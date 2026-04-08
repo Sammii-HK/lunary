@@ -16,6 +16,13 @@ import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 import { Sparkles, Moon, Star, Home } from 'lucide-react';
 import { ensureDescendantInChart } from '@/utils/astrology/birth-chart-analysis';
 
+type HouseSystem =
+  | 'placidus'
+  | 'whole-sign'
+  | 'koch'
+  | 'porphyry'
+  | 'alcabitius';
+
 const BirthChartPage = () => {
   const { user, loading } = useUser();
   const subscription = useSubscription();
@@ -26,6 +33,8 @@ const BirthChartPage = () => {
   >('all');
   const [showAsteroids, setShowAsteroids] = useState(true);
   const [clockwise, setClockwise] = useState(false);
+  const [showSymbols, setShowSymbols] = useState(true);
+  const [houseSystem, setHouseSystem] = useState<HouseSystem>('placidus');
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const originalBirthChartData = user?.birthChart || null;
@@ -41,7 +50,52 @@ const BirthChartPage = () => {
 
   useEffect(() => {
     setHasMounted(true);
-  }, []);
+    // Load preferences from localStorage and user profile
+    const savedShowSymbols = localStorage.getItem('chart-symbols');
+    if (savedShowSymbols !== null) {
+      setShowSymbols(savedShowSymbols === 'true');
+    }
+
+    // Load house system from user profile or localStorage
+    if (
+      user?.birthChartHouseSystem &&
+      ['placidus', 'whole-sign', 'koch', 'porphyry', 'alcabitius'].includes(
+        user.birthChartHouseSystem,
+      )
+    ) {
+      setHouseSystem(user.birthChartHouseSystem as HouseSystem);
+    } else {
+      const savedHouseSystem = localStorage.getItem('chart-house-system');
+      if (
+        savedHouseSystem &&
+        ['placidus', 'whole-sign', 'koch', 'porphyry', 'alcabitius'].includes(
+          savedHouseSystem,
+        )
+      ) {
+        setHouseSystem(savedHouseSystem as HouseSystem);
+      }
+    }
+  }, [user?.birthChartHouseSystem]);
+
+  // Save showSymbols to localStorage
+  useEffect(() => {
+    if (hasMounted) {
+      localStorage.setItem('chart-symbols', String(showSymbols));
+    }
+  }, [showSymbols, hasMounted]);
+
+  // Save houseSystem to localStorage and database
+  useEffect(() => {
+    if (hasMounted && user?.id) {
+      localStorage.setItem('chart-house-system', houseSystem);
+      // Save to database
+      fetch('/api/profile/birth-chart-preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ houseSystem }),
+      }).catch((err) => console.error('Failed to save house system:', err));
+    }
+  }, [houseSystem, hasMounted, user?.id]);
 
   useEffect(() => {
     if (hasChartAccess && user?.hasBirthChart && user?.id) {
@@ -217,6 +271,11 @@ const BirthChartPage = () => {
             onToggleAsteroids={() => setShowAsteroids(!showAsteroids)}
             clockwise={clockwise}
             onToggleClockwise={() => setClockwise(!clockwise)}
+            showSymbols={showSymbols}
+            onToggleSymbols={() => setShowSymbols(!showSymbols)}
+            houseSystem={houseSystem}
+            onHouseSystemChange={setHouseSystem}
+            isFreeTier={subscription.status === 'inactive'}
           />
 
           <div data-testid='chart-visualization'>
@@ -228,6 +287,8 @@ const BirthChartPage = () => {
               aspectFilter={aspectFilter}
               showAsteroids={showAsteroids}
               clockwise={clockwise}
+              showSymbols={showSymbols}
+              houseSystem={houseSystem}
             />
           </div>
         </div>

@@ -59,6 +59,7 @@ export interface UserData {
   hasBirthChart: boolean;
   hasPersonalCard: boolean;
   isPaid: boolean;
+  birthChartHouseSystem?: string;
 }
 
 interface UserContextValue {

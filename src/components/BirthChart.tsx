@@ -110,6 +110,13 @@ function formatPlacementLabel({
   return `${body}${signLabel}${degreeLabel ? ` ${degreeLabel}` : ''}${retroLabel}`;
 }
 
+type HouseSystem =
+  | 'placidus'
+  | 'whole-sign'
+  | 'koch'
+  | 'porphyry'
+  | 'alcabitius';
+
 type BirthChartProps = {
   birthChart: BirthChartData[];
   houses?: HouseCusp[];
@@ -120,6 +127,8 @@ type BirthChartProps = {
   showAsteroids?: boolean;
   clockwise?: boolean;
   onAspectsToggle?: (show: boolean) => void;
+  showSymbols?: boolean;
+  houseSystem?: HouseSystem;
 };
 
 export const BirthChart = ({
@@ -132,6 +141,8 @@ export const BirthChart = ({
   showAsteroids = true,
   clockwise = false,
   onAspectsToggle,
+  showSymbols = true,
+  houseSystem = 'placidus',
 }: BirthChartProps) => {
   const [hoveredBody, setHoveredBody] = useState<string | null>(null);
   const [highlightedPlanet, setHighlightedPlanet] = useState<string | null>(
@@ -554,17 +565,20 @@ export const BirthChart = ({
                 className='flex items-center justify-between p-2 md:p-3 bg-surface-elevated rounded-lg'
               >
                 <div className='flex items-center space-x-2 md:space-x-3'>
-                  <span
-                    className={cx(
-                      'text-base md:text-lg font-astro',
-                      retrograde ? 'text-red-400' : 'text-content-primary',
-                    )}
-                  >
-                    {getSymbolForBody(body)}
-                  </span>
-                  <span className='font-medium text-content-primary text-sm md:text-base'>
-                    {body}
-                  </span>
+                  {showSymbols ? (
+                    <span
+                      className={cx(
+                        'text-base md:text-lg font-astro',
+                        retrograde ? 'text-red-400' : 'text-content-primary',
+                      )}
+                    >
+                      {getSymbolForBody(body)}
+                    </span>
+                  ) : (
+                    <span className='font-medium text-content-primary text-sm md:text-base'>
+                      {body}
+                    </span>
+                  )}
                 </div>
 
                 <div className='flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm'>
@@ -605,12 +619,15 @@ export const BirthChart = ({
                   className='flex items-center justify-between p-2 md:p-3 bg-surface-elevated rounded-lg'
                 >
                   <div className='flex items-center space-x-2 md:space-x-3'>
-                    <span className='text-base md:text-lg font-astro text-lunary-accent'>
-                      {getSymbolForBody(body)}
-                    </span>
-                    <span className='font-medium text-content-primary text-sm md:text-base'>
-                      {ANGLE_DISPLAY[body] || body}
-                    </span>
+                    {showSymbols ? (
+                      <span className='text-base md:text-lg font-astro text-lunary-accent'>
+                        {getSymbolForBody(body)}
+                      </span>
+                    ) : (
+                      <span className='font-medium text-content-primary text-sm md:text-base'>
+                        {ANGLE_DISPLAY[body] || body}
+                      </span>
+                    )}
                   </div>
 
                   <div className='flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm'>
@@ -650,18 +667,23 @@ export const BirthChart = ({
                     className='flex items-center justify-between p-2 md:p-3 bg-surface-elevated rounded-lg'
                   >
                     <div className='flex items-center space-x-2 md:space-x-3'>
-                      <span
-                        className={cx(
-                          'text-base md:text-lg',
-                          useAstroFont && 'font-astro',
-                          retrograde ? 'text-red-400' : 'text-lunary-secondary',
-                        )}
-                      >
-                        {pointSymbol}
-                      </span>
-                      <span className='font-medium text-content-primary text-sm md:text-base'>
-                        {body}
-                      </span>
+                      {showSymbols ? (
+                        <span
+                          className={cx(
+                            'text-base md:text-lg',
+                            useAstroFont && 'font-astro',
+                            retrograde
+                              ? 'text-red-400'
+                              : 'text-lunary-secondary',
+                          )}
+                        >
+                          {pointSymbol}
+                        </span>
+                      ) : (
+                        <span className='font-medium text-content-primary text-sm md:text-base'>
+                          {body}
+                        </span>
+                      )}
                     </div>
 
                     <div className='flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm'>

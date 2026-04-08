@@ -1,8 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
-import { Map, Telescope, X, Check, MapPin } from 'lucide-react';
-import { useLocation } from '@/hooks/useLocation';
+import { Map, Telescope, X } from 'lucide-react';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { BirthChartPlacement, useUser } from '@/context/UserContext';
 import { ChartWheelSvg } from '@/app/birth-chart/chart-wheel-svg';
@@ -420,31 +419,7 @@ interface SkyNowCardProps {
 export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
   const { user } = useUser();
   const { currentAstrologicalChart } = usePlanetaryChart();
-  const {
-    requestLocation,
-    loading: locationLoading,
-    error: locationError,
-  } = useLocation();
-  const [showLocationFeedback, setShowLocationFeedback] = useState(false);
-  const [refreshState, setRefreshState] = useState<
-    'idle' | 'success' | 'error'
-  >('idle');
   const [showChartModal, setShowChartModal] = useState(false);
-  const handleRefreshLocation = async () => {
-    setRefreshState('idle');
-    try {
-      await requestLocation();
-      setRefreshState('success');
-    } catch {
-      setRefreshState('error');
-    } finally {
-      setShowLocationFeedback(true);
-      setTimeout(() => {
-        setShowLocationFeedback(false);
-        setRefreshState('idle');
-      }, 2000);
-    }
-  };
 
   const planets = useMemo(() => {
     if (!currentAstrologicalChart || currentAstrologicalChart.length === 0) {
@@ -498,37 +473,6 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
             <div onClick={(e) => e.stopPropagation()}>
               <ShareSkyNow compact />
             </div>
-            <button
-              type='button'
-              onClick={async (event) => {
-                event.stopPropagation();
-                await handleRefreshLocation();
-              }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  void handleRefreshLocation();
-                }
-              }}
-              aria-label='Refresh location used for Sky Now'
-              title='Refresh my location'
-              className='p-0.5 rounded-full border border-transparent text-content-muted hover:text-content-secondary hover:border-stroke-default transition-colors relative'
-            >
-              {/* TODO: add back in with rise and set times functionality */}
-              {refreshState === 'success' ? (
-                <Check className='w-3 h-3 text-lunary-success' />
-              ) : (
-                <MapPin
-                  className={`w-3 h-3 ${locationLoading ? 'animate-pulse' : ''}`}
-                />
-              )}
-              {showLocationFeedback && locationError && (
-                <span className='absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] text-content-secondary'>
-                  Failed
-                </span>
-              )}
-            </button>
             <button
               type='button'
               onClick={(event) => {
