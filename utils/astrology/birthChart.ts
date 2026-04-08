@@ -941,4 +941,21 @@ export const getBirthChartFromProfile = (
   return birthChart as BirthChartData[];
 };
 
+/**
+ * Recalculate which house each body is in based on new house cusps
+ * Called when user changes house system to update house assignments
+ * @param bodies - Array of birth chart data with ecliptic longitudes
+ * @param houses - House cusps for the selected system
+ * @returns Array of bodies with updated house assignments
+ */
+export const assignHousesToBodies = (
+  bodies: BirthChartData[],
+  houses: HouseCusp[],
+): BirthChartData[] => {
+  return bodies.map((body) => ({
+    ...body,
+    house: getHouseForPlanet(body.eclipticLongitude, houses),
+  }));
+};
+
 export { parseLocationToCoordinates };

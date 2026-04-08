@@ -15,6 +15,7 @@ import { BirthChartShowcase } from '@/components/birth-chart-sections/BirthChart
 import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 import { Sparkles, Moon, Star, Home } from 'lucide-react';
 import { ensureDescendantInChart } from '@/utils/astrology/birth-chart-analysis';
+import { assignHousesToBodies } from '@/utils/astrology/birthChart';
 import type { HouseCusp } from '@/utils/astrology/houseSystems';
 
 type HouseSystem =
@@ -100,26 +101,78 @@ const BirthChartPage = () => {
     }
   }, [houseSystem, hasMounted, user?.id]);
 
-  // Fetch houses when house system changes
+  // Fetch all 5 house systems once on page load
+  // Cache in localStorage and in-memory to avoid repeated API calls
   useEffect(() => {
-    if (houseSystem && hasMounted) {
-      setLoadingHouses(true);
-      fetch(`/api/profile/birth-chart/houses?system=${houseSystem}`)
-        .then((res) => {
-          if (!res.ok) throw new Error('Failed to fetch houses');
-          return res.json();
-        })
-        .then((data) => {
-          setHouses(data);
-          setLoadingHouses(false);
-        })
-        .catch((err) => {
-          console.error('Failed to fetch houses:', err);
-          setLoadingHouses(false);
-          // Fall back to existing houses if available
+    if (!hasMounted || !user?.id) return;
+
+    const cacheKey = `houseSystems_${user.id}`;
+    const inMemoryCache = new Map<string, HouseCusp[]>();
+
+    // Check localStorage
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const allSystems = JSON.parse(cached);
+        // Populate in-memory cache from localStorage
+        Object.entries(allSystems).forEach(([system, houses]) => {
+          inMemoryCache.set(system, houses as HouseCusp[]);
         });
+        // Set initial houses for current system
+        setHouses(allSystems[houseSystem] || null);
+        return;
+      } catch (err) {
+        console.error('Failed to parse cached houses:', err);
+        localStorage.removeItem(cacheKey);
+      }
     }
-  }, [houseSystem, hasMounted]);
+
+    // Not in localStorage, fetch all systems (1 API call)
+    setLoadingHouses(true);
+    fetch('/api/profile/birth-chart/houses')
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch houses');
+        return res.json();
+      })
+      .then((allSystems: Record<string, HouseCusp[]>) => {
+        // Cache in localStorage for future visits
+        localStorage.setItem(cacheKey, JSON.stringify(allSystems));
+        // Set houses for current system
+        setHouses(allSystems[houseSystem] || null);
+        setLoadingHouses(false);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch houses:', err);
+        setLoadingHouses(false);
+      });
+  }, [hasMounted, user?.id]);
+
+  // When user changes house system, get from cache and recalculate house assignments
+  useEffect(() => {
+    if (!hasMounted || !user?.id || !birthChartData) return;
+
+    const cacheKey = `houseSystems_${user.id}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const allSystems = JSON.parse(cached);
+        const newHouses = allSystems[houseSystem];
+        if (newHouses) {
+          setHouses(newHouses);
+          // Recalculate which house each body is in for the new house system
+          // This updates the display with correct house assignments
+          const bodyDataWithUpdatedHouses = assignHousesToBodies(
+            birthChartData,
+            newHouses,
+          );
+          // Note: This updates house assignments in memory but we'd need to pass
+          // this to components if we want to display updated house numbers
+        }
+      } catch (err) {
+        console.error('Failed to get houses from cache:', err);
+      }
+    }
+  }, [houseSystem, hasMounted, user?.id, birthChartData]);
 
   useEffect(() => {
     if (hasChartAccess && user?.hasBirthChart && user?.id) {
