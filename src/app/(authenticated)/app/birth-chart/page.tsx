@@ -15,6 +15,7 @@ import { BirthChartShowcase } from '@/components/birth-chart-sections/BirthChart
 import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 import { Sparkles, Moon, Star, Home } from 'lucide-react';
 import { ensureDescendantInChart } from '@/utils/astrology/birth-chart-analysis';
+import type { HouseCusp } from '@/utils/astrology/houseSystems';
 
 type HouseSystem =
   | 'placidus'
@@ -35,6 +36,8 @@ const BirthChartPage = () => {
   const [clockwise, setClockwise] = useState(false);
   const [showSymbols, setShowSymbols] = useState(true);
   const [houseSystem, setHouseSystem] = useState<HouseSystem>('placidus');
+  const [houses, setHouses] = useState<HouseCusp[] | null>(null);
+  const [loadingHouses, setLoadingHouses] = useState(false);
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const originalBirthChartData = user?.birthChart || null;
@@ -84,7 +87,7 @@ const BirthChartPage = () => {
     }
   }, [showSymbols, hasMounted]);
 
-  // Save houseSystem to localStorage and database
+  // Save houseSystem to localStorage and database, and fetch houses
   useEffect(() => {
     if (hasMounted && user?.id) {
       localStorage.setItem('chart-house-system', houseSystem);
@@ -96,6 +99,27 @@ const BirthChartPage = () => {
       }).catch((err) => console.error('Failed to save house system:', err));
     }
   }, [houseSystem, hasMounted, user?.id]);
+
+  // Fetch houses when house system changes
+  useEffect(() => {
+    if (houseSystem && hasMounted) {
+      setLoadingHouses(true);
+      fetch(`/api/profile/birth-chart/houses?system=${houseSystem}`)
+        .then((res) => {
+          if (!res.ok) throw new Error('Failed to fetch houses');
+          return res.json();
+        })
+        .then((data) => {
+          setHouses(data);
+          setLoadingHouses(false);
+        })
+        .catch((err) => {
+          console.error('Failed to fetch houses:', err);
+          setLoadingHouses(false);
+          // Fall back to existing houses if available
+        });
+    }
+  }, [houseSystem, hasMounted]);
 
   useEffect(() => {
     if (hasChartAccess && user?.hasBirthChart && user?.id) {
@@ -255,6 +279,7 @@ const BirthChartPage = () => {
                   birthChart={birthChartData}
                   userName={userName}
                   userBirthday={userBirthday}
+                  houseSystem={houseSystem}
                 />
               </div>
             )}
@@ -281,6 +306,7 @@ const BirthChartPage = () => {
           <div data-testid='chart-visualization'>
             <BirthChart
               birthChart={birthChartData}
+              houses={houses}
               userName={userName}
               birthDate={userBirthday}
               showAspects={showAspects}
@@ -299,6 +325,7 @@ const BirthChartPage = () => {
               birthChart={birthChartData}
               userName={userName}
               userBirthday={userBirthday}
+              houseSystem={houseSystem}
             />
           </div>
         )}

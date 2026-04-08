@@ -3,6 +3,7 @@ import { Sparkles } from 'lucide-react';
 import { ChartWheelOg } from '@/app/birth-chart/chart-wheel-og';
 import { formatDegree } from '../../../../utils/astrology/astrology';
 import type { BirthChartData } from '../../../../utils/astrology/birthChart';
+import type { HouseSystem } from '../../../../utils/astrology/houseSystems';
 import { bodiesSymbols, zodiacSymbol } from '@/constants/symbols';
 import { Button } from '@/components/ui/button';
 
@@ -100,6 +101,7 @@ export type ShareBirthChartDisplayData = {
   insight?: string;
   keywords?: string[];
   birthChart?: BirthChartData[];
+  houseSystem?: HouseSystem;
 };
 
 const BODY_ORDER = [
@@ -137,6 +139,7 @@ export function ShareBirthChartLayout({
     insight,
     keywords = [],
     birthChart = [],
+    houseSystem = 'placidus',
   } = data;
 
   const theme =
@@ -282,18 +285,30 @@ export function ShareBirthChartLayout({
                 ))}
               </div>
 
-              {keywords.length > 0 && (
-                <div className='flex flex-wrap justify-center gap-2 text-[0.65rem] uppercase tracking-[0.35em] text-content-primary/70'>
-                  {keywords.map((keyword) => (
-                    <span
-                      key={keyword}
-                      className='rounded-full border border-white/20 px-3 py-1'
-                    >
-                      {keyword}
-                    </span>
-                  ))}
-                </div>
-              )}
+              <div className='flex flex-wrap justify-center gap-2 text-[0.65rem] uppercase tracking-[0.35em] text-content-primary/70'>
+                <span className='rounded-full border border-white/20 px-3 py-1'>
+                  {houseSystem === 'whole-sign'
+                    ? 'Whole-Sign'
+                    : houseSystem === 'placidus'
+                      ? 'Placidus'
+                      : houseSystem === 'koch'
+                        ? 'Koch'
+                        : houseSystem === 'porphyry'
+                          ? 'Porphyry'
+                          : houseSystem === 'alcabitius'
+                            ? 'Alcabitius'
+                            : 'House System'}{' '}
+                  Houses
+                </span>
+                {keywords.map((keyword) => (
+                  <span
+                    key={keyword}
+                    className='rounded-full border border-white/20 px-3 py-1'
+                  >
+                    {keyword}
+                  </span>
+                ))}
+              </div>
 
               {insight && (
                 <div className='rounded-2xl border border-white/10 bg-white/5 p-6 text-left'>

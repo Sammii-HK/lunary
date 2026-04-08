@@ -15,6 +15,11 @@ import {
   calculateEros,
 } from './asteroids';
 import {
+  calculateHouses,
+  type HouseSystem,
+  type HouseCusp,
+} from './houseSystems';
+import {
   Observer,
   AstroTime,
   SiderealTime,
@@ -42,18 +47,13 @@ export type BirthChartData = {
   house?: number;
 };
 
-export type HouseCusp = {
-  house: number;
-  sign: string;
-  degree: number;
-  minute: number;
-  eclipticLongitude: number;
-};
-
 export type BirthChartResult = {
   planets: BirthChartData[];
   houses: HouseCusp[];
 };
+
+// Re-export for backward compatibility
+export type { HouseCusp, HouseSystem };
 
 function calculateMeanLunarNode(date: Date): number {
   const jd = getJulianDay(date);
@@ -347,28 +347,6 @@ function toUtcFromTimeZone(
   }
 
   return firstResult;
-}
-
-function calculateWholeSigHouses(ascendantLongitude: number): HouseCusp[] {
-  const houses: HouseCusp[] = [];
-  const ascSign = Math.floor(ascendantLongitude / 30);
-
-  for (let i = 0; i < 12; i++) {
-    const houseSign = (ascSign + i) % 12;
-    const cuspLongitude = houseSign * 30;
-    const sign = getZodiacSign(cuspLongitude);
-    const formatted = formatDegree(cuspLongitude);
-
-    houses.push({
-      house: i + 1,
-      sign,
-      degree: formatted.degree,
-      minute: formatted.minute,
-      eclipticLongitude: cuspLongitude,
-    });
-  }
-
-  return houses;
 }
 
 function getHouseForPlanet(longitude: number, houses: HouseCusp[]): number {
@@ -911,6 +889,7 @@ export const generateBirthChartWithHouses = async (
   birthLocation?: string,
   birthTimezone?: string,
   observer?: Observer,
+  houseSystem: HouseSystem = 'whole-sign',
 ): Promise<BirthChartResult> => {
   const planets = await generateBirthChart(
     birthDate,
@@ -923,7 +902,11 @@ export const generateBirthChartWithHouses = async (
   const ascendant = planets.find((p) => p.body === 'Ascendant');
   const ascendantLong = ascendant?.eclipticLongitude || 0;
 
-  const houses = calculateWholeSigHouses(ascendantLong);
+  // For non-whole-sign systems, we'd need MC; for now default to whole-sign fallback
+  const mc = planets.find((p) => p.body === 'Midheaven');
+  const mcLong = mc?.eclipticLongitude || 0;
+
+  const houses = calculateHouses(houseSystem, ascendantLong, mcLong, observer);
 
   const planetsWithHouses = planets.map((planet) => ({
     ...planet,
