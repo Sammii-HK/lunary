@@ -10,7 +10,7 @@
     "cap:android": "npx cap open android",
     "postinstall": "prisma generate",
     "build": "prisma generate && NODE_OPTIONS='--max-old-space-size=4096' pnpm run generate:sitemap-last-modified && NODE_OPTIONS='--max-old-space-size=4096' next build",
-    "build:deploy": "prisma generate && prisma migrate deploy && NODE_OPTIONS='--max-old-space-size=4096' pnpm run generate:sitemap-last-modified && NODE_OPTIONS='--max-old-space-size=4096' next build",
+    "build:deploy": "prisma generate && prisma migrate deploy && rm -rf .next/cache && NODE_OPTIONS='--max-old-space-size=4096' pnpm run generate:sitemap-last-modified && NODE_OPTIONS='--max-old-space-size=4096' next build",
     "generate:sitemap-last-modified": "node scripts/generate-sitemap-last-modified.js",
     "start": "next start",
     "lint": "eslint . --fix --ext .ts,.tsx",
