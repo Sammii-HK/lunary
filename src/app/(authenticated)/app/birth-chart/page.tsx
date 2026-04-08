@@ -15,10 +15,12 @@ import { BirthChartShowcase } from '@/components/birth-chart-sections/BirthChart
 import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 import { ChartModeToggle } from '@/components/ChartModeToggle';
 import { Sparkles, Moon, Star, Home } from 'lucide-react';
-import { ensureDescendantInChart } from '@utils/astrology/birth-chart-analysis';
+import { ensureDescendantInChart } from '@/utils/astrology/birth-chart-analysis';
 import { assignHousesToBodies } from '@utils/astrology/birthChart';
 import { type ZodiacSystem } from '@utils/astrology/zodiacSystems';
 import { useProgressedChart } from '@/hooks/useProgressedChart';
+import { useDashaTimeline } from '@/hooks/useDashaTimeline';
+import { DashaTimeline } from '@/components/DashaTimeline';
 import type { HouseCusp } from '@utils/astrology/houseSystems';
 
 type HouseSystem =
@@ -57,6 +59,20 @@ const BirthChartPage = () => {
     currentAge,
     loading: progressionLoading,
   } = useProgressedChart(userBirthday, birthChartData || undefined);
+
+  // Extract Moon position from birth chart for dasha calculations
+  const moonPosition = useMemo(() => {
+    if (!birthChartData) return undefined;
+    const moonData = birthChartData.find((body) => body.body === 'Moon');
+    return moonData?.eclipticLongitude;
+  }, [birthChartData]);
+
+  // Fetch dasha timeline
+  const {
+    currentDasha,
+    upcomingPeriods,
+    loading: dashaLoading,
+  } = useDashaTimeline(userBirthday, moonPosition);
 
   // Determine which chart to display based on mode
   const displayChart = useMemo(() => {
@@ -453,6 +469,27 @@ const BirthChartPage = () => {
                 </p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Vedic Dasha Timeline - only show for sidereal zodiac */}
+        {zodiacSystem === 'sidereal' && moonPosition !== undefined && (
+          <div className='mt-8 pt-8 border-t border-stroke-subtle'>
+            <div className='mb-4'>
+              <h2 className='text-lg font-semibold text-content-primary mb-2'>
+                Vimshottari Dasha
+              </h2>
+              <p className='text-sm text-content-secondary'>
+                Your Vedic planetary period cycle. The Vimshottari Dasha is a
+                120-year cycle of planetary influence calculated from your natal
+                Moon position.
+              </p>
+            </div>
+            <DashaTimeline
+              currentDasha={currentDasha}
+              upcomingPeriods={upcomingPeriods}
+              loading={dashaLoading}
+            />
           </div>
         )}
 

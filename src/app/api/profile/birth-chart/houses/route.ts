@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
-import { db } from '@/lib/db';
+import { sql } from '@vercel/postgres';
+import { getCurrentUser } from '@/lib/get-user-session';
 import { generateBirthChartWithHouses } from '@utils/astrology/birthChart';
 import { type HouseSystem } from '@utils/astrology/houseSystems';
 
@@ -12,6 +12,8 @@ const HOUSE_SYSTEMS = [
   'alcabitius',
 ] as const;
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/profile/birth-chart/houses
  * Fetch all 5 house systems in a single call
@@ -20,23 +22,38 @@ const HOUSE_SYSTEMS = [
  */
 export async function GET(req: NextRequest) {
   try {
-    const user = await requireAuth();
+    const user = await getCurrentUser(req);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     // Get user's birth chart data from profile
-    const profile = await db.query.userProfiles.findFirst({
-      where: (fields) => ({
-        userId: user.id,
-      }),
-      columns: {
-        birthChart: true,
-        birthDate: true,
-        birthTime: true,
-        birthLocation: true,
-        birthTimezone: true,
-      },
-    });
+    const result = await sql`
+      SELECT birth_chart, birth_date, birth_time, birth_location, birth_timezone
+      FROM user_profiles
+      WHERE user_id = ${user.id}
+      LIMIT 1
+    `;
 
-    if (!profile?.birthChart) {
+    if (result.rows.length === 0) {
+      return NextResponse.json(
+        { error: 'No birth chart found for user' },
+        { status: 404 },
+      );
+    }
+
+    const profile = result.rows[0] as {
+      birth_chart?: Array<{
+        body: string;
+        eclipticLongitude: number;
+      }>;
+      birth_date?: string;
+      birth_time?: string;
+      birth_location?: string;
+      birth_timezone?: string;
+    };
+
+    if (!profile?.birth_chart) {
       return NextResponse.json(
         { error: 'No birth chart found for user' },
         { status: 404 },
@@ -44,10 +61,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Find Ascendant and MC from existing chart
-    const planets = profile.birthChart as Array<{
-      body: string;
-      eclipticLongitude: number;
-    }>;
+    const planets = profile.birth_chart;
     const ascendant = planets.find((p) => p.body === 'Ascendant');
     const mc = planets.find((p) => p.body === 'Midheaven');
 
@@ -62,10 +76,10 @@ export async function GET(req: NextRequest) {
     const allHouses = await Promise.all(
       HOUSE_SYSTEMS.map(async (system) => {
         const result = await generateBirthChartWithHouses(
-          profile.birthDate || '',
-          profile.birthTime,
-          profile.birthLocation,
-          profile.birthTimezone,
+          profile.birth_date || '',
+          profile.birth_time,
+          profile.birth_location,
+          profile.birth_timezone,
           undefined,
           system as HouseSystem,
         );

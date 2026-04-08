@@ -3,14 +3,15 @@
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import type { Aspect } from '@/hooks/useAspects';
+import aspectInterpretationsData from '@/data/aspect-interpretations.json';
 
 interface AspectDetailModalProps {
   aspect: Aspect | null;
   onClose: () => void;
 }
 
-// Aspect interpretations for common aspects
-const aspectInterpretations: Record<
+// Fallback generic interpretations for common aspects
+const genericAspectInterpretations: Record<
   string,
   { meaning: string; description: string }
 > = {
@@ -65,10 +66,32 @@ function getOrbDescription(orb: number): string {
 export function AspectDetailModal({ aspect, onClose }: AspectDetailModalProps) {
   if (!aspect) return null;
 
-  const interpretation = aspectInterpretations[aspect.type] || {
-    meaning: aspect.type,
-    description: 'Explore the dynamic between these two planetary energies.',
-  };
+  // Look up planet-pair specific interpretation
+  let interpretation = genericAspectInterpretations[aspect.type];
+
+  const planetData =
+    aspectInterpretationsData[
+      aspect.planet1 as keyof typeof aspectInterpretationsData
+    ];
+  if (planetData) {
+    const planetPairData =
+      planetData[aspect.planet2 as keyof typeof planetData];
+    if (planetPairData) {
+      const specificInterpretation =
+        planetPairData[aspect.type as keyof typeof planetPairData];
+      if (specificInterpretation) {
+        interpretation = specificInterpretation;
+      }
+    }
+  }
+
+  // Fall back to generic if not found
+  if (!interpretation) {
+    interpretation = {
+      meaning: aspect.type,
+      description: 'Explore the dynamic between these two planetary energies.',
+    };
+  }
 
   const orbStrength = getOrbStrength(aspect.orb);
   const orbDescription = getOrbDescription(aspect.orb);

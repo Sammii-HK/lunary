@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
-import { db } from '@/lib/db';
+import { sql } from '@vercel/postgres';
+import { getCurrentUser } from '@/lib/get-user-session';
 import {
   convertLongitudeToZodiacSystem,
   getSignForZodiacSystem,
 } from '@utils/astrology/zodiacSystems';
 
 const ZODIAC_SYSTEMS = ['tropical', 'sidereal', 'equatorial'] as const;
+
+export const dynamic = 'force-dynamic';
 
 type PlanetWithZodiac = {
   body: string;
@@ -40,19 +42,38 @@ type PlanetWithZodiac = {
  */
 export async function GET(req: NextRequest) {
   try {
-    const user = await requireAuth();
+    const user = await getCurrentUser(req);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     // Get user's birth chart data from profile
-    const profile = await db.query.userProfiles.findFirst({
-      where: (fields) => ({
-        userId: user.id,
-      }),
-      columns: {
-        birthChart: true,
-      },
-    });
+    const result = await sql`
+      SELECT birth_chart FROM user_profiles
+      WHERE user_id = ${user.id}
+      LIMIT 1
+    `;
 
-    if (!profile?.birthChart) {
+    if (result.rows.length === 0) {
+      return NextResponse.json(
+        { error: 'No birth chart found for user' },
+        { status: 404 },
+      );
+    }
+
+    const profile = result.rows[0] as {
+      birth_chart?: Array<{
+        body: string;
+        sign: string;
+        degree: number;
+        minute: number;
+        eclipticLongitude: number;
+        retrograde: boolean;
+        house?: number;
+      }>;
+    };
+
+    if (!profile?.birth_chart) {
       return NextResponse.json(
         { error: 'No birth chart found for user' },
         { status: 404 },
@@ -60,15 +81,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Convert tropical birth chart to all zodiac systems
-    const planets = profile.birthChart as Array<{
-      body: string;
-      sign: string;
-      degree: number;
-      minute: number;
-      eclipticLongitude: number;
-      retrograde: boolean;
-      house?: number;
-    }>;
+    const planets = profile.birth_chart;
 
     // Transform each planet to include all three zodiac systems
     const planetsWithAllSystems = planets.map((planet) => {

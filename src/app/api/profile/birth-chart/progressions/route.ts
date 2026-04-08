@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getCurrentUser } from '@/lib/get-user-session';
-import { generateBirthChart } from '@/utils/astrology/birthChart';
+import { generateBirthChart } from '@utils/astrology/birthChart';
 import { Observer } from 'astronomy-engine';
 import tzLookup from 'tz-lookup';
 
