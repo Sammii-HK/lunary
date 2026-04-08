@@ -11,6 +11,8 @@ import classNames from 'classnames';
 import { parseIsoDateOnly } from '@/lib/date-only';
 import { useAspects } from '@/hooks/useAspects';
 import { AspectLines } from '@/components/AspectLines';
+import { AspectDetailModal } from '@/components/AspectDetailModal';
+import type { Aspect } from '@/hooks/useAspects';
 import styles from './BirthChart.module.css';
 
 const cx = classNames;
@@ -145,6 +147,7 @@ export const BirthChart = ({
   houseSystem = 'placidus',
 }: BirthChartProps) => {
   const [hoveredBody, setHoveredBody] = useState<string | null>(null);
+  const [selectedAspect, setSelectedAspect] = useState<Aspect | null>(null);
   const [highlightedPlanet, setHighlightedPlanet] = useState<string | null>(
     null,
   );
@@ -375,6 +378,7 @@ export const BirthChart = ({
               visible={showAspects}
               highlightedPlanet={highlightedPlanet}
               opacity={0.15}
+              onAspectClick={setSelectedAspect}
             />
           )}
 
@@ -712,6 +716,11 @@ export const BirthChart = ({
             </div>
           </>
         )}
+
+        <AspectDetailModal
+          aspect={selectedAspect}
+          onClose={() => setSelectedAspect(null)}
+        />
       </div>
     </div>
   );

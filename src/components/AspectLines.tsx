@@ -12,6 +12,7 @@ interface AspectLinesProps {
   visible?: boolean;
   highlightedPlanet?: string | null;
   opacity?: number;
+  onAspectClick?: (aspect: Aspect) => void;
 }
 
 export function AspectLines({
@@ -19,6 +20,7 @@ export function AspectLines({
   visible = true,
   highlightedPlanet = null,
   opacity = 0.15,
+  onAspectClick,
 }: AspectLinesProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -54,7 +56,8 @@ export function AspectLines({
 
   return (
     <g className='aspect-lines'>
-      {aspects.map(({ planet1, planet2, color, type, x1, y1, x2, y2 }, i) => {
+      {aspects.map((aspect, i) => {
+        const { planet1, planet2, color, type, x1, y1, x2, y2 } = aspect;
         const isHighlighted =
           highlightedPlanet === planet1 || highlightedPlanet === planet2;
         const lineOpacity = isHighlighted ? 0.6 : baseOpacity;
@@ -69,9 +72,14 @@ export function AspectLines({
             stroke={color}
             strokeWidth={isHighlighted ? 1.5 : 1}
             opacity={lineOpacity}
-            className={cx('transition-all duration-200', styles.aspectLine, {
-              [styles.highlighted]: isHighlighted,
-            })}
+            className={cx(
+              'transition-all duration-200 cursor-pointer hover:opacity-100',
+              styles.aspectLine,
+              {
+                [styles.highlighted]: isHighlighted,
+              },
+            )}
+            onClick={() => onAspectClick?.(aspect)}
           />
         );
       })}
