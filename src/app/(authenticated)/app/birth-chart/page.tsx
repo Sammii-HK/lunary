@@ -16,6 +16,7 @@ import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 import { Sparkles, Moon, Star, Home } from 'lucide-react';
 import { ensureDescendantInChart } from '@utils/astrology/birth-chart-analysis';
 import { assignHousesToBodies } from '@utils/astrology/birthChart';
+import { type ZodiacSystem } from '@utils/astrology/zodiacSystems';
 import type { HouseCusp } from '@utils/astrology/houseSystems';
 
 type HouseSystem =
@@ -37,6 +38,7 @@ const BirthChartPage = () => {
   const [clockwise, setClockwise] = useState(false);
   const [showSymbols, setShowSymbols] = useState(true);
   const [houseSystem, setHouseSystem] = useState<HouseSystem>('placidus');
+  const [zodiacSystem, setZodiacSystem] = useState<ZodiacSystem>('tropical');
   const [houses, setHouses] = useState<HouseCusp[] | null>(null);
   const [loadingHouses, setLoadingHouses] = useState(false);
   const userName = user?.name;
@@ -79,6 +81,15 @@ const BirthChartPage = () => {
         setHouseSystem(savedHouseSystem as HouseSystem);
       }
     }
+
+    // Load zodiac system from localStorage
+    const savedZodiacSystem = localStorage.getItem('chart-zodiac-system');
+    if (
+      savedZodiacSystem &&
+      ['tropical', 'sidereal', 'equatorial'].includes(savedZodiacSystem)
+    ) {
+      setZodiacSystem(savedZodiacSystem as ZodiacSystem);
+    }
   }, [user?.birthChartHouseSystem]);
 
   // Save showSymbols to localStorage
@@ -100,6 +111,13 @@ const BirthChartPage = () => {
       }).catch((err) => console.error('Failed to save house system:', err));
     }
   }, [houseSystem, hasMounted, user?.id]);
+
+  // Save zodiacSystem to localStorage
+  useEffect(() => {
+    if (hasMounted) {
+      localStorage.setItem('chart-zodiac-system', zodiacSystem);
+    }
+  }, [zodiacSystem, hasMounted]);
 
   // Fetch all 5 house systems once on page load
   // Cache in localStorage and in-memory to avoid repeated API calls
@@ -353,6 +371,8 @@ const BirthChartPage = () => {
             onToggleSymbols={() => setShowSymbols(!showSymbols)}
             houseSystem={houseSystem}
             onHouseSystemChange={setHouseSystem}
+            zodiacSystem={zodiacSystem}
+            onZodiacSystemChange={setZodiacSystem}
             isFreeTier={subscription.status === 'inactive'}
           />
 
@@ -368,6 +388,7 @@ const BirthChartPage = () => {
               clockwise={clockwise}
               showSymbols={showSymbols}
               houseSystem={houseSystem}
+              zodiacSystem={zodiacSystem}
             />
           </div>
         </div>
@@ -386,7 +407,10 @@ const BirthChartPage = () => {
         {/* Planetary Interpretations */}
         {birthChartData && (
           <div data-testid='planets-list'>
-            <BirthChartShowcase birthChart={birthChartData} />
+            <BirthChartShowcase
+              birthChart={birthChartData}
+              zodiacSystem={zodiacSystem}
+            />
           </div>
         )}
 

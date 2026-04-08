@@ -3,6 +3,10 @@
 import { useMemo, useState } from 'react';
 import { BirthChartData, HouseCusp } from '../../utils/astrology/birthChart';
 import {
+  getSignForZodiacSystem,
+  type ZodiacSystem,
+} from '@utils/astrology/zodiacSystems';
+import {
   bodiesSymbols,
   zodiacSymbol,
   astroPointSymbols,
@@ -102,12 +106,24 @@ function formatPlacementLabel({
   degree,
   minute,
   retrograde,
-}: Pick<BirthChartData, 'body' | 'sign' | 'degree' | 'minute' | 'retrograde'>) {
+  eclipticLongitude,
+  zodiacSystem,
+}: Pick<
+  BirthChartData,
+  'body' | 'sign' | 'degree' | 'minute' | 'retrograde' | 'eclipticLongitude'
+> & { zodiacSystem?: ZodiacSystem }) {
   const hasDegree = Number.isFinite(degree) && Number.isFinite(minute);
   const degreeLabel = hasDegree
     ? `${Math.floor(degree)}°${String(Math.floor(minute)).padStart(2, '0')}'`
     : undefined;
-  const signLabel = sign ? ` in ${sign}` : '';
+
+  // Get sign for the selected zodiac system
+  const displaySign =
+    zodiacSystem && eclipticLongitude !== undefined
+      ? getSignForZodiacSystem(eclipticLongitude, zodiacSystem).sign
+      : sign;
+
+  const signLabel = displaySign ? ` in ${displaySign}` : '';
   const retroLabel = retrograde ? ' ℞' : '';
   return `${body}${signLabel}${degreeLabel ? ` ${degreeLabel}` : ''}${retroLabel}`;
 }
@@ -131,6 +147,7 @@ type BirthChartProps = {
   onAspectsToggle?: (show: boolean) => void;
   showSymbols?: boolean;
   houseSystem?: HouseSystem;
+  zodiacSystem?: ZodiacSystem;
 };
 
 export const BirthChart = ({
@@ -145,6 +162,7 @@ export const BirthChart = ({
   onAspectsToggle,
   showSymbols = true,
   houseSystem = 'placidus',
+  zodiacSystem = 'tropical',
 }: BirthChartProps) => {
   const [hoveredBody, setHoveredBody] = useState<string | null>(null);
   const [selectedAspect, setSelectedAspect] = useState<Aspect | null>(null);
@@ -476,84 +494,105 @@ export const BirthChart = ({
             ...angles,
             ...points,
             ...(showAsteroids ? asteroids : []),
-          ].map(({ body, x, y, retrograde, sign, degree, minute }) => {
-            const isAngle = ANGLES.includes(body);
-            const isPoint = POINTS.includes(body);
-            const isPlanet = MAIN_PLANETS.includes(body);
-            const isAsteroid = ASTEROIDS.includes(body);
-            const isHovered = body === hoveredBody;
-            const symbol = getSymbolForBody(body);
-            const isAstroFont =
-              symbol.length === 1 && symbol.charCodeAt(0) < 128;
+          ].map(
+            ({
+              body,
+              x,
+              y,
+              retrograde,
+              sign,
+              degree,
+              minute,
+              eclipticLongitude,
+            }) => {
+              const isAngle = ANGLES.includes(body);
+              const isPoint = POINTS.includes(body);
+              const isPlanet = MAIN_PLANETS.includes(body);
+              const isAsteroid = ASTEROIDS.includes(body);
+              const isHovered = body === hoveredBody;
+              const symbol = getSymbolForBody(body);
+              const isAstroFont =
+                symbol.length === 1 && symbol.charCodeAt(0) < 128;
 
-            // Get element color for planets based on their sign
-            const elementColor =
-              isPlanet && sign && SIGN_ELEMENTS[sign]
-                ? ELEMENT_COLORS[SIGN_ELEMENTS[sign]]
-                : undefined;
+              // Get sign for the selected zodiac system
+              const displaySign = getSignForZodiacSystem(
+                eclipticLongitude,
+                zodiacSystem,
+              ).sign;
 
-            const baseColor = retrograde
-              ? '#f87171'
-              : isAngle
-                ? '#C77DFF'
-                : isPoint
-                  ? '#7B7BE8'
-                  : isAsteroid
-                    ? '#FCD34D'
-                    : elementColor || '#ffffff';
+              // Get element color for planets based on their sign
+              const elementColor =
+                isPlanet && displaySign && SIGN_ELEMENTS[displaySign]
+                  ? ELEMENT_COLORS[SIGN_ELEMENTS[displaySign]]
+                  : undefined;
 
-            const color = isHovered ? '#ffffff' : baseColor;
-            const opacity = isHovered ? 1 : hoveredBody ? 0.4 : 1;
+              const baseColor = retrograde
+                ? '#f87171'
+                : isAngle
+                  ? '#C77DFF'
+                  : isPoint
+                    ? '#7B7BE8'
+                    : isAsteroid
+                      ? '#FCD34D'
+                      : elementColor || '#ffffff';
 
-            return (
-              <g
-                key={body}
-                className={cx('planet-node', styles.planetNode)}
-                onMouseEnter={() => setHoveredBody(body)}
-                onMouseLeave={() => setHoveredBody(null)}
-                onClick={() =>
-                  setHighlightedPlanet(highlightedPlanet === body ? null : body)
-                }
-                opacity={opacity}
-              >
-                <title>
-                  {formatPlacementLabel({
-                    body,
-                    sign,
-                    degree,
-                    minute,
-                    retrograde,
-                  })}
-                </title>
-                <line
-                  x1='0'
-                  y1='0'
-                  x2={x}
-                  y2={y}
-                  stroke={color}
-                  strokeWidth={isHovered ? '0.5' : '0.3'}
-                  opacity='0.2'
-                />
-                <text
-                  x={x}
-                  y={y}
-                  textAnchor='middle'
-                  dominantBaseline='central'
-                  className={cx(
-                    'planet-glyph',
-                    isAstroFont && 'font-astro',
-                    styles.planetGlyph,
-                  )}
-                  fontSize={
-                    isAngle || isPoint ? '12' : isAsteroid ? '11' : '14'
+              const color = isHovered ? '#ffffff' : baseColor;
+              const opacity = isHovered ? 1 : hoveredBody ? 0.4 : 1;
+
+              return (
+                <g
+                  key={body}
+                  className={cx('planet-node', styles.planetNode)}
+                  onMouseEnter={() => setHoveredBody(body)}
+                  onMouseLeave={() => setHoveredBody(null)}
+                  onClick={() =>
+                    setHighlightedPlanet(
+                      highlightedPlanet === body ? null : body,
+                    )
                   }
-                  fill={color}
+                  opacity={opacity}
                 >
-                  {symbol}
-                </text>
-              </g>
-            );
-          })}
+                  <title>
+                    {formatPlacementLabel({
+                      body,
+                      sign: displaySign,
+                      degree,
+                      minute,
+                      retrograde,
+                      eclipticLongitude,
+                      zodiacSystem,
+                    })}
+                  </title>
+                  <line
+                    x1='0'
+                    y1='0'
+                    x2={x}
+                    y2={y}
+                    stroke={color}
+                    strokeWidth={isHovered ? '0.5' : '0.3'}
+                    opacity='0.2'
+                  />
+                  <text
+                    x={x}
+                    y={y}
+                    textAnchor='middle'
+                    dominantBaseline='central'
+                    className={cx(
+                      'planet-glyph',
+                      isAstroFont && 'font-astro',
+                      styles.planetGlyph,
+                    )}
+                    fontSize={
+                      isAngle || isPoint ? '12' : isAsteroid ? '11' : '14'
+                    }
+                    fill={color}
+                  >
+                    {symbol}
+                  </text>
+                </g>
+              );
+            },
+          )}
         </svg>
       </div>
 
@@ -563,73 +602,37 @@ export const BirthChart = ({
         </h3>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
           {mainPlanets.map(
-            ({ body, sign, degree, minute, retrograde, house }) => (
-              <div
-                key={body}
-                className='flex items-center justify-between p-2 md:p-3 bg-surface-elevated rounded-lg'
-              >
-                <div className='flex items-center space-x-2 md:space-x-3'>
-                  {showSymbols ? (
-                    <span
-                      className={cx(
-                        'text-base md:text-lg font-astro',
-                        retrograde ? 'text-red-400' : 'text-content-primary',
-                      )}
-                    >
-                      {getSymbolForBody(body)}
-                    </span>
-                  ) : (
-                    <span className='font-medium text-content-primary text-sm md:text-base'>
-                      {body}
-                    </span>
-                  )}
-                </div>
-
-                <div className='flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm'>
-                  <span className='text-content-secondary'>
-                    {degree}°{minute.toString().padStart(2, '0')}&apos;
-                  </span>
-                  <span className='text-base md:text-lg font-astro'>
-                    {
-                      zodiacSymbol[
-                        sign.toLowerCase() as keyof typeof zodiacSymbol
-                      ]
-                    }
-                  </span>
-                  <span className='text-content-muted hidden sm:inline'>
-                    {sign}
-                  </span>
-                  {house && (
-                    <span className='text-content-muted text-xs'>H{house}</span>
-                  )}
-                  {retrograde && (
-                    <span className='text-red-400 text-xs font-medium'>℞</span>
-                  )}
-                </div>
-              </div>
-            ),
-          )}
-        </div>
-
-        {angles.length > 0 && (
-          <>
-            <h3 className='text-base md:text-lg font-semibold text-lunary-accent mb-2 md:mb-3 mt-4'>
-              Chart Angles
-            </h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
-              {angles.map(({ body, sign, degree, minute }) => (
+            ({
+              body,
+              sign,
+              degree,
+              minute,
+              retrograde,
+              house,
+              eclipticLongitude,
+            }) => {
+              const displaySign = getSignForZodiacSystem(
+                eclipticLongitude,
+                zodiacSystem,
+              ).sign;
+              return (
                 <div
                   key={body}
                   className='flex items-center justify-between p-2 md:p-3 bg-surface-elevated rounded-lg'
                 >
                   <div className='flex items-center space-x-2 md:space-x-3'>
                     {showSymbols ? (
-                      <span className='text-base md:text-lg font-astro text-lunary-accent'>
+                      <span
+                        className={cx(
+                          'text-base md:text-lg font-astro',
+                          retrograde ? 'text-red-400' : 'text-content-primary',
+                        )}
+                      >
                         {getSymbolForBody(body)}
                       </span>
                     ) : (
                       <span className='font-medium text-content-primary text-sm md:text-base'>
-                        {ANGLE_DISPLAY[body] || body}
+                        {body}
                       </span>
                     )}
                   </div>
@@ -641,16 +644,78 @@ export const BirthChart = ({
                     <span className='text-base md:text-lg font-astro'>
                       {
                         zodiacSymbol[
-                          sign.toLowerCase() as keyof typeof zodiacSymbol
+                          displaySign.toLowerCase() as keyof typeof zodiacSymbol
                         ]
                       }
                     </span>
                     <span className='text-content-muted hidden sm:inline'>
-                      {sign}
+                      {displaySign}
                     </span>
+                    {house && (
+                      <span className='text-content-muted text-xs'>
+                        H{house}
+                      </span>
+                    )}
+                    {retrograde && (
+                      <span className='text-red-400 text-xs font-medium'>
+                        ℞
+                      </span>
+                    )}
                   </div>
                 </div>
-              ))}
+              );
+            },
+          )}
+        </div>
+
+        {angles.length > 0 && (
+          <>
+            <h3 className='text-base md:text-lg font-semibold text-lunary-accent mb-2 md:mb-3 mt-4'>
+              Chart Angles
+            </h3>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
+              {angles.map(
+                ({ body, sign, degree, minute, eclipticLongitude }) => {
+                  const displaySign = getSignForZodiacSystem(
+                    eclipticLongitude,
+                    zodiacSystem,
+                  ).sign;
+                  return (
+                    <div
+                      key={body}
+                      className='flex items-center justify-between p-2 md:p-3 bg-surface-elevated rounded-lg'
+                    >
+                      <div className='flex items-center space-x-2 md:space-x-3'>
+                        {showSymbols ? (
+                          <span className='text-base md:text-lg font-astro text-lunary-accent'>
+                            {getSymbolForBody(body)}
+                          </span>
+                        ) : (
+                          <span className='font-medium text-content-primary text-sm md:text-base'>
+                            {ANGLE_DISPLAY[body] || body}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className='flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm'>
+                        <span className='text-content-secondary'>
+                          {degree}°{minute.toString().padStart(2, '0')}&apos;
+                        </span>
+                        <span className='text-base md:text-lg font-astro'>
+                          {
+                            zodiacSymbol[
+                              displaySign.toLowerCase() as keyof typeof zodiacSymbol
+                            ]
+                          }
+                        </span>
+                        <span className='text-content-muted hidden sm:inline'>
+                          {displaySign}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                },
+              )}
             </div>
           </>
         )}
@@ -661,58 +726,71 @@ export const BirthChart = ({
               Sensitive Points
             </h3>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
-              {points.map(({ body, sign, degree, minute, retrograde }) => {
-                const pointSymbol = getSymbolForBody(body);
-                const useAstroFont =
-                  pointSymbol.length === 1 && pointSymbol.charCodeAt(0) < 128;
-                return (
-                  <div
-                    key={body}
-                    className='flex items-center justify-between p-2 md:p-3 bg-surface-elevated rounded-lg'
-                  >
-                    <div className='flex items-center space-x-2 md:space-x-3'>
-                      {showSymbols ? (
-                        <span
-                          className={cx(
-                            'text-base md:text-lg',
-                            useAstroFont && 'font-astro',
-                            retrograde
-                              ? 'text-red-400'
-                              : 'text-lunary-secondary',
-                          )}
-                        >
-                          {pointSymbol}
-                        </span>
-                      ) : (
-                        <span className='font-medium text-content-primary text-sm md:text-base'>
-                          {body}
-                        </span>
-                      )}
-                    </div>
+              {points.map(
+                ({
+                  body,
+                  sign,
+                  degree,
+                  minute,
+                  retrograde,
+                  eclipticLongitude,
+                }) => {
+                  const pointSymbol = getSymbolForBody(body);
+                  const useAstroFont =
+                    pointSymbol.length === 1 && pointSymbol.charCodeAt(0) < 128;
+                  const displaySign = getSignForZodiacSystem(
+                    eclipticLongitude,
+                    zodiacSystem,
+                  ).sign;
+                  return (
+                    <div
+                      key={body}
+                      className='flex items-center justify-between p-2 md:p-3 bg-surface-elevated rounded-lg'
+                    >
+                      <div className='flex items-center space-x-2 md:space-x-3'>
+                        {showSymbols ? (
+                          <span
+                            className={cx(
+                              'text-base md:text-lg',
+                              useAstroFont && 'font-astro',
+                              retrograde
+                                ? 'text-red-400'
+                                : 'text-lunary-secondary',
+                            )}
+                          >
+                            {pointSymbol}
+                          </span>
+                        ) : (
+                          <span className='font-medium text-content-primary text-sm md:text-base'>
+                            {body}
+                          </span>
+                        )}
+                      </div>
 
-                    <div className='flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm'>
-                      <span className='text-content-secondary'>
-                        {degree}°{minute.toString().padStart(2, '0')}&apos;
-                      </span>
-                      <span className='text-base md:text-lg font-astro'>
-                        {
-                          zodiacSymbol[
-                            sign.toLowerCase() as keyof typeof zodiacSymbol
-                          ]
-                        }
-                      </span>
-                      <span className='text-content-muted hidden sm:inline'>
-                        {sign}
-                      </span>
-                      {retrograde && (
-                        <span className='text-red-400 text-xs font-medium'>
-                          ℞
+                      <div className='flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm'>
+                        <span className='text-content-secondary'>
+                          {degree}°{minute.toString().padStart(2, '0')}&apos;
                         </span>
-                      )}
+                        <span className='text-base md:text-lg font-astro'>
+                          {
+                            zodiacSymbol[
+                              displaySign.toLowerCase() as keyof typeof zodiacSymbol
+                            ]
+                          }
+                        </span>
+                        <span className='text-content-muted hidden sm:inline'>
+                          {displaySign}
+                        </span>
+                        {retrograde && (
+                          <span className='text-red-400 text-xs font-medium'>
+                            ℞
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                },
+              )}
             </div>
           </>
         )}
