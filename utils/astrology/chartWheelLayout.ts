@@ -5,6 +5,7 @@ import type {
 import { ZODIAC_SIGNS } from '@/constants/symbols';
 import {
   convertLongitudeToZodiacSystem,
+  getLongitudeInTropicalSign,
   type ZodiacSystem,
 } from './zodiacSystems';
 import type { HouseSystem } from './houseSystems';
@@ -33,6 +34,7 @@ export function buildChartWheelLayout(args: {
       0,
       zodiacSystem,
     );
+    const displaySignData = getLongitudeInTropicalSign(displayLongitude);
     const adjustedLong = (displayLongitude - displayAscendantAngle + 360) % 360;
     const angle = (180 + adjustedLong) % 360;
     const radian = (angle * Math.PI) / 180;
@@ -41,7 +43,17 @@ export function buildChartWheelLayout(args: {
     const x = Math.cos(radian) * radius;
     const y = Math.sin(radian) * radius;
 
-    return { ...planet, adjustedLong, angle, x, y };
+    return {
+      ...planet,
+      sign: displaySignData.sign,
+      degree: Math.floor(displaySignData.degreeInSign),
+      minute: Math.round((displaySignData.degreeInSign % 1) * 60),
+      eclipticLongitude: displayLongitude,
+      adjustedLong,
+      angle,
+      x,
+      y,
+    };
   });
 
   const zodiacSigns = ZODIAC_SIGNS.map((sign, index) => {

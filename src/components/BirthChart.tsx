@@ -3,8 +3,8 @@
 import { useMemo, useState } from 'react';
 import { BirthChartData, HouseCusp } from '../../utils/astrology/birthChart';
 import {
-  getSignForZodiacSystem,
   convertLongitudeToZodiacSystem,
+  getLongitudeInTropicalSign,
   type ZodiacSystem,
 } from '@utils/astrology/zodiacSystems';
 import type { HouseSystem } from '../../utils/astrology/houseSystems';
@@ -125,10 +125,7 @@ function formatPlacementLabel({
     : undefined;
 
   // Get sign for the selected zodiac system
-  const displaySign =
-    zodiacSystem && eclipticLongitude !== undefined
-      ? getSignForZodiacSystem(eclipticLongitude, zodiacSystem).sign
-      : sign;
+  const displaySign = sign;
 
   const signLabel = displaySign ? ` in ${displaySign}` : '';
   const retroLabel = retrograde ? ' ℞' : '';
@@ -188,6 +185,7 @@ export const BirthChart = ({
         0,
         zodiacSystem,
       );
+      const displaySignData = getLongitudeInTropicalSign(displayLongitude);
       const adjustedLong = (displayLongitude - ascendantAngle + 360) % 360;
       const angle = (180 + adjustedLong) % 360;
       const radian = (angle * Math.PI) / 180;
@@ -198,6 +196,10 @@ export const BirthChart = ({
 
       return {
         ...planet,
+        sign: displaySignData.sign,
+        degree: Math.floor(displaySignData.degreeInSign),
+        minute: Math.round((displaySignData.degreeInSign % 1) * 60),
+        eclipticLongitude: displayLongitude,
         adjustedLong,
         angle,
         x,
@@ -555,10 +557,7 @@ export const BirthChart = ({
                 symbol.length === 1 && symbol.charCodeAt(0) < 128;
 
               // Get sign for the selected zodiac system
-              const displaySign = getSignForZodiacSystem(
-                eclipticLongitude,
-                zodiacSystem,
-              ).sign;
+              const displaySign = sign;
 
               // Get element color for planets based on their sign
               const elementColor =
@@ -651,10 +650,7 @@ export const BirthChart = ({
               house,
               eclipticLongitude,
             }) => {
-              const displaySign = getSignForZodiacSystem(
-                eclipticLongitude,
-                zodiacSystem,
-              ).sign;
+              const displaySign = sign;
               return (
                 <div
                   key={body}
@@ -716,10 +712,7 @@ export const BirthChart = ({
             <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
               {angles.map(
                 ({ body, sign, degree, minute, eclipticLongitude }) => {
-                  const displaySign = getSignForZodiacSystem(
-                    eclipticLongitude,
-                    zodiacSystem,
-                  ).sign;
+                  const displaySign = sign;
                   return (
                     <div
                       key={body}
@@ -778,10 +771,7 @@ export const BirthChart = ({
                   const pointSymbol = getSymbolForBody(body);
                   const useAstroFont =
                     pointSymbol.length === 1 && pointSymbol.charCodeAt(0) < 128;
-                  const displaySign = getSignForZodiacSystem(
-                    eclipticLongitude,
-                    zodiacSystem,
-                  ).sign;
+                  const displaySign = sign;
                   return (
                     <div
                       key={body}
