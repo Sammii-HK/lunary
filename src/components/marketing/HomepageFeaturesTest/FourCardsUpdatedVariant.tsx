@@ -12,13 +12,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { moonPhaseIconMap } from '@/lib/constants/moon';
 import ctaExamples from '@/lib/cta-examples.json';
+import { Reveal } from '@/components/marketing/Reveal';
 
 export function FourCardsUpdatedVariant() {
   return (
     <div className='max-w-5xl mx-auto space-y-12 md:space-y-20'>
       {/* Card 1: Daily Cosmic Dashboard */}
       <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
-        <div className='space-y-3'>
+        <Reveal delayMs={0} className='space-y-3'>
           <LayoutDashboard
             className='w-7 h-7 text-lunary-primary-400'
             strokeWidth={1.5}
@@ -64,8 +65,11 @@ export function FourCardsUpdatedVariant() {
           <Button variant='outline' asChild className='mt-4'>
             <Link href='/auth?signup=true'>See your dashboard →</Link>
           </Button>
-        </div>
-        <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6'>
+        </Reveal>
+        <Reveal
+          delayMs={140}
+          className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6'
+        >
           <Image
             src={moonPhaseIconMap[ctaExamples.marketing.moonPhase.phase]}
             alt='Dashboard preview'
@@ -79,12 +83,15 @@ export function FourCardsUpdatedVariant() {
           <p className='text-xs text-content-muted'>
             Screenshot showing actual dashboard interface
           </p>
-        </div>
+        </Reveal>
       </div>
 
       {/* Card 2: Personal Horoscope */}
       <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
-        <div className='order-2 md:order-1 rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6'>
+        <Reveal
+          delayMs={140}
+          className='order-2 md:order-1 rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6'
+        >
           <p className='text-sm text-content-muted mb-2'>
             Transit list with interpretations
           </p>
@@ -96,8 +103,8 @@ export function FourCardsUpdatedVariant() {
               Moon in Gemini: Communication flows
             </div>
           </div>
-        </div>
-        <div className='order-1 md:order-2 space-y-3'>
+        </Reveal>
+        <Reveal delayMs={0} className='order-1 md:order-2 space-y-3'>
           <Sparkles
             className='w-7 h-7 text-lunary-primary-400'
             strokeWidth={1.5}
@@ -143,12 +150,12 @@ export function FourCardsUpdatedVariant() {
           <Button variant='outline' asChild className='mt-4'>
             <Link href='/auth?signup=true'>See today's transits →</Link>
           </Button>
-        </div>
+        </Reveal>
       </div>
 
       {/* Card 3: Tarot Readings */}
       <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
-        <div className='space-y-3'>
+        <Reveal delayMs={0} className='space-y-3'>
           <Layers
             className='w-7 h-7 text-lunary-primary-400'
             strokeWidth={1.5}
@@ -194,8 +201,11 @@ export function FourCardsUpdatedVariant() {
           <Button variant='outline' asChild className='mt-4'>
             <Link href='/auth?signup=true'>Draw your card →</Link>
           </Button>
-        </div>
-        <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6'>
+        </Reveal>
+        <Reveal
+          delayMs={140}
+          className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6'
+        >
           <p className='text-sm text-content-muted mb-2'>
             Daily card + spread library
           </p>
@@ -207,12 +217,15 @@ export function FourCardsUpdatedVariant() {
               {ctaExamples.marketing.tarotCard.keywords}
             </p>
           </div>
-        </div>
+        </Reveal>
       </div>
 
       {/* Card 4: Astral Guide & Tools */}
       <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
-        <div className='order-2 md:order-1 rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6'>
+        <Reveal
+          delayMs={140}
+          className='order-2 md:order-1 rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6'
+        >
           <div className='space-y-3'>
             <div className='flex justify-end'>
               <div className='max-w-[80%]'>
@@ -229,8 +242,8 @@ export function FourCardsUpdatedVariant() {
               </div>
             </div>
           </div>
-        </div>
-        <div className='order-1 md:order-2 space-y-3'>
+        </Reveal>
+        <Reveal delayMs={0} className='order-1 md:order-2 space-y-3'>
           <MessageCircle
             className='w-7 h-7 text-lunary-primary-400'
             strokeWidth={1.5}
@@ -276,7 +289,7 @@ export function FourCardsUpdatedVariant() {
           <Button variant='outline' asChild className='mt-4'>
             <Link href='/auth?signup=true'>Start exploring →</Link>
           </Button>
-        </div>
+        </Reveal>
       </div>
     </div>
   );

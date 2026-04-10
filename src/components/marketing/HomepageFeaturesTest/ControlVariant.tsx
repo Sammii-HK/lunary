@@ -13,13 +13,14 @@ import { Button } from '@/components/ui/button';
 import { CTA_COPY } from '@/lib/cta-copy';
 import { moonPhaseIconMap } from '@/lib/constants/moon';
 import ctaExamples from '@/lib/cta-examples.json';
+import { Reveal } from '@/components/marketing/Reveal';
 
 export function ControlVariant() {
   return (
     <div className='max-w-5xl mx-auto space-y-12 md:space-y-20'>
       {/* Feature 1: Daily Cosmic Dashboard */}
       <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
-        <div className='space-y-3'>
+        <Reveal delayMs={0} className='space-y-3'>
           <LayoutDashboard
             className='w-7 h-7 text-lunary-primary-400'
             strokeWidth={1.5}
@@ -35,8 +36,8 @@ export function ControlVariant() {
             Your birth chart is created and saved to your account. Chart-based
             interpretation included with Lunary+.
           </p>
-        </div>
-        <div className='space-y-2'>
+        </Reveal>
+        <Reveal delayMs={140} className='space-y-2'>
           <div className='py-3 px-4 border border-stroke-subtle rounded-lg'>
             <div className='flex items-center gap-2 mb-1'>
               <Image
@@ -88,12 +89,15 @@ export function ControlVariant() {
               {ctaExamples.marketing.crystal.meaning}
             </p>
           </div>
-        </div>
+        </Reveal>
       </div>
 
       {/* Feature 2: Astral Guide Chat */}
       <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
-        <div className='order-2 md:order-1 rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6'>
+        <Reveal
+          delayMs={140}
+          className='order-2 md:order-1 rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6'
+        >
           <div className='space-y-3'>
             <div className='flex justify-end'>
               <div className='max-w-[80%]'>
@@ -112,8 +116,8 @@ export function ControlVariant() {
               </div>
             </div>
           </div>
-        </div>
-        <div className='order-1 md:order-2 space-y-3'>
+        </Reveal>
+        <Reveal delayMs={0} className='order-1 md:order-2 space-y-3'>
           <MessageCircle
             className='w-7 h-7 text-lunary-primary-400'
             strokeWidth={1.5}
@@ -129,12 +133,12 @@ export function ControlVariant() {
             Optional chat grounded in your chart. Your chart itself is always
             astronomy-based.
           </p>
-        </div>
+        </Reveal>
       </div>
 
       {/* Feature 3: Living Book of Shadows */}
       <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
-        <div className='space-y-3'>
+        <Reveal delayMs={0} className='space-y-3'>
           <BookOpen
             className='w-7 h-7 text-lunary-primary-400'
             strokeWidth={1.5}
@@ -146,8 +150,11 @@ export function ControlVariant() {
             Record your insights and moods in one place. Lunary highlights the
             threads between your entries, transits and tarot pulls over time
           </p>
-        </div>
-        <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6'>
+        </Reveal>
+        <Reveal
+          delayMs={140}
+          className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6'
+        >
           <div className='space-y-2.5'>
             <div className='p-2.5 rounded-lg bg-surface-card/50 border border-stroke-default/30'>
               <p className='text-xs text-content-muted mb-0.5'>Nov 28</p>
@@ -165,12 +172,15 @@ export function ControlVariant() {
               Pattern: Hope themes recurring during Sagittarius season
             </div>
           </div>
-        </div>
+        </Reveal>
       </div>
 
       {/* Feature 4: Tarot and Transit Patterns */}
       <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
-        <div className='order-2 md:order-1 rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6'>
+        <Reveal
+          delayMs={140}
+          className='order-2 md:order-1 rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6'
+        >
           <div className='space-y-3'>
             <div className='flex items-center justify-between'>
               <span className='text-sm text-content-muted'>
@@ -208,8 +218,8 @@ export function ControlVariant() {
               </div>
             </div>
           </div>
-        </div>
-        <div className='order-1 md:order-2 space-y-3'>
+        </Reveal>
+        <Reveal delayMs={0} className='order-1 md:order-2 space-y-3'>
           <Layers
             className='w-7 h-7 text-lunary-primary-400'
             strokeWidth={1.5}
@@ -221,11 +231,11 @@ export function ControlVariant() {
             Daily cards, weekly guidance, spread library, and pattern
             recognition across time
           </p>
-        </div>
+        </Reveal>
       </div>
 
       {/* Hint at More Features */}
-      <div className='mt-12 md:mt-16 text-center space-y-6'>
+      <Reveal className='mt-12 md:mt-16 text-center space-y-6'>
         <p className='text-sm md:text-base text-content-secondary leading-relaxed max-w-2xl mx-auto'>
           Your complete cosmic toolkit includes birth chart calculator, transit
           calendar, ritual library, wheel of the year, and more
@@ -233,7 +243,7 @@ export function ControlVariant() {
         <Button variant='lunary' asChild>
           <Link href='/features'>{CTA_COPY.navigation.exploreFeatures}</Link>
         </Button>
-      </div>
+      </Reveal>
     </div>
   );
 }

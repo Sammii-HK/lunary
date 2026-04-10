@@ -126,7 +126,19 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch profile');
+          // 401/403 means the session expired between mount and refetch
+          // (e.g. user came back to a tab after sign-out in another tab).
+          // Clear user state quietly — this isn't a bug to surface.
+          if (response.status === 401 || response.status === 403) {
+            setUser(null);
+            if (!hasLoadedOnce) {
+              setHasLoadedOnce(true);
+            }
+            return;
+          }
+          throw new Error(
+            `Failed to fetch profile (status ${response.status})`,
+          );
         }
 
         const data = await response.json();
@@ -148,6 +160,7 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
           personalCard,
           location: profile?.location || undefined,
           intention: profile?.intention || undefined,
+          birthChartHouseSystem: profile?.birthChartHouseSystem || undefined,
           stripeCustomerId: subscription?.stripeCustomerId || undefined,
           subscriptionStatus: status,
           subscriptionPlan: subscription?.planType || undefined,
@@ -160,7 +173,10 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
           setHasLoadedOnce(true);
         }
       } catch (err) {
-        console.error('Error fetching user data:', err);
+        // Use warn instead of error so the Next.js dev overlay doesn't
+        // treat transient profile fetch failures (network blips, focus
+        // re-fetches during navigation, etc.) as blocking runtime errors.
+        console.warn('Error fetching user data:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
         // Still set basic user info even if profile fetch fails
         setUser({

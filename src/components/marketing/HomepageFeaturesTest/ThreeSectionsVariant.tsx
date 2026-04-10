@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import { Sunrise, Sparkles, BookOpen, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Reveal } from '@/components/marketing/Reveal';
 
 export function ThreeSectionsVariant() {
   return (
     <div className='max-w-4xl mx-auto space-y-12 md:space-y-16'>
-      <div className='text-center space-y-4'>
+      <Reveal className='text-center space-y-4'>
         <h2 className='text-2xl md:text-3xl font-light text-content-primary'>
           Your Cosmic Practice
         </h2>
@@ -15,10 +16,10 @@ export function ThreeSectionsVariant() {
           Everything you need for daily guidance, deep exploration, and
           continuous learning
         </p>
-      </div>
+      </Reveal>
 
       {/* Daily Practice */}
-      <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/30 p-6 md:p-8 space-y-4'>
+      <Reveal className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/30 p-6 md:p-8 space-y-4 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'>
         <div className='flex items-center gap-3'>
           <Sunrise className='w-6 h-6 text-lunary-primary-400' />
           <h3 className='text-xl md:text-2xl font-light text-content-primary'>
@@ -56,10 +57,10 @@ export function ThreeSectionsVariant() {
             <ArrowRight className='w-4 h-4 group-hover:translate-x-1 transition-transform' />
           </Link>
         </Button>
-      </div>
+      </Reveal>
 
       {/* Deep Exploration */}
-      <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/30 p-6 md:p-8 space-y-4'>
+      <Reveal className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/30 p-6 md:p-8 space-y-4 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'>
         <div className='flex items-center gap-3'>
           <Sparkles className='w-6 h-6 text-lunary-primary-400' />
           <h3 className='text-xl md:text-2xl font-light text-content-primary'>
@@ -94,10 +95,10 @@ export function ThreeSectionsVariant() {
             <ArrowRight className='w-4 h-4 group-hover:translate-x-1 transition-transform' />
           </Link>
         </Button>
-      </div>
+      </Reveal>
 
       {/* Always Learning */}
-      <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/30 p-6 md:p-8 space-y-4'>
+      <Reveal className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/30 p-6 md:p-8 space-y-4 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'>
         <div className='flex items-center gap-3'>
           <BookOpen className='w-6 h-6 text-lunary-primary-400' />
           <h3 className='text-xl md:text-2xl font-light text-content-primary'>
@@ -132,14 +133,14 @@ export function ThreeSectionsVariant() {
             <ArrowRight className='w-4 h-4 group-hover:translate-x-1 transition-transform' />
           </Link>
         </Button>
-      </div>
+      </Reveal>
 
       {/* Overall CTA */}
-      <div className='text-center pt-8'>
+      <Reveal className='text-center pt-8'>
         <Button variant='lunary' size='lg' asChild>
           <Link href='/auth?signup=true'>Start your free trial</Link>
         </Button>
-      </div>
+      </Reveal>
     </div>
   );
 }
