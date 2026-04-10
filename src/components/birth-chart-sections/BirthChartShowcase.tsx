@@ -1,7 +1,10 @@
 'use client';
 
 import { useMemo } from 'react';
-import type { BirthChartData } from '../../../utils/astrology/birthChart';
+import type {
+  BirthChartData,
+  HouseCusp,
+} from '../../../utils/astrology/birthChart';
 import {
   bodiesSymbols,
   zodiacSymbol,
@@ -41,15 +44,17 @@ import {
 interface BirthChartShowcaseProps {
   birthChart: BirthChartData[];
   zodiacSystem?: ZodiacSystem;
+  houses?: HouseCusp[];
 }
 
 export function BirthChartShowcase({
   birthChart,
   zodiacSystem = 'tropical',
+  houses: explicitHouses,
 }: BirthChartShowcaseProps) {
   const getDisplaySign = (planet: BirthChartData | undefined) => {
     if (!planet) return '';
-    if (!planet.eclipticLongitude) return planet.sign;
+    if (!Number.isFinite(planet.eclipticLongitude)) return planet.sign;
     return getSignForZodiacSystem(planet.eclipticLongitude, zodiacSystem).sign;
   };
 
@@ -76,10 +81,16 @@ export function BirthChartShowcase({
     [modalities],
   );
 
-  const houses = useMemo(
-    () => calculateWholeSigHouses(birthChart),
-    [birthChart],
-  );
+  const houses = useMemo(() => {
+    if (explicitHouses && explicitHouses.length > 0) {
+      return explicitHouses.map((house) => ({
+        house: house.house,
+        sign: house.sign,
+        planets: birthChart.filter((planet) => planet.house === house.house),
+      }));
+    }
+    return calculateWholeSigHouses(birthChart);
+  }, [birthChart, explicitHouses]);
 
   const chartRulerData = useMemo(() => {
     if (!rising) return null;

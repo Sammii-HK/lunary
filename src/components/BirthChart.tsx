@@ -4,8 +4,10 @@ import { useMemo, useState } from 'react';
 import { BirthChartData, HouseCusp } from '../../utils/astrology/birthChart';
 import {
   getSignForZodiacSystem,
+  convertLongitudeToZodiacSystem,
   type ZodiacSystem,
 } from '@utils/astrology/zodiacSystems';
+import type { HouseSystem } from '../../utils/astrology/houseSystems';
 import {
   bodiesSymbols,
   zodiacSymbol,
@@ -45,6 +47,11 @@ const SIGN_ELEMENTS: Record<string, keyof typeof ELEMENT_COLORS> = {
   Aquarius: 'Air',
   Pisces: 'Water',
 };
+
+function getSignElementColor(sign: string): string {
+  const element = SIGN_ELEMENTS[sign];
+  return element ? ELEMENT_COLORS[element] : '#71717a';
+}
 
 const MAIN_PLANETS = [
   'Sun',
@@ -128,13 +135,6 @@ function formatPlacementLabel({
   return `${body}${signLabel}${degreeLabel ? ` ${degreeLabel}` : ''}${retroLabel}`;
 }
 
-type HouseSystem =
-  | 'placidus'
-  | 'whole-sign'
-  | 'koch'
-  | 'porphyry'
-  | 'alcabitius';
-
 type BirthChartProps = {
   birthChart: BirthChartData[];
   houses?: HouseCusp[];
@@ -170,14 +170,25 @@ export const BirthChart = ({
     null,
   );
   const ascendant = birthChart.find((p) => p.body === 'Ascendant');
-  const ascendantAngle = ascendant ? ascendant.eclipticLongitude : 0;
+  const tropicalAscendantAngle = ascendant ? ascendant.eclipticLongitude : 0;
+  const ascendantAngle = ascendant
+    ? convertLongitudeToZodiacSystem(
+        ascendant.eclipticLongitude,
+        0,
+        zodiacSystem,
+      )
+    : 0;
 
   const yf = clockwise ? -1 : 1;
 
   const chartData = useMemo(() => {
     return birthChart.map((planet) => {
-      const adjustedLong =
-        (planet.eclipticLongitude - ascendantAngle + 360) % 360;
+      const displayLongitude = convertLongitudeToZodiacSystem(
+        planet.eclipticLongitude,
+        0,
+        zodiacSystem,
+      );
+      const adjustedLong = (displayLongitude - ascendantAngle + 360) % 360;
       const angle = (180 + adjustedLong) % 360;
       const radian = (angle * Math.PI) / 180;
 
@@ -193,7 +204,7 @@ export const BirthChart = ({
         y,
       };
     });
-  }, [birthChart, ascendantAngle, yf]);
+  }, [birthChart, ascendantAngle, yf, zodiacSystem]);
 
   const zodiacSigns = useMemo(() => {
     const signs = [
@@ -214,7 +225,12 @@ export const BirthChart = ({
     return signs.map((sign, index) => {
       const signStart = index * 30;
       const signMid = signStart + 15;
-      const adjustedMid = (signMid - ascendantAngle + 360) % 360;
+      const displayMid = convertLongitudeToZodiacSystem(
+        signMid,
+        0,
+        zodiacSystem,
+      );
+      const adjustedMid = (displayMid - ascendantAngle + 360) % 360;
       const angle = (180 + adjustedMid) % 360;
       const radian = (angle * Math.PI) / 180;
       const radius = 100;
@@ -223,13 +239,30 @@ export const BirthChart = ({
 
       return { sign, angle, x, y };
     });
-  }, [ascendantAngle, yf]);
+  }, [ascendantAngle, yf, zodiacSystem]);
 
   const houseData = useMemo(() => {
+    if (houseSystem === 'whole-sign') {
+      const startOfFirstHouse = Math.floor(ascendantAngle / 30) * 30;
+      return Array.from({ length: 12 }, (_, i) => {
+        const houseLongitude = (startOfFirstHouse + i * 30) % 360;
+        const adjustedLong = (houseLongitude - ascendantAngle + 360) % 360;
+        const angle = (180 + adjustedLong) % 360;
+        const radian = (angle * Math.PI) / 180;
+        return {
+          house: i + 1,
+          eclipticLongitude: houseLongitude,
+          adjustedLong,
+          angle,
+          radian,
+        };
+      });
+    }
+
     if (houses && houses.length > 0) {
       return houses.map((house) => {
         const adjustedLong =
-          (house.eclipticLongitude - ascendantAngle + 360) % 360;
+          (house.eclipticLongitude - tropicalAscendantAngle + 360) % 360;
         const angle = (180 + adjustedLong) % 360;
         const radian = (angle * Math.PI) / 180;
         return { ...house, adjustedLong, angle, radian };
@@ -242,14 +275,14 @@ export const BirthChart = ({
       const radian = (angle * Math.PI) / 180;
       return {
         house: i + 1,
-        eclipticLongitude: (ascendantAngle + houseStart) % 360,
+        eclipticLongitude: (tropicalAscendantAngle + houseStart) % 360,
         adjustedLong,
         angle,
         radian,
       };
     });
     // houseData stores radians — yf flip is applied at render time
-  }, [houses, ascendantAngle]);
+  }, [houses, tropicalAscendantAngle, ascendantAngle, houseSystem]);
 
   const mainPlanets = chartData.filter((p) => MAIN_PLANETS.includes(p.body));
   const angles = chartData.filter((p) => ANGLES.includes(p.body));
@@ -452,7 +485,12 @@ export const BirthChart = ({
 
           {Array.from({ length: 12 }, (_, i) => {
             const signStart = i * 30;
-            const adjustedStart = (signStart - ascendantAngle + 360) % 360;
+            const displayStart = convertLongitudeToZodiacSystem(
+              signStart,
+              0,
+              zodiacSystem,
+            );
+            const adjustedStart = (displayStart - ascendantAngle + 360) % 360;
             const angle = (180 + adjustedStart) % 360;
             const radian = (angle * Math.PI) / 180;
             const x1 = r6(Math.cos(radian) * 85);
@@ -481,8 +519,10 @@ export const BirthChart = ({
               y={y}
               textAnchor='middle'
               dominantBaseline='central'
-              className='fill-zinc-500 font-astro'
+              className='font-astro'
               fontSize='12'
+              fill={getSignElementColor(sign)}
+              opacity='0.9'
             >
               {zodiacSymbol[sign.toLowerCase() as keyof typeof zodiacSymbol]}
             </text>

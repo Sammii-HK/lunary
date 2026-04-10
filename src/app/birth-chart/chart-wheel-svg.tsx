@@ -10,6 +10,10 @@ import {
   zodiacSymbol,
   astroPointSymbols,
 } from '../../../utils/zodiac/zodiac';
+import {
+  convertLongitudeToZodiacSystem,
+  type ZodiacSystem,
+} from '../../../utils/astrology/zodiacSystems';
 import { useAspects } from '@/hooks/useAspects';
 import { AspectLines } from '@/components/AspectLines';
 import { isHarmoniousAspect, isChallengingAspect } from '@/hooks/useAspects';
@@ -60,6 +64,12 @@ const SIGN_ELEMENTS: Record<string, string> = {
   Aquarius: 'Air',
   Pisces: 'Water',
 };
+
+function getSignElementColor(sign: string): string {
+  const element = SIGN_ELEMENTS[sign];
+  if (element && ELEMENT_COLORS[element]) return ELEMENT_COLORS[element];
+  return '#71717a';
+}
 
 function getSymbolForBody(body: string): string {
   const key = body
@@ -135,6 +145,7 @@ export function ChartWheelSvg({
   aspectFilter = 'all',
   showAsteroids = true,
   clockwise = false,
+  zodiacSystem = 'tropical',
   colours = {
     ring: '#3f3f46',
     ringInner: '#27272a',
@@ -158,6 +169,7 @@ export function ChartWheelSvg({
   aspectFilter?: 'all' | 'harmonious' | 'challenging';
   showAsteroids?: boolean;
   clockwise?: boolean;
+  zodiacSystem?: ZodiacSystem;
   colours?: Partial<{
     ring: string;
     ringInner: string;
@@ -391,7 +403,17 @@ export function ChartWheelSvg({
       {Array.from({ length: 12 }, (_, i) => {
         const yf = clockwise ? -1 : 1;
         const start = i * 30;
-        const pos = polarFromLongitude(start, ascendantAngle, 0, clockwise);
+        const displayStart = convertLongitudeToZodiacSystem(
+          start,
+          0,
+          zodiacSystem,
+        );
+        const pos = polarFromLongitude(
+          displayStart,
+          ascendantAngle,
+          0,
+          clockwise,
+        );
         const x1 = Math.cos(pos.radian) * 85;
         const y1 = Math.sin(pos.radian) * 85 * yf;
         const x2 = Math.cos(pos.radian) * 120;
@@ -420,7 +442,8 @@ export function ChartWheelSvg({
           textAnchor='middle'
           dominantBaseline='central'
           fontSize='12'
-          fill={colours.zodiac}
+          fill={getSignElementColor(sign)}
+          opacity='0.9'
           style={{ fontFamily: fontFamilySymbols }}
         >
           {zodiacSymbol[sign.toLowerCase() as keyof typeof zodiacSymbol]}
