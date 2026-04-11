@@ -318,5 +318,11 @@
     "typescript": "^5.9.3",
     "web-streams-polyfill": "^4.2.0"
   },
-  "packageManager": "pnpm@9.15.0"
+  "packageManager": "pnpm@9.15.0",
+  "pnpm": {
+    "overrides": {
+      "handlebars": ">=4.7.9",
+      "axios": ">=1.15.0"
+    }
+  }
 }
