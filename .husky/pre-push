@@ -54,7 +54,7 @@ if ! pnpm test -- --changedSince=origin/main --passWithNoTests 2>/dev/null; then
   TEST_RESULT=1
 fi
 if [ "$WIP_STASHED" = true ]; then
-  git stash pop --quiet
+  git stash pop --quiet || true
 fi
 if [ $TEST_RESULT -ne 0 ]; then
   echo "❌ Tests failed. Fix failing tests before pushing."
