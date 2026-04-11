@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/expandable-card';
 import { ShareSkyNow } from '@/components/share/ShareSkyNow';
 import { TransitDurationBadge } from '@/components/TransitDurationBadge';
+import { useLocation } from '@/hooks/useLocation';
 
 const getPlanetMeaning = (planet: string, sign: string): string => {
   const planetMeanings: Record<string, Record<string, string>> = {
@@ -419,7 +420,31 @@ interface SkyNowCardProps {
 export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
   const { user } = useUser();
   const { currentAstrologicalChart } = usePlanetaryChart();
+  const {
+    requestLocation,
+    loading: locationLoading,
+    error: locationError,
+  } = useLocation();
+  const [showLocationFeedback, setShowLocationFeedback] = useState(false);
+  const [refreshState, setRefreshState] = useState<
+    'idle' | 'success' | 'error'
+  >('idle');
   const [showChartModal, setShowChartModal] = useState(false);
+  const handleRefreshLocation = async () => {
+    setRefreshState('idle');
+    try {
+      await requestLocation();
+      setRefreshState('success');
+    } catch {
+      setRefreshState('error');
+    } finally {
+      setShowLocationFeedback(true);
+      setTimeout(() => {
+        setShowLocationFeedback(false);
+        setRefreshState('idle');
+      }, 2000);
+    }
+  };
 
   const planets = useMemo(() => {
     if (!currentAstrologicalChart || currentAstrologicalChart.length === 0) {
