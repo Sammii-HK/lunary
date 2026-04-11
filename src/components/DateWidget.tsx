@@ -153,7 +153,7 @@ export const DateWidget = () => {
                   caption_label: 'text-sm font-medium',
                   nav: 'space-x-1 flex items-center',
                   nav_button:
-                    'h-7 w-7 bg-transparent p-0 opacity-70 active:opacity-100 text-content-muted active:text-lunary-accent transition-colors',
+                    'h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100 text-content-muted hover:text-lunary-accent transition-colors',
                   nav_button_previous: 'absolute left-1',
                   nav_button_next: 'absolute right-1',
                   table: 'w-full border-collapse space-y-1',
@@ -162,9 +162,9 @@ export const DateWidget = () => {
                     'text-content-muted rounded-md w-8 font-normal text-[0.8rem]',
                   row: 'flex w-full mt-2',
                   cell: 'relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-layer-base [&:has([aria-selected])]:rounded-md',
-                  day: 'h-8 w-8 p-0 font-normal text-content-secondary active:bg-surface-card active:text-content-brand-accent rounded-md transition-colors aria-selected:opacity-100',
+                  day: 'h-8 w-8 p-0 font-normal text-content-secondary hover:bg-surface-card hover:text-content-brand-accent rounded-md transition-colors aria-selected:opacity-100',
                   day_selected:
-                    'bg-lunary-primary text-white active:bg-lunary-primary active:text-white focus:bg-lunary-primary focus:text-white',
+                    'bg-lunary-primary text-white hover:bg-lunary-primary hover:text-white focus:bg-lunary-primary focus:text-white',
                   day_today: 'bg-surface-card text-lunary-accent font-medium',
                   day_outside: 'text-content-muted opacity-50',
                   day_disabled: 'text-content-muted opacity-30',

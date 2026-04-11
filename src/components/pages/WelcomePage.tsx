@@ -94,6 +94,7 @@ export default function WelcomePage() {
     <>
       {renderJsonLd(structuredData)}
       <ScrollProgressBar />
+
       <div className='min-h-screen bg-surface-base text-content-primary flex flex-col'>
         {/* Referral Banner */}
         <div className='bg-gradient-to-r from-layer-base/40 to-layer-raised/40 border-b border-lunary-primary-700/30 py-2 px-4'>

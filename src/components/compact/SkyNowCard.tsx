@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
-import { Map, Telescope, X } from 'lucide-react';
+import { Check, Map, MapPin, Telescope, X } from 'lucide-react';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { BirthChartPlacement, useUser } from '@/context/UserContext';
 import { ChartWheelSvg } from '@/app/birth-chart/chart-wheel-svg';
@@ -473,6 +473,37 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
             <div onClick={(e) => e.stopPropagation()}>
               <ShareSkyNow compact />
             </div>
+            <button
+              type='button'
+              onClick={async (event) => {
+                event.stopPropagation();
+                await handleRefreshLocation();
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  void handleRefreshLocation();
+                }
+              }}
+              aria-label='Refresh location used for Sky Now'
+              title='Refresh my location'
+              className='p-0.5 rounded-full border border-transparent text-content-muted hover:text-content-secondary hover:border-stroke-default transition-colors relative'
+            >
+              {/* TODO: add back in with rise and set times functionality */}
+              {refreshState === 'success' ? (
+                <Check className='w-3 h-3 text-lunary-success' />
+              ) : (
+                <MapPin
+                  className={`w-3 h-3 ${locationLoading ? 'animate-pulse' : ''}`}
+                />
+              )}
+              {showLocationFeedback && locationError && (
+                <span className='absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] text-content-secondary'>
+                  Failed
+                </span>
+              )}
+            </button>
             <button
               type='button'
               onClick={(event) => {

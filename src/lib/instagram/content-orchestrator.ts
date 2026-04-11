@@ -30,6 +30,7 @@ import { getWeightedGrimoireCategories } from '@/lib/threads/orbit-insights';
 
 // Render URL: Mac Mini content-pipeline for OG image rendering.
 // Falls back to lunary.app if not set.
+// Note: always use canonical non-www URL — www.lunary.app returns 308 redirect.
 const SHARE_BASE_URL = process.env.CONTENT_RENDER_URL || 'https://lunary.app';
 
 // Daily posting schedule (UTC hours) — targeting US/UK crossover
