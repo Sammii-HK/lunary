@@ -1,13 +1,43 @@
 /**
  * AI content generator for transit deep-dive blog posts.
  *
- * Uses claude CLI (--print mode) with Haiku for fast, cost-effective
- * generation. The rich context from the context-builder means the model
- * mostly organises and expands existing data.
+ * Two backends:
+ * - Default: claude CLI (--print mode) with Sonnet
+ * - Local (TRANSIT_USE_OLLAMA=1): Ollama HTTP API on Mac Mini
  */
 
 import { execFileSync } from 'child_process';
 import type { TransitGenerationContext, TransitBlogContent } from './types';
+
+const USE_OLLAMA = process.env.TRANSIT_USE_OLLAMA === '1';
+const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
+const OLLAMA_WRITER_MODEL = process.env.OLLAMA_WRITER_MODEL || 'gemma3:27b';
+
+async function callOllama(
+  model: string,
+  prompt: string,
+  numPredict = 8000,
+): Promise<string> {
+  const isQwen = model.includes('qwen');
+  const body: Record<string, unknown> = {
+    model,
+    messages: [{ role: 'user', content: prompt }],
+    stream: false,
+    options: { num_predict: numPredict, temperature: 0.7 },
+  };
+  if (isQwen) body.think = false;
+
+  const res = await fetch(`${OLLAMA_URL}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(900_000), // 15 minutes for large models
+  } as RequestInit);
+
+  if (!res.ok) throw new Error(`Ollama ${model} error: ${res.status}`);
+  const data = (await res.json()) as { message: { content: string } };
+  return data.message.content;
+}
 
 const ZODIAC_SIGNS = [
   'aries',
@@ -185,18 +215,24 @@ export async function generateTransitBlogPost(
 ): Promise<TransitBlogContent> {
   const prompt = buildPrompt(ctx);
 
-  // Call claude CLI in --print mode with Sonnet for richer historical depth
-  // execFileSync avoids shell injection -- prompt passed via stdin
-  const rawOutput = execFileSync(
-    'claude',
-    ['--print', '--model', 'sonnet', '--output-format', 'text'],
-    {
-      input: prompt,
-      encoding: 'utf-8',
-      maxBuffer: 4 * 1024 * 1024, // 4MB for longer Sonnet output
-      timeout: 300_000, // 5 minutes
-    },
-  );
+  let rawOutput: string;
+  if (USE_OLLAMA) {
+    console.log(`  [ollama] ${OLLAMA_WRITER_MODEL} — this may take 10-20 min`);
+    rawOutput = await callOllama(OLLAMA_WRITER_MODEL, prompt, 10000);
+  } else {
+    // Call claude CLI in --print mode with Sonnet for richer historical depth
+    // execFileSync avoids shell injection -- prompt passed via stdin
+    rawOutput = execFileSync(
+      'claude',
+      ['--print', '--model', 'sonnet', '--output-format', 'text'],
+      {
+        input: prompt,
+        encoding: 'utf-8',
+        maxBuffer: 4 * 1024 * 1024, // 4MB for longer Sonnet output
+        timeout: 300_000, // 5 minutes
+      },
+    );
+  }
 
   const jsonStr = extractJSON(rawOutput);
   const content = JSON.parse(jsonStr) as TransitBlogContent;

@@ -151,7 +151,7 @@ npm test -- --watch __tests__/unit/astrology/
 ### Planetary Positions
 
 - **Planets**: Simplified orbital mechanics (not full ephemeris)
-- **Acceptable tolerance**: ±1-3° from Swiss Ephemeris
+- **Acceptable tolerance**: ±1-3° from the reference corpus
 - **Reference**: NASA JPL Horizons System
 
 ### Asteroids
@@ -195,7 +195,7 @@ These simplifications are acceptable for astrological purposes (±1-3° toleranc
 
 - **Astronomy Engine**: https://github.com/cosinekitty/astronomy
 - **JPL Horizons**: https://ssd.jpl.nasa.gov/horizons/
-- **Swiss Ephemeris**: https://www.astro.com/swisseph/
+- **Reference corpus**: Curated hardcoded validation fixtures in this repo
 - **J2000.0 Epoch**: https://en.wikipedia.org/wiki/Epoch_(astronomy)#J2000.0
 
 ## Maintenance

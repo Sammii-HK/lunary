@@ -111,6 +111,9 @@ function polarFromLongitude(
   const angle = (180 + adjustedLong) % 360;
   const radian = (angle * Math.PI) / 180;
   const rawY = Math.sin(radian) * radius;
+  // Default: 1st house extends from AC at 9 o'clock upward toward 10
+  // o'clock. `clockwise` flips the wheel so it descends toward 8 o'clock.
+  // Matches BirthChart.tsx and pre-house-system behavior.
   return {
     angle,
     radian,

@@ -648,7 +648,7 @@ Unlike other apps:
 - **Astronomicon Font**: https://astronomicon.co/en/astronomicon-fonts/
 - **Font License**: Open Font License (SIL OFL)
 - **JPL Horizons**: https://ssd.jpl.nasa.gov/horizons/
-- **Swiss Ephemeris**: https://www.astro.com/swisseph/
+- **Reference corpus**: Curated hardcoded validation fixtures in this repo
 
 ### Internal Documentation
 

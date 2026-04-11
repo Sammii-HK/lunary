@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getCurrentUser } from '@/lib/get-user-session';
-import {
-  convertLongitudeToZodiacSystem,
-  getSignForZodiacSystem,
-} from '@utils/astrology/zodiacSystems';
+import { normalizeIsoDateOnly } from '@/lib/date-only';
+import { getZodiacSign } from '@utils/astrology/astrology';
+import { convertToEquatorial } from '@utils/astrology/zodiacSystems';
+import { convertToSidereal } from '@utils/astrology/zodiacSystems';
 
 const ZODIAC_SYSTEMS = ['tropical', 'sidereal', 'equatorial'] as const;
 
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
 
     // Get user's birth chart data from profile
     const result = await sql`
-      SELECT birth_chart FROM user_profiles
+      SELECT birthday, birth_chart FROM user_profiles
       WHERE user_id = ${user.id}
       LIMIT 1
     `;
@@ -62,6 +62,7 @@ export async function GET(req: NextRequest) {
     }
 
     const profile = result.rows[0] as {
+      birthday?: string;
       birth_chart?: Array<{
         body: string;
         sign: string;
@@ -73,10 +74,21 @@ export async function GET(req: NextRequest) {
       }>;
     };
 
+    const birthDate = normalizeIsoDateOnly(
+      profile.birthday ? String(profile.birthday) : null,
+    );
+
     if (!profile?.birth_chart) {
       return NextResponse.json(
         { error: 'No birth chart found for user' },
         { status: 404 },
+      );
+    }
+
+    if (!birthDate) {
+      return NextResponse.json(
+        { error: 'Birth date not set in profile' },
+        { status: 400 },
       );
     }
 
@@ -85,52 +97,35 @@ export async function GET(req: NextRequest) {
 
     // Transform each planet to include all three zodiac systems
     const planetsWithAllSystems = planets.map((planet) => {
-      const tropical = getSignForZodiacSystem(
-        planet.eclipticLongitude,
-        'tropical',
-      );
-      const sidereal = getSignForZodiacSystem(
-        planet.eclipticLongitude,
-        'sidereal',
-      );
-      const equatorial = getSignForZodiacSystem(
-        planet.eclipticLongitude,
-        'equatorial',
-      );
+      const tropicalLongitude = planet.eclipticLongitude;
+      const tropicalDegree = tropicalLongitude % 30;
+      const tropicalSign = getZodiacSign(tropicalLongitude);
+      const siderealLongitude = convertToSidereal(tropicalLongitude);
+      const siderealSign = getZodiacSign(siderealLongitude);
+      const equatorialLongitude = convertToEquatorial(tropicalLongitude, 0);
+      const equatorialSign = getZodiacSign(equatorialLongitude);
 
       return {
         body: planet.body,
         eclipticLongitude: planet.eclipticLongitude,
         retrograde: planet.retrograde,
         tropical: {
-          longitude: convertLongitudeToZodiacSystem(
-            planet.eclipticLongitude,
-            0,
-            'tropical',
-          ),
-          sign: tropical.sign,
-          degree: Math.floor(tropical.degreeInSign),
-          minute: Math.round((tropical.degreeInSign % 1) * 60),
+          longitude: tropicalLongitude,
+          sign: tropicalSign,
+          degree: Math.floor(tropicalDegree),
+          minute: Math.round((tropicalDegree % 1) * 60),
         },
         sidereal: {
-          longitude: convertLongitudeToZodiacSystem(
-            planet.eclipticLongitude,
-            0,
-            'sidereal',
-          ),
-          sign: sidereal.sign,
-          degree: Math.floor(sidereal.degreeInSign),
-          minute: Math.round((sidereal.degreeInSign % 1) * 60),
+          longitude: siderealLongitude,
+          sign: siderealSign,
+          degree: Math.floor(siderealLongitude % 30),
+          minute: Math.round((siderealLongitude % 1) * 60),
         },
         equatorial: {
-          longitude: convertLongitudeToZodiacSystem(
-            planet.eclipticLongitude,
-            0,
-            'equatorial',
-          ),
-          sign: equatorial.sign,
-          degree: Math.floor(equatorial.degreeInSign),
-          minute: Math.round((equatorial.degreeInSign % 1) * 60),
+          longitude: equatorialLongitude,
+          sign: equatorialSign,
+          degree: Math.floor(equatorialLongitude % 30),
+          minute: Math.round((equatorialLongitude % 1) * 60),
         },
       } as PlanetWithZodiac;
     });

@@ -16,8 +16,14 @@ import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 import { ChartModeToggle } from '@/components/ChartModeToggle';
 import { Sparkles, Moon, Star, Home } from 'lucide-react';
 import { ensureDescendantInChart } from '@/utils/astrology/birth-chart-analysis';
-import { assignHousesToBodies } from '@utils/astrology/birthChart';
-import { type ZodiacSystem } from '@utils/astrology/zodiacSystems';
+import {
+  assignHousesToBodies,
+  assignWholeSignHousesToBodies,
+} from '@utils/astrology/houseAssignments';
+import {
+  convertToSidereal,
+  type ZodiacSystem,
+} from '@utils/astrology/zodiacSystems';
 import { useProgressedChart } from '@/hooks/useProgressedChart';
 import { useDashaTimeline } from '@/hooks/useDashaTimeline';
 import { DashaTimeline } from '@/components/DashaTimeline';
@@ -41,7 +47,7 @@ const BirthChartPage = () => {
   const [showAsteroids, setShowAsteroids] = useState(true);
   const [clockwise, setClockwise] = useState(false);
   const [showSymbols, setShowSymbols] = useState(true);
-  const [houseSystem, setHouseSystem] = useState<HouseSystem>('placidus');
+  const [houseSystem, setHouseSystem] = useState<HouseSystem>('whole-sign');
   const [zodiacSystem, setZodiacSystem] = useState<ZodiacSystem>('tropical');
   const [houses, setHouses] = useState<HouseCusp[] | null>(null);
   const [loadingHouses, setLoadingHouses] = useState(false);
@@ -64,15 +70,19 @@ const BirthChartPage = () => {
   const moonPosition = useMemo(() => {
     if (!birthChartData) return undefined;
     const moonData = birthChartData.find((body) => body.body === 'Moon');
-    return moonData?.eclipticLongitude;
+    if (!moonData) return undefined;
+    return convertToSidereal(moonData.eclipticLongitude);
   }, [birthChartData]);
+
+  const dashaMoonDegree =
+    zodiacSystem === 'sidereal' ? moonPosition : undefined;
 
   // Fetch dasha timeline
   const {
     currentDasha,
     upcomingPeriods,
     loading: dashaLoading,
-  } = useDashaTimeline(userBirthday, moonPosition);
+  } = useDashaTimeline(userBirthday, dashaMoonDegree);
 
   // Determine which chart to display based on mode
   const displayChart = useMemo(() => {
@@ -81,6 +91,15 @@ const BirthChartPage = () => {
     }
     return birthChartData;
   }, [chartMode, progressedChart, birthChartData]);
+
+  const displayChartWithHouses = useMemo(() => {
+    if (!displayChart) return null;
+    if (houseSystem === 'whole-sign') {
+      return assignWholeSignHousesToBodies(displayChart, zodiacSystem);
+    }
+    if (!houses || houses.length === 0) return displayChart;
+    return assignHousesToBodies(displayChart, houses);
+  }, [displayChart, houses, houseSystem, zodiacSystem]);
 
   const hasChartAccess = hasBirthChartAccess(
     subscription.status,
@@ -93,6 +112,11 @@ const BirthChartPage = () => {
     const savedShowSymbols = localStorage.getItem('chart-symbols');
     if (savedShowSymbols !== null) {
       setShowSymbols(savedShowSymbols === 'true');
+    }
+
+    const savedClockwise = localStorage.getItem('chart-clockwise');
+    if (savedClockwise !== null) {
+      setClockwise(savedClockwise === 'true');
     }
 
     // Load house system from user profile or localStorage
@@ -124,6 +148,13 @@ const BirthChartPage = () => {
       setZodiacSystem(savedZodiacSystem as ZodiacSystem);
     }
   }, [user?.birthChartHouseSystem]);
+
+  // Save clockwise to localStorage so the wheel direction preserves across refresh
+  useEffect(() => {
+    if (hasMounted) {
+      localStorage.setItem('chart-clockwise', String(clockwise));
+    }
+  }, [clockwise, hasMounted]);
 
   // Save showSymbols to localStorage
   useEffect(() => {
@@ -196,7 +227,7 @@ const BirthChartPage = () => {
         console.error('Failed to fetch houses:', err);
         setLoadingHouses(false);
       });
-  }, [hasMounted, user?.id]);
+  }, [hasMounted, user?.id, houseSystem]);
 
   // When user changes house system, get from cache and recalculate house assignments
   useEffect(() => {
@@ -212,12 +243,6 @@ const BirthChartPage = () => {
           setHouses(newHouses);
           // Recalculate which house each body is in for the new house system
           // This updates the display with correct house assignments
-          const bodyDataWithUpdatedHouses = assignHousesToBodies(
-            birthChartData,
-            newHouses,
-          );
-          // Note: This updates house assignments in memory but we'd need to pass
-          // this to components if we want to display updated house numbers
         }
       } catch (err) {
         console.error('Failed to get houses from cache:', err);
@@ -418,23 +443,27 @@ const BirthChartPage = () => {
             onHouseSystemChange={setHouseSystem}
             zodiacSystem={zodiacSystem}
             onZodiacSystemChange={setZodiacSystem}
-            isFreeTier={subscription.status === 'inactive'}
+            isFreeTier={
+              !['active', 'trial', 'trialing'].includes(subscription.status)
+            }
           />
 
           <div data-testid='chart-visualization'>
-            <BirthChart
-              birthChart={displayChart}
-              houses={houses}
-              userName={userName}
-              birthDate={userBirthday}
-              showAspects={showAspects}
-              aspectFilter={aspectFilter}
-              showAsteroids={showAsteroids}
-              clockwise={clockwise}
-              showSymbols={showSymbols}
-              houseSystem={houseSystem}
-              zodiacSystem={zodiacSystem}
-            />
+            {displayChartWithHouses && (
+              <BirthChart
+                birthChart={displayChartWithHouses}
+                houses={houses || undefined}
+                userName={userName}
+                birthDate={userBirthday}
+                showAspects={showAspects}
+                aspectFilter={aspectFilter}
+                showAsteroids={showAsteroids}
+                clockwise={clockwise}
+                showSymbols={showSymbols}
+                houseSystem={houseSystem}
+                zodiacSystem={zodiacSystem}
+              />
+            )}
           </div>
         </div>
 
@@ -450,11 +479,12 @@ const BirthChartPage = () => {
         )}
 
         {/* Planetary Interpretations */}
-        {displayChart && (
+        {displayChartWithHouses && (
           <div data-testid='planets-list'>
             <BirthChartShowcase
-              birthChart={displayChart}
+              birthChart={displayChartWithHouses}
               zodiacSystem={zodiacSystem}
+              houses={houses || undefined}
             />
             {chartMode === 'progressed' && currentAge > 0 && (
               <div className='mt-6 p-4 bg-surface-elevated/30 rounded-lg border border-stroke-subtle text-sm text-content-secondary'>

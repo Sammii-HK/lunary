@@ -4,6 +4,9 @@ import { getCurrentUser } from '@/lib/get-user-session';
 import { generateBirthChart } from '@utils/astrology/birthChart';
 import { Observer } from 'astronomy-engine';
 import tzLookup from 'tz-lookup';
+import { decrypt } from '@/lib/encryption';
+import { normalizeIsoDateOnly } from '@/lib/date-only';
+import { decryptLocation } from '@/lib/location-encryption';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +16,9 @@ interface LocationData {
   latitude?: number;
   longitude?: number;
   timezone?: string;
+  birthTime?: string;
+  birthLocation?: string;
+  birthTimezone?: string;
 }
 
 /**
@@ -60,7 +66,10 @@ export async function GET(request: NextRequest) {
       location?: LocationData;
     };
 
-    if (!birthday) {
+    const birthDate = normalizeIsoDateOnly(birthday ? decrypt(birthday) : null);
+    const decryptedLocation = decryptLocation(location) as LocationData | null;
+
+    if (!birthDate) {
       return NextResponse.json(
         { error: 'Birth date not set in profile' },
         { status: 400 },
@@ -82,8 +91,8 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      const birthDate = new Date(birthday);
-      const progDate = new Date(birthDate);
+      const baseBirthDate = new Date(birthDate);
+      const progDate = new Date(baseBirthDate);
       progDate.setDate(progDate.getDate() + age);
 
       progressedDate = progDate.toISOString().split('T')[0];
@@ -93,15 +102,28 @@ export async function GET(request: NextRequest) {
     let observer: Observer | undefined;
     let timezone: string | undefined = 'UTC';
 
-    if (location && typeof location === 'object') {
-      if (location.latitude && location.longitude) {
-        observer = new Observer(location.latitude, location.longitude, 0);
-        timezone = location.timezone || 'UTC';
+    if (decryptedLocation && typeof decryptedLocation === 'object') {
+      if (
+        typeof decryptedLocation.latitude === 'number' &&
+        typeof decryptedLocation.longitude === 'number'
+      ) {
+        observer = new Observer(
+          decryptedLocation.latitude,
+          decryptedLocation.longitude,
+          0,
+        );
+        timezone =
+          decryptedLocation.birthTimezone ||
+          decryptedLocation.timezone ||
+          'UTC';
 
         // Try to look up timezone if not provided
-        if (!location.timezone) {
+        if (!decryptedLocation.birthTimezone && !decryptedLocation.timezone) {
           try {
-            timezone = tzLookup(location.latitude, location.longitude);
+            timezone = tzLookup(
+              decryptedLocation.latitude,
+              decryptedLocation.longitude,
+            );
           } catch {
             timezone = 'UTC';
           }
@@ -111,11 +133,10 @@ export async function GET(request: NextRequest) {
 
     // Generate progressed chart using the same calculation as natal
     // but with the progressed date instead of birth date
-    // Note: We don't have birth time stored, so we use noon (12:00) as default
     const progressedChart = await generateBirthChart(
       progressedDate,
-      '12:00', // Use noon if birth time not available
-      undefined,
+      decryptedLocation?.birthTime || '12:00',
+      decryptedLocation?.birthLocation,
       timezone,
       observer,
     );

@@ -20,13 +20,6 @@ export function buildChartWheelLayout(args: {
 
   const ascendant = birthChart.find((p) => p.body === 'Ascendant');
   const tropicalAscendantAngle = ascendant ? ascendant.eclipticLongitude : 0;
-  const displayAscendantAngle = ascendant
-    ? convertLongitudeToZodiacSystem(
-        ascendant.eclipticLongitude,
-        0,
-        zodiacSystem,
-      )
-    : 0;
 
   const chartData = birthChart.map((planet) => {
     const displayLongitude = convertLongitudeToZodiacSystem(
@@ -35,7 +28,8 @@ export function buildChartWheelLayout(args: {
       zodiacSystem,
     );
     const displaySignData = getLongitudeInTropicalSign(displayLongitude);
-    const adjustedLong = (displayLongitude - displayAscendantAngle + 360) % 360;
+    const adjustedLong =
+      (planet.eclipticLongitude - tropicalAscendantAngle + 360) % 360;
     const angle = (180 + adjustedLong) % 360;
     const radian = (angle * Math.PI) / 180;
 
@@ -60,7 +54,7 @@ export function buildChartWheelLayout(args: {
     const signStart = index * 30;
     const signMid = signStart + 15;
     const displayMid = convertLongitudeToZodiacSystem(signMid, 0, zodiacSystem);
-    const adjustedMid = (displayMid - displayAscendantAngle + 360) % 360;
+    const adjustedMid = (displayMid - tropicalAscendantAngle + 360) % 360;
     const angle = (180 + adjustedMid) % 360;
     const radian = (angle * Math.PI) / 180;
 
@@ -75,9 +69,9 @@ export function buildChartWheelLayout(args: {
     houseSystem === 'whole-sign'
       ? Array.from({ length: 12 }, (_, i) => {
           const houseLongitude =
-            (Math.floor(displayAscendantAngle / 30) * 30 + i * 30) % 360;
+            (Math.floor(tropicalAscendantAngle / 30) * 30 + i * 30) % 360;
           const adjustedLong =
-            (houseLongitude - displayAscendantAngle + 360) % 360;
+            (houseLongitude - tropicalAscendantAngle + 360) % 360;
           const angle = (180 + adjustedLong) % 360;
           const radian = (angle * Math.PI) / 180;
           return {
@@ -111,7 +105,7 @@ export function buildChartWheelLayout(args: {
           });
 
   return {
-    ascendantAngle: displayAscendantAngle,
+    ascendantAngle: tropicalAscendantAngle,
     chartData,
     zodiacSigns,
     houseData,

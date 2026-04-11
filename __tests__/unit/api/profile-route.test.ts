@@ -128,7 +128,8 @@ describe('Profile API Route - GET', () => {
     (getCurrentUser as jest.Mock).mockResolvedValueOnce(fakeUser);
     sqlMock
       .mockResolvedValueOnce({ rows: [fakeProfileRow] })
-      .mockResolvedValueOnce({ rows: [fakeSubscriptionRow] });
+      .mockResolvedValueOnce({ rows: [fakeSubscriptionRow] })
+      .mockResolvedValueOnce({ rows: [{ birthChartHouseSystem: 'placidus' }] });
 
     const response = await GET(makeRequest());
 
@@ -147,6 +148,7 @@ describe('Profile API Route - GET', () => {
       location: { city: 'Portland' },
       stripeCustomerId: 'cus_abc',
       intention: 'self-discovery',
+      birthChartHouseSystem: 'placidus',
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-06-01T00:00:00Z',
     });
@@ -171,6 +173,7 @@ describe('Profile API Route - GET', () => {
   it('returns { profile: null, subscription: { status: "free" } } for user with no data', async () => {
     (getCurrentUser as jest.Mock).mockResolvedValueOnce(fakeUser);
     sqlMock
+      .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] });
 
@@ -207,20 +210,23 @@ describe('Profile API Route - GET', () => {
 
     await GET(makeRequest());
 
-    // Both sql calls should be registered before either resolves.
+    // All sql calls should be registered before any resolves.
     // With Promise.all the order is:
-    //   sql-called-0, sql-called-1, sql-resolved-0, sql-resolved-1
+    //   sql-called-0, sql-called-1, sql-called-2, sql-resolved-0, sql-resolved-1, sql-resolved-2
     // With sequential await the order would be:
-    //   sql-called-0, sql-resolved-0, sql-called-1, sql-resolved-1
+    //   sql-called-0, sql-resolved-0, sql-called-1, sql-resolved-1, ...
     expect(callOrder[0]).toBe('sql-called-0');
     expect(callOrder[1]).toBe('sql-called-1');
-    expect(callOrder[2]).toBe('sql-resolved-0');
-    expect(callOrder[3]).toBe('sql-resolved-1');
+    expect(callOrder[2]).toBe('sql-called-2');
+    expect(callOrder[3]).toBe('sql-resolved-0');
+    expect(callOrder[4]).toBe('sql-resolved-1');
+    expect(callOrder[5]).toBe('sql-resolved-2');
   });
 
   it('selects specific columns instead of SELECT *', async () => {
     (getCurrentUser as jest.Mock).mockResolvedValueOnce(fakeUser);
     sqlMock
+      .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] });
 
@@ -228,7 +234,7 @@ describe('Profile API Route - GET', () => {
 
     // The sql tagged template is called with template string arrays.
     // Inspect the first argument (the template strings) of each call.
-    expect(sqlMock).toHaveBeenCalledTimes(2);
+    expect(sqlMock).toHaveBeenCalledTimes(3);
 
     const profileQuery = sqlMock.mock.calls[0][0][0];
     const subscriptionQuery = sqlMock.mock.calls[1][0][0];

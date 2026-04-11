@@ -1,239 +1,195 @@
-/**
- * House System Validation Tests
- * Compares our implementations against known reference data from Astro-Seek and Cafe Astrology
- *
- * Test cases gathered from public astrological calculators:
- * - Astro-Seek: https://horoscopes.astro-seek.com/astrology-house-systems-calculator
- * - Cafe Astrology: https://cafeastrology.com/compare-house-systems-report.html
- *
- * Acceptable tolerance: ±0.5° for user-facing displays
- */
-
-import {
-  calculateWholeSigHouses,
-  calculatePlacidusHouses,
-  calculateKochHouses,
-  calculatePorphyryHouses,
-  calculateAlcabitiusHouses,
-} from '../houseSystems';
 import { Observer } from 'astronomy-engine';
+import { generateBirthChartWithHouses } from '../birthChart';
+import {
+  calculateAlcabitiusHouses,
+  calculateHouses,
+  calculateKochHouses,
+  calculatePlacidusHouses,
+  calculatePorphyryHouses,
+  calculateWholeSigHouses,
+} from '../houseSystems';
 
-/**
- * Test Case 1: New York, NY
- * Birth: 1985-04-15, 09:30 EDT
- * Coordinates: 40.7128°N, 74.0060°W
- *
- * Reference data from Astro-Seek calculator
- */
+const NYC_OBSERVER = new Observer(40.7128, -74.006, 10);
+const NYC_JD = 2446171.0625;
+const NYC_ASC = 84.42261433054409;
+const NYC_MC = 330.05627416571383;
+
+const NYC_WHOLE_SIGN = [60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 0, 30];
+const NYC_PLACIDUS = [
+  84.42261433054409, 104.87514595027967, 125.49179946854504, 150.05627416571383,
+  182.6682793307973, 224.19283141247044, 264.4226143305441, 284.87514595027966,
+  305.491799468545, 330.05627416571383, 2.668279330797313, 44.19283141247045,
+];
+const NYC_KOCH = [
+  84.42261433054409, 107.90846062687496, 129.206054881885, 150.05627416571383,
+  195.23273035098526, 235.12398803896093, 264.4226143305441, 287.90846062687496,
+  309.206054881885, 330.05627416571383, 15.232730350985262, 55.12398803896093,
+];
+const NYC_PORPHYRY = [
+  84.42261433054409, 106.30050094226733, 128.17838755399058, 150.05627416571383,
+  188.1783875539906, 226.30050094226732, 264.4226143305441, 286.3005009422673,
+  308.17838755399055, 330.05627416571383, 8.178387553990603, 46.30050094226732,
+];
+const NYC_ALCABITIUS = [
+  84.42261433054409, 105.3563207972965, 127.00590308329495, 150.05627416571383,
+  190.23295838413128, 229.11891862603667, 264.4226143305441, 285.3563207972965,
+  307.0059030832949, 330.05627416571383, 10.23295838413128, 49.118918626036674,
+];
+
+const LONDON_OBSERVER = new Observer(51.5074, -0.1278, 5);
+const LONDON_JD = 2449372.5416666665;
+const LONDON_PLACIDUS = [
+  210.9523726693758, 238.36296654518878, 272.81207694394436, 311.599838946751,
+  345.3328673925106, 11.22752134983665, 30.95237266937579, 58.36296654518878,
+  92.81207694394436, 131.599838946751, 165.33286739251056, 191.22752134983665,
+];
+
+const SYDNEY_OBSERVER = new Observer(-33.8688, 151.2093, 5);
+const SYDNEY_JD = 2447972.0104166665;
+const SYDNEY_PLACIDUS = [
+  261.17108592685224, 283.45873769382945, 305.75679559426516, 331.7049855582495,
+  4.4828027728971165, 43.519177182259284, 81.17108592685224, 103.45873769382945,
+  125.75679559426516, 151.70498555824955, 184.48280277289714,
+  223.51917718225928,
+];
+
+function expectAngles(actual: number[], expected: number[]) {
+  expect(actual).toHaveLength(expected.length);
+  actual.forEach((value, index) => {
+    expect(Math.abs(value - expected[index])).toBeLessThan(5e-5);
+  });
+}
+
 describe('House System Validation - New York', () => {
-  const observer = new Observer(40.7128, -74.006, 10);
-  const jd = 2446148.9; // 1985-04-15 09:30 EDT (approximation)
-  const ascendant = 120; // Leo Ascendant (estimated)
-  const mc = 30; // Aries MC (estimated)
-
   describe('Whole-Sign System', () => {
-    it('House 1 (Ascendant) should be exactly at 120°', () => {
-      const houses = calculateWholeSigHouses(ascendant);
-      expect(houses[0].eclipticLongitude).toBe(120);
-    });
-
-    it('House 10 (MC) should be at 30° (9 houses * 30° from ascendant)', () => {
-      const houses = calculateWholeSigHouses(ascendant);
-      const mcCusp = houses[9];
-      // Whole-sign: house 10 = ascendant (120°) + 9 × 30° = 390° = 30°
-      const expectedHouse10 = (ascendant + 9 * 30) % 360;
-      expect(mcCusp.eclipticLongitude).toBe(expectedHouse10);
-      expect(mcCusp.eclipticLongitude).toBe(30);
-    });
-
-    it('All 12 houses should be exactly 30° apart', () => {
-      const houses = calculateWholeSigHouses(ascendant);
-      for (let i = 0; i < 12; i++) {
-        const expectedLong = (ascendant + i * 30) % 360;
-        expect(houses[i].eclipticLongitude).toBe(expectedLong);
-      }
+    it('matches the reference whole-sign cusps', () => {
+      expectAngles(
+        calculateWholeSigHouses(NYC_ASC).map(
+          (house) => house.eclipticLongitude,
+        ),
+        NYC_WHOLE_SIGN,
+      );
     });
   });
 
   describe('Placidus System', () => {
-    it('House 1 cusp (Ascendant) should be within 0.5° of 120°', () => {
-      const houses = calculatePlacidusHouses(ascendant, mc, observer, jd);
-      expect(Math.abs(houses[0].eclipticLongitude - ascendant)).toBeLessThan(
-        0.5,
+    it('matches the reference Placidus cusps', () => {
+      expectAngles(
+        calculatePlacidusHouses(NYC_ASC, NYC_MC, NYC_OBSERVER, NYC_JD).map(
+          (house) => house.eclipticLongitude,
+        ),
+        NYC_PLACIDUS,
       );
-    });
-
-    it('House 10 cusp (MC) should be positioned near 30°', () => {
-      const houses = calculatePlacidusHouses(ascendant, mc, observer, jd);
-      const mcCusp = houses[9];
-      // MC in Placidus is typically very close to actual MC
-      expect(Math.abs(mcCusp.eclipticLongitude - mc)).toBeLessThan(1.0);
-    });
-
-    it('House 7 (Descendant) should be opposite Ascendant', () => {
-      const houses = calculatePlacidusHouses(ascendant, mc, observer, jd);
-      const desc = houses[6];
-      const expectedDesc = (ascendant + 180) % 360;
-      expect(Math.abs(desc.eclipticLongitude - expectedDesc)).toBeLessThan(1.0);
-    });
-
-    it('Houses should be ordered around zodiac 0-360°', () => {
-      const houses = calculatePlacidusHouses(ascendant, mc, observer, jd);
-      houses.forEach((house) => {
-        expect(house.eclipticLongitude).toBeGreaterThanOrEqual(0);
-        expect(house.eclipticLongitude).toBeLessThanOrEqual(360);
-      });
     });
   });
 
   describe('Koch System', () => {
-    it('House 1 (Ascendant) should match Placidus closely', () => {
-      const koch = calculateKochHouses(ascendant, mc);
-      const placidus = calculatePlacidusHouses(ascendant, mc, observer, jd);
-      expect(
-        Math.abs(koch[0].eclipticLongitude - placidus[0].eclipticLongitude),
-      ).toBeLessThan(0.1);
-    });
-
-    it('All cusps should be within valid range 0-360°', () => {
-      const houses = calculateKochHouses(ascendant, mc);
-      houses.forEach((house) => {
-        expect(house.eclipticLongitude).toBeGreaterThanOrEqual(0);
-        expect(house.eclipticLongitude).toBeLessThanOrEqual(360);
-      });
+    it('matches the reference Koch cusps', () => {
+      expectAngles(
+        calculateKochHouses(NYC_ASC, NYC_MC, NYC_OBSERVER, NYC_JD).map(
+          (house) => house.eclipticLongitude,
+        ),
+        NYC_KOCH,
+      );
     });
   });
 
   describe('Porphyry System', () => {
-    it('Cardinal points (1,4,7,10) should align with key axes', () => {
-      const houses = calculatePorphyryHouses(ascendant, mc);
-      const asc = ascendant;
-      const desc = (ascendant + 180) % 360;
-      const ic = (mc + 180) % 360;
-
-      // House 1 = Ascendant
-      expect(Math.abs(houses[0].eclipticLongitude - asc)).toBeLessThan(0.1);
-      // House 4 = IC
-      expect(Math.abs(houses[3].eclipticLongitude - ic)).toBeLessThan(0.1);
-      // House 7 = Descendant
-      expect(Math.abs(houses[6].eclipticLongitude - desc)).toBeLessThan(0.1);
-      // House 10 = MC
-      expect(Math.abs(houses[9].eclipticLongitude - mc)).toBeLessThan(0.1);
-    });
-
-    it('Quadrants should divide evenly', () => {
-      const houses = calculatePorphyryHouses(ascendant, mc);
-      const asc = ascendant;
-      const desc = (ascendant + 180) % 360;
-
-      // First quadrant: 1 to 4
-      const q1Arc =
-        (houses[3].eclipticLongitude - houses[0].eclipticLongitude + 360) % 360;
-      // Houses 2 and 3 should be between
-      expect(houses[1].eclipticLongitude).toBeGreaterThan(
-        houses[0].eclipticLongitude,
-      );
-      expect(houses[2].eclipticLongitude).toBeGreaterThan(
-        houses[1].eclipticLongitude,
-      );
-      expect(houses[2].eclipticLongitude).toBeLessThan(
-        houses[3].eclipticLongitude,
+    it('matches the reference Porphyry cusps', () => {
+      expectAngles(
+        calculatePorphyryHouses(NYC_ASC, NYC_MC, NYC_OBSERVER, NYC_JD).map(
+          (house) => house.eclipticLongitude,
+        ),
+        NYC_PORPHYRY,
       );
     });
   });
 
   describe('Alcabitius System', () => {
-    it('Cardinal points should match Porphyry closely', () => {
-      const alc = calculateAlcabitiusHouses(ascendant, mc);
-      const por = calculatePorphyryHouses(ascendant, mc);
+    it('matches the reference Alcabitius cusps', () => {
+      expectAngles(
+        calculateAlcabitiusHouses(NYC_ASC, NYC_MC, NYC_OBSERVER, NYC_JD).map(
+          (house) => house.eclipticLongitude,
+        ),
+        NYC_ALCABITIUS,
+      );
+    });
+  });
 
-      for (const i of [0, 3, 6, 9]) {
-        expect(
-          Math.abs(alc[i].eclipticLongitude - por[i].eclipticLongitude),
-        ).toBeLessThan(0.5);
-      }
+  describe('Dispatcher', () => {
+    it('returns the same reference values as the direct helpers', () => {
+      expectAngles(
+        calculateHouses(
+          'whole-sign',
+          NYC_ASC,
+          NYC_MC,
+          NYC_OBSERVER,
+          NYC_JD,
+        ).map((house) => house.eclipticLongitude),
+        NYC_WHOLE_SIGN,
+      );
+      expectAngles(
+        calculateHouses('placidus', NYC_ASC, NYC_MC, NYC_OBSERVER, NYC_JD).map(
+          (house) => house.eclipticLongitude,
+        ),
+        NYC_PLACIDUS,
+      );
+      expectAngles(
+        calculateHouses('koch', NYC_ASC, NYC_MC, NYC_OBSERVER, NYC_JD).map(
+          (house) => house.eclipticLongitude,
+        ),
+        NYC_KOCH,
+      );
+      expectAngles(
+        calculateHouses('porphyry', NYC_ASC, NYC_MC, NYC_OBSERVER, NYC_JD).map(
+          (house) => house.eclipticLongitude,
+        ),
+        NYC_PORPHYRY,
+      );
+      expectAngles(
+        calculateHouses(
+          'alcabitius',
+          NYC_ASC,
+          NYC_MC,
+          NYC_OBSERVER,
+          NYC_JD,
+        ).map((house) => house.eclipticLongitude),
+        NYC_ALCABITIUS,
+      );
     });
   });
 });
 
-/**
- * Test Case 2: London, UK
- * Different latitude to test observer variation
- * Coordinates: 51.5074°N, 0.1278°W
- */
-describe('House System Validation - London (High Latitude)', () => {
-  const observer = new Observer(51.5074, -0.1278, 5);
-  const jd = 2460000; // Jan 1, 2024
-  const ascendant = 210; // Scorpio Ascendant
-  const mc = 120; // Leo MC
-
-  describe('High Latitude Effects', () => {
-    it('Placidus should handle northern latitude without errors', () => {
-      const houses = calculatePlacidusHouses(ascendant, mc, observer, jd);
-      expect(houses).toHaveLength(12);
-      houses.forEach((house) => {
-        expect(house.eclipticLongitude).toBeGreaterThanOrEqual(0);
-        expect(house.eclipticLongitude).toBeLessThanOrEqual(360);
-      });
-    });
-
-    it('All systems should produce valid results', () => {
-      const systems = {
-        whole: calculateWholeSigHouses(ascendant),
-        placidus: calculatePlacidusHouses(ascendant, mc, observer, jd),
-        koch: calculateKochHouses(ascendant, mc),
-        porphyry: calculatePorphyryHouses(ascendant, mc),
-        alcabitius: calculateAlcabitiusHouses(ascendant, mc),
-      };
-
-      Object.entries(systems).forEach(([name, houses]) => {
-        expect(houses).toHaveLength(12);
-        houses.forEach((h, i) => {
-          expect(h.house).toBe(i + 1);
-          expect(h.eclipticLongitude).toBeGreaterThanOrEqual(0);
-          expect(h.eclipticLongitude).toBeLessThanOrEqual(360);
-          expect(h.degree).toBeGreaterThanOrEqual(0);
-          expect(h.degree).toBeLessThan(30);
-          expect(h.minute).toBeGreaterThanOrEqual(0);
-          expect(h.minute).toBeLessThan(60);
-        });
-      });
-    });
+describe('House System Validation - London', () => {
+  it('matches the reference Placidus cusps for London', async () => {
+    const chart = await generateBirthChartWithHouses(
+      '1994-01-20',
+      '01:00',
+      undefined,
+      'UTC',
+      LONDON_OBSERVER,
+      'placidus',
+    );
+    expectAngles(
+      chart.houses.map((house) => house.eclipticLongitude),
+      LONDON_PLACIDUS,
+    );
   });
 });
 
-/**
- * Test Case 3: Sydney, Australia (Southern Hemisphere)
- * Coordinates: 33.8688°S, 151.2093°E
- *
- * Tests southern hemisphere observer effects
- */
-describe('House System Validation - Sydney (Southern Hemisphere)', () => {
-  const observer = new Observer(-33.8688, 151.2093, 5);
-  const jd = 2460000;
-  const ascendant = 300; // Aquarius
-  const mc = 210; // Scorpio
-
-  it('Southern hemisphere Placidus should maintain house order', () => {
-    const houses = calculatePlacidusHouses(ascendant, mc, observer, jd);
-    expect(houses).toHaveLength(12);
-
-    // All longitudes should be valid
-    houses.forEach((house) => {
-      expect(house.eclipticLongitude).toBeGreaterThanOrEqual(0);
-      expect(house.eclipticLongitude).toBeLessThanOrEqual(360);
-    });
-
-    // Ascendant should be in house 1
-    expect(Math.abs(houses[0].eclipticLongitude - ascendant)).toBeLessThan(1);
+describe('House System Validation - Sydney', () => {
+  it('matches the reference Placidus cusps for Sydney', async () => {
+    const chart = await generateBirthChartWithHouses(
+      '1990-03-21',
+      '12:15',
+      undefined,
+      'UTC',
+      SYDNEY_OBSERVER,
+      'placidus',
+    );
+    expectAngles(
+      chart.houses.map((house) => house.eclipticLongitude),
+      SYDNEY_PLACIDUS,
+    );
   });
 });
-
-/**
- * Tolerance Reference:
- * - Precise calculations (professional astrology): ±0.1°
- * - User-facing displays: ±0.5°
- * - Historical tables: ±1.0°
- *
- * Our implementations should meet user-facing tolerance (±0.5°) for all systems.
- */

@@ -148,10 +148,17 @@ export function AuthStatusProvider({
       }
 
       authPromise = (async () => {
-        // Retry once on error — transient network failures (PostHog timeouts, cold
-        // starts, SW update races) must not kick the user out of the app.
+        // Retry on BOTH thrown errors AND null-user responses. The null-user
+        // case matters because immediately after sign-in there's a race
+        // between the Set-Cookie commit and the first getSession() call at
+        // /app: Better Auth can return `{ data: { user: null } }` as a
+        // "successful" response before the session is readable, which would
+        // otherwise cache a bogus logged-out state and kick the user back
+        // to /auth. Up to 3 attempts with short backoff gives the session
+        // time to propagate.
         let lastError: unknown;
-        for (let attempt = 0; attempt < 2; attempt++) {
+        const maxAttempts = 3;
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
           try {
             const session = await betterAuthClient.getSession();
 
@@ -162,34 +169,52 @@ export function AuthStatusProvider({
                   : ((session as any)?.data?.user ?? null)
                 : null;
 
-            const newState: AuthState = {
-              isAuthenticated: !!user,
-              user,
-              profile: user || null,
+            if (user) {
+              const newState: AuthState = {
+                isAuthenticated: true,
+                user,
+                profile: user,
+                loading: false,
+              };
+              // Only cache confirmed-authenticated results. A null-user
+              // response may be a propagation race, not a true logout —
+              // see comment above.
+              cachedAuthState = newState;
+              return newState;
+            }
+
+            // Null-user: could be genuine (logged out) or transient
+            // (session not visible yet). Retry up to maxAttempts before
+            // accepting it, but never cache so a later mount gets a
+            // fresh read.
+            if (attempt < maxAttempts - 1) {
+              await new Promise((r) => setTimeout(r, 400));
+              continue;
+            }
+            return {
+              isAuthenticated: false,
+              user: null,
+              profile: null,
               loading: false,
             };
-            // Only cache a definitive result (success or confirmed-no-session).
-            cachedAuthState = newState;
-            return newState;
           } catch (error) {
             lastError = error;
-            if (attempt === 0) {
+            if (attempt < maxAttempts - 1) {
               // Brief pause before retry so transient issues can clear.
               await new Promise((r) => setTimeout(r, 800));
             }
           }
         }
-        // Both attempts failed — log but do NOT cache the failure so the next
-        // mount gets a fresh check rather than a persisted "logged out" state.
-        console.error('Auth check failed after retry:', lastError);
-        const errorState: AuthState = {
+        // All attempts failed — log but do NOT cache the failure so the
+        // next mount gets a fresh check rather than a persisted
+        // "logged out" state.
+        console.warn('Auth check failed after retries:', lastError);
+        return {
           isAuthenticated: false,
           user: null,
           profile: null,
           loading: false,
         };
-        // Intentionally NOT setting cachedAuthState here.
-        return errorState;
       })();
 
       const result = await authPromise;

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type {
   CurrentDashaState,
   DashaPeriod,
-} from '@/utils/astrology/vedic-dasha';
+} from '@utils/astrology/vedic-dasha';
 
 interface UseDashaTimelineReturn {
   currentDasha: CurrentDashaState | null;

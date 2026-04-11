@@ -4,6 +4,10 @@ import { put } from '@vercel/blob';
 import { postToSocial } from '@/lib/social/client';
 import { hasValidImageExtension } from '@/lib/social/pre-upload-image';
 import { sendDiscordNotification } from '@/lib/discord';
+import {
+  buildLegacySocialSkipResponse,
+  shouldLunaryRunSocialPipeline,
+} from '@/lib/social/pipeline-cutover';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -30,6 +34,7 @@ const ALLOWED_BASE_URLS = new Set(
     'https://www.lunary.app',
     process.env.NEXT_PUBLIC_BASE_URL,
     process.env.NEXT_PUBLIC_APP_URL,
+    process.env.CONTENT_RENDER_URL,
   ].filter(Boolean),
 );
 
@@ -44,6 +49,13 @@ export async function GET(request: NextRequest) {
   const startTime = Date.now();
 
   try {
+    const url = new URL(request.url);
+    const allowLegacy = url.searchParams.get('allowLegacy') === '1';
+
+    if (!allowLegacy && !shouldLunaryRunSocialPipeline()) {
+      return NextResponse.json(buildLegacySocialSkipResponse('weekly-stories'));
+    }
+
     const isVercelCron = request.headers.get('x-vercel-cron') === '1';
     const authHeader = request.headers.get('authorization');
 
@@ -56,7 +68,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const url = new URL(request.url);
     const force = url.searchParams.get('force') === 'true';
     const overrideStart = url.searchParams.get('startDate');
     const daysParam = url.searchParams.get('days');
@@ -64,13 +75,14 @@ export async function GET(request: NextRequest) {
 
     const requestedBaseUrl = (
       url.searchParams.get('storyBaseUrl') ||
+      process.env.CONTENT_RENDER_URL ||
       process.env.NEXT_PUBLIC_BASE_URL ||
       'https://lunary.app'
     ).replace(/\/$/, '');
 
     const SHARE_BASE_URL = ALLOWED_BASE_URLS.has(requestedBaseUrl)
       ? requestedBaseUrl
-      : 'https://lunary.app';
+      : process.env.CONTENT_RENDER_URL || 'https://lunary.app';
 
     // Calculate date range: default is tomorrow + 7 days
     const startDate = (() => {

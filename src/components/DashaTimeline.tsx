@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import type {
   CurrentDashaState,
   DashaPeriod,
-} from '@/utils/astrology/vedic-dasha';
+} from '@utils/astrology/vedic-dasha';
 
 interface DashaTimelineProps {
   currentDasha: CurrentDashaState | null;

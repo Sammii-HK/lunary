@@ -3,6 +3,9 @@ import { sql } from '@vercel/postgres';
 import { getCurrentUser } from '@/lib/get-user-session';
 import { generateBirthChartWithHouses } from '@utils/astrology/birthChart';
 import { type HouseSystem } from '@utils/astrology/houseSystems';
+import { decrypt } from '@/lib/encryption';
+import { normalizeIsoDateOnly } from '@/lib/date-only';
+import { decryptLocation } from '@/lib/location-encryption';
 
 const HOUSE_SYSTEMS = [
   'whole-sign',
@@ -29,7 +32,7 @@ export async function GET(req: NextRequest) {
 
     // Get user's birth chart data from profile
     const result = await sql`
-      SELECT birth_chart, birth_date, birth_time, birth_location, birth_timezone
+      SELECT birth_chart, birthday, location
       FROM user_profiles
       WHERE user_id = ${user.id}
       LIMIT 1
@@ -47,16 +50,36 @@ export async function GET(req: NextRequest) {
         body: string;
         eclipticLongitude: number;
       }>;
-      birth_date?: string;
-      birth_time?: string;
-      birth_location?: string;
-      birth_timezone?: string;
+      birthday?: string;
+      location?: unknown;
     };
 
     if (!profile?.birth_chart) {
       return NextResponse.json(
         { error: 'No birth chart found for user' },
         { status: 404 },
+      );
+    }
+
+    const birthDate = normalizeIsoDateOnly(
+      profile.birthday ? decrypt(profile.birthday) : null,
+    );
+    const location = decryptLocation(profile.location) || {};
+    const birthTime =
+      typeof location.birthTime === 'string' ? location.birthTime : undefined;
+    const birthLocation =
+      typeof location.birthLocation === 'string'
+        ? location.birthLocation
+        : undefined;
+    const birthTimezone =
+      typeof location.birthTimezone === 'string'
+        ? location.birthTimezone
+        : undefined;
+
+    if (!birthDate) {
+      return NextResponse.json(
+        { error: 'Birth date not set in profile' },
+        { status: 400 },
       );
     }
 
@@ -76,10 +99,10 @@ export async function GET(req: NextRequest) {
     const allHouses = await Promise.all(
       HOUSE_SYSTEMS.map(async (system) => {
         const result = await generateBirthChartWithHouses(
-          profile.birth_date || '',
-          profile.birth_time,
-          profile.birth_location,
-          profile.birth_timezone,
+          birthDate,
+          birthTime,
+          birthLocation,
+          birthTimezone,
           undefined,
           system as HouseSystem,
         );

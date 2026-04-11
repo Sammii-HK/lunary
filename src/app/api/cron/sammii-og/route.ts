@@ -276,7 +276,12 @@ export async function GET(request: NextRequest) {
     birthday,
   } = SAMMII;
   const p = (v: string) => encodeURIComponent(v);
-  const baseUrl = 'https://lunary.app';
+  const baseUrl = (
+    process.env.LUNARY_SHARE_BASE_URL ||
+    process.env.LUNARY_IMAGE_BASE_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    'https://lunary.app'
+  ).replace(/\/+$/, '');
 
   // Schedule all posts at noon UTC today
   const scheduledFor = new Date(now);

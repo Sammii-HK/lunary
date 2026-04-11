@@ -14,6 +14,7 @@ export function buildUtmUrl(
 export const getImageBaseUrl = (): string => {
   const explicitBaseUrl =
     process.env.LUNARY_IMAGE_BASE_URL ||
+    process.env.CONTENT_RENDER_URL ||
     process.env.NEXT_PUBLIC_BASE_URL ||
     process.env.NEXT_PUBLIC_APP_URL;
 

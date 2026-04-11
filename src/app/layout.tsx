@@ -141,6 +141,11 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('lunary-theme');var r;if(t==='light')r='light';else if(t==='system')r=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';else r='dark';document.documentElement.setAttribute('data-theme',r);}catch(e){}})();`,
           }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var h=location.hostname;var dev=h==='localhost'||h==='127.0.0.1'||h.endsWith('.localhost');if(!dev)return;if('serviceWorker'in navigator&&navigator.serviceWorker){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister();});});}if('caches'in window){caches.keys().then(function(keys){keys.forEach(function(k){caches.delete(k);});});}}catch(e){}})();`,
+          }}
+        />
         {/* Polyfill crypto.randomUUID for older Android WebViews */}
         <script
           dangerouslySetInnerHTML={{

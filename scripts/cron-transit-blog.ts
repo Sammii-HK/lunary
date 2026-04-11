@@ -67,7 +67,7 @@ async function save(
       ${JSON.stringify(content.signBreakdowns)}, ${content.closingSection},
       ${ctx.planet}, ${ctx.sign}, ${ctx.transitType},
       ${ctx.startDate}, ${ctx.endDate}, ${ctx.rarity},
-      ${status}, 'cron-local', 'claude-sonnet', ${wordCount},
+      ${status}, 'cron-local', ${process.env.TRANSIT_USE_OLLAMA === '1' ? process.env.OLLAMA_WRITER_MODEL || 'gemma3:27b' : 'claude-sonnet'}, ${wordCount},
       ${publishedAt}, ${now}, ${now}
     )
     ON CONFLICT (slug) DO NOTHING

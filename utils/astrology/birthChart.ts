@@ -19,6 +19,7 @@ import {
   type HouseSystem,
   type HouseCusp,
 } from './houseSystems';
+import { assignHousesToBodies } from './houseAssignments';
 import {
   Observer,
   AstroTime,
@@ -349,27 +350,6 @@ function toUtcFromTimeZone(
   return firstResult;
 }
 
-function getHouseForPlanet(longitude: number, houses: HouseCusp[]): number {
-  for (let i = 0; i < 12; i++) {
-    const currentHouse = houses[i];
-    const nextHouse = houses[(i + 1) % 12];
-
-    let start = currentHouse.eclipticLongitude;
-    let end = nextHouse.eclipticLongitude;
-
-    if (end <= start) {
-      if (longitude >= start || longitude < end) {
-        return currentHouse.house;
-      }
-    } else {
-      if (longitude >= start && longitude < end) {
-        return currentHouse.house;
-      }
-    }
-  }
-  return 1;
-}
-
 const locationCache = new Map<
   string,
   { latitude: number; longitude: number }
@@ -526,50 +506,11 @@ export const generateBirthChart = async (
     }
   }
 
-  let birthDateTime: Date;
-  if (birthTimezone) {
-    const [year, month, day] = birthDate.split('-').map(Number);
-    let hours = 12;
-    let minutes = 0;
-    if (birthTime) {
-      const [h, m] = birthTime.split(':').map(Number);
-      hours = h;
-      minutes = m || 0;
-    }
-    try {
-      birthDateTime = toUtcFromTimeZone(
-        year,
-        month,
-        day,
-        hours,
-        minutes,
-        birthTimezone,
-      );
-    } catch {
-      // Fallback: treat as UTC explicitly (not runtime-local)
-      console.warn(
-        `[BirthChart] Timezone conversion failed for "${birthTimezone}", falling back to UTC`,
-      );
-      birthDateTime = new Date(
-        Date.UTC(year, month - 1, day, hours, minutes, 0),
-      );
-    }
-  } else {
-    // No timezone available — use UTC explicitly to ensure consistent behavior
-    // across server (Vercel/UTC) and client environments
-    const [year, month, day] = birthDate.split('-').map(Number);
-    let hours = 12;
-    let minutes = 0;
-    if (birthTime) {
-      const [h, m] = birthTime.split(':').map(Number);
-      hours = h;
-      minutes = m || 0;
-    }
-    console.warn(
-      '[BirthChart] No timezone provided, using UTC. Chart may be inaccurate — provide birth location for timezone resolution.',
-    );
-    birthDateTime = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0));
-  }
+  const birthDateTime = resolveBirthDateTime(
+    birthDate,
+    birthTime,
+    birthTimezone,
+  );
 
   let finalObserver: Observer;
   if (observer) {
@@ -891,6 +832,12 @@ export const generateBirthChartWithHouses = async (
   observer?: Observer,
   houseSystem: HouseSystem = 'whole-sign',
 ): Promise<BirthChartResult> => {
+  const birthDateTime = resolveBirthDateTime(
+    birthDate,
+    birthTime,
+    birthTimezone,
+  );
+
   const planets = await generateBirthChart(
     birthDate,
     birthTime,
@@ -906,12 +853,15 @@ export const generateBirthChartWithHouses = async (
   const mc = planets.find((p) => p.body === 'Midheaven');
   const mcLong = mc?.eclipticLongitude || 0;
 
-  const houses = calculateHouses(houseSystem, ascendantLong, mcLong, observer);
+  const houses = calculateHouses(
+    houseSystem,
+    ascendantLong,
+    mcLong,
+    observer,
+    getJulianDay(birthDateTime),
+  );
 
-  const planetsWithHouses = planets.map((planet) => ({
-    ...planet,
-    house: getHouseForPlanet(planet.eclipticLongitude, houses),
-  }));
+  const planetsWithHouses = assignHousesToBodies(planets, houses);
 
   return {
     planets: planetsWithHouses,
@@ -922,6 +872,38 @@ export const generateBirthChartWithHouses = async (
 export const __test__ = {
   toUtcFromTimeZone,
 };
+
+function resolveBirthDateTime(
+  birthDate: string,
+  birthTime?: string,
+  birthTimezone?: string,
+): Date {
+  const [year, month, day] = birthDate.split('-').map(Number);
+  let hours = 12;
+  let minutes = 0;
+
+  if (birthTime) {
+    const [h, m] = birthTime.split(':').map(Number);
+    hours = h;
+    minutes = m || 0;
+  }
+
+  if (birthTimezone) {
+    try {
+      return toUtcFromTimeZone(year, month, day, hours, minutes, birthTimezone);
+    } catch {
+      console.warn(
+        `[BirthChart] Timezone conversion failed for "${birthTimezone}", falling back to UTC`,
+      );
+    }
+  } else {
+    console.warn(
+      '[BirthChart] No timezone provided, using UTC. Chart may be inaccurate — provide birth location for timezone resolution.',
+    );
+  }
+
+  return new Date(Date.UTC(year, month - 1, day, hours, minutes, 0));
+}
 
 export const hasBirthChart = (
   birthChart: BirthChartData[] | null | undefined,
@@ -939,23 +921,6 @@ export const getBirthChartFromProfile = (
     return null;
   }
   return birthChart as BirthChartData[];
-};
-
-/**
- * Recalculate which house each body is in based on new house cusps
- * Called when user changes house system to update house assignments
- * @param bodies - Array of birth chart data with ecliptic longitudes
- * @param houses - House cusps for the selected system
- * @returns Array of bodies with updated house assignments
- */
-export const assignHousesToBodies = (
-  bodies: BirthChartData[],
-  houses: HouseCusp[],
-): BirthChartData[] => {
-  return bodies.map((body) => ({
-    ...body,
-    house: getHouseForPlanet(body.eclipticLongitude, houses),
-  }));
 };
 
 export { parseLocationToCoordinates };

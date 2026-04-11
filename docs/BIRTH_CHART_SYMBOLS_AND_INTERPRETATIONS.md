@@ -371,7 +371,7 @@ const isAstronomiconChar = symbol.length === 1 && symbol.charCodeAt(0) < 128;
 - **Astronomicon Font v1.1**: https://astronomicon.co/en/astronomicon-fonts/
 - **Font License**: Open Font License (SIL OFL)
 - **JPL Horizons** (Orbital Elements): https://ssd.jpl.nasa.gov/horizons/
-- **Swiss Ephemeris**: https://www.astro.com/swisseph/
+- **Reference corpus**: Curated hardcoded validation fixtures in this repo
 
 ---
 

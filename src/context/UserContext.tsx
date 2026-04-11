@@ -119,23 +119,34 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
         // The server response has max-age=300 for proxy caches, but client-side
         // we must always get fresh data — stale birth charts, subscriptions, or
         // location data cause downstream bugs across the entire app.
-        const response = await fetch('/api/profile', {
-          method: 'GET',
-          credentials: 'include',
-          cache: 'no-store',
-        });
+        //
+        // Retry once on 401/403: immediately after sign-in there's a brief
+        // window where the session cookie is set in the jar but Better Auth
+        // server-side can't resolve it yet (DB replication / serverless cold
+        // start). Without the retry, the first profile fetch after sign-in
+        // can fail and leave the user without name/subscription/birth-chart
+        // state until they navigate.
+        let response: Response;
+        let attempt = 0;
+        while (true) {
+          response = await fetch('/api/profile', {
+            method: 'GET',
+            credentials: 'include',
+            cache: 'no-store',
+          });
+          if (response.ok) break;
+          if (
+            (response.status === 401 || response.status === 403) &&
+            attempt === 0
+          ) {
+            attempt += 1;
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            continue;
+          }
+          break;
+        }
 
         if (!response.ok) {
-          // 401/403 means the session expired between mount and refetch
-          // (e.g. user came back to a tab after sign-out in another tab).
-          // Clear user state quietly — this isn't a bug to surface.
-          if (response.status === 401 || response.status === 403) {
-            setUser(null);
-            if (!hasLoadedOnce) {
-              setHasLoadedOnce(true);
-            }
-            return;
-          }
           throw new Error(
             `Failed to fetch profile (status ${response.status})`,
           );

@@ -86,6 +86,7 @@ import {
   type CalendarEvent,
   type MoonArcEvent,
 } from '@/lib/astro/event-calendar';
+import { shouldLunaryRunSocialPipeline } from '@/lib/social/pipeline-cutover';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes — this cron runs 9+ sections with image pre-uploads
@@ -1637,75 +1638,81 @@ async function runWeeklyTasks(request: NextRequest) {
     }
 
     // 4. Generate social media posts for the week ahead (7 days in advance)
-    console.log(
-      '📱 Generating social media posts for the week ahead (7 days in advance)...',
-    );
     let socialPostsResult = null;
-    try {
-      // Calculate the week that starts 7 days from now
-      // This ensures posts are always generated exactly 7 days in advance
-      const today = new Date();
-      const weekAheadDate = new Date(today);
-      weekAheadDate.setDate(today.getDate() + 7);
-
+    if (shouldLunaryRunSocialPipeline()) {
       console.log(
-        `📅 Generating posts for week starting: ${weekAheadDate.toISOString()}`,
+        '📱 Generating social media posts for the week ahead (7 days in advance)...',
       );
+      try {
+        // Calculate the week that starts 7 days from now
+        // This ensures posts are always generated exactly 7 days in advance
+        const today = new Date();
+        const weekAheadDate = new Date(today);
+        weekAheadDate.setDate(today.getDate() + 7);
 
-      const socialPostsResponse = await fetch(
-        `${baseUrl}/api/admin/social-posts/generate-weekly`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'Lunary-Master-Cron/1.0',
-          },
-          body: JSON.stringify({
-            weekStart: weekAheadDate.toISOString(),
-          }),
-        },
-      );
-
-      if (socialPostsResponse.ok) {
-        socialPostsResult = await socialPostsResponse.json();
         console.log(
-          `✅ Generated ${socialPostsResult.savedIds?.length || 0} social media posts for next week`,
+          `📅 Generating posts for week starting: ${weekAheadDate.toISOString()}`,
         );
-        await logActivity({
-          activityType: 'content_creation',
-          activityCategory: 'content',
-          status: 'success',
-          message: `Generated ${socialPostsResult.savedIds?.length || 0} social media posts`,
-          metadata: {
-            postsGenerated: socialPostsResult.savedIds?.length || 0,
-            weekRange: socialPostsResult.weekRange,
+
+        const socialPostsResponse = await fetch(
+          `${baseUrl}/api/admin/social-posts/generate-weekly`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'User-Agent': 'Lunary-Master-Cron/1.0',
+            },
+            body: JSON.stringify({
+              weekStart: weekAheadDate.toISOString(),
+            }),
           },
-        });
-      } else {
-        console.error(
-          '❌ Social posts generation failed:',
-          socialPostsResponse.status,
         );
+
+        if (socialPostsResponse.ok) {
+          socialPostsResult = await socialPostsResponse.json();
+          console.log(
+            `✅ Generated ${socialPostsResult.savedIds?.length || 0} social media posts for next week`,
+          );
+          await logActivity({
+            activityType: 'content_creation',
+            activityCategory: 'content',
+            status: 'success',
+            message: `Generated ${socialPostsResult.savedIds?.length || 0} social media posts`,
+            metadata: {
+              postsGenerated: socialPostsResult.savedIds?.length || 0,
+              weekRange: socialPostsResult.weekRange,
+            },
+          });
+        } else {
+          console.error(
+            '❌ Social posts generation failed:',
+            socialPostsResponse.status,
+          );
+          await logActivity({
+            activityType: 'content_creation',
+            activityCategory: 'content',
+            status: 'failed',
+            message: 'Social posts generation failed',
+            errorMessage: `HTTP ${socialPostsResponse.status}`,
+          });
+        }
+      } catch (socialPostsError) {
+        console.error('❌ Social posts generation error:', socialPostsError);
         await logActivity({
           activityType: 'content_creation',
           activityCategory: 'content',
           status: 'failed',
-          message: 'Social posts generation failed',
-          errorMessage: `HTTP ${socialPostsResponse.status}`,
+          message: 'Social posts generation error',
+          errorMessage:
+            socialPostsError instanceof Error
+              ? socialPostsError.message
+              : 'Unknown error',
         });
       }
-    } catch (socialPostsError) {
-      console.error('❌ Social posts generation error:', socialPostsError);
-      await logActivity({
-        activityType: 'content_creation',
-        activityCategory: 'content',
-        status: 'failed',
-        message: 'Social posts generation error',
-        errorMessage:
-          socialPostsError instanceof Error
-            ? socialPostsError.message
-            : 'Unknown error',
-      });
+    } else {
+      console.log(
+        '📱 Skipping Lunary social post generation; content-creator owns the social pipeline',
+      );
     }
 
     // Generate blog preview image URL (use first day of the week)

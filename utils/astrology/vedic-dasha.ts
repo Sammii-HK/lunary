@@ -73,13 +73,7 @@ export interface CurrentDashaState {
     daysRemaining: number;
     percentComplete: number;
   };
-  antardasha: {
-    planet: string;
-    startDate: Date;
-    endDate: Date;
-    daysRemaining: number;
-    percentComplete: number;
-  };
+  antardasha: DashaPeriod;
   upcoming: DashaPeriod[];
   currentAge: number;
   ageInCurrentDasha: number;
@@ -377,7 +371,7 @@ export function isMajorDashaTransition(
  * This is for detailed timeline views
  */
 export interface DetailedDashaPeriod extends DashaPeriod {
-  antardashas?: DashaPeriod[];
+  antardashas?: DetailedDashaPeriod[];
   level: 'mahadasha' | 'antardasha' | 'pratyantar';
 }
 

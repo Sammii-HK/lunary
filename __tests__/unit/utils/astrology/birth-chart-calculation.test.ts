@@ -1,11 +1,11 @@
 /**
  * Birth Chart Calculation Validation Tests
  *
- * Validates planetary positions against Swiss Ephemeris reference data
+ * Validates planetary positions against a hardcoded reference corpus
  * from astro.com / astro-seek.com. Cross-verified against multiple sources.
  *
  * Tolerance:
- *   ±0.5° for planets (cross-engine variance between astronomy-engine and Swiss Ephemeris)
+ *   ±0.5° for planets (cross-engine variance against the reference corpus)
  *   ±1.5° for Ascendant/Midheaven (very sensitive to exact time and coordinates)
  *
  * Coverage:
@@ -145,7 +145,7 @@ describe('Birth chart calculation validation', () => {
 
   // ================================================================
   // 2. Houston, TX — September 4, 1981, 10:00 AM CDT (Beyoncé)
-  //    Source: astro-charts.com, Swiss Ephemeris
+  //    Source: astro-charts.com reference data
   // ================================================================
   describe('2. Houston, TX — Sep 4, 1981, 10:00 AM CDT', () => {
     let chart: ChartResult;

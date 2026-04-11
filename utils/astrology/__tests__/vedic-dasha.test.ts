@@ -5,6 +5,7 @@ import {
   getCurrentDashaState,
   isMajorDashaTransition,
   getDashaPeriodsWithSubdivisions,
+  type DetailedDashaPeriod,
 } from '../vedic-dasha';
 import dayjs from 'dayjs';
 
@@ -178,7 +179,7 @@ describe('Vedic Dasha System', () => {
       expect(periods).toBeInstanceOf(Array);
       expect(periods.length).toBeGreaterThan(0);
 
-      const mahadasha = periods[0];
+      const mahadasha = periods[0] as DetailedDashaPeriod;
       expect(mahadasha.planet).toBe('Venus');
       expect(mahadasha.level).toBe('mahadasha');
       expect(mahadasha.antardashas).toBeInstanceOf(Array);

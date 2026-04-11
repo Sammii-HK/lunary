@@ -2,13 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { put } from '@vercel/blob';
 import { sendDiscordNotification } from '@/lib/discord';
+import {
+  buildLegacySocialSkipResponse,
+  shouldLunaryRunSocialPipeline,
+} from '@/lib/social/pipeline-cutover';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
 // Only canonical non-www URL is allowed — www.lunary.app returns 308
 // which Postiz/Spellcast does not follow when fetching carousel images.
-const ALLOWED_BASE_URLS = new Set(['https://lunary.app'].filter(Boolean));
+const ALLOWED_BASE_URLS = new Set(
+  ['https://lunary.app', process.env.CONTENT_RENDER_URL].filter(Boolean),
+);
 
 const TARGET_PLATFORMS = ['instagram', 'bluesky'];
 
@@ -24,6 +30,15 @@ export async function GET(request: NextRequest) {
   const startTime = Date.now();
 
   try {
+    const url = new URL(request.url);
+    const allowLegacy = url.searchParams.get('allowLegacy') === '1';
+
+    if (!allowLegacy && !shouldLunaryRunSocialPipeline()) {
+      return NextResponse.json(
+        buildLegacySocialSkipResponse('weekly-carousels'),
+      );
+    }
+
     const isVercelCron = request.headers.get('x-vercel-cron') === '1';
     const authHeader = request.headers.get('authorization');
 
@@ -36,7 +51,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const url = new URL(request.url);
     const force = url.searchParams.get('force') === 'true';
     const skipVideo = url.searchParams.get('skipVideo') === 'true';
     const overrideStart = url.searchParams.get('startDate');
@@ -45,13 +59,14 @@ export async function GET(request: NextRequest) {
 
     const requestedBaseUrl = (
       url.searchParams.get('baseUrl') ||
+      process.env.CONTENT_RENDER_URL ||
       process.env.NEXT_PUBLIC_BASE_URL ||
       'https://lunary.app'
     ).replace(/\/$/, '');
 
     const baseUrl = ALLOWED_BASE_URLS.has(requestedBaseUrl)
       ? requestedBaseUrl
-      : 'https://lunary.app';
+      : process.env.CONTENT_RENDER_URL || 'https://lunary.app';
 
     const startDate = (() => {
       if (overrideStart && /^\d{4}-\d{2}-\d{2}$/.test(overrideStart)) {

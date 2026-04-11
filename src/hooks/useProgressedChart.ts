@@ -45,7 +45,7 @@ export function useProgressedChart(
         const currentAge = calculateAge(birthDate);
 
         // Check localStorage cache first
-        const cacheKey = `progressedChart_${currentAge}`;
+        const cacheKey = `progressedChart_${birthDate}_${currentAge}`;
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           try {

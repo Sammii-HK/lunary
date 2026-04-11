@@ -168,14 +168,12 @@ export const BirthChart = ({
   );
   const ascendant = birthChart.find((p) => p.body === 'Ascendant');
   const tropicalAscendantAngle = ascendant ? ascendant.eclipticLongitude : 0;
-  const ascendantAngle = ascendant
-    ? convertLongitudeToZodiacSystem(
-        ascendant.eclipticLongitude,
-        0,
-        zodiacSystem,
-      )
-    : 0;
 
+  // Default orientation: 1st house extends from AC at 9 o'clock upward
+  // toward 10 o'clock. Toggling `clockwise` flips the wheel so the 1st
+  // house descends from AC toward 8 o'clock. This matches the
+  // pre-house-system behavior and is shared uniformly across all house
+  // systems and zodiac systems via the single `yf` multiplier below.
   const yf = clockwise ? -1 : 1;
 
   const chartData = useMemo(() => {
@@ -186,7 +184,8 @@ export const BirthChart = ({
         zodiacSystem,
       );
       const displaySignData = getLongitudeInTropicalSign(displayLongitude);
-      const adjustedLong = (displayLongitude - ascendantAngle + 360) % 360;
+      const adjustedLong =
+        (planet.eclipticLongitude - tropicalAscendantAngle + 360) % 360;
       const angle = (180 + adjustedLong) % 360;
       const radian = (angle * Math.PI) / 180;
 
@@ -206,7 +205,7 @@ export const BirthChart = ({
         y,
       };
     });
-  }, [birthChart, ascendantAngle, yf, zodiacSystem]);
+  }, [birthChart, tropicalAscendantAngle, yf, zodiacSystem]);
 
   const zodiacSigns = useMemo(() => {
     const signs = [
@@ -232,7 +231,7 @@ export const BirthChart = ({
         0,
         zodiacSystem,
       );
-      const adjustedMid = (displayMid - ascendantAngle + 360) % 360;
+      const adjustedMid = (displayMid - tropicalAscendantAngle + 360) % 360;
       const angle = (180 + adjustedMid) % 360;
       const radian = (angle * Math.PI) / 180;
       const radius = 100;
@@ -241,14 +240,15 @@ export const BirthChart = ({
 
       return { sign, angle, x, y };
     });
-  }, [ascendantAngle, yf, zodiacSystem]);
+  }, [tropicalAscendantAngle, yf, zodiacSystem]);
 
   const houseData = useMemo(() => {
     if (houseSystem === 'whole-sign') {
-      const startOfFirstHouse = Math.floor(ascendantAngle / 30) * 30;
+      const startOfFirstHouse = Math.floor(tropicalAscendantAngle / 30) * 30;
       return Array.from({ length: 12 }, (_, i) => {
         const houseLongitude = (startOfFirstHouse + i * 30) % 360;
-        const adjustedLong = (houseLongitude - ascendantAngle + 360) % 360;
+        const adjustedLong =
+          (houseLongitude - tropicalAscendantAngle + 360) % 360;
         const angle = (180 + adjustedLong) % 360;
         const radian = (angle * Math.PI) / 180;
         return {
@@ -284,7 +284,7 @@ export const BirthChart = ({
       };
     });
     // houseData stores radians — yf flip is applied at render time
-  }, [houses, tropicalAscendantAngle, ascendantAngle, houseSystem]);
+  }, [houses, tropicalAscendantAngle, houseSystem]);
 
   const mainPlanets = chartData.filter((p) => MAIN_PLANETS.includes(p.body));
   const angles = chartData.filter((p) => ANGLES.includes(p.body));
@@ -492,7 +492,8 @@ export const BirthChart = ({
               0,
               zodiacSystem,
             );
-            const adjustedStart = (displayStart - ascendantAngle + 360) % 360;
+            const adjustedStart =
+              (displayStart - tropicalAscendantAngle + 360) % 360;
             const angle = (180 + adjustedStart) % 360;
             const radian = (angle * Math.PI) / 180;
             const x1 = r6(Math.cos(radian) * 85);
