@@ -59,6 +59,7 @@ export interface UserData {
   hasBirthChart: boolean;
   hasPersonalCard: boolean;
   isPaid: boolean;
+  birthChartHouseSystem?: string;
 }
 
 interface UserContextValue {
@@ -118,14 +119,37 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
         // The server response has max-age=300 for proxy caches, but client-side
         // we must always get fresh data — stale birth charts, subscriptions, or
         // location data cause downstream bugs across the entire app.
-        const response = await fetch('/api/profile', {
-          method: 'GET',
-          credentials: 'include',
-          cache: 'no-store',
-        });
+        //
+        // Retry once on 401/403: immediately after sign-in there's a brief
+        // window where the session cookie is set in the jar but Better Auth
+        // server-side can't resolve it yet (DB replication / serverless cold
+        // start). Without the retry, the first profile fetch after sign-in
+        // can fail and leave the user without name/subscription/birth-chart
+        // state until they navigate.
+        let response: Response;
+        let attempt = 0;
+        while (true) {
+          response = await fetch('/api/profile', {
+            method: 'GET',
+            credentials: 'include',
+            cache: 'no-store',
+          });
+          if (response.ok) break;
+          if (
+            (response.status === 401 || response.status === 403) &&
+            attempt === 0
+          ) {
+            attempt += 1;
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            continue;
+          }
+          break;
+        }
 
         if (!response.ok) {
-          throw new Error('Failed to fetch profile');
+          throw new Error(
+            `Failed to fetch profile (status ${response.status})`,
+          );
         }
 
         const data = await response.json();
@@ -147,6 +171,7 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
           personalCard,
           location: profile?.location || undefined,
           intention: profile?.intention || undefined,
+          birthChartHouseSystem: profile?.birthChartHouseSystem || undefined,
           stripeCustomerId: subscription?.stripeCustomerId || undefined,
           subscriptionStatus: status,
           subscriptionPlan: subscription?.planType || undefined,
@@ -159,7 +184,10 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
           setHasLoadedOnce(true);
         }
       } catch (err) {
-        console.error('Error fetching user data:', err);
+        // Use warn instead of error so the Next.js dev overlay doesn't
+        // treat transient profile fetch failures (network blips, focus
+        // re-fetches during navigation, etc.) as blocking runtime errors.
+        console.warn('Error fetching user data:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
         // Still set basic user info even if profile fetch fails
         setUser({

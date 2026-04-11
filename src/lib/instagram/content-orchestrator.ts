@@ -28,9 +28,10 @@ import type { IGScheduledPost, IGPostBatch, IGPostType } from './types';
 import { validateSocialCopy } from '@/lib/social/social-copy/validation';
 import { getWeightedGrimoireCategories } from '@/lib/threads/orbit-insights';
 
-// Always use canonical non-www URL — www.lunary.app returns 308 which
-// Postiz/Spellcast does not follow when pre-fetching carousel images.
-const SHARE_BASE_URL = 'https://lunary.app';
+// Render URL: Mac Mini content-pipeline for OG image rendering.
+// Falls back to lunary.app if not set.
+// Note: always use canonical non-www URL — www.lunary.app returns 308 redirect.
+const SHARE_BASE_URL = process.env.CONTENT_RENDER_URL || 'https://lunary.app';
 
 // Daily posting schedule (UTC hours) — targeting US/UK crossover
 // 13:00 UTC = 9am EDT / 2pm BST | 16:00 = noon EDT / 5pm BST

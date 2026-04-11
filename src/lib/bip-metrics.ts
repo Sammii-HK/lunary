@@ -1,4 +1,8 @@
 /**
+ * @deprecated Milestone definitions and checks have moved to src/lib/bip/milestones.ts.
+ * The weekly cron now uses src/lib/bip/metric-thresholds.ts and caption-templates.ts.
+ * This file is kept for the legacy CLI (scripts/generate-bip-post.ts).
+ *
  * Build in Public — Metrics Fetcher
  *
  * Fetches weekly snapshot data from Lunary's admin API for BIP posts.

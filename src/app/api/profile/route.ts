@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch profile and subscription in parallel
-    const [profileResult, subscriptionResult] = await Promise.all([
+    const [profileResult, subscriptionResult, userResult] = await Promise.all([
       sql`
         SELECT id, user_id, name, birthday, birth_chart, personal_card,
                location, stripe_customer_id, intention, created_at, updated_at
@@ -25,6 +25,12 @@ export async function GET(request: NextRequest) {
         SELECT status, plan_type, stripe_customer_id, stripe_subscription_id,
                trial_ends_at, current_period_end
         FROM subscriptions WHERE user_id = ${user.id} LIMIT 1
+      `,
+      sql`
+        SELECT "birthChartHouseSystem"
+        FROM "user"
+        WHERE id = ${user.id}
+        LIMIT 1
       `,
     ]);
 
@@ -63,6 +69,8 @@ export async function GET(request: NextRequest) {
               location: decryptLocation(profile.location),
               stripeCustomerId: profile.stripe_customer_id,
               intention: profile.intention,
+              birthChartHouseSystem:
+                userResult.rows[0]?.birthChartHouseSystem || 'placidus',
               createdAt: profile.created_at,
               updatedAt: profile.updated_at,
             }

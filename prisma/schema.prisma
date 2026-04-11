@@ -343,6 +343,12 @@ model app_config {
   updated_at DateTime? @default(now()) @db.Timestamptz(6)
 }
 
+model app_settings {
+  key        String    @id
+  value      String
+  updated_at DateTime  @default(now())
+}
+
 model collection_folders {
   id          Int           @id @default(autoincrement())
   user_id     String
@@ -1079,15 +1085,16 @@ model theme_publications {
 }
 
 model user {
-  id            String    @id
-  name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt     DateTime  @default(now()) @db.Timestamptz(6)
-  account       account[]
-  session       session[]
+  id                        String    @id
+  name                      String
+  email                     String    @unique
+  emailVerified             Boolean   @default(false)
+  image                     String?
+  birthChartHouseSystem     String    @default("placidus")
+  createdAt                 DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt                 DateTime  @default(now()) @db.Timestamptz(6)
+  account                   account[]
+  session                   session[]
 
   @@index([email], map: "idx_user_email")
 }

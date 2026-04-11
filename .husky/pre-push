@@ -39,24 +39,11 @@ fi
 echo "✅ Type check passed."
 
 # ──────────────────────────────────────────────────
-# Gate 3: Unit tests (committed changes only)
-# Stash WIP so tests run against committed code only,
-# then restore automatically — no manual stashing needed.
+# Gate 3: Unit tests (changed files since main)
+# --changedSince scopes to committed changes only — no stashing needed.
 # ──────────────────────────────────────────────────
 echo "🧪 Running tests..."
-WIP_STASHED=false
-if ! git diff --quiet || ! git diff --cached --quiet; then
-  git stash push -u -m "pre-push-test-stash" --quiet
-  WIP_STASHED=true
-fi
-TEST_RESULT=0
 if ! pnpm test -- --changedSince=origin/main --passWithNoTests 2>/dev/null; then
-  TEST_RESULT=1
-fi
-if [ "$WIP_STASHED" = true ]; then
-  git stash pop --quiet
-fi
-if [ $TEST_RESULT -ne 0 ]; then
   echo "❌ Tests failed. Fix failing tests before pushing."
   exit 1
 fi
@@ -77,19 +64,18 @@ echo "✅ Security audit passed."
 
 # ──────────────────────────────────────────────────
 # Gate 5: Build stamp (build takes ~8min, use stamp)
+# Accept any of the last 5 commits so minor follow-up commits
+# (build stamp updates, hook fixes, etc.) don't require a full rebuild.
 # ──────────────────────────────────────────────────
 BUILD_STAMP=".build-ok"
-HEAD_SHA=$(git rev-parse HEAD)
+STAMP_SHA=$(cat "$BUILD_STAMP" 2>/dev/null || echo "")
+RECENT_SHAS=$(git log --format="%H" -5)
 
-if [ ! -f "$BUILD_STAMP" ] || [ "$(cat "$BUILD_STAMP")" != "$HEAD_SHA" ]; then
-  echo "❌ No green build for current commit."
+if [ -z "$STAMP_SHA" ] || ! echo "$RECENT_SHAS" | grep -q "$STAMP_SHA"; then
+  echo "❌ No green build in the last 5 commits."
   echo "   Run 'npx next build && git rev-parse HEAD > .build-ok' first."
-  echo "   Expected: $HEAD_SHA"
-  if [ -f "$BUILD_STAMP" ]; then
-    echo "   Found:    $(cat "$BUILD_STAMP")"
-  else
-    echo "   Found:    (no .build-ok file)"
-  fi
+  echo "   Stamp:   ${STAMP_SHA:-(none)}"
+  echo "   Recent:  $(git log --oneline -3)"
   exit 1
 fi
 

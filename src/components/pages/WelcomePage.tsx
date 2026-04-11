@@ -27,6 +27,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { HomepageFeaturesTest } from '@/components/marketing/HomepageFeaturesTest';
 import { OptimizedDemoIframe } from '@/components/marketing/OptimizedDemoIframe';
+import { Reveal } from '@/components/marketing/Reveal';
+import { ScrollProgressBar } from '@/components/marketing/ScrollProgressBar';
 import {
   useABTestTracking,
   useABTestConversion,
@@ -91,6 +93,8 @@ export default function WelcomePage() {
   return (
     <>
       {renderJsonLd(structuredData)}
+      <ScrollProgressBar />
+
       <div className='min-h-screen bg-surface-base text-content-primary flex flex-col'>
         {/* Referral Banner */}
         <div className='bg-gradient-to-r from-layer-base/40 to-layer-raised/40 border-b border-lunary-primary-700/30 py-2 px-4'>
@@ -108,7 +112,7 @@ export default function WelcomePage() {
 
         {/* Section 1: Hero */}
         <section className='relative px-4 md:px-6 pt-4 md:pt-16 pb-10 md:pb-16 bg-surface-base'>
-          <div className='max-w-3xl mx-auto text-center space-y-6'>
+          <Reveal className='max-w-3xl mx-auto text-center space-y-6'>
             <p className='text-xs uppercase tracking-[0.2em] text-content-muted'>
               Personal astrology grounded in real astronomy
             </p>
@@ -155,15 +159,18 @@ export default function WelcomePage() {
                 bonus week
               </p>
             </div>
-          </div>
+          </Reveal>
 
           {/* Hero Mini App */}
-          <div className='mt-8 mx-3 md:mx-0 md:mt-[33px] flex justify-center'>
+          <Reveal
+            delayMs={120}
+            className='mt-8 mx-3 md:mx-0 md:mt-[33px] flex justify-center'
+          >
             <OptimizedDemoIframe
               loading='eager' // Above-the-fold
               preload={true} // Max performance
             />
-          </div>
+          </Reveal>
         </section>
 
         <section className='py-2 px-4 md:py-8 leading-relaxed max-w-3xl mx-auto text-center'>
@@ -191,99 +198,119 @@ export default function WelcomePage() {
         {/* Section 2: Differentiation */}
         <section className='py-12 md:py-16 px-4 md:px-6 border-t border-stroke-subtle/30'>
           <div className='max-w-4xl mx-auto text-center space-y-6'>
-            <Heading
-              as='h2'
-              variant='h1'
-              className='max-w-md md:max-w-2xl mx-auto text-content-primary'
-            >
-              Most apps entertain you.
-              <br />
-              <span className='text-content-brand/80'>
-                Lunary helps you understand yourself.
-              </span>
-            </Heading>
+            <Reveal>
+              <Heading
+                as='h2'
+                variant='h1'
+                className='max-w-md md:max-w-2xl mx-auto text-content-primary'
+              >
+                Most apps entertain you.
+                <br />
+                <span className='text-content-brand/80'>
+                  Lunary helps you understand yourself.
+                </span>
+              </Heading>
+            </Reveal>
             <div className='max-w-2xl mx-auto text-left md:text-center space-y-3'>
-              <p className='text-content-muted'>
-                <span className='text-content-muted'>Generic apps:</span> Sun
-                sign horoscopes for millions
-              </p>
-              <p className='text-content-secondary'>
-                <span className='text-lunary-primary-400'>Lunary:</span> Your
-                full chart analyzed daily
-              </p>
-              <p className='text-content-muted'>
-                <span className='text-content-muted'>Generic apps:</span>{' '}
-                Predict what will happen
-              </p>
-              <p className='text-content-secondary'>
-                <span className='text-lunary-primary-400'>Lunary:</span> Track
-                your own patterns over time
-              </p>
-              <p className='text-content-muted'>
-                <span className='text-content-muted'>Generic apps:</span> Built
-                for virality
-              </p>
-              <p className='text-content-secondary'>
-                <span className='text-lunary-primary-400'>Lunary:</span> Built
-                for depth and learning
-              </p>
-              <p className='text-content-muted'>
-                <span className='text-content-muted'>Generic apps:</span> Basic
-                sun sign compatibility
-              </p>
-              <p className='text-content-secondary'>
-                <span className='text-lunary-primary-400'>Lunary:</span> Full
-                synastry analysis + Best Times to Connect
-              </p>
-              <p className='text-content-muted'>
-                <span className='text-content-muted'>Generic apps:</span> Tell
-                you what transits mean
-              </p>
-              <p className='text-content-secondary'>
-                <span className='text-lunary-primary-400'>Lunary:</span> Show
-                you YOUR patterns over time so you become the expert
-              </p>
+              <Reveal delayMs={0}>
+                <p className='text-content-muted'>
+                  <span className='text-content-muted'>Generic apps:</span> Sun
+                  sign horoscopes for millions
+                </p>
+                <p className='text-content-secondary'>
+                  <span className='text-lunary-primary-400'>Lunary:</span> Your
+                  full chart analyzed daily
+                </p>
+              </Reveal>
+              <Reveal delayMs={80}>
+                <p className='text-content-muted'>
+                  <span className='text-content-muted'>Generic apps:</span>{' '}
+                  Predict what will happen
+                </p>
+                <p className='text-content-secondary'>
+                  <span className='text-lunary-primary-400'>Lunary:</span> Track
+                  your own patterns over time
+                </p>
+              </Reveal>
+              <Reveal delayMs={160}>
+                <p className='text-content-muted'>
+                  <span className='text-content-muted'>Generic apps:</span>{' '}
+                  Built for virality
+                </p>
+                <p className='text-content-secondary'>
+                  <span className='text-lunary-primary-400'>Lunary:</span> Built
+                  for depth and learning
+                </p>
+              </Reveal>
+              <Reveal delayMs={240}>
+                <p className='text-content-muted'>
+                  <span className='text-content-muted'>Generic apps:</span>{' '}
+                  Basic sun sign compatibility
+                </p>
+                <p className='text-content-secondary'>
+                  <span className='text-lunary-primary-400'>Lunary:</span> Full
+                  synastry analysis + Best Times to Connect
+                </p>
+              </Reveal>
+              <Reveal delayMs={320}>
+                <p className='text-content-muted'>
+                  <span className='text-content-muted'>Generic apps:</span> Tell
+                  you what transits mean
+                </p>
+                <p className='text-content-secondary'>
+                  <span className='text-lunary-primary-400'>Lunary:</span> Show
+                  you YOUR patterns over time so you become the expert
+                </p>
+              </Reveal>
             </div>
-            <div className='pt-4'>
+            <Reveal delayMs={100} className='pt-4'>
               <p className='text-xs text-content-muted mb-4'>
                 Plus: 2,000+ free education articles
               </p>
               <Button variant='outline' asChild>
                 <Link href='/features'>See all features</Link>
               </Button>
-            </div>
+            </Reveal>
           </div>
         </section>
 
         {/* Section 3: Founder Story */}
         <section className='py-12 md:py-16 px-4 md:px-6 bg-surface-elevated/20'>
           <div className='max-w-3xl mx-auto text-center space-y-6'>
-            <div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-card mb-4'>
-              <Sparkles
-                className='w-8 h-8 text-lunary-primary-400'
-                strokeWidth={1.5}
-              />
-            </div>
-            <Heading
-              as='h2'
-              variant='h1'
-              className='text-lg text-content-primary'
-            >
-              Built by someone who wanted better astrology tools
-            </Heading>
-            <p className='text-sm text-content-muted leading-relaxed max-w-2xl mx-auto'>
-              "I got tired of generic sun sign horoscopes. So I built Lunary:
-              personal astrology that actually uses your full chart and tracks
-              your patterns over time. Small team, focused on quality over
-              scale."
-            </p>
-            <p className='text-xs text-content-muted'>Sammii, Founder</p>
+            <Reveal delayMs={0}>
+              <div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-card'>
+                <Sparkles
+                  className='w-8 h-8 text-lunary-primary-400'
+                  strokeWidth={1.5}
+                />
+              </div>
+            </Reveal>
+            <Reveal delayMs={120}>
+              <Heading
+                as='h2'
+                variant='h1'
+                className='text-lg text-content-primary'
+              >
+                Built by someone who wanted better astrology tools
+              </Heading>
+            </Reveal>
+            <Reveal delayMs={240}>
+              <p className='text-sm text-content-muted leading-relaxed max-w-2xl mx-auto'>
+                "I got tired of generic sun sign horoscopes. So I built Lunary:
+                personal astrology that actually uses your full chart and tracks
+                your patterns over time. Small team, focused on quality over
+                scale."
+              </p>
+            </Reveal>
+            <Reveal delayMs={360}>
+              <p className='text-xs text-content-muted'>Sammii, Founder</p>
+            </Reveal>
           </div>
         </section>
 
         {/* Section 3b: Technical Trust */}
         <section className='py-12 md:py-16 px-4 md:px-6 border-t border-stroke-subtle/30'>
-          <div className='max-w-3xl mx-auto text-center space-y-6'>
+          <Reveal className='max-w-3xl mx-auto text-center space-y-6'>
             <div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-card mb-4'>
               <Telescope
                 className='w-8 h-8 text-lunary-primary-400'
@@ -303,57 +330,59 @@ export default function WelcomePage() {
               Real astronomical calculations, applied to your complete birth
               chart.
             </p>
-          </div>
+          </Reveal>
         </section>
 
         {/* Section 4: Educational Empowerment */}
         <section className='border-t border-stroke-subtle/30 py-12 md:py-16'>
           <div className='max-w-4xl mx-auto px-4 md:px-6 text-center space-y-6'>
-            <Heading as='h2' variant='h2' className='text-content-primary'>
-              Learn astrology through your own experience
-            </Heading>
-            <p className='text-content-muted max-w-2xl mx-auto leading-relaxed'>
-              Most apps keep you dependent on daily horoscopes.
-              <br />
-              Lunary teaches you to read your own chart.
-            </p>
+            <Reveal>
+              <Heading as='h2' variant='h2' className='text-content-primary'>
+                Learn astrology through your own experience
+              </Heading>
+              <p className='text-content-muted max-w-2xl mx-auto leading-relaxed mt-4'>
+                Most apps keep you dependent on daily horoscopes.
+                <br />
+                Lunary teaches you to read your own chart.
+              </p>
+            </Reveal>
 
             <div className='max-w-2xl mx-auto text-left space-y-3 pt-4'>
-              <div className='flex items-start gap-3'>
+              <Reveal delayMs={0} className='flex items-start gap-3'>
                 <Check className='w-5 h-5 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
                 <div>
                   <p className='text-sm text-content-primary'>
                     How your natal chart shapes your patterns
                   </p>
                 </div>
-              </div>
-              <div className='flex items-start gap-3'>
+              </Reveal>
+              <Reveal delayMs={80} className='flex items-start gap-3'>
                 <Check className='w-5 h-5 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
                 <div>
                   <p className='text-sm text-content-primary'>
                     Which transits affect you most (and how to work with them)
                   </p>
                 </div>
-              </div>
-              <div className='flex items-start gap-3'>
+              </Reveal>
+              <Reveal delayMs={160} className='flex items-start gap-3'>
                 <Check className='w-5 h-5 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
                 <div>
                   <p className='text-sm text-content-primary'>
                     Reading tarot in context of your chart
                   </p>
                 </div>
-              </div>
-              <div className='flex items-start gap-3'>
+              </Reveal>
+              <Reveal delayMs={240} className='flex items-start gap-3'>
                 <Check className='w-5 h-5 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
                 <div>
                   <p className='text-sm text-content-primary'>
                     When to expect emotional intensity vs. ease
                   </p>
                 </div>
-              </div>
+              </Reveal>
             </div>
 
-            <div className='pt-6'>
+            <Reveal delayMs={120} className='pt-6'>
               <p className='text-sm text-content-muted mb-2'>
                 After 3-6 months of daily practice, most users can confidently
                 interpret their own transits.
@@ -361,20 +390,19 @@ export default function WelcomePage() {
               <p className='text-xs text-content-brand font-medium'>
                 Free grimoire: 2,000+ articles explaining everything
               </p>
-            </div>
-
-            <div className='pt-2'>
-              <Button variant='lunary' asChild>
-                <Link href='/grimoire'>Start learning</Link>
-              </Button>
-            </div>
+              <div className='pt-6'>
+                <Button variant='lunary' asChild>
+                  <Link href='/grimoire'>Start learning</Link>
+                </Button>
+              </div>
+            </Reveal>
           </div>
         </section>
 
         {/* Section 4b: Connect with Your Cosmic Circle */}
         <section className='py-12 md:py-16 px-4 md:px-6 bg-surface-elevated/20'>
           <div className='max-w-4xl mx-auto'>
-            <div className='text-center space-y-4 mb-8'>
+            <Reveal className='text-center space-y-4 mb-8'>
               <div className='inline-flex items-center justify-center w-14 h-14 rounded-full bg-layer-raised/50 mb-2'>
                 <Users className='w-7 h-7 text-content-brand-accent' />
               </div>
@@ -385,10 +413,13 @@ export default function WelcomePage() {
                 See how your charts interact. Track compatibility. Get alerts
                 when cosmic timing is perfect for connection.
               </p>
-            </div>
+            </Reveal>
 
             <div className='grid md:grid-cols-3 gap-4 mb-8'>
-              <div className='rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 space-y-3'>
+              <Reveal
+                delayMs={0}
+                className='rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 space-y-3 transition-transform duration-300 hover:-translate-y-0.5'
+              >
                 <div className='flex items-center gap-2 align-middle'>
                   <Heart className='w-5 h-5 text-lunary-primary-400' />
                   <Heading
@@ -403,8 +434,11 @@ export default function WelcomePage() {
                   See exactly how your charts interact with full aspect
                   analysis. Element and modality balance comparisons.
                 </p>
-              </div>
-              <div className='rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 space-y-3'>
+              </Reveal>
+              <Reveal
+                delayMs={100}
+                className='rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 space-y-3 transition-transform duration-300 hover:-translate-y-0.5'
+              >
                 <div className='flex items-center gap-2 align-middle'>
                   <Calendar className='w-5 h-5 text-content-brand' />
                   <Heading as='h3' variant='h3' className='mb-0 ml-2'>
@@ -415,8 +449,11 @@ export default function WelcomePage() {
                   Know when cosmic timing supports connection. Analyzes BOTH
                   charts to find optimal windows.
                 </p>
-              </div>
-              <div className='rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 space-y-3'>
+              </Reveal>
+              <Reveal
+                delayMs={200}
+                className='rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 space-y-3 transition-transform duration-300 hover:-translate-y-0.5'
+              >
                 <div className='flex items-center gap-2 align-middle'>
                   <Moon className='w-5 h-5 text-blue-400/70' />
                   <Heading
@@ -431,10 +468,10 @@ export default function WelcomePage() {
                   Moon phases that activate compatible houses for both of you.
                   Never miss cosmically significant moments together.
                 </p>
-              </div>
+              </Reveal>
             </div>
 
-            <div className='text-center space-y-3'>
+            <Reveal delayMs={120} className='text-center space-y-3'>
               <div className='flex flex-wrap justify-center gap-4 text-xs text-content-muted mb-2'>
                 <span>Free: 5 friends with basic compatibility</span>
                 <span className='text-content-muted hidden md:inline'>•</span>
@@ -445,14 +482,14 @@ export default function WelcomePage() {
               <Button variant='outline' asChild>
                 <Link href='/circle'>Explore Circle features</Link>
               </Button>
-            </div>
+            </Reveal>
           </div>
         </section>
 
         {/* Section 5: Who Lunary Is For */}
         <section className='py-12 md:py-20 px-4 md:px-6 bg-surface-elevated/30'>
           <div className='max-w-5xl mx-auto'>
-            <div className='text-center space-y-4 mb-10 md:mb-12'>
+            <Reveal className='text-center space-y-4 mb-10 md:mb-12'>
               <Heading as='h2' variant='h2' className='text-content-primary'>
                 Who Lunary is for
               </Heading>
@@ -460,9 +497,12 @@ export default function WelcomePage() {
                 Designed for people who want personal astrology that feels
                 grounded, gentle and useful.
               </p>
-            </div>
+            </Reveal>
             <div className='grid md:grid-cols-2 gap-6 md:gap-8 text-sm'>
-              <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-2'>
+              <Reveal
+                delayMs={0}
+                className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-2 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
+              >
                 <p className='text-sm md:text-base text-content-brand'>
                   "I want to understand myself better"
                 </p>
@@ -470,8 +510,11 @@ export default function WelcomePage() {
                   Track patterns across time. Notice which transits affect you.
                   Build self-awareness through cosmic timing.
                 </p>
-              </div>
-              <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-2'>
+              </Reveal>
+              <Reveal
+                delayMs={80}
+                className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-2 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
+              >
                 <p className='text-sm md:text-base text-content-brand'>
                   "I'm learning astrology"
                 </p>
@@ -479,8 +522,11 @@ export default function WelcomePage() {
                   2,000+ free articles. Daily practice with your own chart.
                   Hands-on education, not theory.
                 </p>
-              </div>
-              <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-2'>
+              </Reveal>
+              <Reveal
+                delayMs={160}
+                className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-2 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
+              >
                 <p className='text-sm md:text-base text-content-brand'>
                   "I'm tired of generic horoscopes"
                 </p>
@@ -488,8 +534,11 @@ export default function WelcomePage() {
                   Your full birth chart matters. Personal insights, not sun sign
                   predictions. See what's actually happening in YOUR life.
                 </p>
-              </div>
-              <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-2'>
+              </Reveal>
+              <Reveal
+                delayMs={240}
+                className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-2 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
+              >
                 <p className='text-sm md:text-base text-content-brand'>
                   "I journal and track my cycles"
                 </p>
@@ -497,8 +546,11 @@ export default function WelcomePage() {
                   Connect reflections to moon phases. Track patterns over time.
                   Your journal becomes your astrology textbook.
                 </p>
-              </div>
-              <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-2 md:col-span-2'>
+              </Reveal>
+              <Reveal
+                delayMs={320}
+                className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-2 md:col-span-2 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
+              >
                 <p className='text-sm md:text-base text-content-brand'>
                   "I want to understand my relationships better"
                 </p>
@@ -509,7 +561,7 @@ export default function WelcomePage() {
                   their 7th houses: great for starting new creative projects
                   together."
                 </p>
-              </div>
+              </Reveal>
             </div>
           </div>
         </section>
@@ -518,7 +570,7 @@ export default function WelcomePage() {
         <section className='py-12 md:py-20 px-4 md:px-6 bg-surface-elevated/30'>
           <div className='max-w-5xl mx-auto'>
             <div className='grid md:grid-cols-3 gap-8 md:gap-10'>
-              <div className='text-center space-y-3'>
+              <Reveal delayMs={0} className='text-center space-y-3'>
                 <Telescope
                   className='w-8 h-8 text-lunary-primary-400 mx-auto'
                   strokeWidth={1.5}
@@ -534,8 +586,8 @@ export default function WelcomePage() {
                   Every insight is interpreted through your full chart, not
                   isolated meanings.
                 </p>
-              </div>
-              <div className='text-center space-y-3'>
+              </Reveal>
+              <Reveal delayMs={120} className='text-center space-y-3'>
                 <Sparkles
                   className='w-8 h-8 text-content-brand mx-auto'
                   strokeWidth={1.5}
@@ -547,8 +599,8 @@ export default function WelcomePage() {
                   Tarot, transits, and moon cycles work together. Each insight
                   connects to your full chart and current timing.
                 </p>
-              </div>
-              <div className='text-center space-y-3'>
+              </Reveal>
+              <Reveal delayMs={240} className='text-center space-y-3'>
                 <NotebookPen
                   className='w-8 h-8 text-blue-400/70 mx-auto'
                   strokeWidth={1.5}
@@ -560,7 +612,7 @@ export default function WelcomePage() {
                   Calm and reflective guidance that supports self understanding
                   rather than predicting your fate.
                 </p>
-              </div>
+              </Reveal>
             </div>
           </div>
         </section>
@@ -571,12 +623,14 @@ export default function WelcomePage() {
         </section>
 
         {/* Testimonials */}
-        <Testimonials />
+        <Reveal>
+          <Testimonials />
+        </Reveal>
 
         {/* Section 8: Learn & Explore */}
         <section className='py-12 md:py-20 px-4 md:px-6 bg-surface-elevated/30'>
           <div className='max-w-5xl mx-auto'>
-            <div className='text-center space-y-4 mb-10 md:mb-14'>
+            <Reveal className='text-center space-y-4 mb-10 md:mb-14'>
               <Heading as='h2' variant='h2'>
                 Free astrology education: 2,000+ articles
               </Heading>
@@ -589,80 +643,104 @@ export default function WelcomePage() {
                   100% free. No paywall. No upsells.
                 </span>
               </p>
-            </div>
+            </Reveal>
             <div className='grid md:grid-cols-2 gap-6 md:gap-8'>
-              <Link
-                href='/grimoire/astrology'
-                className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-3'
-              >
-                <Heading as='h3' variant='h3' className='text-content-primary'>
-                  Astrology, explained properly
-                </Heading>
-                <p className='text-xs text-content-muted leading-relaxed'>
-                  Explore planets, houses, aspects, and transits with clarity.
-                  Learn how the sky works and how it connects to lived
-                  experience.
-                </p>
-                <div className='text-xs text-content-brand hover:text-content-secondary transition-colors'>
-                  Explore astrology
-                </div>
-              </Link>
-              <Link
-                href='/grimoire/tarot'
-                className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-3'
-              >
-                <Heading as='h3' variant='h3' className='text-content-primary'>
-                  Tarot beyond single-card pulls
-                </Heading>
-                <p className='text-xs text-content-muted leading-relaxed'>
-                  Understand archetypes, symbolism, and recurring themes across
-                  time. Tarot becomes meaningful when you see the patterns, not
-                  just the card of the day.
-                </p>
-                <div className='text-xs text-content-brand hover:text-content-secondary transition-colors'>
-                  Explore tarot
-                </div>
-              </Link>
-              <Link
-                href='/grimoire/moon'
-                className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-3'
-              >
-                <Heading as='h3' variant='h3' className='text-content-primary'>
-                  Moon phases & ritual timing
-                </Heading>
-                <p className='text-xs text-content-muted leading-relaxed'>
-                  Learn how lunar cycles influence reflection, release, and
-                  intention. From new moons to eclipses, timing becomes
-                  intuitive rather than overwhelming.
-                </p>
-                <div className='text-xs text-content-brand hover:text-content-secondary transition-colors'>
-                  Explore moon phases
-                </div>
-              </Link>
-              <Link
-                href='/grimoire/correspondences'
-                className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-3'
-              >
-                <Heading as='h3' variant='h3' className='text-content-primary'>
-                  Crystals, runes & symbolic systems
-                </Heading>
-                <p className='text-xs text-content-muted leading-relaxed'>
-                  Discover how different symbolic systems connect through
-                  meaning and correspondence, presented with clarity and respect
-                  rather than superstition.
-                </p>
-                <div className='text-xs text-content-brand hover:text-content-secondary transition-colors'>
-                  Explore correspondences
-                </div>
-              </Link>
+              <Reveal delayMs={0}>
+                <Link
+                  href='/grimoire/astrology'
+                  className='block rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-3 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
+                >
+                  <Heading
+                    as='h3'
+                    variant='h3'
+                    className='text-content-primary'
+                  >
+                    Astrology, explained properly
+                  </Heading>
+                  <p className='text-xs text-content-muted leading-relaxed'>
+                    Explore planets, houses, aspects, and transits with clarity.
+                    Learn how the sky works and how it connects to lived
+                    experience.
+                  </p>
+                  <div className='text-xs text-content-brand hover:text-content-secondary transition-colors'>
+                    Explore astrology
+                  </div>
+                </Link>
+              </Reveal>
+              <Reveal delayMs={100}>
+                <Link
+                  href='/grimoire/tarot'
+                  className='block rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-3 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
+                >
+                  <Heading
+                    as='h3'
+                    variant='h3'
+                    className='text-content-primary'
+                  >
+                    Tarot beyond single-card pulls
+                  </Heading>
+                  <p className='text-xs text-content-muted leading-relaxed'>
+                    Understand archetypes, symbolism, and recurring themes
+                    across time. Tarot becomes meaningful when you see the
+                    patterns, not just the card of the day.
+                  </p>
+                  <div className='text-xs text-content-brand hover:text-content-secondary transition-colors'>
+                    Explore tarot
+                  </div>
+                </Link>
+              </Reveal>
+              <Reveal delayMs={200}>
+                <Link
+                  href='/grimoire/moon'
+                  className='block rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-3 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
+                >
+                  <Heading
+                    as='h3'
+                    variant='h3'
+                    className='text-content-primary'
+                  >
+                    Moon phases & ritual timing
+                  </Heading>
+                  <p className='text-xs text-content-muted leading-relaxed'>
+                    Learn how lunar cycles influence reflection, release, and
+                    intention. From new moons to eclipses, timing becomes
+                    intuitive rather than overwhelming.
+                  </p>
+                  <div className='text-xs text-content-brand hover:text-content-secondary transition-colors'>
+                    Explore moon phases
+                  </div>
+                </Link>
+              </Reveal>
+              <Reveal delayMs={300}>
+                <Link
+                  href='/grimoire/correspondences'
+                  className='block rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-3 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
+                >
+                  <Heading
+                    as='h3'
+                    variant='h3'
+                    className='text-content-primary'
+                  >
+                    Crystals, runes & symbolic systems
+                  </Heading>
+                  <p className='text-xs text-content-muted leading-relaxed'>
+                    Discover how different symbolic systems connect through
+                    meaning and correspondence, presented with clarity and
+                    respect rather than superstition.
+                  </p>
+                  <div className='text-xs text-content-brand hover:text-content-secondary transition-colors'>
+                    Explore correspondences
+                  </div>
+                </Link>
+              </Reveal>
             </div>
-            <div className='text-center mt-10 md:mt-14'>
+            <Reveal delayMs={120} className='text-center mt-10 md:mt-14'>
               <p className='text-sm md:text-base text-content-muted leading-relaxed max-w-2xl mx-auto'>
                 Learning gives context. When you're ready, Lunary connects that
                 understanding to your birth chart and current timing for deeper
                 personal insight.
               </p>
-            </div>
+            </Reveal>
           </div>
         </section>
 
@@ -672,15 +750,17 @@ export default function WelcomePage() {
           className='py-12 md:py-20 px-4 md:px-6 bg-surface-elevated/30 scroll-mt-16'
         >
           <div className='max-w-5xl mx-auto'>
-            <Heading
-              as='h2'
-              variant='h2'
-              className='text-center mb-10 md:mb-14'
-            >
-              How it works
-            </Heading>
+            <Reveal>
+              <Heading
+                as='h2'
+                variant='h2'
+                className='text-center mb-10 md:mb-14'
+              >
+                How it works
+              </Heading>
+            </Reveal>
             <div className='grid md:grid-cols-3 gap-8 md:gap-10'>
-              <div className='text-center space-y-3'>
+              <Reveal delayMs={0} className='text-center space-y-3'>
                 <Calendar
                   className='w-8 h-8 text-lunary-primary-400 mx-auto'
                   strokeWidth={1.5}
@@ -697,8 +777,8 @@ export default function WelcomePage() {
                 <p className='text-xs text-content-muted'>
                   Sets the foundation for personalised insight.
                 </p>
-              </div>
-              <div className='text-center space-y-3'>
+              </Reveal>
+              <Reveal delayMs={140} className='text-center space-y-3'>
                 <Map
                   className='w-8 h-8 text-content-brand mx-auto'
                   strokeWidth={1.5}
@@ -714,8 +794,8 @@ export default function WelcomePage() {
                 <p className='text-xs text-content-muted'>
                   See what is influencing your day.
                 </p>
-              </div>
-              <div className='text-center space-y-3'>
+              </Reveal>
+              <Reveal delayMs={280} className='text-center space-y-3'>
                 <MessagesSquare
                   className='w-8 h-8 text-blue-400/70 mx-auto'
                   strokeWidth={1.5}
@@ -731,7 +811,7 @@ export default function WelcomePage() {
                 <p className='text-xs text-content-muted'>
                   Your companion for clarity and reflection.
                 </p>
-              </div>
+              </Reveal>
             </div>
           </div>
         </section>
@@ -741,7 +821,10 @@ export default function WelcomePage() {
           <div className='max-w-3xl mx-auto'>
             <div className='grid md:grid-cols-2 gap-4 md:gap-6'>
               {/* Other Apps */}
-              <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/30 p-5 md:p-6'>
+              <Reveal
+                delayMs={0}
+                className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/30 p-5 md:p-6'
+              >
                 <h3 className='text-sm font-medium text-content-muted uppercase tracking-wider mb-5'>
                   Other apps
                 </h3>
@@ -783,10 +866,13 @@ export default function WelcomePage() {
                     </span>
                   </li>
                 </ul>
-              </div>
+              </Reveal>
 
               {/* Lunary */}
-              <div className='rounded-2xl border border-lunary-primary-700 bg-surface-elevated/50 p-5 md:p-6'>
+              <Reveal
+                delayMs={120}
+                className='rounded-2xl border border-lunary-primary-700 bg-surface-elevated/50 p-5 md:p-6'
+              >
                 <h3 className='text-sm font-medium text-lunary-primary-400 uppercase tracking-wider mb-5'>
                   Lunary
                 </h3>
@@ -828,7 +914,7 @@ export default function WelcomePage() {
                     </span>
                   </li>
                 </ul>
-              </div>
+              </Reveal>
             </div>
           </div>
         </section>
@@ -836,15 +922,24 @@ export default function WelcomePage() {
         {/* Section 11: Pricing Teaser */}
         <section className='py-12 md:py-20 px-4 md:px-6 bg-surface-elevated/30'>
           <div className='max-w-2xl mx-auto text-center space-y-5'>
-            <p className='text-sm text-content-muted'>
-              Free to begin. <br /> Upgrade only if you want deeper,
-              chart-specific insight.
-            </p>
-            <Heading as='h2' variant='h2' className='text-content-primary'>
-              What’s included
-            </Heading>
+            <Reveal>
+              <p className='text-sm text-content-muted'>
+                Free to begin. <br /> Upgrade only if you want deeper,
+                chart-specific insight.
+              </p>
+              <Heading
+                as='h2'
+                variant='h2'
+                className='text-content-primary mt-4'
+              >
+                What’s included
+              </Heading>
+            </Reveal>
             <div className='grid md:grid-cols-2 gap-4 text-left text-sm text-content-muted'>
-              <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-4'>
+              <Reveal
+                delayMs={0}
+                className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-4 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
+              >
                 <p className='text-xs uppercase tracking-[0.2em] text-content-muted'>
                   Free includes
                 </p>
@@ -880,8 +975,11 @@ export default function WelcomePage() {
                     </p>
                   </li>
                 </ul>
-              </div>
-              <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-4'>
+              </Reveal>
+              <Reveal
+                delayMs={120}
+                className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-4 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
+              >
                 <p className='text-xs uppercase tracking-[0.2em] text-content-muted'>
                   Your Personal Insight
                 </p>
@@ -914,9 +1012,9 @@ export default function WelcomePage() {
                     </p>
                   </li>
                 </ul>
-              </div>
+              </Reveal>
             </div>
-            <div className='pt-2'>
+            <Reveal delayMs={120} className='pt-2'>
               <Button variant='outline' asChild>
                 <Link
                   href='/pricing'
@@ -927,13 +1025,13 @@ export default function WelcomePage() {
                   View plans
                 </Link>
               </Button>
-            </div>
+            </Reveal>
           </div>
         </section>
 
         {/* Section 12: Why Lunary Feels Different */}
         <section className='py-12 md:py-16 px-4 md:px-6'>
-          <div className='max-w-2xl mx-auto text-center space-y-4'>
+          <Reveal className='max-w-2xl mx-auto text-center space-y-4'>
             <Heading as='h2' variant='h2'>
               Why Lunary feels different
             </Heading>
@@ -942,29 +1040,36 @@ export default function WelcomePage() {
               current sky to build a deeper, personalised understanding over
               time.
             </p>
-          </div>
+          </Reveal>
         </section>
 
         {/* Section 13: FAQs */}
         <section className='py-12 md:py-20 px-4 md:px-6 bg-surface-elevated/20'>
           <div className='max-w-3xl mx-auto'>
-            <Heading as='h2' variant='h2' className='text-center mb-6 md:mb-12'>
-              Common questions
-            </Heading>
+            <Reveal>
+              <Heading
+                as='h2'
+                variant='h2'
+                className='text-center mb-6 md:mb-12'
+              >
+                Common questions
+              </Heading>
+            </Reveal>
             <div className='space-y-3'>
-              {homepageFAQs.map((faq) => (
-                <FAQAccordion
-                  key={faq.id}
-                  question={faq.question}
-                  answer={faq.answer}
-                  isOpen={openFAQId === faq.id}
-                  onToggle={() =>
-                    setOpenFAQId(openFAQId === faq.id ? null : faq.id)
-                  }
-                />
+              {homepageFAQs.map((faq, index) => (
+                <Reveal key={faq.id} delayMs={index * 60}>
+                  <FAQAccordion
+                    question={faq.question}
+                    answer={faq.answer}
+                    isOpen={openFAQId === faq.id}
+                    onToggle={() =>
+                      setOpenFAQId(openFAQId === faq.id ? null : faq.id)
+                    }
+                  />
+                </Reveal>
               ))}
             </div>
-            <div className='text-center mt-8'>
+            <Reveal delayMs={120} className='text-center mt-8'>
               <Link
                 href='/faq'
                 className='text-sm text-content-brand hover:text-content-secondary transition-colors inline-flex items-center gap-2'
@@ -984,51 +1089,56 @@ export default function WelcomePage() {
                   />
                 </svg>
               </Link>
-            </div>
+            </Reveal>
           </div>
         </section>
 
         {/* Section 14: Final CTA */}
         <section className='py-12 md:py-20 px-4 md:px-6 border-t border-stroke-subtle/30'>
           <div className='max-w-2xl mx-auto text-center space-y-6'>
-            <Heading as='h2' variant='h2'>
-              Start understanding yourself better
-            </Heading>
+            <Reveal>
+              <Heading as='h2' variant='h2'>
+                Start understanding yourself better
+              </Heading>
+            </Reveal>
 
             <div className='max-w-md mx-auto text-left space-y-2'>
-              <div className='flex items-center gap-2'>
+              <Reveal delayMs={0} className='flex items-center gap-2'>
                 <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
                 <span className='text-sm text-content-muted'>
                   Complete birth chart in 60 seconds
                 </span>
-              </div>
-              <div className='flex items-center gap-2'>
+              </Reveal>
+              <Reveal delayMs={60} className='flex items-center gap-2'>
                 <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
                 <span className='text-sm text-content-muted'>
                   Daily guidance based on YOUR chart
                 </span>
-              </div>
-              <div className='flex items-center gap-2'>
+              </Reveal>
+              <Reveal delayMs={120} className='flex items-center gap-2'>
                 <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
                 <span className='text-sm text-content-muted'>
                   2,000+ free grimoire articles
                 </span>
-              </div>
-              <div className='flex items-center gap-2'>
+              </Reveal>
+              <Reveal delayMs={180} className='flex items-center gap-2'>
                 <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
                 <span className='text-sm text-content-muted'>
                   Pattern tracking over time
                 </span>
-              </div>
-              <div className='flex items-center gap-2'>
+              </Reveal>
+              <Reveal delayMs={240} className='flex items-center gap-2'>
                 <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
                 <span className='text-sm text-content-muted'>
                   No credit card required
                 </span>
-              </div>
+              </Reveal>
             </div>
 
-            <div className='pt-4 flex flex-col gap-3 items-center'>
+            <Reveal
+              delayMs={180}
+              className='pt-4 flex flex-col gap-3 items-center'
+            >
               <Button variant='lunary-soft' size='default' asChild>
                 <Link
                   href='/auth?signup=true'
@@ -1059,13 +1169,13 @@ export default function WelcomePage() {
                   Explore what's included
                 </Link>
               </p>
-            </div>
+            </Reveal>
           </div>
         </section>
 
         {/* Section 15: Newsletter */}
         <section className='py-12 md:py-20 px-4 md:px-6'>
-          <div className='max-w-4xl mx-auto'>
+          <Reveal className='max-w-4xl mx-auto'>
             <NewsletterSignupForm
               source='welcome_page'
               headline='Weekly cosmic recap, delivered'
@@ -1074,7 +1184,7 @@ export default function WelcomePage() {
               successMessage='Check your inbox to confirm your subscription.'
               align='center'
             />
-          </div>
+          </Reveal>
         </section>
 
         {/* Footer */}

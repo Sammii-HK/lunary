@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v236';
+const CACHE_NAME = 'lunary-v258';
 const STATIC_CACHE_URLS = [
   '/app',
   '/manifest.json?v=20251103-1',
@@ -191,6 +191,10 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Next.js JS/CSS chunks: network-first to prevent stale chunk errors after deploys
+  // CRITICAL: If network returns 404 for a chunk, the deployment has changed and
+  // cached chunks are from a different build. Serving stale chunks causes
+  // "(0, l.xx) is not a function" crashes from mismatched module exports.
+  // Instead of falling back to cache, force a full page reload.
   const isNextChunk = url.pathname.startsWith('/_next/static/');
   if (isNextChunk) {
     event.respondWith(
@@ -201,6 +205,16 @@ self.addEventListener('fetch', (event) => {
             caches.open(CACHE_NAME).then((cache) => {
               cache.put(event.request, clone);
             });
+            return networkResponse;
+          }
+          // Chunk 404 = new deployment, old chunks invalid.
+          // Purge stale cache and let the browser handle the error,
+          // which triggers Next.js built-in recovery (full reload).
+          if (networkResponse.status === 404) {
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.delete(event.request);
+            });
+            return networkResponse;
           }
           return networkResponse;
         })

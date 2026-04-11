@@ -671,7 +671,7 @@ Based on current structure, potential additions:
 
 ### Data Sources:
 
-- Swiss Ephemeris (planetary positions)
+- Reference ephemeris data (planetary positions)
 - Custom tarot deck data
 - Grimoire content database (crystals, spells)
 - User birth data (from profile)

@@ -2,6 +2,15 @@
 
 import { Button } from '@/components/ui/button';
 
+type HouseSystem =
+  | 'placidus'
+  | 'whole-sign'
+  | 'koch'
+  | 'porphyry'
+  | 'alcabitius';
+
+type ZodiacSystem = 'tropical' | 'sidereal' | 'equatorial';
+
 interface ChartControlsProps {
   showAspects: boolean;
   onToggleAspects: () => void;
@@ -11,6 +20,13 @@ interface ChartControlsProps {
   onToggleAsteroids: () => void;
   clockwise?: boolean;
   onToggleClockwise?: () => void;
+  showSymbols?: boolean;
+  onToggleSymbols?: () => void;
+  houseSystem?: HouseSystem;
+  onHouseSystemChange?: (system: HouseSystem) => void;
+  zodiacSystem?: ZodiacSystem;
+  onZodiacSystemChange?: (system: ZodiacSystem) => void;
+  isFreeTier?: boolean;
 }
 
 export function ChartControls({
@@ -22,7 +38,27 @@ export function ChartControls({
   onToggleAsteroids,
   clockwise = false,
   onToggleClockwise,
+  showSymbols = true,
+  onToggleSymbols,
+  houseSystem = 'placidus',
+  onHouseSystemChange,
+  zodiacSystem = 'tropical',
+  onZodiacSystemChange,
+  isFreeTier = false,
 }: ChartControlsProps) {
+  const houseSystemLabels: Record<HouseSystem, string> = {
+    placidus: 'Placidus',
+    'whole-sign': 'Whole Sign',
+    koch: 'Koch',
+    porphyry: 'Porphyry',
+    alcabitius: 'Alcabitius',
+  };
+
+  const zodiacSystemLabels: Record<ZodiacSystem, string> = {
+    tropical: 'Tropical',
+    sidereal: 'Sidereal',
+    equatorial: 'Equatorial',
+  };
   return (
     <div className='flex flex-col items-center gap-2'>
       <div className='flex flex-wrap gap-2 items-center justify-center'>
@@ -62,6 +98,62 @@ export function ChartControls({
           >
             Challenging
           </Button>
+        </div>
+      )}
+      {onToggleSymbols && (
+        <Button onClick={onToggleSymbols} variant='lunary-soft' size='sm'>
+          {showSymbols ? 'Show Names' : 'Show Symbols'}
+        </Button>
+      )}
+      {onHouseSystemChange && (
+        <div className='flex flex-col gap-2 w-full'>
+          <span className='text-xs text-content-muted text-center'>
+            House System{isFreeTier ? ' (locked to selection)' : ''}
+          </span>
+          <div className='flex flex-wrap gap-2 justify-center'>
+            {(
+              [
+                'placidus',
+                'whole-sign',
+                'koch',
+                'porphyry',
+                'alcabitius',
+              ] as HouseSystem[]
+            ).map((system) => (
+              <Button
+                key={system}
+                onClick={() => !isFreeTier && onHouseSystemChange(system)}
+                variant={houseSystem === system ? 'lunary-soft' : 'ghost'}
+                size='xs'
+                disabled={isFreeTier && houseSystem !== system}
+              >
+                {houseSystemLabels[system]}
+                {houseSystem === system && ' ✓'}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+      {onZodiacSystemChange && (
+        <div className='flex flex-col gap-2 w-full'>
+          <span className='text-xs text-content-muted text-center'>
+            Zodiac System
+          </span>
+          <div className='flex flex-wrap gap-2 justify-center'>
+            {(['tropical', 'sidereal', 'equatorial'] as ZodiacSystem[]).map(
+              (system) => (
+                <Button
+                  key={system}
+                  onClick={() => onZodiacSystemChange(system)}
+                  variant={zodiacSystem === system ? 'lunary-soft' : 'ghost'}
+                  size='xs'
+                >
+                  {zodiacSystemLabels[system]}
+                  {zodiacSystem === system && ' ✓'}
+                </Button>
+              ),
+            )}
+          </div>
         </div>
       )}
     </div>

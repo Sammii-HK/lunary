@@ -135,7 +135,8 @@ export default function FeaturesPage() {
               'Every placement explained in educational detail',
               'Visual chart wheel with all bodies',
               'Major aspects explained in plain language',
-              '12 houses with Whole Sign system',
+              '12 houses with 5 systems (Whole Sign, Placidus, Koch, Porphyry, Alcabitius)',
+              'Zodiac system flexibility (Tropical, Sidereal, Equatorial)',
               'Elemental & modal balance analysis',
               'Saved to your account for personalized features',
             ]}
@@ -231,6 +232,25 @@ export default function FeaturesPage() {
             freeTier='2 major transits'
             paidTier='All daily transits with durations + applying/separating status'
             cta="See today's transits"
+            ctaHref='/auth?signup=true'
+          />
+
+          {/* Time Travel / Date Explorer */}
+          <FeatureCard
+            icon={<Calendar className='w-5 h-5 md:w-6 md:h-6' />}
+            title='Time Travel Through the Cosmos'
+            description='Tap any date to see how the entire dashboard shifts—perfect for planning ahead or understanding the past.'
+            features={[
+              'See moon phases for any date in history or future',
+              'View planetary positions for a specific moment',
+              'Pull tarot cards as they would manifest on a different date',
+              'Check cosmic energy and transits for future dates',
+              'Plan big decisions by exploring different time windows',
+              'Understand the astrology of important past dates',
+            ]}
+            freeTier='Today only'
+            paidTier='Explore any date in history or future'
+            cta='Try time travel'
             ctaHref='/auth?signup=true'
           />
 

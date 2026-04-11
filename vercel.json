@@ -86,10 +86,6 @@
       "schedule": "0 7 * * 1"
     },
     {
-      "path": "/api/cron/bip-weekly",
-      "schedule": "0 2 * * 1"
-    },
-    {
       "path": "/api/admin/stripe-sync",
       "schedule": "0 3 * * *"
     },
@@ -136,6 +132,26 @@
     {
       "path": "/api/cron/weekly-reading",
       "schedule": "0 9 * * 0"
+    },
+    {
+      "path": "/api/cron/announcement-email-referrals",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/announcement-email-moon-circles",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/announcement-email-synastry",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/announcement-email-deeper-transits",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/announcement-email-light-mode-runes",
+      "schedule": "0 14 * * *"
     }
   ]
 }

@@ -1,5 +1,6 @@
 import { kvGet, kvPut } from '@/lib/cloudflare/kv';
 import type { BirthChartData } from '../../../utils/astrology/birthChart';
+import type { HouseSystem } from '../../../utils/astrology/houseSystems';
 
 const SHARE_TTL_SECONDS = 60 * 60 * 24 * 90; // 90 days
 
@@ -14,6 +15,7 @@ export type ShareBirthChartPayload = {
   insight?: string;
   keywords?: string[];
   placements: BirthChartData[];
+  houseSystem?: HouseSystem;
 };
 
 export type ShareBirthChartRecord = ShareBirthChartPayload & {

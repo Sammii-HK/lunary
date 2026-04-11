@@ -1,13 +1,20 @@
 'use client';
 
 import { useMemo } from 'react';
-import type { BirthChartData } from '../../../utils/astrology/birthChart';
+import type {
+  BirthChartData,
+  HouseCusp,
+} from '../../../utils/astrology/birthChart';
 import {
   bodiesSymbols,
   zodiacSymbol,
   astroPointSymbols,
   houseThemes,
 } from '../../../utils/zodiac/zodiac';
+import {
+  getSignForZodiacSystem,
+  type ZodiacSystem,
+} from '@utils/astrology/zodiacSystems';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { PersonalPlanetsSection } from './PersonalPlanetsSection';
 import { SocialPlanetsSection } from './SocialPlanetsSection';
@@ -36,9 +43,25 @@ import {
 
 interface BirthChartShowcaseProps {
   birthChart: BirthChartData[];
+  zodiacSystem?: ZodiacSystem;
+  houses?: HouseCusp[];
 }
 
-export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
+export function BirthChartShowcase({
+  birthChart,
+  zodiacSystem = 'tropical',
+  houses: explicitHouses,
+}: BirthChartShowcaseProps) {
+  const getDisplaySign = (planet: BirthChartData | undefined) => {
+    if (!planet) return '';
+    if (!Number.isFinite(planet.eclipticLongitude)) return planet.sign;
+    return getSignForZodiacSystem(planet.eclipticLongitude, zodiacSystem).sign;
+  };
+
+  // Wrapper function to bind zodiacSystem to getPlanetaryInterpretation
+  const getPlanetaryInterpretationWithSystem = (planet: BirthChartData) =>
+    getPlanetaryInterpretation(planet, zodiacSystem);
+
   const sun = birthChart.find((p) => p.body === 'Sun');
   const moon = birthChart.find((p) => p.body === 'Moon');
   const rising = birthChart.find((p) => p.body === 'Ascendant');
@@ -58,14 +81,21 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
     [modalities],
   );
 
-  const houses = useMemo(
-    () => calculateWholeSigHouses(birthChart),
-    [birthChart],
-  );
+  const houses = useMemo(() => {
+    if (explicitHouses && explicitHouses.length > 0) {
+      return explicitHouses.map((house) => ({
+        house: house.house,
+        sign: house.sign,
+        planets: birthChart.filter((planet) => planet.house === house.house),
+      }));
+    }
+    return calculateWholeSigHouses(birthChart);
+  }, [birthChart, explicitHouses]);
 
   const chartRulerData = useMemo(() => {
     if (!rising) return null;
-    const chartRulerName = getChartRuler(rising.sign);
+    const displayRisingSign = getDisplaySign(rising);
+    const chartRulerName = getChartRuler(displayRisingSign);
     const chartRuler = birthChart.find((p) => p.body === chartRulerName);
     if (!chartRuler) return null;
 
@@ -81,8 +111,16 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
       )
       .slice(0, 3);
 
-    return { chartRulerName, chartRuler, housePlacement, rulerAspects };
-  }, [birthChart, rising, houses]);
+    const displaySign = getDisplaySign(chartRuler);
+
+    return {
+      chartRulerName,
+      chartRuler,
+      displaySign,
+      housePlacement,
+      rulerAspects,
+    };
+  }, [birthChart, rising, houses, zodiacSystem]);
 
   const chartAnalysis = useMemo(
     () => getChartAnalysis(birthChart),
@@ -119,7 +157,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                         {bodiesSymbols.sun}
                       </span>
                       <span className='text-sm font-medium text-content-primary'>
-                        Sun in {sun.sign}
+                        Sun in {getDisplaySign(sun)}
                       </span>
                     </div>
                     <p className='text-xs text-content-secondary'>
@@ -135,7 +173,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                         {bodiesSymbols.moon}
                       </span>
                       <span className='text-sm font-medium text-content-primary'>
-                        Moon in {moon.sign}
+                        Moon in {getDisplaySign(moon)}
                       </span>
                     </div>
                     <p className='text-xs text-content-secondary'>
@@ -151,12 +189,14 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                         {astroPointSymbols.ascendant}
                       </span>
                       <span className='text-sm font-medium text-content-primary'>
-                        {rising.sign} Rising
+                        {getDisplaySign(rising)} Rising
                       </span>
                       <span className='text-sm font-astro text-content-muted'>
                         {
                           zodiacSymbol[
-                            rising.sign.toLowerCase() as keyof typeof zodiacSymbol
+                            getDisplaySign(
+                              rising,
+                            ).toLowerCase() as keyof typeof zodiacSymbol
                           ]
                         }
                       </span>
@@ -270,7 +310,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                   </span>
                 </div>
                 <p className='text-sm text-content-secondary mb-3'>
-                  As the ruler of your {rising.sign} Ascendant,{' '}
+                  As the ruler of your {getDisplaySign(rising)} Ascendant,{' '}
                   {chartRulerData.chartRulerName} is the most important planet
                   in your chart. Its placement shows how you express your
                   Ascendant&apos;s energy and where you direct your life force.
@@ -285,11 +325,11 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                   <div className='text-center'>
                     <div className='text-xs text-content-muted mb-1'>Sign</div>
                     <div className='text-sm text-content-primary flex items-center justify-center gap-1.5'>
-                      {chartRulerData.chartRuler.sign}
+                      {chartRulerData.displaySign}
                       <span className='font-astro text-base text-content-muted'>
                         {
                           zodiacSymbol[
-                            chartRulerData.chartRuler.sign.toLowerCase() as keyof typeof zodiacSymbol
+                            chartRulerData.displaySign.toLowerCase() as keyof typeof zodiacSymbol
                           ]
                         }
                       </span>
@@ -467,21 +507,21 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
       {/* Personal Planets */}
       <PersonalPlanetsSection
         birthChartData={birthChart}
-        getPlanetaryInterpretation={getPlanetaryInterpretation}
+        getPlanetaryInterpretation={getPlanetaryInterpretationWithSystem}
         getPlanetDignityStatus={getPlanetDignityStatus}
       />
 
       {/* Social Planets */}
       <SocialPlanetsSection
         birthChartData={birthChart}
-        getPlanetaryInterpretation={getPlanetaryInterpretation}
+        getPlanetaryInterpretation={getPlanetaryInterpretationWithSystem}
         getPlanetDignityStatus={getPlanetDignityStatus}
       />
 
       {/* Generational Planets */}
       <GenerationalPlanetsSection
         birthChartData={birthChart}
-        getPlanetaryInterpretation={getPlanetaryInterpretation}
+        getPlanetaryInterpretation={getPlanetaryInterpretationWithSystem}
         getPlanetDignityStatus={getPlanetDignityStatus}
       />
 
@@ -569,11 +609,12 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                               const isAstronomiconChar =
                                 symbol.length === 1 &&
                                 symbol.charCodeAt(0) < 128;
+                              const displaySign = getDisplaySign(planet);
                               return (
                                 <span
                                   key={planet.body}
                                   className={`text-xs bg-surface-card px-1 rounded ${isAstronomiconChar ? 'font-astro' : ''}`}
-                                  title={`${planet.body}: ${planet.degree}\u00B0${planet.minute}' ${planet.sign}`}
+                                  title={`${planet.body}: ${planet.degree}\u00B0${planet.minute}' ${displaySign}`}
                                 >
                                   {symbol}
                                 </span>
@@ -631,11 +672,12 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                                 const isAstronomiconChar =
                                   symbol.length === 1 &&
                                   symbol.charCodeAt(0) < 128;
+                                const displaySign = getDisplaySign(planet);
                                 return (
                                   <span
                                     key={planet.body}
                                     className={`text-xs bg-surface-card px-1 rounded ${isAstronomiconChar ? 'font-astro' : ''}`}
-                                    title={`${planet.body}: ${planet.degree}\u00B0${planet.minute}' ${planet.sign}`}
+                                    title={`${planet.body}: ${planet.degree}\u00B0${planet.minute}' ${displaySign}`}
                                   >
                                     {symbol}
                                   </span>
@@ -728,25 +770,33 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
           >
             <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
               <div className='space-y-2'>
-                {stelliums.map((stellium, index) => (
-                  <div
-                    key={index}
-                    className='border-l-2 border-lunary-highlight pl-3'
-                  >
-                    <h5 className='text-xs font-medium text-lunary-highlight-300'>
-                      {stellium.sign} Stellium ({stellium.planets.length}{' '}
-                      planets)
-                    </h5>
-                    <p className='text-xs text-content-muted mb-1'>
-                      {stellium.planets
-                        .map((p) => `${p.body} (${p.degree}\u00B0)`)
-                        .join(', ')}
-                    </p>
-                    <p className='text-xs text-content-secondary'>
-                      {stellium.meaning}
-                    </p>
-                  </div>
-                ))}
+                {stelliums.map((stellium, index) => {
+                  const firstPlanetInStellium = birthChart.find(
+                    (p) => p.body === stellium.planets[0].body,
+                  );
+                  const displayStelliumSign = getDisplaySign(
+                    firstPlanetInStellium,
+                  );
+                  return (
+                    <div
+                      key={index}
+                      className='border-l-2 border-lunary-highlight pl-3'
+                    >
+                      <h5 className='text-xs font-medium text-lunary-highlight-300'>
+                        {displayStelliumSign} Stellium (
+                        {stellium.planets.length} planets)
+                      </h5>
+                      <p className='text-xs text-content-muted mb-1'>
+                        {stellium.planets
+                          .map((p) => `${p.body} (${p.degree}\u00B0)`)
+                          .join(', ')}
+                      </p>
+                      <p className='text-xs text-content-secondary'>
+                        {stellium.meaning}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </CollapsibleSection>

@@ -11,6 +11,29 @@
 import { execFileSync } from 'child_process';
 import type { TransitBlogContent } from './types';
 
+const USE_OLLAMA = process.env.TRANSIT_USE_OLLAMA === '1';
+const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
+const OLLAMA_SCORER_MODEL = process.env.OLLAMA_SCORER_MODEL || 'qwen3:14b';
+
+async function callOllamaSingle(prompt: string): Promise<string> {
+  const body: Record<string, unknown> = {
+    model: OLLAMA_SCORER_MODEL,
+    messages: [{ role: 'user', content: prompt }],
+    stream: false,
+    think: false,
+    options: { num_predict: 512, temperature: 0 },
+  };
+  const res = await fetch(`${OLLAMA_URL}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(120_000),
+  } as RequestInit);
+  if (!res.ok) throw new Error(`Ollama scorer error: ${res.status}`);
+  const data = (await res.json()) as { message: { content: string } };
+  return data.message.content;
+}
+
 export const PUBLISH_THRESHOLD = 7; // out of 10
 
 // --- Deterministic checks ---
@@ -175,16 +198,21 @@ Return ONLY valid JSON, no markdown:
   "feedback": "<one sentence of the most important thing to fix, or 'Looks good' if strong>"
 }`;
 
-  const rawOutput = execFileSync(
-    'claude',
-    ['--print', '--model', 'haiku', '--output-format', 'text'],
-    {
-      input: prompt,
-      encoding: 'utf-8',
-      maxBuffer: 512 * 1024,
-      timeout: 60_000,
-    },
-  );
+  let rawOutput: string;
+  if (USE_OLLAMA) {
+    rawOutput = await callOllamaSingle(prompt);
+  } else {
+    rawOutput = execFileSync(
+      'claude',
+      ['--print', '--model', 'haiku', '--output-format', 'text'],
+      {
+        input: prompt,
+        encoding: 'utf-8',
+        maxBuffer: 512 * 1024,
+        timeout: 60_000,
+      },
+    );
+  }
 
   // Extract JSON
   const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);

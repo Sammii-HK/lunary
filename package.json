@@ -4,13 +4,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack -p 3003",
+    "dev": "next dev -p 3003",
     "cap:sync": "npx cap sync",
     "cap:ios": "npx cap open ios",
     "cap:android": "npx cap open android",
     "postinstall": "prisma generate",
     "build": "prisma generate && NODE_OPTIONS='--max-old-space-size=4096' pnpm run generate:sitemap-last-modified && NODE_OPTIONS='--max-old-space-size=4096' next build",
-    "build:deploy": "prisma generate && prisma migrate deploy && NODE_OPTIONS='--max-old-space-size=4096' pnpm run generate:sitemap-last-modified && NODE_OPTIONS='--max-old-space-size=4096' next build",
+    "build:deploy": "prisma generate && prisma migrate deploy && rm -rf .next/cache && NODE_OPTIONS='--max-old-space-size=4096' pnpm run generate:sitemap-last-modified && NODE_OPTIONS='--max-old-space-size=4096' next build",
     "generate:sitemap-last-modified": "node scripts/generate-sitemap-last-modified.js",
     "start": "next start",
     "lint": "eslint . --fix --ext .ts,.tsx",
@@ -318,5 +318,11 @@
     "typescript": "^5.9.3",
     "web-streams-polyfill": "^4.2.0"
   },
-  "packageManager": "pnpm@9.15.0"
+  "packageManager": "pnpm@9.15.0",
+  "pnpm": {
+    "overrides": {
+      "handlebars": ">=4.7.9",
+      "axios": ">=1.15.0"
+    }
+  }
 }

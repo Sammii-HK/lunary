@@ -1,0 +1,1010 @@
+{
+  "Sun": {
+    "Moon": {
+      "Conjunction": {
+        "meaning": "Inner Harmony",
+        "description": "Your conscious will aligns with your emotional nature. This creates a unified self-expression where your core identity and feelings work in harmony. You present a consistent persona to the world."
+      },
+      "Opposition": {
+        "meaning": "Internal Dialogue",
+        "description": "Tension between your ego and emotions creates internal conflict. You may struggle between what you want and what you feel. This aspect drives psychological growth through integration of opposing needs."
+      },
+      "Square": {
+        "meaning": "Creative Friction",
+        "description": "Conflict between will and emotion fuels action. You feel pulled in different directions, which can drive productivity but also create restlessness. Channel this dynamic energy into creative pursuits."
+      },
+      "Trine": {
+        "meaning": "Emotional Ease",
+        "description": "Your feelings naturally support your life direction. Emotional responses align with your goals, making it easy to pursue what matters. You likely have natural confidence and emotional stability."
+      },
+      "Sextile": {
+        "meaning": "Emotional Support",
+        "description": "Your emotions gently encourage your goals without forcing them. You can access your feelings to support your ambitions. This aspect offers flexibility in emotional expression."
+      }
+    },
+    "Mercury": {
+      "Conjunction": {
+        "meaning": "Unified Voice",
+        "description": "Your core identity and mind merge seamlessly. You speak and think from your authentic self. Communication feels natural and reflects your true values."
+      },
+      "Opposition": {
+        "meaning": "Internal Debate",
+        "description": "Your thoughts may challenge your core beliefs. You overthink identity questions and may second-guess yourself. This aspect sharpens critical thinking."
+      },
+      "Square": {
+        "meaning": "Challenged Expression",
+        "description": "Friction between will and communication creates obstacles in self-expression. You may struggle to articulate who you are. With practice, this teaches clear, intentional communication."
+      },
+      "Trine": {
+        "meaning": "Clear Expression",
+        "description": "Thoughts naturally express your authentic self. Communication flows easily and others understand you well. You're seen as honest and straightforward."
+      },
+      "Sextile": {
+        "meaning": "Articulate Self",
+        "description": "You can express yourself clearly when you choose to. Words come easily when discussing your values. This aspect supports learning and communication skills."
+      }
+    },
+    "Venus": {
+      "Conjunction": {
+        "meaning": "Magnetic Charm",
+        "description": "Identity and attraction merge into magnetic presence. You draw people to you naturally. Self-worth and charisma are aligned."
+      },
+      "Opposition": {
+        "meaning": "Value Conflict",
+        "description": "Your core self may clash with what you love or attract. Identity struggles can affect relationships. Resolving this brings deeper self-acceptance."
+      },
+      "Square": {
+        "meaning": "Worth Challenge",
+        "description": "Tension between self-expression and relationships creates friction. You may sacrifice self for love or struggle with self-worth. Growth comes through balance."
+      },
+      "Trine": {
+        "meaning": "Lovable Self",
+        "description": "You naturally attract what you need. Self-expression draws positive responses from others. Relationships feel supportive of your growth."
+      },
+      "Sextile": {
+        "meaning": "Relational Ease",
+        "description": "You can express yourself in ways others appreciate. Social skills come naturally. This aspect smooths relationship dynamics."
+      }
+    },
+    "Mars": {
+      "Conjunction": {
+        "meaning": "Dynamic Action",
+        "description": "Will and aggression unite into forceful action. You pursue goals with intensity and courage. Leadership comes naturally."
+      },
+      "Opposition": {
+        "meaning": "Will vs. Drive",
+        "description": "Your goals may clash with your desires or external forces oppose you. You face obstacles that test your resolve. Persistence leads to hard-won victories."
+      },
+      "Square": {
+        "meaning": "Assertive Challenge",
+        "description": "Friction between will and action creates frustration or impulsive behavior. You may struggle with anger or assertiveness. Channel this energy deliberately into challenges."
+      },
+      "Trine": {
+        "meaning": "Effortless Drive",
+        "description": "Courage aligns with your core purpose. You take action naturally toward meaningful goals. Physical vitality and determination flow easily."
+      },
+      "Sextile": {
+        "meaning": "Active Support",
+        "description": "Energy supports your goals when you activate it. You can assert yourself effectively. This aspect encourages healthy competition and courage."
+      }
+    },
+    "Jupiter": {
+      "Conjunction": {
+        "meaning": "Expansive Identity",
+        "description": "Your core self expands outward easily. You're naturally optimistic and drawn to growth. Luck often follows your authentic self-expression."
+      },
+      "Opposition": {
+        "meaning": "Expansion Tension",
+        "description": "Growth and identity pull in opposite directions. You may overextend or face external limits. Wisdom comes from recognizing when to expand and when to consolidate."
+      },
+      "Square": {
+        "meaning": "Growth Friction",
+        "description": "Obstacles to expansion create frustration but spur determination. You may struggle with excess or limitation. Balanced growth requires discipline."
+      },
+      "Trine": {
+        "meaning": "Natural Luck",
+        "description": "Opportunities flow toward your authentic self. Optimism and identity align. You attract growth and positive circumstances naturally."
+      },
+      "Sextile": {
+        "meaning": "Opportunity Support",
+        "description": "Growth opportunities appear when you express yourself. This aspect encourages learning and exploration. You're naturally fortunate in pursuing your interests."
+      }
+    },
+    "Saturn": {
+      "Conjunction": {
+        "meaning": "Serious Purpose",
+        "description": "Identity fuses with responsibility and maturity. You're naturally serious and purposeful. Leadership through discipline comes naturally."
+      },
+      "Opposition": {
+        "meaning": "Structure vs. Self",
+        "description": "Authority and identity clash. You may feel restricted in expressing yourself or rebel against structure. Maturity comes through respecting both freedom and responsibility."
+      },
+      "Square": {
+        "meaning": "Limitation Challenge",
+        "description": "Obstacles force you to prove yourself. Identity feels limited by external constraints. Persistence and patience build real achievement."
+      },
+      "Trine": {
+        "meaning": "Earned Success",
+        "description": "Discipline naturally supports your goals. You're respected for reliability and competence. Authority comes through integrity."
+      },
+      "Sextile": {
+        "meaning": "Grounded Purpose",
+        "description": "Structure supports your ambitions. You can access discipline when needed. This aspect aids career development and long-term goals."
+      }
+    },
+    "Uranus": {
+      "Conjunction": {
+        "meaning": "Radical Self",
+        "description": "Identity rebels against convention. You're naturally innovative and unique. Authenticity means standing apart from the crowd."
+      },
+      "Opposition": {
+        "meaning": "Freedom vs. Identity",
+        "description": "Rebellion and stability clash. You struggle between fitting in and standing out. True freedom comes from accepting your uniqueness."
+      },
+      "Square": {
+        "meaning": "Unconventional Challenge",
+        "description": "Expect sudden changes to identity and direction. Unpredictability tests flexibility. Growth comes through embracing change."
+      },
+      "Trine": {
+        "meaning": "Innovative Self",
+        "description": "Uniqueness flows naturally into self-expression. You're seen as creative and forward-thinking. Innovation comes easily."
+      },
+      "Sextile": {
+        "meaning": "Inspired Expression",
+        "description": "Original ideas support your goals. You can access unconventional thinking when needed. This aspect encourages progressive thinking."
+      }
+    },
+    "Neptune": {
+      "Conjunction": {
+        "meaning": "Dreamy Identity",
+        "description": "Self merges with imagination and idealism. Your identity is fluid and creative. You inspire others but may struggle with boundaries."
+      },
+      "Opposition": {
+        "meaning": "Illusion vs. Reality",
+        "description": "Confusion between ego and fantasy clouds perception. You may struggle with illusion or self-deception. Clarity comes through spiritual seeking."
+      },
+      "Square": {
+        "meaning": "Confusion Challenge",
+        "description": "Reality feels slippery or identity becomes unclear. Confusion tests your discernment. Grounding practices help integrate vision with reality."
+      },
+      "Trine": {
+        "meaning": "Mystical Ease",
+        "description": "Imagination naturally enriches your identity. You access inspiration and intuition easily. Spirituality feels integrated into daily life."
+      },
+      "Sextile": {
+        "meaning": "Creative Vision",
+        "description": "Imagination supports your goals when you access it. This aspect aids artistic expression and intuitive insights. Dreams can guide your path."
+      }
+    },
+    "Pluto": {
+      "Conjunction": {
+        "meaning": "Powerful Transformation",
+        "description": "Identity undergoes intense transformation. You're naturally powerful but must learn self-mastery. Rebirth is central to your purpose."
+      },
+      "Opposition": {
+        "meaning": "Power Struggle",
+        "description": "Control issues shape relationships. You may battle external forces for autonomy. True power comes through releasing control."
+      },
+      "Square": {
+        "meaning": "Transformative Crisis",
+        "description": "Crises force deep identity change. You face power struggles with authority. Resilience and authenticity emerge through trials."
+      },
+      "Trine": {
+        "meaning": "Regenerative Power",
+        "description": "Transformation serves your goals. You naturally release what no longer serves you. Depth and authenticity shine through."
+      },
+      "Sextile": {
+        "meaning": "Transformative Support",
+        "description": "Change can support your evolution when you embrace it. This aspect aids psychological work and personal power. Growth through letting go."
+      }
+    }
+  },
+  "Moon": {
+    "Mercury": {
+      "Conjunction": {
+        "meaning": "Emotional Communication",
+        "description": "Feelings and thoughts blend seamlessly. You express emotions verbally and easily share feelings. Communication is emotionally intuitive."
+      },
+      "Opposition": {
+        "meaning": "Head vs. Heart",
+        "description": "Thoughts clash with feelings creating internal debate. You may overthink emotions or feel misunderstood. This aspect sharpens emotional awareness."
+      },
+      "Square": {
+        "meaning": "Expression Friction",
+        "description": "Emotional needs and communication conflict. You may struggle to express feelings clearly or overthink emotionally. This teaches emotional vocabulary."
+      },
+      "Trine": {
+        "meaning": "Fluid Expression",
+        "description": "You articulate feelings naturally and others understand your emotions. Words match feelings. This aids counselling, writing, or teaching."
+      },
+      "Sextile": {
+        "meaning": "Connected Communication",
+        "description": "Thoughts can express feelings when you choose. This aspect supports both intellect and emotional intelligence. Learning feels emotionally natural."
+      }
+    },
+    "Venus": {
+      "Conjunction": {
+        "meaning": "Emotional Affection",
+        "description": "Love and emotion merge into natural warmth. You nurture others easily and feel deeply about relationships. Emotional security through connection."
+      },
+      "Opposition": {
+        "meaning": "Love Conflict",
+        "description": "Emotional needs clash with relationship desires. You may struggle between attachment and independence. Integration brings relationship harmony."
+      },
+      "Square": {
+        "meaning": "Intimacy Challenge",
+        "description": "Emotional and relational needs conflict. You may fear abandonment or struggle with vulnerability. Growth comes through building trust."
+      },
+      "Trine": {
+        "meaning": "Nurturing Love",
+        "description": "Emotional warmth draws supportive relationships. You naturally attract care and comfort. Relationships feel safe and nurturing."
+      },
+      "Sextile": {
+        "meaning": "Affectionate Support",
+        "description": "Emotions support relationships when expressed. This aspect aids emotional intimacy and affection. You can access warmth deliberately."
+      }
+    },
+    "Mars": {
+      "Conjunction": {
+        "meaning": "Passionate Emotions",
+        "description": "Feelings and anger merge into passionate energy. Emotions drive action directly. You may be quick-tempered but also intensely caring."
+      },
+      "Opposition": {
+        "meaning": "Emotional vs. Aggressive",
+        "description": "Feelings clash with assertiveness. You may struggle between aggression and sensitivity. Healthy expression requires balancing passion with compassion."
+      },
+      "Square": {
+        "meaning": "Emotional Friction",
+        "description": "Feelings create tension with action or desires. Irritability may surface. This aspect teaches managing emotional intensity constructively."
+      },
+      "Trine": {
+        "meaning": "Courageous Feelings",
+        "description": "You feel deeply and act on emotions with confidence. Emotional courage comes naturally. Passion fuels meaningful action."
+      },
+      "Sextile": {
+        "meaning": "Emotionally Assertive",
+        "description": "Feelings can fuel positive action. This aspect aids standing up for needs while remaining compassionate. Emotional honesty strengthens you."
+      }
+    },
+    "Jupiter": {
+      "Conjunction": {
+        "meaning": "Generous Heart",
+        "description": "Emotional nature is expansive and generous. You feel optimistic and draw comfort from growth. Nurturing others brings joy."
+      },
+      "Opposition": {
+        "meaning": "Expansion Tension",
+        "description": "Emotional needs clash with growth impulses. You may overindulge emotionally or seek excessive comfort. Moderation brings balance."
+      },
+      "Square": {
+        "meaning": "Emotional Excess",
+        "description": "Feelings expand beyond healthy bounds. You may struggle with emotional or physical excess. Boundaries and discipline aid growth."
+      },
+      "Trine": {
+        "meaning": "Optimistic Nurture",
+        "description": "You feel hopeful and emotionally generous. Comfort and growth align naturally. This aspect brings emotional luck and resilience."
+      },
+      "Sextile": {
+        "meaning": "Emotional Opportunity",
+        "description": "Feelings can expand your worldview. This aspect aids finding meaning through emotional experience. Hope naturally supports emotional needs."
+      }
+    },
+    "Saturn": {
+      "Conjunction": {
+        "meaning": "Serious Feelings",
+        "description": "Emotions are deep and cautious. You feel responsibility for others' welfare. Emotional maturity and stability come naturally."
+      },
+      "Opposition": {
+        "meaning": "Emotional Restriction",
+        "description": "You feel restricted or cannot express emotions freely. Fear of loss may dominate. Emotional growth comes through gradual opening."
+      },
+      "Square": {
+        "meaning": "Emotional Barriers",
+        "description": "Difficulty feeling or expressing emotions creates isolation. You may seem cold but feel deeply inside. Building emotional trust takes time."
+      },
+      "Trine": {
+        "meaning": "Grounded Emotions",
+        "description": "Feelings are stable and reliable. You're emotionally responsible. This aspect aids caring professions and steady relationships."
+      },
+      "Sextile": {
+        "meaning": "Emotionally Mature",
+        "description": "You can access emotional depth thoughtfully. This aspect aids emotional discipline and maturity. Feelings become your teacher."
+      }
+    },
+    "Uranus": {
+      "Conjunction": {
+        "meaning": "Unpredictable Feelings",
+        "description": "Emotions are changeable and unconventional. You feel differently than others. Emotional freedom matters deeply to you."
+      },
+      "Opposition": {
+        "meaning": "Emotional Rebellion",
+        "description": "Feelings push against restrictions creating sudden outbursts. You crave emotional freedom but fear instability. Balance security with independence."
+      },
+      "Square": {
+        "meaning": "Emotional Volatility",
+        "description": "Sudden mood shifts test stability. Relationships can feel unpredictable. Embracing emotional uniqueness brings peace."
+      },
+      "Trine": {
+        "meaning": "Creatively Emotional",
+        "description": "Feelings inspire creative and innovative expression. Emotional intuition guides you well. You're comfortable with feelings others find strange."
+      },
+      "Sextile": {
+        "meaning": "Inspired Feelings",
+        "description": "Emotions can spark creative insight. This aspect aids emotional breakthroughs and new perspectives. You're emotionally open to change."
+      }
+    },
+    "Neptune": {
+      "Conjunction": {
+        "meaning": "Mystical Emotions",
+        "description": "Feelings merge with imagination and spirituality. You're highly intuitive and empathetic. Boundaries between self and others blur."
+      },
+      "Opposition": {
+        "meaning": "Emotional Illusion",
+        "description": "Feelings create confusion or deception clouds perception. You may be manipulated or deceive yourself. Truth requires discernment."
+      },
+      "Square": {
+        "meaning": "Emotional Confusion",
+        "description": "Feelings become unclear or reality feels dreamlike. You struggle distinguishing imagination from truth. Grounding helps anchor emotions."
+      },
+      "Trine": {
+        "meaning": "Intuitive Feelings",
+        "description": "Emotions guide you spiritually and intuitively. You're naturally empathetic and compassionate. This aspect aids healing and artistic pursuits."
+      },
+      "Sextile": {
+        "meaning": "Empathetic Intuition",
+        "description": "Emotions can access deeper truth. This aspect aids psychic abilities and creative expression. Feelings connect you to something greater."
+      }
+    },
+    "Pluto": {
+      "Conjunction": {
+        "meaning": "Intense Feelings",
+        "description": "Emotions run deep and powerfully. You feel everything intensely with strong needs for control. Emotional transformation is your journey."
+      },
+      "Opposition": {
+        "meaning": "Emotional Power Struggle",
+        "description": "Feelings clash with outside forces or lose control. You may experience emotional manipulation. Reclaiming emotional power requires vulnerability."
+      },
+      "Square": {
+        "meaning": "Emotional Crisis",
+        "description": "Feelings become overwhelming or trigger intense reactions. Emotional crises force deep transformation. This aspect teaches emotional resilience."
+      },
+      "Trine": {
+        "meaning": "Regenerative Emotions",
+        "description": "You naturally transform through feelings. Emotional depth becomes your strength. This aspect aids healing work and psychological insight."
+      },
+      "Sextile": {
+        "meaning": "Emotionally Transformative",
+        "description": "Feelings can catalyze positive change. This aspect supports emotional depth and healing. You naturally understand others' shadows."
+      }
+    }
+  },
+  "Mercury": {
+    "Venus": {
+      "Conjunction": {
+        "meaning": "Charming Communication",
+        "description": "Words and charm combine into persuasive speech. You talk about relationships easily and diplomatically. Social grace comes naturally."
+      },
+      "Opposition": {
+        "meaning": "Logic vs. Love",
+        "description": "Thoughts clash with relationship needs. You may overthink love or struggle with diplomatic speech. This aspect brings balanced perspective."
+      },
+      "Square": {
+        "meaning": "Communication Tension",
+        "description": "Difficulty balancing intellect and affection. You may say the wrong thing or feel misunderstood in relationships. This teaches thoughtful communication."
+      },
+      "Trine": {
+        "meaning": "Graceful Words",
+        "description": "You express affection and values clearly. Communication smooths relationships. This aspect aids mediation and diplomatic speech."
+      },
+      "Sextile": {
+        "meaning": "Affectionate Expression",
+        "description": "Thoughts can express love when you choose. This aspect supports both intellect and romance. Social skills enhance relationships."
+      }
+    },
+    "Mars": {
+      "Conjunction": {
+        "meaning": "Sharp Assertiveness",
+        "description": "Words and aggression merge into direct, forceful speech. You argue persuasively and speak your mind immediately. Sarcasm or cutting remarks come easily."
+      },
+      "Opposition": {
+        "meaning": "Debate Clash",
+        "description": "Words spark arguments or others challenge your views. You may rush to defend yourself. This aspect sharpens debate skills."
+      },
+      "Square": {
+        "meaning": "Argumentative Friction",
+        "description": "Communication creates conflict or you speak too quickly. Arguments escalate easily. This teaches strategic communication and listening."
+      },
+      "Trine": {
+        "meaning": "Persuasive Mind",
+        "description": "Your arguments are convincing and well-articulated. You debate skillfully. Mental energy supports ambitious communication."
+      },
+      "Sextile": {
+        "meaning": "Active Thinking",
+        "description": "Thoughts can fuel assertive speech. This aspect aids quick thinking and decisive communication. You stand up for ideas effectively."
+      }
+    },
+    "Jupiter": {
+      "Conjunction": {
+        "meaning": "Expansive Mind",
+        "description": "Thinking is broad and philosophical. You speak about bigger pictures and possibilities. Communication flows generously."
+      },
+      "Opposition": {
+        "meaning": "Opinion Excess",
+        "description": "You have strong opinions that others may perceive as arrogant. Excess talking or over-promising occurs. Humility aids learning."
+      },
+      "Square": {
+        "meaning": "Mental Excess",
+        "description": "You may talk too much or have scattered thoughts. Education takes effort despite capability. This teaches focused thinking and listening."
+      },
+      "Trine": {
+        "meaning": "Natural Eloquence",
+        "description": "Words flow expansively and persuasively. You're naturally witty and engaging. This aspect aids teaching, writing, and public speaking."
+      },
+      "Sextile": {
+        "meaning": "Inspired Communication",
+        "description": "Thoughts can expand optimistically. This aspect supports learning and philosophical discussion. You're naturally curious and articulate."
+      }
+    },
+    "Saturn": {
+      "Conjunction": {
+        "meaning": "Serious Mind",
+        "description": "Thinking is logical, careful, and serious. You speak with authority and few wasted words. Communication is measured and responsible."
+      },
+      "Opposition": {
+        "meaning": "Thinking Tension",
+        "description": "Mental limitations feel restricting or external voices silence you. You may doubt your intelligence. Persistence builds mental confidence."
+      },
+      "Square": {
+        "meaning": "Mental Discipline Challenge",
+        "description": "Focusing or expressing thoughts takes effort. You doubt your intelligence or communication ability. This teaches mental discipline and clarity."
+      },
+      "Trine": {
+        "meaning": "Clear Logic",
+        "description": "Thinking is organized and methodical. You communicate clearly and logically. This aspect aids science, mathematics, and structured writing."
+      },
+      "Sextile": {
+        "meaning": "Organized Thinking",
+        "description": "You can access disciplined thought when needed. This aspect supports learning through structure. Words carry weight and authority."
+      }
+    },
+    "Uranus": {
+      "Conjunction": {
+        "meaning": "Brilliant Mind",
+        "description": "Thinking is original, erratic, and unconventional. You speak ahead of your time and think in unique ways. Communication surprises others."
+      },
+      "Opposition": {
+        "meaning": "Thought Rebellion",
+        "description": "Others may think you're eccentric or out-of-touch. Your views shock people. This aspect makes you a catalyst for new thinking."
+      },
+      "Square": {
+        "meaning": "Scattered Thinking",
+        "description": "Thoughts jump around or feel fragmented. Communication can be confusing. Channeling nervous energy aids focus."
+      },
+      "Trine": {
+        "meaning": "Intuitive Genius",
+        "description": "Flashes of insight and original thinking come naturally. Your ideas are ahead of the curve. This aspect aids innovative work and invention."
+      },
+      "Sextile": {
+        "meaning": "Original Ideas",
+        "description": "You can access original thinking when needed. This aspect supports innovation and new perspectives. Communication brings fresh ideas."
+      }
+    },
+    "Neptune": {
+      "Conjunction": {
+        "meaning": "Mystical Mind",
+        "description": "Thinking is imaginative but impractical. You see possibilities others miss. Words carry poetic or spiritual quality."
+      },
+      "Opposition": {
+        "meaning": "Confused Thinking",
+        "description": "Reality and imagination blur. You may be deceived or communicate unclearly. Groundedness clarifies perception."
+      },
+      "Square": {
+        "meaning": "Vague Communication",
+        "description": "Expressing yourself clearly is difficult. Thoughts feel dreamlike and scattered. This teaches clear communication through practice."
+      },
+      "Trine": {
+        "meaning": "Poetic Mind",
+        "description": "Imagination naturally enhances communication. Your words inspire or heal. This aspect aids writing, music, and artistic expression."
+      },
+      "Sextile": {
+        "meaning": "Intuitive Thinking",
+        "description": "You can access intuitive knowing. This aspect supports channeling and creative writing. Imagination serves communication."
+      }
+    },
+    "Pluto": {
+      "Conjunction": {
+        "meaning": "Penetrating Mind",
+        "description": "Thinking cuts to truth and hidden matters. You understand psychology and power dynamics intuitively. Communication reveals secrets."
+      },
+      "Opposition": {
+        "meaning": "Mind Control",
+        "description": "Others may try to control your thinking or you're obsessed with ideas. This aspect brings insight into manipulation and truth-seeking."
+      },
+      "Square": {
+        "meaning": "Obsessive Thinking",
+        "description": "You fixate on ideas or struggle with intrusive thoughts. This aspect teaches releasing mental control and embracing flow."
+      },
+      "Trine": {
+        "meaning": "Incisive Mind",
+        "description": "You naturally understand hidden depths. Your insights transform understanding. This aspect aids psychology, detective work, and research."
+      },
+      "Sextile": {
+        "meaning": "Transformative Thinking",
+        "description": "Thoughts can penetrate to truth. This aspect supports deep investigation and research. Communication can catalyze change in others."
+      }
+    }
+  },
+  "Venus": {
+    "Mars": {
+      "Conjunction": {
+        "meaning": "Magnetic Passion",
+        "description": "Love and desire unite into passionate attraction. You're naturally charismatic and sensual. Relationships are intense and physically active."
+      },
+      "Opposition": {
+        "meaning": "Love vs. Desire",
+        "description": "Passion and affection clash. You may alternate between hot and cold in relationships. Integration brings balanced expression of feeling and sexuality."
+      },
+      "Square": {
+        "meaning": "Passionate Friction",
+        "description": "Conflict between gentle love and aggressive desire. Relationships may feel turbulent. This teaches balancing tenderness with passion."
+      },
+      "Trine": {
+        "meaning": "Harmonious Desire",
+        "description": "Love and passion flow together naturally. Relationships are both affectionate and sexually satisfying. Charm and courage complement each other."
+      },
+      "Sextile": {
+        "meaning": "Romantic Energy",
+        "description": "Passion supports relationships when expressed thoughtfully. This aspect aids romantic initiative and healthy sexuality. Attraction supports connection."
+      }
+    },
+    "Jupiter": {
+      "Conjunction": {
+        "meaning": "Generous Love",
+        "description": "You're naturally warm, generous in relationships, and attract abundance through charm. Love expands your world. Social life flourishes."
+      },
+      "Opposition": {
+        "meaning": "Love Excess",
+        "description": "You may overindulge in pleasure or relationships, or feel external limits on happiness. This aspect teaches balance between indulgence and gratitude."
+      },
+      "Square": {
+        "meaning": "Indulgent Friction",
+        "description": "You may struggle with excess in pleasure or relationships. Extravagance causes problems. This teaches healthy limits and realistic expectations."
+      },
+      "Trine": {
+        "meaning": "Fortunate Love",
+        "description": "Luck flows through relationships and social charm. You naturally attract what you need. This aspect brings ease in finding partnership and prosperity through relationships."
+      },
+      "Sextile": {
+        "meaning": "Fortunate Affection",
+        "description": "Relationships bring growth and opportunity. This aspect aids generosity and social expansion. Love opens doors naturally."
+      }
+    },
+    "Saturn": {
+      "Conjunction": {
+        "meaning": "Serious Love",
+        "description": "You approach relationships with maturity and commitment. Love grows slowly but runs deep. You're reliable and responsible in partnership."
+      },
+      "Opposition": {
+        "meaning": "Love Restriction",
+        "description": "You may fear relationships or feel unworthy of love. External barriers to happiness emerge. Trust develops through consistent care."
+      },
+      "Square": {
+        "meaning": "Love Barriers",
+        "description": "Difficulty expressing affection or receiving love. Relationships test commitment. This aspect teaches authentic love through facing fears."
+      },
+      "Trine": {
+        "meaning": "Lasting Love",
+        "description": "Relationships develop through dedication and loyalty. Love matures beautifully with time. This aspect aids lasting partnerships and stability."
+      },
+      "Sextile": {
+        "meaning": "Devoted Love",
+        "description": "You can access commitment and loyalty deliberately. This aspect supports building lasting relationships through effort. Love deepens with time."
+      }
+    },
+    "Uranus": {
+      "Conjunction": {
+        "meaning": "Unconventional Love",
+        "description": "Your approach to relationships is unique and non-traditional. You need freedom in partnership. Relationships spark excitement and change."
+      },
+      "Opposition": {
+        "meaning": "Freedom vs. Relationship",
+        "description": "You crave independence within relationships or face sudden disruptions. Relationships feel unpredictable. Balance autonomy with commitment."
+      },
+      "Square": {
+        "meaning": "Relationship Turbulence",
+        "description": "Sudden changes test relationships. Commitment feels restrictive. This aspect teaches creating freedom within partnership."
+      },
+      "Trine": {
+        "meaning": "Innovative Relationships",
+        "description": "Relationships inspire creativity and personal growth. You attract unique partners. This aspect aids unconventional but happy unions."
+      },
+      "Sextile": {
+        "meaning": "Progressive Love",
+        "description": "Relationships can evolve and change positively. This aspect supports modern partnerships and personal freedom. Love feels liberating."
+      }
+    },
+    "Neptune": {
+      "Conjunction": {
+        "meaning": "Romantic Fantasy",
+        "description": "Love merges with imagination creating idealistic, spiritual connection. You may lose yourself in relationships. Romance feels dreamy."
+      },
+      "Opposition": {
+        "meaning": "Love Illusion",
+        "description": "Deception or loss in relationships creates pain. You may idealize or deceive in love. Discernment brings clarity about true connection."
+      },
+      "Square": {
+        "meaning": "Confused Affection",
+        "description": "Relationships feel unclear or you struggle with illusion in love. Heartbreak teaches boundaries. This aspect aids spiritual understanding of love."
+      },
+      "Trine": {
+        "meaning": "Spiritual Love",
+        "description": "You naturally access unconditional and spiritual love. Relationships feel transcendent. This aspect aids healing and compassion in partnership."
+      },
+      "Sextile": {
+        "meaning": "Intuitive Romance",
+        "description": "Love can access spiritual dimension. This aspect supports imagination and creativity in relationships. You're naturally compassionate."
+      }
+    },
+    "Pluto": {
+      "Conjunction": {
+        "meaning": "Transformative Love",
+        "description": "Relationships profoundly transform you. Love feels intense and consuming. You need deep merging but must maintain autonomy."
+      },
+      "Opposition": {
+        "meaning": "Power Struggle",
+        "description": "Control issues dominate relationships. You may encounter manipulation or power imbalance. Healthy relationships require releasing control."
+      },
+      "Square": {
+        "meaning": "Passionate Crisis",
+        "description": "Intense emotions create relationship turmoil. Jealousy or possessiveness emerges. This aspect teaches healthy boundaries and authentic intimacy."
+      },
+      "Trine": {
+        "meaning": "Regenerative Love",
+        "description": "Relationships catalyze deep personal transformation. You naturally understand others' depths. This aspect aids profound intimacy and healing partnership."
+      },
+      "Sextile": {
+        "meaning": "Intensely Bonding",
+        "description": "Love can deepen through psychological work. This aspect supports authentic connection and intimate understanding. Relationships transform both partners."
+      }
+    }
+  },
+  "Mars": {
+    "Jupiter": {
+      "Conjunction": {
+        "meaning": "Expansive Courage",
+        "description": "Courage and optimism combine into bold action. You pursue goals with enthusiasm and confidence. Success comes through taking big risks."
+      },
+      "Opposition": {
+        "meaning": "Action Excess",
+        "description": "Overconfidence leads to overextension or recklessness. You may act too quickly or lack patience. Wisdom comes through learning restraint."
+      },
+      "Square": {
+        "meaning": "Reckless Energy",
+        "description": "Excess energy drives impulsive action. Restraint is difficult. This aspect teaches channeling ambition productively."
+      },
+      "Trine": {
+        "meaning": "Fortunate Courage",
+        "description": "Action aligns with opportunity and luck. You naturally take advantage of chances. This aspect brings easy success through bold action."
+      },
+      "Sextile": {
+        "meaning": "Confident Action",
+        "description": "Courage can fuel ambitious goals. This aspect aids taking calculated risks. Action brings growth and opportunity."
+      }
+    },
+    "Saturn": {
+      "Conjunction": {
+        "meaning": "Disciplined Drive",
+        "description": "Action is controlled and purposeful. You work steadily toward difficult goals. Respect for structure and discipline comes naturally."
+      },
+      "Opposition": {
+        "meaning": "Blocked Action",
+        "description": "External obstacles frustrate your drive or you fear taking action. Patience and persistence overcome barriers. This builds real strength."
+      },
+      "Square": {
+        "meaning": "Action Obstacles",
+        "description": "Frustration builds from blocked goals. This aspect teaches persistence and strategic action. Hard work leads to earned success."
+      },
+      "Trine": {
+        "meaning": "Persistent Effort",
+        "description": "Discipline supports your goals naturally. Hard work pays off reliably. This aspect aids career advancement through steady effort."
+      },
+      "Sextile": {
+        "meaning": "Strategic Drive",
+        "description": "Action can be focused and efficient. This aspect supports planning and follow-through. You're naturally disciplined when needed."
+      }
+    },
+    "Uranus": {
+      "Conjunction": {
+        "meaning": "Rebellious Drive",
+        "description": "Action breaks convention and defies expectations. You're a pioneer but can be reckless. Change and disruption energize you."
+      },
+      "Opposition": {
+        "meaning": "Chaotic Action",
+        "description": "Sudden action creates disruption or external forces block you. Unpredictability tests flexibility. This aspect teaches embracing chaos."
+      },
+      "Square": {
+        "meaning": "Erratic Energy",
+        "description": "Impulsive action creates problems or nervous energy builds. This aspect teaches channeling rebellion constructively."
+      },
+      "Trine": {
+        "meaning": "Revolutionary Drive",
+        "description": "Energy fuels innovative action naturally. You're drawn to pioneering work. This aspect aids progressive action and breakthrough innovation."
+      },
+      "Sextile": {
+        "meaning": "Inspired Action",
+        "description": "Action can spark innovation. This aspect supports taking unconventional approaches. You naturally embrace new methods."
+      }
+    },
+    "Neptune": {
+      "Conjunction": {
+        "meaning": "Subtle Drive",
+        "description": "Action is intuitive but unfocused. You move toward dreams but may lack clarity. Spiritual warrior energy awakens."
+      },
+      "Opposition": {
+        "meaning": "Confused Action",
+        "description": "Direction feels unclear or deception clouds motivation. This aspect teaches discerning true goals from fantasy."
+      },
+      "Square": {
+        "meaning": "Vague Motivation",
+        "description": "Energy dissipates or goals feel unclear. This aspect teaches grounding dreams into concrete action."
+      },
+      "Trine": {
+        "meaning": "Inspired Courage",
+        "description": "Intuition guides action beautifully. You're naturally drawn to spiritual or healing pursuits. This aspect aids following inner guidance."
+      },
+      "Sextile": {
+        "meaning": "Spiritual Drive",
+        "description": "Action can serve spiritual purpose. This aspect aids following intuition and pursuing artistic goals. Dreams can guide action."
+      }
+    },
+    "Pluto": {
+      "Conjunction": {
+        "meaning": "Intense Will",
+        "description": "Action is powerful and transformative. You possess tremendous drive and strategic power. Willpower is extraordinary but can be dominating."
+      },
+      "Opposition": {
+        "meaning": "Power Clash",
+        "description": "You battle external forces or internal resistance. Control struggles emerge. True power comes through releasing control."
+      },
+      "Square": {
+        "meaning": "Obsessive Drive",
+        "description": "Compulsive action or power struggles consume energy. This aspect teaches healthy assertion and releasing obsession."
+      },
+      "Trine": {
+        "meaning": "Transformative Power",
+        "description": "Energy catalyzes deep change. You're naturally strategic and powerful. This aspect aids recovery from adversity and psychological work."
+      },
+      "Sextile": {
+        "meaning": "Strategic Power",
+        "description": "Action can penetrate to core issues. This aspect supports investigative work and deep change. You understand power dynamics intuitively."
+      }
+    }
+  },
+  "Jupiter": {
+    "Saturn": {
+      "Conjunction": {
+        "meaning": "Balanced Growth",
+        "description": "Expansion meets responsibility in healthy balance. You pursue growth through structured effort. Opportunities come through careful planning."
+      },
+      "Opposition": {
+        "meaning": "Growth vs. Limitation",
+        "description": "Your expansion is repeatedly constrained or you struggle between optimism and caution. Wisdom comes through accepting both limitation and possibility."
+      },
+      "Square": {
+        "meaning": "Growth Friction",
+        "description": "Obstacles test optimism or you swing between excess and restriction. This aspect teaches integrating both ambition and realism."
+      },
+      "Trine": {
+        "meaning": "Structured Luck",
+        "description": "Growth comes through discipline naturally. Optimism is grounded in reality. This aspect aids career success and lasting prosperity."
+      },
+      "Sextile": {
+        "meaning": "Wise Growth",
+        "description": "Expansion can be achieved through effort. This aspect supports building lasting structures. Growth is realistic and sustainable."
+      }
+    },
+    "Uranus": {
+      "Conjunction": {
+        "meaning": "Revolutionary Expansion",
+        "description": "Growth through innovation and upheaval. Your worldview constantly expands through change. You're naturally drawn to new philosophies."
+      },
+      "Opposition": {
+        "meaning": "Expansion Rebellion",
+        "description": "Change disrupts your plans or you rebel against limitations. Unexpected opportunities arise. Flexibility aids growth."
+      },
+      "Square": {
+        "meaning": "Chaotic Growth",
+        "description": "Sudden expansion or restriction disrupts plans. This aspect teaches embracing uncertainty and trusting the process."
+      },
+      "Trine": {
+        "meaning": "Progressive Luck",
+        "description": "Opportunities come through innovation and change. Your worldview expands naturally. This aspect aids breakthrough insights and new possibilities."
+      },
+      "Sextile": {
+        "meaning": "Innovative Growth",
+        "description": "Expansion can come through unconventional methods. This aspect supports progressive thinking and new opportunities."
+      }
+    },
+    "Neptune": {
+      "Conjunction": {
+        "meaning": "Spiritual Expansion",
+        "description": "Growth through spirituality and imagination. You're naturally optimistic about transcendent possibilities. Faith and vision guide you."
+      },
+      "Opposition": {
+        "meaning": "Illusion Expansion",
+        "description": "Optimism becomes illusion or reality disappoints idealism. This aspect teaches discerning truth from wishful thinking."
+      },
+      "Square": {
+        "meaning": "Confused Expansion",
+        "description": "Goals feel unclear or idealism clouds judgment. This aspect teaches grounding spirituality into practical reality."
+      },
+      "Trine": {
+        "meaning": "Inspired Growth",
+        "description": "Vision naturally expands your world. Spirituality brings joy and meaning. This aspect aids faith and transcendent experiences."
+      },
+      "Sextile": {
+        "meaning": "Visionary Luck",
+        "description": "Dreams can guide expansion. This aspect supports spiritual growth and inspirational pursuits. Vision brings opportunities."
+      }
+    },
+    "Pluto": {
+      "Conjunction": {
+        "meaning": "Intense Expansion",
+        "description": "Growth becomes obsessive or transformative. You have powerful vision but can become dominating. Your beliefs deeply reshape others."
+      },
+      "Opposition": {
+        "meaning": "Growth Power Struggle",
+        "description": "External forces limit expansion or you try to control transformation. This aspect brings wisdom about surrendering control."
+      },
+      "Square": {
+        "meaning": "Obsessive Growth",
+        "description": "You fixate on expansion or face crises. This aspect teaches releasing attachment to outcomes."
+      },
+      "Trine": {
+        "meaning": "Regenerative Growth",
+        "description": "You naturally release what limits you. Transformation brings genuine expansion. This aspect aids deep spiritual and psychological growth."
+      },
+      "Sextile": {
+        "meaning": "Transformative Luck",
+        "description": "Growth can deepen through releasing old patterns. This aspect supports profound change and regeneration. Wisdom comes through depth."
+      }
+    }
+  },
+  "Saturn": {
+    "Uranus": {
+      "Conjunction": {
+        "meaning": "Revolutionary Structure",
+        "description": "Innovation within discipline creates lasting change. You revolutionize established systems. Structure and rebellion find surprising harmony."
+      },
+      "Opposition": {
+        "meaning": "Rigid vs. Free",
+        "description": "You battle between needing stability and craving freedom. Change tests your security. Healthy expression requires both innovation and structure."
+      },
+      "Square": {
+        "meaning": "Structural Rebellion",
+        "description": "Sudden disruption tests plans or you rebel against authority. This aspect teaches integrating innovation with responsibility."
+      },
+      "Trine": {
+        "meaning": "Progressive Structure",
+        "description": "Change strengthens your foundations naturally. You build lasting innovations. This aspect aids sustainable breakthroughs."
+      },
+      "Sextile": {
+        "meaning": "Evolving Stability",
+        "description": "Structure can adapt to change. This aspect supports building new systems. Progress comes through thoughtful innovation."
+      }
+    },
+    "Neptune": {
+      "Conjunction": {
+        "meaning": "Spiritual Structure",
+        "description": "Discipline serves spiritual purpose. You build lasting spiritual structures or dreams. Reality and spirituality blend."
+      },
+      "Opposition": {
+        "meaning": "Reality Confusion",
+        "description": "Reality disappoints spirituality or illusion undermines foundations. This aspect teaches grounding spirituality practically."
+      },
+      "Square": {
+        "meaning": "Spiritual Barriers",
+        "description": "Spirituality feels blocked or reality seems cold. This aspect teaches integrating spirit and matter."
+      },
+      "Trine": {
+        "meaning": "Grounded Spirituality",
+        "description": "Discipline serves your spiritual path naturally. You create lasting spiritual practices. This aspect aids meditation and spiritual development."
+      },
+      "Sextile": {
+        "meaning": "Structured Spirituality",
+        "description": "Discipline can support spiritual practice. This aspect aids building sustainable spiritual routines. Faith develops through practice."
+      }
+    },
+    "Pluto": {
+      "Conjunction": {
+        "meaning": "Deep Discipline",
+        "description": "You understand power and transformation intimately. Authority must be earned through integrity. Regeneration requires facing your depths."
+      },
+      "Opposition": {
+        "meaning": "Authority Power Struggle",
+        "description": "Power dynamics with authority figures test you. Surrender of control is necessary. This brings wisdom about authentic power."
+      },
+      "Square": {
+        "meaning": "Power Crisis",
+        "description": "Confrontations with authority or internal power struggles. This aspect teaches healthy power and respect boundaries."
+      },
+      "Trine": {
+        "meaning": "Transformative Authority",
+        "description": "You lead through integrity and depth. Authority becomes a vehicle for positive transformation. This aspect aids leadership that lasts."
+      },
+      "Sextile": {
+        "meaning": "Disciplined Power",
+        "description": "Authority can serve transformative purposes. This aspect supports deep work and psychological insight. Power stems from integrity."
+      }
+    }
+  },
+  "Uranus": {
+    "Neptune": {
+      "Conjunction": {
+        "meaning": "Visionary Innovation",
+        "description": "Revolutionary ideas with spiritual vision create breakthroughs. You channel collective dreams into new forms. Imagination revolutionizes."
+      },
+      "Opposition": {
+        "meaning": "Vision Confusion",
+        "description": "Idealism and innovation clash or reality disappoints visions. This aspect teaches manifesting dreams practically."
+      },
+      "Square": {
+        "meaning": "Confused Innovation",
+        "description": "Visions feel scattered or breakthroughs lack clarity. This aspect teaches channeling creative chaos into form."
+      },
+      "Trine": {
+        "meaning": "Inspired Breakthroughs",
+        "description": "Visionary ideas naturally breakthrough. You channel collective dreams into innovation. This aspect aids genius-level creativity."
+      },
+      "Sextile": {
+        "meaning": "Creative Innovation",
+        "description": "Breakthroughs can inspire others. This aspect supports channeling vision into new forms. Imagination serves innovation."
+      }
+    },
+    "Pluto": {
+      "Conjunction": {
+        "meaning": "Revolutionary Power",
+        "description": "Deep transformation through radical change. You challenge systems powerfully. Revolution becomes your tool for regeneration."
+      },
+      "Opposition": {
+        "meaning": "Power Rebellion",
+        "description": "Authority opposes your innovation or you fear your own power. This aspect brings wisdom about respectful rebellion."
+      },
+      "Square": {
+        "meaning": "Destructive Innovation",
+        "description": "You may destroy what's valuable in seeking change or face resistance. This aspect teaches discerning what to transform."
+      },
+      "Trine": {
+        "meaning": "Regenerative Revolution",
+        "description": "Innovation naturally regenerates systems. You transform the world. This aspect aids revolutionary breakthroughs that last."
+      },
+      "Sextile": {
+        "meaning": "Transformative Innovation",
+        "description": "Change can catalyze deep transformation. This aspect supports social evolution and psychological breakthrough. You understand hidden dynamics."
+      }
+    }
+  },
+  "Neptune": {
+    "Pluto": {
+      "Conjunction": {
+        "meaning": "Mystical Depth",
+        "description": "Spirituality merges with transformation. You access collective unconscious profoundly. Illusion and truth blur in spiritual seeking."
+      },
+      "Opposition": {
+        "meaning": "Illusion Power Struggle",
+        "description": "Deception and manipulation test spiritual beliefs. This aspect teaches discernment about spiritual truth versus ego."
+      },
+      "Square": {
+        "meaning": "Spiritual Crisis",
+        "description": "Transformation of beliefs creates confusion. Spiritual crises test faith. This aspect aids moving through illusion to truth."
+      },
+      "Trine": {
+        "meaning": "Spiritual Regeneration",
+        "description": "Transformation serves spiritual evolution naturally. You understand collective psychology. This aspect aids healing work and spiritual awakening."
+      },
+      "Sextile": {
+        "meaning": "Transformative Vision",
+        "description": "Spirituality can catalyze transformation. This aspect supports psychological depth and spiritual understanding. Vision penetrates hidden truth."
+      }
+    }
+  }
+}

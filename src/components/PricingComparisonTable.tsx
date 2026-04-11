@@ -172,6 +172,13 @@ export function PricingComparisonTable() {
             pro='+ In-depth analysis'
             annual='+ 6-month timeline'
           />
+          <Row
+            feature='Time travel (explore any date)'
+            free={false}
+            plus='Full dashboard for any date'
+            pro='Full dashboard for any date'
+            annual='Full dashboard for any date'
+          />
 
           {/* Other Features */}
           <tr className='border-b border-stroke-subtle/50'>

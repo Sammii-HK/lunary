@@ -1,8 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
-import { Map, Telescope, X, Check, MapPin } from 'lucide-react';
-import { useLocation } from '@/hooks/useLocation';
+import { Check, Map, MapPin, Telescope, X } from 'lucide-react';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { BirthChartPlacement, useUser } from '@/context/UserContext';
 import { ChartWheelSvg } from '@/app/birth-chart/chart-wheel-svg';
@@ -17,6 +16,7 @@ import {
 } from '@/components/ui/expandable-card';
 import { ShareSkyNow } from '@/components/share/ShareSkyNow';
 import { TransitDurationBadge } from '@/components/TransitDurationBadge';
+import { useLocation } from '@/hooks/useLocation';
 
 const getPlanetMeaning = (planet: string, sign: string): string => {
   const planetMeanings: Record<string, Record<string, string>> = {

@@ -29,6 +29,9 @@ const birthChartShareSchema = z.object({
       }),
     )
     .min(1),
+  houseSystem: z
+    .enum(['whole-sign', 'placidus', 'koch', 'porphyry', 'alcabitius'])
+    .optional(),
 });
 
 export async function POST(request: NextRequest) {

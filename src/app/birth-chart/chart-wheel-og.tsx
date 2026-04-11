@@ -8,6 +8,7 @@ import {
   bodiesSymbols,
   zodiacSymbol,
 } from '@/constants/symbols';
+import { convertLongitudeToZodiacSystem } from '../../../utils/astrology/zodiacSystems';
 
 const MAIN_PLANETS = [
   'Sun',
@@ -33,6 +34,28 @@ const ASTEROIDS = [
   'Psyche',
   'Eros',
 ];
+
+const ELEMENT_COLORS: Record<string, string> = {
+  Fire: '#ff6b6b',
+  Earth: '#6b8e4e',
+  Air: '#5dade2',
+  Water: '#9b59b6',
+};
+
+const SIGN_ELEMENTS: Record<string, string> = {
+  Aries: 'Fire',
+  Taurus: 'Earth',
+  Gemini: 'Air',
+  Cancer: 'Water',
+  Leo: 'Fire',
+  Virgo: 'Earth',
+  Libra: 'Air',
+  Scorpio: 'Water',
+  Sagittarius: 'Fire',
+  Capricorn: 'Earth',
+  Aquarius: 'Air',
+  Pisces: 'Water',
+};
 
 function getSymbolForBody(body: string): string {
   const key = body
@@ -68,19 +91,29 @@ function formatPlacementLabel({
   return `${body}${signLabel}${degreeLabel ? ` ${degreeLabel}` : ''}${retroLabel}`;
 }
 
+function getSignElementColor(sign: string): string {
+  const element = SIGN_ELEMENTS[sign];
+  if (element && ELEMENT_COLORS[element]) return ELEMENT_COLORS[element];
+  return '#71717a';
+}
+
 export function ChartWheelOg({
   birthChart,
   houses,
   size = 360,
   showTooltips = true,
+  zodiacSystem = 'tropical',
+  houseSystem,
 }: {
   birthChart: BirthChartData[];
   houses?: HouseCusp[];
   size?: number;
   showTooltips?: boolean;
+  zodiacSystem?: 'tropical' | 'sidereal' | 'equatorial';
+  houseSystem?: 'placidus' | 'whole-sign' | 'koch' | 'porphyry' | 'alcabitius';
 }) {
   const { ascendantAngle, chartData, zodiacSigns, houseData } =
-    buildChartWheelLayout({ birthChart, houses });
+    buildChartWheelLayout({ birthChart, houses, zodiacSystem, houseSystem });
 
   const mainPlanets = chartData.filter((p) => MAIN_PLANETS.includes(p.body));
   const angles = chartData.filter((p) => ANGLES.includes(p.body));
@@ -164,7 +197,12 @@ export function ChartWheelOg({
 
         {Array.from({ length: 12 }, (_, i) => {
           const signStart = i * 30;
-          const adjustedStart = (signStart - ascendantAngle + 360) % 360;
+          const displayStart = convertLongitudeToZodiacSystem(
+            signStart,
+            0,
+            zodiacSystem,
+          );
+          const adjustedStart = (displayStart - ascendantAngle + 360) % 360;
           const angle = (180 + adjustedStart) % 360;
           const radian = (angle * Math.PI) / 180;
           const x1 = Math.cos(radian) * 85;
@@ -257,7 +295,8 @@ export function ChartWheelOg({
             transform: 'translate(-50%, -50%)',
             fontFamily: 'Astronomicon',
             fontSize: 32,
-            color: '#71717a',
+            color: getSignElementColor(sign),
+            opacity: 0.9,
             display: 'flex',
           }}
         >

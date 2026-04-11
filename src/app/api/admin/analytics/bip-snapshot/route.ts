@@ -1,0 +1,55 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { sql } from '@vercel/postgres';
+import { requireAdminAuth } from '@/lib/admin-auth';
+
+export const dynamic = 'force-dynamic';
+
+/**
+ * BIP Snapshot — returns subscriber count, MRR, new signups (7d), and DAU.
+ * Called by Spellcast's BIP crons to avoid direct DB access.
+ */
+export async function GET(request: NextRequest) {
+  const authError = await requireAdminAuth(request);
+  if (authError) return authError;
+
+  try {
+    const nowIso = new Date().toISOString();
+    const now7dAgo = new Date(
+      Date.now() - 7 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+
+    const [mrrResult, signupsResult, dauResult] = await Promise.all([
+      sql.query(
+        `SELECT COUNT(*) as subscriber_count,
+                COALESCE(SUM(COALESCE(monthly_amount_due, 0)), 0) as mrr
+         FROM subscriptions
+         WHERE status = 'active'
+           AND stripe_subscription_id IS NOT NULL
+           AND (user_email IS NULL OR (user_email NOT LIKE '%@test.lunary.app' AND user_email != 'test@test.lunary.app'))`,
+        [],
+      ),
+      sql.query(
+        `SELECT COUNT(*) as count FROM "user"
+         WHERE "createdAt" >= $1 AND "createdAt" <= $2
+           AND (email IS NULL OR (email NOT LIKE '%@test.lunary.app' AND email != 'test@test.lunary.app'))`,
+        [now7dAgo, nowIso],
+      ),
+      sql
+        .query(
+          `SELECT dau FROM daily_metrics WHERE dau IS NOT NULL ORDER BY metric_date DESC LIMIT 1`,
+          [],
+        )
+        .catch(() => ({ rows: [] })),
+    ]);
+
+    return NextResponse.json({
+      subscriberCount: Number(mrrResult.rows[0]?.subscriber_count || 0),
+      mrr: Number(mrrResult.rows[0]?.mrr || 0),
+      newSignups7d: Number(signupsResult.rows[0]?.count || 0),
+      dau: Number(dauResult.rows[0]?.dau || 0),
+    });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}

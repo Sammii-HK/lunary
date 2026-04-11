@@ -4,6 +4,10 @@ import {
   getZodiacSign,
 } from '../../../utils/astrology/astrology';
 import { elementAstro, modalityAstro } from '../../../utils/zodiac/zodiac';
+import {
+  getSignForZodiacSystem,
+  type ZodiacSystem,
+} from '../../../utils/astrology/zodiacSystems';
 
 // ── Types ───────────────────────────────────────────────────────────
 
@@ -126,7 +130,10 @@ export const ensureDescendantInChart = (birthChart: BirthChartData[]) => {
 
 // ── Planetary Interpretations ───────────────────────────────────────
 
-export const getPlanetaryInterpretation = (planet: BirthChartData): string => {
+export const getPlanetaryInterpretation = (
+  planet: BirthChartData,
+  zodiacSystem: ZodiacSystem = 'tropical',
+): string => {
   const interpretations: Record<string, Record<string, string>> = {
     Sun: {
       Aries:
@@ -278,7 +285,16 @@ export const getPlanetaryInterpretation = (planet: BirthChartData): string => {
     Pisces: 'compassionate, intuitive, and imaginative',
   };
 
-  const specific = interpretations[planet.body]?.[planet.sign];
+  // Compute display sign based on selected zodiac system
+  let displaySign = planet.sign;
+  if (planet.eclipticLongitude && zodiacSystem !== 'tropical') {
+    displaySign = getSignForZodiacSystem(
+      planet.eclipticLongitude,
+      zodiacSystem,
+    ).sign;
+  }
+
+  const specific = interpretations[planet.body]?.[displaySign];
   if (specific) {
     const retrogradeNote = planet.retrograde
       ? ' [Retrograde: This energy turns inward, requiring you to master it internally before expressing it outwardly. Periods of reflection and revision are essential.]'
@@ -287,7 +303,7 @@ export const getPlanetaryInterpretation = (planet: BirthChartData): string => {
   }
 
   const planetMeaning = planetMeanings[planet.body] || `Your ${planet.body}`;
-  const signQuality = signQualities[planet.sign] || planet.sign;
+  const signQuality = signQualities[displaySign] || displaySign;
   const retrogradeNote = planet.retrograde
     ? ' Retrograde brings internal focus and deeper mastery.'
     : '';

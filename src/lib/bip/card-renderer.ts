@@ -155,37 +155,96 @@ function rootStyle(): React.CSSProperties {
 
 export interface MetricsCardOptions {
   weekLabel: string;
-  mau: number;
-  mauDelta: number;
-  mrr: number;
-  mrrDelta: number;
+  mau?: number;
+  mauDelta?: number;
+  mrr?: number;
+  mrrDelta?: number;
   impressionsPerDay: number;
   impressionsDelta: number;
   newSignups: number;
   dau?: number;
+  subscriberCount?: number;
 }
 
 function buildMetricsElement(opts: MetricsCardOptions): React.ReactElement {
-  const stats = [
-    {
+  // Build stats array dynamically — only include metrics that have values
+  const allStats: Array<{
+    label: string;
+    value: number;
+    delta: number;
+    fmt: (n: number) => string;
+  }> = [];
+
+  // Always include impressions if > 0
+  if (opts.impressionsPerDay > 0) {
+    allStats.push({
       label: 'impressions/day',
       value: opts.impressionsPerDay,
       delta: opts.impressionsDelta,
       fmt: formatImpressions,
-    },
-    {
-      label: 'MAU',
-      value: opts.mau,
-      delta: opts.mauDelta,
-      fmt: (n: number) => String(n),
-    },
-    {
+    });
+  }
+
+  // MRR only when > 0
+  if (opts.mrr && opts.mrr > 0) {
+    allStats.push({
       label: 'MRR',
       value: opts.mrr,
-      delta: opts.mrrDelta,
+      delta: opts.mrrDelta ?? 0,
       fmt: formatMrr,
-    },
-  ];
+    });
+  }
+
+  // Subscribers when present (coupon era)
+  if (opts.subscriberCount && opts.subscriberCount > 0) {
+    allStats.push({
+      label: 'subscribers',
+      value: opts.subscriberCount,
+      delta: 0,
+      fmt: (n: number) => String(n),
+    });
+  }
+
+  // MAU only when explicitly provided (hidden by default now)
+  if (opts.mau && opts.mau > 0) {
+    allStats.push({
+      label: 'MAU',
+      value: opts.mau,
+      delta: opts.mauDelta ?? 0,
+      fmt: (n: number) => String(n),
+    });
+  }
+
+  // Ensure we have at least 3 stats for layout (pad with signups/DAU)
+  if (allStats.length < 3 && opts.newSignups > 0) {
+    allStats.push({
+      label: 'signups this week',
+      value: opts.newSignups,
+      delta: 0,
+      fmt: (n: number) => String(n),
+    });
+  }
+  if (allStats.length < 3 && opts.dau && opts.dau > 0) {
+    allStats.push({
+      label: 'DAU',
+      value: opts.dau,
+      delta: 0,
+      fmt: (n: number) => String(n),
+    });
+  }
+
+  // Fallback: need at least 1 stat
+  const stats =
+    allStats.length > 0
+      ? allStats
+      : [
+          {
+            label: 'impressions/day',
+            value: opts.impressionsPerDay,
+            delta: opts.impressionsDelta,
+            fmt: formatImpressions,
+          },
+        ];
 
   const heroIdx = stats.reduce(
     (maxI, s, i) =>
@@ -193,16 +252,24 @@ function buildMetricsElement(opts: MetricsCardOptions): React.ReactElement {
     0,
   );
   const hero = stats[heroIdx];
-  const secondary = stats.filter((_, i) => i !== heroIdx);
+  const secondary = stats.filter((_, i) => i !== heroIdx).slice(0, 2);
 
   const heroStr = hero.fmt(hero.value);
-  const sec0Str = secondary[0].fmt(secondary[0].value);
-  const sec1Str = secondary[1].fmt(secondary[1].value);
 
-  const footerText = [
-    `${opts.newSignups} new signup${opts.newSignups !== 1 ? 's' : ''} this week`,
-    ...(opts.dau ? [`${opts.dau} DAU yesterday`] : []),
-  ].join('  ·  ');
+  // Footer items: metrics not shown in hero/secondary
+  const footerParts: string[] = [];
+  if (
+    opts.newSignups > 0 &&
+    !stats.some((s) => s.label === 'signups this week')
+  ) {
+    footerParts.push(
+      `${opts.newSignups} new signup${opts.newSignups !== 1 ? 's' : ''} this week`,
+    );
+  }
+  if (opts.dau && opts.dau > 0 && !stats.some((s) => s.label === 'DAU')) {
+    footerParts.push(`${opts.dau} DAU yesterday`);
+  }
+  const footerText = footerParts.join('  ·  ');
 
   return h(
     'div',
@@ -298,116 +365,91 @@ function buildMetricsElement(opts: MetricsCardOptions): React.ReactElement {
 
     Separator(),
 
-    // Secondary stats
-    h(
-      'div',
-      {
-        style: {
-          display: 'flex',
-          flexDirection: 'row',
-          paddingTop: 22,
-          paddingBottom: 22,
-        },
-      },
-      // Stat A
-      h(
-        'div',
-        {
-          style: {
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            flex: 1,
-            gap: 6,
-          },
-        },
-        h(
-          'span',
+    // Secondary stats (dynamic — 0, 1, or 2 items)
+    secondary.length > 0
+      ? h(
+          'div',
           {
             style: {
-              color: C.white,
-              fontSize: secSize(sec0Str),
-              fontWeight: 700,
-              lineHeight: 1,
-              letterSpacing: '-1px',
+              display: 'flex',
+              flexDirection: 'row',
+              paddingTop: 22,
+              paddingBottom: 22,
             },
           },
-          sec0Str,
-        ),
-        h(
-          'span',
-          { style: { color: C.secondary, fontSize: 18, fontWeight: 400 } },
-          secondary[0].label,
-        ),
-        secondary[0].delta !== 0
-          ? h(
-              'span',
+          ...secondary.flatMap((sec, i) => {
+            const secStr = sec.fmt(sec.value);
+            const statEl = h(
+              'div',
               {
+                key: `sec-${i}`,
                 style: {
-                  color: secondary[0].delta > 0 ? C.positive : C.negative,
-                  fontSize: 18,
-                  fontWeight: 400,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  flex: 1,
+                  gap: 6,
                 },
               },
-              `${secondary[0].delta > 0 ? '↑' : '↓'}${Math.abs(secondary[0].delta)}%`,
-            )
-          : null,
-      ),
-      // Vertical divider
-      h('div', {
-        style: {
-          width: 1,
-          background:
-            'linear-gradient(180deg, transparent, rgba(132,88,216,0.5), transparent)',
-          margin: '0 8px',
-          alignSelf: 'stretch',
-        },
-      }),
-      // Stat B
-      h(
-        'div',
-        {
-          style: {
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            flex: 1,
-            gap: 6,
-          },
-        },
-        h(
-          'span',
-          {
-            style: {
-              color: C.white,
-              fontSize: secSize(sec1Str),
-              fontWeight: 700,
-              lineHeight: 1,
-              letterSpacing: '-1px',
-            },
-          },
-          sec1Str,
-        ),
-        h(
-          'span',
-          { style: { color: C.secondary, fontSize: 18, fontWeight: 400 } },
-          secondary[1].label,
-        ),
-        secondary[1].delta !== 0
-          ? h(
-              'span',
-              {
-                style: {
-                  color: secondary[1].delta > 0 ? C.positive : C.negative,
-                  fontSize: 18,
-                  fontWeight: 400,
+              h(
+                'span',
+                {
+                  style: {
+                    color: C.white,
+                    fontSize: secSize(secStr),
+                    fontWeight: 700,
+                    lineHeight: 1,
+                    letterSpacing: '-1px',
+                  },
                 },
-              },
-              `${secondary[1].delta > 0 ? '↑' : '↓'}${Math.abs(secondary[1].delta)}%`,
-            )
-          : null,
-      ),
-    ),
+                secStr,
+              ),
+              h(
+                'span',
+                {
+                  style: {
+                    color: C.secondary,
+                    fontSize: 18,
+                    fontWeight: 400,
+                  },
+                },
+                sec.label,
+              ),
+              sec.delta !== 0
+                ? h(
+                    'span',
+                    {
+                      style: {
+                        color: sec.delta > 0 ? C.positive : C.negative,
+                        fontSize: 18,
+                        fontWeight: 400,
+                      },
+                    },
+                    `${sec.delta > 0 ? '↑' : '↓'}${Math.abs(sec.delta)}%`,
+                  )
+                : null,
+            );
+
+            // Add vertical divider before second stat
+            if (i > 0) {
+              return [
+                h('div', {
+                  key: `div-${i}`,
+                  style: {
+                    width: 1,
+                    background:
+                      'linear-gradient(180deg, transparent, rgba(132,88,216,0.5), transparent)',
+                    margin: '0 8px',
+                    alignSelf: 'stretch',
+                  },
+                }),
+                statEl,
+              ];
+            }
+            return [statEl];
+          }),
+        )
+      : null,
 
     Separator(),
 
@@ -448,7 +490,7 @@ function buildMetricsElement(opts: MetricsCardOptions): React.ReactElement {
 // ---------------------------------------------------------------------------
 
 export interface MilestoneCardOptions {
-  metric: 'mau' | 'mrr' | 'impressionsPerDay' | 'clicksPerDay';
+  metric: string;
   value: number;
   threshold: number;
   context?: string;
@@ -461,6 +503,10 @@ function buildMilestoneElement(opts: MilestoneCardOptions): React.ReactElement {
     mrr: 'monthly recurring revenue',
     impressionsPerDay: 'impressions per day',
     clicksPerDay: 'clicks per day',
+    totalImpressions28d: 'impressions in 28 days',
+    totalClicks28d: 'clicks in 28 days',
+    peakImpressionsDay: 'impressions in a single day',
+    subscriberCount: 'subscribers',
   };
 
   const valueStr =

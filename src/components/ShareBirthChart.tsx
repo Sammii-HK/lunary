@@ -18,6 +18,7 @@ interface ShareBirthChartProps {
   birthChart: BirthChartData[];
   userName?: string;
   userBirthday?: string;
+  houseSystem?: 'placidus' | 'whole-sign' | 'koch' | 'porphyry' | 'alcabitius';
 }
 
 const getElementCounts = (birthChart: BirthChartData[]) => {
@@ -104,6 +105,7 @@ export function ShareBirthChart({
   birthChart,
   userName,
   userBirthday,
+  houseSystem = 'placidus',
 }: ShareBirthChartProps) {
   const { user } = useUser();
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
@@ -174,6 +176,7 @@ export function ShareBirthChart({
             insight: insight.substring(0, 160),
             placements: placementsForOg,
             format: format,
+            houseSystem,
           }),
         });
 
@@ -227,6 +230,7 @@ export function ShareBirthChart({
     placementsForOg,
     shareRecord,
     format,
+    houseSystem,
     setLoading,
     setError,
   ]);
