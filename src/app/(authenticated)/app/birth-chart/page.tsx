@@ -45,6 +45,7 @@ const BirthChartPage = () => {
     'all' | 'harmonious' | 'challenging'
   >('all');
   const [showAsteroids, setShowAsteroids] = useState(true);
+  const [showPoints, setShowPoints] = useState(true);
   const [clockwise, setClockwise] = useState(false);
   const [showSymbols, setShowSymbols] = useState(true);
   const [houseSystem, setHouseSystem] = useState<HouseSystem>('whole-sign');
@@ -435,10 +436,10 @@ const BirthChartPage = () => {
             onAspectFilterChange={setAspectFilter}
             showAsteroids={showAsteroids}
             onToggleAsteroids={() => setShowAsteroids(!showAsteroids)}
+            showPoints={showPoints}
+            onTogglePoints={() => setShowPoints(!showPoints)}
             clockwise={clockwise}
             onToggleClockwise={() => setClockwise(!clockwise)}
-            showSymbols={showSymbols}
-            onToggleSymbols={() => setShowSymbols(!showSymbols)}
             houseSystem={houseSystem}
             onHouseSystemChange={setHouseSystem}
             zodiacSystem={zodiacSystem}
@@ -458,8 +459,10 @@ const BirthChartPage = () => {
                 showAspects={showAspects}
                 aspectFilter={aspectFilter}
                 showAsteroids={showAsteroids}
+                showPoints={showPoints}
                 clockwise={clockwise}
                 showSymbols={showSymbols}
+                onToggleSymbols={() => setShowSymbols(!showSymbols)}
                 houseSystem={houseSystem}
                 zodiacSystem={zodiacSystem}
               />

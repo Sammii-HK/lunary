@@ -140,9 +140,11 @@ type BirthChartProps = {
   showAspects?: boolean;
   aspectFilter?: 'all' | 'harmonious' | 'challenging';
   showAsteroids?: boolean;
+  showPoints?: boolean;
   clockwise?: boolean;
   onAspectsToggle?: (show: boolean) => void;
   showSymbols?: boolean;
+  onToggleSymbols?: () => void;
   houseSystem?: HouseSystem;
   zodiacSystem?: ZodiacSystem;
 };
@@ -155,9 +157,11 @@ export const BirthChart = ({
   showAspects = false,
   aspectFilter = 'all',
   showAsteroids = true,
+  showPoints = true,
   clockwise = false,
   onAspectsToggle,
   showSymbols = true,
+  onToggleSymbols,
   houseSystem = 'placidus',
   zodiacSystem = 'tropical',
 }: BirthChartProps) => {
@@ -535,7 +539,7 @@ export const BirthChart = ({
           {[
             ...mainPlanets,
             ...angles,
-            ...points,
+            ...(showPoints ? points : []),
             ...(showAsteroids ? asteroids : []),
           ].map(
             ({
@@ -637,9 +641,19 @@ export const BirthChart = ({
       </div>
 
       <div className='w-full max-w-2xl sm:max-w-3xl md:max-w-4xl px-2'>
-        <h3 className='text-base md:text-lg font-semibold text-lunary-secondary mb-2 md:mb-3'>
-          Planetary Positions
-        </h3>
+        <div className='flex items-center justify-between mb-2 md:mb-3'>
+          <h3 className='text-base md:text-lg font-semibold text-lunary-secondary'>
+            Planetary Positions
+          </h3>
+          {onToggleSymbols && (
+            <button
+              onClick={onToggleSymbols}
+              className='text-xs text-content-muted hover:text-content-secondary transition-colors'
+            >
+              {showSymbols ? 'Show names' : 'Show symbols'}
+            </button>
+          )}
+        </div>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
           {mainPlanets.map(
             ({
@@ -754,7 +768,7 @@ export const BirthChart = ({
           </>
         )}
 
-        {points.length > 0 && (
+        {points.length > 0 && showPoints && (
           <>
             <h3 className='text-base md:text-lg font-semibold text-lunary-secondary mb-2 md:mb-3 mt-4'>
               Sensitive Points

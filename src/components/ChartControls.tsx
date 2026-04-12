@@ -18,10 +18,10 @@ interface ChartControlsProps {
   onAspectFilterChange: (filter: 'all' | 'harmonious' | 'challenging') => void;
   showAsteroids: boolean;
   onToggleAsteroids: () => void;
+  showPoints?: boolean;
+  onTogglePoints?: () => void;
   clockwise?: boolean;
   onToggleClockwise?: () => void;
-  showSymbols?: boolean;
-  onToggleSymbols?: () => void;
   houseSystem?: HouseSystem;
   onHouseSystemChange?: (system: HouseSystem) => void;
   zodiacSystem?: ZodiacSystem;
@@ -36,10 +36,10 @@ export function ChartControls({
   onAspectFilterChange,
   showAsteroids,
   onToggleAsteroids,
+  showPoints = true,
+  onTogglePoints,
   clockwise = false,
   onToggleClockwise,
-  showSymbols = true,
-  onToggleSymbols,
   houseSystem = 'placidus',
   onHouseSystemChange,
   zodiacSystem = 'tropical',
@@ -68,6 +68,11 @@ export function ChartControls({
         <Button onClick={onToggleAsteroids} variant='lunary-soft' size='sm'>
           {showAsteroids ? 'Hide Asteroids' : 'Show Asteroids'}
         </Button>
+        {onTogglePoints && (
+          <Button onClick={onTogglePoints} variant='lunary-soft' size='sm'>
+            {showPoints ? 'Hide Points' : 'Show Points'}
+          </Button>
+        )}
         {onToggleClockwise && (
           <Button onClick={onToggleClockwise} variant='lunary-soft' size='sm'>
             {clockwise ? 'Counter-Clockwise' : 'Clockwise'}
@@ -99,11 +104,6 @@ export function ChartControls({
             Challenging
           </Button>
         </div>
-      )}
-      {onToggleSymbols && (
-        <Button onClick={onToggleSymbols} variant='lunary-soft' size='sm'>
-          {showSymbols ? 'Show Names' : 'Show Symbols'}
-        </Button>
       )}
       {onHouseSystemChange && (
         <div className='flex flex-col gap-2 w-full'>
