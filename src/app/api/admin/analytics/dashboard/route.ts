@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
         sql.query(
           `SELECT
             metric_date,
-            dau, wau, mau,
+            dau, wau, mau, reach_dau, reach_wau, reach_mau,
             signed_in_product_dau, signed_in_product_wau, signed_in_product_mau,
             app_opened_mau,
             new_signups, activated_users, activation_rate,
@@ -189,9 +189,9 @@ export async function GET(request: NextRequest) {
     // Process historical data
     const historicalMetrics = historicalResult.rows.map((row: any) => ({
       date: row.metric_date,
-      dau: Number(row.dau || 0),
-      wau: Number(row.wau || 0),
-      mau: Number(row.mau || 0),
+      dau: Number(row.reach_dau || 0),
+      wau: Number(row.reach_wau || 0),
+      mau: Number(row.reach_mau || 0),
       productDau: Number(row.signed_in_product_dau || 0),
       productWau: Number(row.signed_in_product_wau || 0),
       productMau: Number(row.signed_in_product_mau || 0),

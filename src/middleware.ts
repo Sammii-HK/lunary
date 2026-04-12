@@ -1,4 +1,4 @@
-import { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 const camelToKebab = (str: string) =>
   str
@@ -85,7 +85,7 @@ function assignVariant(
 }
 
 const BOT_UA_PATTERN =
-  /bot|crawler|spider|crawling|preview|facebookexternalhit|slackbot|discordbot|whatsapp|telegrambot|pinterest|embedly|quora|tumblr|redditbot|gpt|openai|anthropic|gemini|perplexity|cohere|googlebot|baiduspider|yandexbot|ccbot|duckduckbot|bingbot|python-requests|libcurl|scrapy|wget|curl\/|httrack|ahrefsbot|semrushbot|mj12bot|dotbot|petalbot|bytespider|sogou|applebot|dataforseo|zoominfobot|gptbot|claudebot|go-http-client|java\/|okhttp|axios|node-fetch|undici|headlesschrome|phantomjs|selenium|puppeteer|playwright/i;
+  /bot|crawler|spider|crawling|preview|facebookexternalhit|slackbot|discordbot|whatsapp|telegrambot|pinterest|embedly|quora|tumblr|redditbot|gpt|openai|anthropic|gemini|perplexity|cohere|googlebot|baiduspider|yandexbot|ccbot|duckduckbot|bingbot|python-requests|libcurl|scrapy|wget|curl\/|httrack|ahrefsbot|semrushbot|mj12bot|dotbot|petalbot|bytespider|sogou|applebot|dataforseo|zoominfobot|gptbot|claudebot|go-http-client|java\/|okhttp|axios|node-fetch|undici|headlesschrome|phantomjs|selenium|puppeteer|playwright|httpx|aiohttp|reqwest|colly|linkcheck|monitoring|uptime|pingdom|site24x7|statuscake|newrelic|datadog|cloudflare-workers|vercel-edge/i;
 
 const shouldSkipTracking = (request: NextRequest, hostname: string) => {
   if (request.method !== 'GET') return true;
@@ -97,12 +97,13 @@ const shouldSkipTracking = (request: NextRequest, hostname: string) => {
   const acceptLang = request.headers.get('accept-language');
   if (!acceptLang) return true;
 
-  // Modern browsers send sec-fetch-dest. Bots using fake Chrome/Firefox UAs don't.
+  // Modern browsers send sec-fetch-dest. Bots using fake Chrome/Firefox/Safari UAs don't.
   const secFetchDest = request.headers.get('sec-fetch-dest');
   if (!secFetchDest) {
     const isModernChrome = /Chrome\/(?:7[6-9]|[89]\d|1\d\d)/.test(ua);
     const isModernFirefox = /Firefox\/(?:9\d|1\d\d)/.test(ua);
-    if (isModernChrome || isModernFirefox) return true;
+    const isModernSafari = /Version\/(?:1[7-9]|[2-9]\d)\.\d.*Safari/.test(ua);
+    if (isModernChrome || isModernFirefox || isModernSafari) return true;
   }
 
   const pathname = request.nextUrl.pathname;
@@ -212,7 +213,7 @@ function isAllowedAuthOrigin(origin: string | null): boolean {
   return false;
 }
 
-export function middleware(request: NextRequest, event: NextFetchEvent) {
+export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
   const hostname =
@@ -463,76 +464,9 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
       });
     }
 
-    // Cost optimisation: only fire the tracking function call once per user per day.
-    // page_viewed, app_opened, product_opened are all daily-deduped in the DB anyway,
-    // so subsequent calls in the same day are wasted invocations.
-    // This cuts ~80-90% of function invocations from middleware.
-    const TRACKED_COOKIE = 'lunary_td';
-    const today = new Date().toISOString().split('T')[0];
-    const lastTrackedDate = request.cookies.get(TRACKED_COOKIE)?.value;
-
-    if (lastTrackedDate !== today) {
-      // First visit today — fire the batch tracking call
-      response.cookies.set(TRACKED_COOKIE, today, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: isProd,
-        path: '/',
-        maxAge: 60 * 60 * 24, // 24h
-      });
-
-      const batchUrl = new URL('/api/ether/batch', request.url);
-      const batchHeaders = new Headers();
-      batchHeaders.set('content-type', 'application/json');
-      batchHeaders.set('x-lunary-anon-id', anonId);
-
-      const cookieHeader = request.headers.get('cookie');
-      if (cookieHeader) batchHeaders.set('cookie', cookieHeader);
-
-      const userAgent = request.headers.get('user-agent');
-      if (userAgent) batchHeaders.set('user-agent', userAgent);
-
-      const referer = request.headers.get('referer');
-      if (referer) batchHeaders.set('referer', referer);
-
-      const acceptLanguage = request.headers.get('accept-language');
-      if (acceptLanguage) batchHeaders.set('accept-language', acceptLanguage);
-
-      const forwardedFor = request.headers.get('x-forwarded-for');
-      if (forwardedFor) batchHeaders.set('x-forwarded-for', forwardedFor);
-
-      const realIp = request.headers.get('x-real-ip');
-      if (realIp) batchHeaders.set('x-real-ip', realIp);
-
-      // Detect platform from user-agent for server-side tracking
-      const ua = userAgent || '';
-      let serverPlatform: string = 'web';
-      if (/Capacitor/i.test(ua)) {
-        if (/iPhone|iPad|iPod/i.test(ua)) {
-          serverPlatform = 'ios';
-        } else {
-          serverPlatform = 'android';
-        }
-      }
-
-      event.waitUntil(
-        fetch(batchUrl, {
-          method: 'POST',
-          headers: batchHeaders,
-          body: JSON.stringify({ path: finalPath, platform: serverPlatform }),
-        })
-          .then((res) => {
-            if (!res.ok) {
-              console.error('[middleware] batch fetch failed:', res.status);
-            }
-            return res.json();
-          })
-          .catch((err) => {
-            console.error('[middleware] batch fetch error:', err.message);
-          }),
-      );
-    }
-    // Returning visitor same day — skip function call entirely, save CPU + invocations
+    // app_opened tracking REMOVED — it fired for every visitor (including bots)
+    // and inflated DAU to 3,650 when real page viewers were ~211.
+    // Real engagement is tracked client-side via page_viewed and product events.
   }
 
   return response;

@@ -400,12 +400,12 @@ export async function GET(request: NextRequest) {
         const realtimeDAU = await getRealtimeDAU();
         const latest = snapshotRows[snapshotRows.length - 1];
 
-        // Build trend arrays from all daily_metrics rows
+        // Build trend arrays — headline uses reach (page_viewed) not 'all' segment
         const trends = snapshotRows.map((row) => ({
           date: snapshotRowDate(row),
-          dau: Number(row.dau || 0),
-          wau: Number(row.wau || 0),
-          mau: Number(row.mau || 0),
+          dau: Number(row.reach_dau || 0),
+          wau: Number(row.reach_wau || 0),
+          mau: Number(row.reach_mau || 0),
         }));
 
         const productTrends = snapshotRows.map((row) => ({
@@ -465,21 +465,26 @@ export async function GET(request: NextRequest) {
         const allUserMau = Number(latest.mau || 0);
 
         const fullData = {
-          // Core engagement metrics (all-user, not just signed-in product)
-          dau: allUserDau,
-          wau: allUserWau,
-          mau: allUserMau,
+          // Core engagement metrics — use sitewide (page_viewed) as headline DAU.
+          // The 'all' segment counts every anonymous cookie including bots and is
+          // severely inflated. Sitewide counts real page viewers only.
+          dau: reachDau,
+          wau: reachWau,
+          mau: reachMau,
           engaged_users_dau: productDau,
           engaged_users_wau: productWau,
           engaged_users_mau: productMau,
-          // Engaged rate = all-user XAU / signed-in product XAU
-          // (matches snapshot-extractors formula; live path uses event counts instead)
+          // All-user metrics (includes anonymous cookies — inflated, kept for reference)
+          all_users_dau: allUserDau,
+          all_users_wau: allUserWau,
+          all_users_mau: allUserMau,
+          // Engaged rate = sitewide reach / signed-in product
           engaged_rate_dau:
-            productDau > 0 ? Number((allUserDau / productDau).toFixed(1)) : 0,
+            productDau > 0 ? Number((reachDau / productDau).toFixed(1)) : 0,
           engaged_rate_wau:
-            productWau > 0 ? Number((allUserWau / productWau).toFixed(1)) : 0,
+            productWau > 0 ? Number((reachWau / productWau).toFixed(1)) : 0,
           engaged_rate_mau:
-            productMau > 0 ? Number((allUserMau / productMau).toFixed(1)) : 0,
+            productMau > 0 ? Number((reachMau / productMau).toFixed(1)) : 0,
           // Stickiness
           stickiness_dau_mau:
             signedInProductMau > 0

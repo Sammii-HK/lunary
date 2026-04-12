@@ -111,10 +111,11 @@ export async function GET(request: NextRequest) {
       ? Number(realtimeDauResult.rows[0]?.count || 0)
       : null;
 
-    // Summary metrics from latest row
-    const dau = realtimeDau ?? Number(latest.dau || 0);
-    const wau = Number(latest.wau || 0);
-    const mau = Number(latest.mau || 0);
+    // Summary metrics from latest row — use reach (page_viewed) as headline DAU,
+    // not 'all' segment which includes bot cookie IDs and is inflated
+    const dau = realtimeDau ?? Number(latest.reach_dau || 0);
+    const wau = Number(latest.reach_wau || 0);
+    const mau = Number(latest.reach_mau || 0);
     const signedInProductDau =
       realtimeDau ?? Number(latest.signed_in_product_dau || 0);
     const signedInProductWau = Number(latest.signed_in_product_wau || 0);
@@ -123,9 +124,9 @@ export async function GET(request: NextRequest) {
     // Build trend arrays from all rows
     const trends = rows.map((r) => ({
       date: formatMetricDate(r.metric_date),
-      dau: Number(r.dau || 0),
-      wau: Number(r.wau || 0),
-      mau: Number(r.mau || 0),
+      dau: Number(r.reach_dau || 0),
+      wau: Number(r.reach_wau || 0),
+      mau: Number(r.reach_mau || 0),
     }));
 
     const signed_in_product_trends = rows.map((r) => ({
@@ -151,7 +152,7 @@ export async function GET(request: NextRequest) {
 
     const dau_trend = rows.map((r) => ({
       date: formatMetricDate(r.metric_date),
-      dau: Number(r.dau || 0),
+      dau: Number(r.reach_dau || 0),
       returning_dau: Number(r.returning_dau || 0),
     }));
 

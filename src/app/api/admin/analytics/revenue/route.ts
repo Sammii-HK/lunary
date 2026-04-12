@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import Stripe from 'stripe';
 import { resolveDateRange } from '@/lib/analytics/date-range';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { requireAdminAuth } from '@/lib/admin-auth';
@@ -7,8 +8,61 @@ import { requireAdminAuth } from '@/lib/admin-auth';
 export const dynamic = 'force-dynamic';
 
 /**
+ * Calculate MRR directly from Stripe (single source of truth).
+ * Iterates all active subscriptions and sums their actual monthly revenue
+ * after discounts, avoiding stale local DB records.
+ */
+async function getStripeMRR(): Promise<number> {
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeKey) {
+    console.warn('[analytics/revenue] STRIPE_SECRET_KEY not set, returning 0');
+    return 0;
+  }
+
+  const stripe = new Stripe(stripeKey);
+  let mrr = 0;
+
+  for await (const sub of stripe.subscriptions.list({
+    status: 'active',
+    expand: ['data.discounts'],
+    limit: 100,
+  })) {
+    for (const item of sub.items.data) {
+      const price = item.price;
+      if (!price?.unit_amount) continue;
+
+      const isYearly = price.recurring?.interval === 'year';
+      let monthlyAmount = isYearly
+        ? price.unit_amount / 100 / 12
+        : price.unit_amount / 100;
+
+      // Apply discount if present
+      const discounts = sub.discounts || [];
+      if (discounts.length > 0) {
+        const discount = discounts[0];
+        if (typeof discount !== 'string' && discount?.coupon) {
+          if (discount.coupon.percent_off) {
+            monthlyAmount *= 1 - discount.coupon.percent_off / 100;
+          } else if (discount.coupon.amount_off) {
+            monthlyAmount = Math.max(
+              0,
+              monthlyAmount - discount.coupon.amount_off / 100,
+            );
+          }
+        }
+      }
+
+      mrr += monthlyAmount;
+    }
+  }
+
+  return Math.round(mrr * 100) / 100;
+}
+
+/**
  * Revenue endpoint for insights
- * Uses pre-computed daily_metrics for 99% cost reduction
+ * MRR: queried directly from Stripe (source of truth)
+ * Signups/conversions: aggregated from daily_metrics
  */
 export async function GET(request: NextRequest) {
   try {
@@ -18,19 +72,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
 
-    // MRR: live query from subscriptions so it always reflects current
-    // discounts/coupons. daily_metrics.mrr has inconsistent historical values
-    // from before coupon sync was implemented — never use MAX() on it.
-    // Signups/conversions still aggregate from daily_metrics.
-    const [mrrResult, aggregateResult] = await Promise.all([
-      sql.query(
-        `SELECT COALESCE(SUM(COALESCE(monthly_amount_due, 0)), 0) as mrr
-         FROM subscriptions
-         WHERE status = 'active'
-           AND stripe_subscription_id IS NOT NULL
-           AND (user_email IS NULL OR (user_email NOT LIKE '%@test.lunary.app' AND user_email != 'test@test.lunary.app'))`,
-        [],
-      ),
+    const [mrr, aggregateResult] = await Promise.all([
+      getStripeMRR(),
       sql.query(
         `SELECT
           SUM(new_signups) as total_signups,
@@ -44,7 +87,6 @@ export async function GET(request: NextRequest) {
       ),
     ]);
 
-    const mrr = Number(mrrResult.rows[0]?.mrr || 0);
     const result = { rows: [{ ...aggregateResult.rows[0] }] };
     const signups = Number(result.rows[0]?.total_signups || 0);
     const conversions = Number(result.rows[0]?.total_conversions || 0);

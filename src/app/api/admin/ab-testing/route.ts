@@ -12,6 +12,12 @@ const CONCLUDED_TESTS = new Set([
   'seo_sticky_cta_copy',
 ]);
 
+// Tests that have hub-specific variants mixed in from legacy tracking.
+// Variants matching {hubName}_{digit} should be filtered out — they're
+// already tracked correctly under per-hub tests (seo_cta_{hub}).
+const TESTS_WITH_LEGACY_HUB_VARIANTS = new Set(['cta_copy', 'sticky_cta_copy']);
+const LEGACY_HUB_VARIANT_PATTERN = /^[a-zA-Z]+_\d+$/;
+
 export interface VariantMetrics {
   name: string;
   impressions: number;
@@ -67,11 +73,20 @@ export async function GET(request: NextRequest) {
       ORDER BY test_name, variant
     `;
 
-    // Group variants by test name, skipping concluded tests
+    // Group variants by test name, skipping concluded tests and legacy hub variants
     const testVariantsMap = new Map<string, string[]>();
     for (const row of testsAndVariants.rows) {
       if (!row.test_name || !row.variant) continue;
       if (CONCLUDED_TESTS.has(row.test_name)) continue;
+      // Filter out legacy hub-specific variants (e.g. "horoscopes_4", "angelNumbers_2")
+      // from tests that had them accidentally bundled in. These are already tracked
+      // under per-hub tests (seo_cta_{hub}).
+      if (
+        TESTS_WITH_LEGACY_HUB_VARIANTS.has(row.test_name) &&
+        LEGACY_HUB_VARIANT_PATTERN.test(row.variant)
+      ) {
+        continue;
+      }
       const variants = testVariantsMap.get(row.test_name) || [];
       variants.push(row.variant);
       testVariantsMap.set(row.test_name, variants);
