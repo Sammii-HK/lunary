@@ -18,15 +18,16 @@ interface ChartControlsProps {
   onAspectFilterChange: (filter: 'all' | 'harmonious' | 'challenging') => void;
   showAsteroids: boolean;
   onToggleAsteroids: () => void;
+  showPoints?: boolean;
+  onTogglePoints?: () => void;
   clockwise?: boolean;
   onToggleClockwise?: () => void;
-  showSymbols?: boolean;
-  onToggleSymbols?: () => void;
   houseSystem?: HouseSystem;
   onHouseSystemChange?: (system: HouseSystem) => void;
   zodiacSystem?: ZodiacSystem;
   onZodiacSystemChange?: (system: ZodiacSystem) => void;
   isFreeTier?: boolean;
+  freeTierSwitchesRemaining?: number;
 }
 
 export function ChartControls({
@@ -36,15 +37,16 @@ export function ChartControls({
   onAspectFilterChange,
   showAsteroids,
   onToggleAsteroids,
+  showPoints = true,
+  onTogglePoints,
   clockwise = false,
   onToggleClockwise,
-  showSymbols = true,
-  onToggleSymbols,
   houseSystem = 'placidus',
   onHouseSystemChange,
   zodiacSystem = 'tropical',
   onZodiacSystemChange,
   isFreeTier = false,
+  freeTierSwitchesRemaining = 3,
 }: ChartControlsProps) {
   const houseSystemLabels: Record<HouseSystem, string> = {
     placidus: 'Placidus',
@@ -68,6 +70,11 @@ export function ChartControls({
         <Button onClick={onToggleAsteroids} variant='lunary-soft' size='sm'>
           {showAsteroids ? 'Hide Asteroids' : 'Show Asteroids'}
         </Button>
+        {onTogglePoints && (
+          <Button onClick={onTogglePoints} variant='lunary-soft' size='sm'>
+            {showPoints ? 'Hide Points' : 'Show Points'}
+          </Button>
+        )}
         {onToggleClockwise && (
           <Button onClick={onToggleClockwise} variant='lunary-soft' size='sm'>
             {clockwise ? 'Counter-Clockwise' : 'Clockwise'}
@@ -100,15 +107,15 @@ export function ChartControls({
           </Button>
         </div>
       )}
-      {onToggleSymbols && (
-        <Button onClick={onToggleSymbols} variant='lunary-soft' size='sm'>
-          {showSymbols ? 'Show Names' : 'Show Symbols'}
-        </Button>
-      )}
       {onHouseSystemChange && (
         <div className='flex flex-col gap-2 w-full'>
           <span className='text-xs text-content-muted text-center'>
-            House System{isFreeTier ? ' (locked to selection)' : ''}
+            House System
+            {isFreeTier && freeTierSwitchesRemaining <= 0
+              ? ' (limit reached today)'
+              : isFreeTier
+                ? ` (${freeTierSwitchesRemaining} switch${freeTierSwitchesRemaining === 1 ? '' : 'es'} left today)`
+                : ''}
           </span>
           <div className='flex flex-wrap gap-2 justify-center'>
             {(
@@ -119,18 +126,23 @@ export function ChartControls({
                 'porphyry',
                 'alcabitius',
               ] as HouseSystem[]
-            ).map((system) => (
-              <Button
-                key={system}
-                onClick={() => !isFreeTier && onHouseSystemChange(system)}
-                variant={houseSystem === system ? 'lunary-soft' : 'ghost'}
-                size='xs'
-                disabled={isFreeTier && houseSystem !== system}
-              >
-                {houseSystemLabels[system]}
-                {houseSystem === system && ' ✓'}
-              </Button>
-            ))}
+            ).map((system) => {
+              const isActive = houseSystem === system;
+              const isLocked =
+                isFreeTier && !isActive && freeTierSwitchesRemaining <= 0;
+              return (
+                <Button
+                  key={system}
+                  onClick={() => !isLocked && onHouseSystemChange(system)}
+                  variant={isActive ? 'lunary-soft' : 'ghost'}
+                  size='xs'
+                  disabled={isLocked}
+                >
+                  {houseSystemLabels[system]}
+                  {isActive && ' ✓'}
+                </Button>
+              );
+            })}
           </div>
         </div>
       )}

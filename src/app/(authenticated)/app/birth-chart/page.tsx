@@ -36,6 +36,36 @@ type HouseSystem =
   | 'porphyry'
   | 'alcabitius';
 
+// Rate-limit house system switches for free users (3 per day)
+const FREE_TIER_DAILY_LIMIT = 3;
+const SWITCH_LOG_KEY = 'chart-house-switches';
+
+function getFreeTierSwitchesRemaining(): number {
+  try {
+    const raw = localStorage.getItem(SWITCH_LOG_KEY);
+    if (!raw) return FREE_TIER_DAILY_LIMIT;
+    const log: number[] = JSON.parse(raw);
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const recentSwitches = log.filter((ts) => ts > oneDayAgo);
+    return Math.max(0, FREE_TIER_DAILY_LIMIT - recentSwitches.length);
+  } catch {
+    return FREE_TIER_DAILY_LIMIT;
+  }
+}
+
+function recordHouseSwitch(): void {
+  try {
+    const raw = localStorage.getItem(SWITCH_LOG_KEY);
+    const log: number[] = raw ? JSON.parse(raw) : [];
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const recent = log.filter((ts) => ts > oneDayAgo);
+    recent.push(Date.now());
+    localStorage.setItem(SWITCH_LOG_KEY, JSON.stringify(recent));
+  } catch {
+    // ignore
+  }
+}
+
 const BirthChartPage = () => {
   const { user, loading } = useUser();
   const subscription = useSubscription();
@@ -45,12 +75,17 @@ const BirthChartPage = () => {
     'all' | 'harmonious' | 'challenging'
   >('all');
   const [showAsteroids, setShowAsteroids] = useState(true);
+  const [showPoints, setShowPoints] = useState(true);
   const [clockwise, setClockwise] = useState(false);
   const [showSymbols, setShowSymbols] = useState(true);
   const [houseSystem, setHouseSystem] = useState<HouseSystem>('whole-sign');
   const [zodiacSystem, setZodiacSystem] = useState<ZodiacSystem>('tropical');
   const [houses, setHouses] = useState<HouseCusp[] | null>(null);
   const [loadingHouses, setLoadingHouses] = useState(false);
+  const [showHouseSystemPicker, setShowHouseSystemPicker] = useState(false);
+  const [switchesRemaining, setSwitchesRemaining] = useState(
+    FREE_TIER_DAILY_LIMIT,
+  );
   const [chartMode, setChartMode] = useState<'natal' | 'progressed'>('natal');
   const userName = user?.name;
   const userBirthday = user?.birthday;
@@ -120,24 +155,30 @@ const BirthChartPage = () => {
     }
 
     // Load house system from user profile or localStorage
+    const validSystems = [
+      'placidus',
+      'whole-sign',
+      'koch',
+      'porphyry',
+      'alcabitius',
+    ];
     if (
       user?.birthChartHouseSystem &&
-      ['placidus', 'whole-sign', 'koch', 'porphyry', 'alcabitius'].includes(
-        user.birthChartHouseSystem,
-      )
+      validSystems.includes(user.birthChartHouseSystem)
     ) {
       setHouseSystem(user.birthChartHouseSystem as HouseSystem);
     } else {
       const savedHouseSystem = localStorage.getItem('chart-house-system');
-      if (
-        savedHouseSystem &&
-        ['placidus', 'whole-sign', 'koch', 'porphyry', 'alcabitius'].includes(
-          savedHouseSystem,
-        )
-      ) {
+      if (savedHouseSystem && validSystems.includes(savedHouseSystem)) {
         setHouseSystem(savedHouseSystem as HouseSystem);
+      } else {
+        // First time viewing chart — no house system chosen yet
+        setShowHouseSystemPicker(true);
       }
     }
+
+    // Load free-tier switch count
+    setSwitchesRemaining(getFreeTierSwitchesRemaining());
 
     // Load zodiac system from localStorage
     const savedZodiacSystem = localStorage.getItem('chart-zodiac-system');
@@ -371,6 +412,71 @@ const BirthChartPage = () => {
 
   return (
     <div className='h-full overflow-auto' data-testid='birth-chart-page'>
+      {/* First-time house system picker */}
+      {showHouseSystemPicker && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
+          <div className='bg-surface-elevated border border-stroke-subtle rounded-2xl p-6 max-w-md w-full space-y-4'>
+            <h2 className='text-lg font-semibold text-content-primary text-center'>
+              Choose your house system
+            </h2>
+            <p className='text-sm text-content-secondary text-center'>
+              This determines how the 12 houses are divided in your chart. Most
+              Western astrologers use Placidus or Whole Sign. You can always
+              change this later.
+            </p>
+            <div className='grid grid-cols-1 gap-2'>
+              {[
+                {
+                  id: 'placidus' as HouseSystem,
+                  name: 'Placidus',
+                  desc: 'Most popular in Western astrology. Unequal houses based on time.',
+                },
+                {
+                  id: 'whole-sign' as HouseSystem,
+                  name: 'Whole Sign',
+                  desc: 'Each sign = one house. Simple and traditional.',
+                },
+                {
+                  id: 'koch' as HouseSystem,
+                  name: 'Koch',
+                  desc: 'Similar to Placidus with different math. Popular in Europe.',
+                },
+                {
+                  id: 'porphyry' as HouseSystem,
+                  name: 'Porphyry',
+                  desc: 'Quadrant trisection. Works at all latitudes.',
+                },
+                {
+                  id: 'alcabitius' as HouseSystem,
+                  name: 'Alcabitius',
+                  desc: 'Medieval system using diurnal arcs.',
+                },
+              ].map(({ id, name, desc }) => (
+                <button
+                  key={id}
+                  onClick={() => {
+                    setHouseSystem(id);
+                    setShowHouseSystemPicker(false);
+                  }}
+                  className='flex flex-col items-start p-3 rounded-lg border border-stroke-subtle hover:border-lunary-primary-500 hover:bg-lunary-primary-900/20 transition-colors text-left'
+                >
+                  <span className='font-medium text-content-primary text-sm'>
+                    {name}
+                  </span>
+                  <span className='text-xs text-content-muted'>{desc}</span>
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowHouseSystemPicker(false)}
+              className='w-full text-xs text-content-muted hover:text-content-secondary transition-colors pt-2'
+            >
+              Skip for now (defaults to Whole Sign)
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className='flex w-full flex-col gap-4 max-w-2xl sm:max-w-3xl md:max-w-4xl mx-auto p-4 mb-16'>
         {/* Internal Links for SEO */}
         <nav className='p-4 bg-surface-elevated/50 rounded-lg border border-stroke-subtle'>
@@ -435,17 +541,27 @@ const BirthChartPage = () => {
             onAspectFilterChange={setAspectFilter}
             showAsteroids={showAsteroids}
             onToggleAsteroids={() => setShowAsteroids(!showAsteroids)}
+            showPoints={showPoints}
+            onTogglePoints={() => setShowPoints(!showPoints)}
             clockwise={clockwise}
             onToggleClockwise={() => setClockwise(!clockwise)}
-            showSymbols={showSymbols}
-            onToggleSymbols={() => setShowSymbols(!showSymbols)}
             houseSystem={houseSystem}
-            onHouseSystemChange={setHouseSystem}
+            onHouseSystemChange={(system) => {
+              const isPaid = ['active', 'trial', 'trialing'].includes(
+                subscription.status,
+              );
+              if (!isPaid) {
+                recordHouseSwitch();
+                setSwitchesRemaining(getFreeTierSwitchesRemaining());
+              }
+              setHouseSystem(system);
+            }}
             zodiacSystem={zodiacSystem}
             onZodiacSystemChange={setZodiacSystem}
             isFreeTier={
               !['active', 'trial', 'trialing'].includes(subscription.status)
             }
+            freeTierSwitchesRemaining={switchesRemaining}
           />
 
           <div data-testid='chart-visualization'>
@@ -458,8 +574,10 @@ const BirthChartPage = () => {
                 showAspects={showAspects}
                 aspectFilter={aspectFilter}
                 showAsteroids={showAsteroids}
+                showPoints={showPoints}
                 clockwise={clockwise}
                 showSymbols={showSymbols}
+                onToggleSymbols={() => setShowSymbols(!showSymbols)}
                 houseSystem={houseSystem}
                 zodiacSystem={zodiacSystem}
               />

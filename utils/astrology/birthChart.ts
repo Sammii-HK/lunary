@@ -838,18 +838,33 @@ export const generateBirthChartWithHouses = async (
     birthTimezone,
   );
 
+  // Resolve observer from birth location — needed for house calculations.
+  // Previously this was only done inside generateBirthChart and never
+  // passed to calculateHouses, causing Placidus/Koch/Alcabitius to use
+  // Observer(0,0,0) (the equator) and produce completely wrong cusps.
+  let resolvedObserver = observer;
+  if (!resolvedObserver) {
+    if (birthLocation) {
+      const coords = await parseLocationToCoordinates(birthLocation);
+      resolvedObserver = coords
+        ? new Observer(coords.latitude, coords.longitude, 0)
+        : new Observer(51.4769, 0.0005, 0);
+    } else {
+      resolvedObserver = new Observer(51.4769, 0.0005, 0);
+    }
+  }
+
   const planets = await generateBirthChart(
     birthDate,
     birthTime,
     birthLocation,
     birthTimezone,
-    observer,
+    resolvedObserver,
   );
 
   const ascendant = planets.find((p) => p.body === 'Ascendant');
   const ascendantLong = ascendant?.eclipticLongitude || 0;
 
-  // For non-whole-sign systems, we'd need MC; for now default to whole-sign fallback
   const mc = planets.find((p) => p.body === 'Midheaven');
   const mcLong = mc?.eclipticLongitude || 0;
 
@@ -857,7 +872,7 @@ export const generateBirthChartWithHouses = async (
     houseSystem,
     ascendantLong,
     mcLong,
-    observer,
+    resolvedObserver,
     getJulianDay(birthDateTime),
   );
 

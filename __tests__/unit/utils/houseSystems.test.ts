@@ -386,5 +386,43 @@ describe('House System Calculations', () => {
         expect(house.eclipticLongitude).toBeLessThanOrEqual(360);
       });
     });
+
+    it('should produce sequential cusps (NYC reference)', () => {
+      // Cusps must go in sequential ecliptic order — each cusp advances
+      // forward through the zodiac. If cusps jump backwards by > 180°,
+      // the algorithm converged to the wrong quadrant.
+      const houses = calculatePlacidusHouses(ascendant, mc, observer, jd);
+      const longs = houses.map((h) => h.eclipticLongitude);
+      for (let i = 0; i < 12; i++) {
+        const curr = longs[i];
+        const next = longs[(i + 1) % 12];
+        const gap = (next - curr + 360) % 360;
+        expect(gap).toBeLessThan(180);
+      }
+    });
+
+    it('should produce sequential cusps for all quadrant systems', () => {
+      // Regression: the houses API was passing Observer(0,0,0) to
+      // calculateHouses instead of the real observer. This caused RAMC
+      // to be inconsistent with the provided AC/MC, producing cusps
+      // in the wrong quadrants. Fixed by resolving observer in
+      // generateBirthChartWithHouses before passing to calculateHouses.
+      const systems: HouseSystem[] = [
+        'placidus',
+        'koch',
+        'porphyry',
+        'alcabitius',
+      ];
+      for (const system of systems) {
+        const houses = calculateHouses(system, ascendant, mc, observer, jd);
+        const longs = houses.map((h) => h.eclipticLongitude);
+        for (let i = 0; i < 12; i++) {
+          const curr = longs[i];
+          const next = longs[(i + 1) % 12];
+          const gap = (next - curr + 360) % 360;
+          expect(gap).toBeLessThan(180);
+        }
+      }
+    });
   });
 });

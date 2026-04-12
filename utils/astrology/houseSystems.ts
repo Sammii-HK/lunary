@@ -506,12 +506,12 @@ export function calculateHouses(
       if (observer && typeof jd === 'number') {
         return calculatePlacidusHouses(ascendantLong, mcLong, observer, jd);
       }
-      return calculatePlacidusHouses(
-        ascendantLong,
-        mcLong,
-        new Observer(0, 0, 0),
-        0,
+      // Fallback should never happen — caller must resolve observer.
+      // Using equator (0,0) produces wrong cusps for any real latitude.
+      console.warn(
+        '[houseSystems] Placidus called without observer/jd — cusps will be inaccurate',
       );
+      return calculatePorphyryHouses(ascendantLong, mcLong, observer, jd);
     case 'koch':
       return calculateKochHouses(ascendantLong, mcLong, observer, jd);
     case 'porphyry':
