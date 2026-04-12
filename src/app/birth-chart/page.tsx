@@ -81,7 +81,12 @@ const comparisonFeatures = [
   { feature: 'Chart pattern detection', lunary: true, others: false },
   { feature: 'Stellium analysis', lunary: true, others: false },
   { feature: 'Personalized interpretations', lunary: true, others: false },
-  { feature: 'Whole Sign Houses', lunary: true, others: true },
+  { feature: 'Multiple house systems', lunary: '5', others: '1-3' },
+  {
+    feature: 'Sidereal and equatorial zodiacs',
+    lunary: true,
+    others: false,
+  },
 ];
 
 export default async function BirthChartLandingPage() {
@@ -136,7 +141,8 @@ export default async function BirthChartLandingPage() {
           featureList: [
             '24+ celestial body positions',
             'Arcminute accuracy',
-            'Whole Sign House system',
+            '5 house systems (Placidus, Whole Sign, Koch, Porphyry, Alcabitius)',
+            '3 zodiac systems (Tropical, Sidereal, Equatorial)',
             'Planetary aspects with orbs',
             'Planetary dignities',
             'Chart pattern detection',
@@ -197,7 +203,7 @@ export default async function BirthChartLandingPage() {
         )}
 
         {/* Feature Highlights */}
-        <section className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+        <section className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
           <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <div className='flex items-center gap-2 mb-3'>
               <Target className='w-5 h-5 text-content-brand' />
@@ -235,6 +241,19 @@ export default async function BirthChartLandingPage() {
               Every placement comes with a personalized interpretation
               explaining what it means in your chart — perfect for beginners and
               seasoned astrologers alike.
+            </p>
+          </div>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <div className='flex items-center gap-2 mb-3'>
+              <Layers className='w-5 h-5 text-lunary-secondary' />
+              <h3 className='text-sm font-medium text-content-primary'>
+                Your chart, your way
+              </h3>
+            </div>
+            <p className='text-xs text-content-muted'>
+              Choose from five house systems including Placidus, Whole Sign, and
+              Koch. View your chart in Tropical, Sidereal, or Equatorial zodiacs
+              to match your practice.
             </p>
           </div>
         </section>

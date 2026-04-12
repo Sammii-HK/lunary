@@ -24,7 +24,7 @@ const faqs = [
   {
     question: 'What house system does Lunary use?',
     answer:
-      'Lunary uses the Placidus house system by default, the most widely used system in Western astrology. House cusps are calculated based on your exact birth time and location.',
+      'Lunary supports 5 house systems: Placidus, Whole Sign, Koch, Porphyry, and Alcabitius. New users choose their preferred system when they first view their chart. Lunary also offers 3 zodiac systems: Tropical, Sidereal (Lahiri), and Equatorial.',
   },
   {
     question: 'How are timezones handled?',
@@ -60,7 +60,7 @@ All calculations run in real-time using peer-reviewed astronomical algorithms, n
 • J2000.0 Epoch: Standard astronomical reference frame
 • WGS84 Coordinates: For birth location input
 
-We use the tropical zodiac (season-based) as standard in Western astrology, where 0° Aries begins at the spring equinox.`,
+We support three zodiac systems: Tropical (season-based, standard in Western astrology), Sidereal (star-based, using the Lahiri ayanamsa), and Equatorial. The tropical zodiac is the default, where 0° Aries begins at the spring equinox.`,
   },
   {
     title: 'Chart Calculation Method',
@@ -69,7 +69,7 @@ We use the tropical zodiac (season-based) as standard in Western astrology, wher
 1. Convert birth time to UTC using historical timezone data
 2. Calculate planetary positions for that exact moment
 3. Determine the Ascendant based on birth location and sidereal time
-4. Calculate house cusps using the Placidus system
+4. Calculate house cusps using the selected system (Placidus, Whole Sign, Koch, Porphyry, or Alcabitius)
 5. Compute aspects between planets within standard orbs
 6. Identify planetary dignity/debility states
 
