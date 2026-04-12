@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
 
+import { getMonthlyMetaOverride } from './monthly-meta-overrides';
+
 const BASE_URL = 'https://lunary.app';
 const OG_BASE = `${BASE_URL}/api/og/cosmic`;
 
@@ -120,8 +122,16 @@ export const monthMeta = (
   monthName: string,
   monthNumber: number,
 ): Metadata => {
-  const title = `${signName} Horoscope ${monthName} ${year}: Love, Career & What to Expect`;
-  const description = `Your personalised ${signName} horoscope for ${monthName} ${year}. Lucky days, power colour, love & career forecasts, plus what the transits mean for your sign this month.`;
+  // Check for per-page override first — these are generated for top-impression
+  // pages to give each sign+month combination a unique SERP hook (auto-generated
+  // by ~/coo-scripts/lib/seo_meta_fixer.py from Search Console quick-wins).
+  const override = getMonthlyMetaOverride(slug, year, monthSlug);
+  const title =
+    override?.title ??
+    `${signName} Horoscope ${monthName} ${year}: Love, Career & What to Expect`;
+  const description =
+    override?.description ??
+    `Your personalised ${signName} horoscope for ${monthName} ${year}. Lucky days, power colour, love & career forecasts, plus what the transits mean for your sign this month.`;
   const image = `${OG_BASE}?sign=${encode(signName)}&month=${encode(monthSlug)}&year=${encode(year)}`;
 
   return {
