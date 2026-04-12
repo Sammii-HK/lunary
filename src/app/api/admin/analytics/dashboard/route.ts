@@ -187,7 +187,12 @@ export async function GET(request: NextRequest) {
     const [historicalResult, todayResults] = await Promise.all(queries);
 
     // Process historical data
-    const historicalMetrics = historicalResult.rows.map((row: any) => ({
+    const historicalRows = (
+      historicalResult && 'rows' in historicalResult
+        ? historicalResult.rows
+        : []
+    ) as any[];
+    const historicalMetrics = historicalRows.map((row: any) => ({
       date: row.metric_date,
       dau: Number(row.reach_dau || 0),
       wau: Number(row.reach_wau || 0),
@@ -232,12 +237,27 @@ export async function GET(request: NextRequest) {
         wau,
         mau,
         productDau,
+        productWau: 0,
+        productMau: 0,
         signups,
+        activationRate: 0,
         mrr,
+        stickiness,
+        featureAdoption: {
+          dashboard: 0,
+          horoscope: 0,
+          tarot: 0,
+          chart: 0,
+          guide: 0,
+          ritual: 0,
+        },
         activeSubscriptions,
         trialSubscriptions,
-        stickiness,
-        isLive: true, // Flag to indicate this is real-time data
+        isLive: true,
+      } as (typeof historicalMetrics)[number] & {
+        activeSubscriptions: number;
+        trialSubscriptions: number;
+        isLive: boolean;
       };
     }
 
