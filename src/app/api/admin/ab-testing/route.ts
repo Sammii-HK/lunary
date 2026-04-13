@@ -12,6 +12,22 @@ const CONCLUDED_TESTS = new Set([
   'seo_sticky_cta_copy',
 ]);
 
+// Tests where copy was rewritten — old data predates the change and must be excluded.
+// These hubs had 0% click-through with chart-focused CTAs, rewritten 2026-04-13
+// to match reader intent (numerology for angel/clock numbers, moon timing for crystals).
+// Data before this date is noise. Filter applies automatically via dateCutoff.
+const REWRITTEN_TESTS_CUTOFF = new Date('2026-04-13T12:00:00Z');
+const REWRITTEN_TESTS = new Set([
+  'seo_cta_angelNumbers',
+  'seo_cta_clockNumbers',
+  'seo_cta_crystals',
+  'seo_cta_weeklyForecast',
+  'seo_sticky_cta_angelNumbers',
+  'seo_sticky_cta_clockNumbers',
+  'seo_sticky_cta_crystals',
+  'seo_sticky_cta_weeklyForecast',
+]);
+
 // Tests that have hub-specific variants mixed in from legacy tracking.
 // Variants matching {hubName}_{digit} should be filtered out — they're
 // already tracked correctly under per-hub tests (seo_cta_{hub}).
@@ -33,6 +49,7 @@ export interface ABTestResult {
   confidence: number;
   isSignificant: boolean;
   recommendation: string;
+  status: 'significant' | 'promising' | 'collecting' | 'sub_par' | 'no_data';
   totalImpressions: number;
   totalConversions: number;
 }
@@ -97,6 +114,13 @@ export async function GET(request: NextRequest) {
     for (const [testName, variants] of Array.from(testVariantsMap.entries())) {
       const variantMetrics: VariantMetrics[] = [];
 
+      // For rewritten tests, use the rewrite date as cutoff to exclude stale data
+      const effectiveCutoff = REWRITTEN_TESTS.has(testName)
+        ? new Date(
+            Math.max(dateCutoff.getTime(), REWRITTEN_TESTS_CUTOFF.getTime()),
+          )
+        : dateCutoff;
+
       for (const variant of variants) {
         // Get impressions for this variant
         // Include cta_impression for SEO page A/B tests, app_opened/pricing_page_viewed for app tests
@@ -106,7 +130,7 @@ export async function GET(request: NextRequest) {
           WHERE metadata->>'abTest' = ${testName}
             AND metadata->>'abVariant' = ${variant}
             AND event_type IN ('app_opened', 'pricing_page_viewed', 'cta_impression', 'page_viewed')
-            AND created_at >= ${dateCutoff.toISOString()}
+            AND created_at >= ${effectiveCutoff.toISOString()}
         `;
 
         // Get conversions for this variant
@@ -117,7 +141,7 @@ export async function GET(request: NextRequest) {
           WHERE metadata->>'abTest' = ${testName}
             AND metadata->>'abVariant' = ${variant}
             AND event_type IN ('trial_started', 'subscription_started', 'trial_converted', 'cta_clicked')
-            AND created_at >= ${dateCutoff.toISOString()}
+            AND created_at >= ${effectiveCutoff.toISOString()}
         `;
 
         const impressions = parseInt(impressionsResult.rows[0]?.count || '0');
@@ -192,6 +216,24 @@ export async function GET(request: NextRequest) {
       const hasEnoughData = minPerVariantImpressions >= 100;
       const isSignificant = confidence >= 95 && hasEnoughData;
 
+      const recommendation = getRecommendation(
+        variantMetrics,
+        confidence,
+        hasEnoughData,
+      );
+
+      // Compute status for programmatic consumption
+      let status: ABTestResult['status'] = 'collecting';
+      if (isSignificant) {
+        status = 'significant';
+      } else if (recommendation.startsWith('Sub-par')) {
+        status = 'sub_par';
+      } else if (totalImpressions === 0) {
+        status = 'no_data';
+      } else if (confidence >= 70 && hasEnoughData) {
+        status = 'promising';
+      }
+
       results.push({
         testName,
         variants: variantMetrics,
@@ -199,11 +241,8 @@ export async function GET(request: NextRequest) {
         improvement,
         confidence,
         isSignificant,
-        recommendation: getRecommendation(
-          variantMetrics,
-          confidence,
-          hasEnoughData,
-        ),
+        recommendation,
+        status,
         totalImpressions,
         totalConversions,
       });
@@ -346,6 +385,28 @@ function getRecommendation(
 
   if (variantsWithTraffic.length === 1) {
     return 'Only one variant has traffic — need multiple variants to compare';
+  }
+
+  // Flag sub-par tests: enough impressions but zero or near-zero conversions
+  const totalImpressions = variantsWithTraffic.reduce(
+    (sum, v) => sum + v.impressions,
+    0,
+  );
+  const totalConversions = variantsWithTraffic.reduce(
+    (sum, v) => sum + v.conversions,
+    0,
+  );
+
+  if (totalImpressions >= 200 && totalConversions === 0) {
+    return 'Sub-par: 0 conversions despite significant impressions. CTA copy likely does not match reader intent. Rewrite recommended.';
+  }
+
+  if (
+    totalImpressions >= 500 &&
+    totalConversions > 0 &&
+    (totalConversions / totalImpressions) * 100 < 0.1
+  ) {
+    return `Sub-par: ${totalConversions} conversions from ${totalImpressions} impressions (${((totalConversions / totalImpressions) * 100).toFixed(2)}%). CTA may need stronger hook or better intent match.`;
   }
 
   if (!hasEnoughData) {
