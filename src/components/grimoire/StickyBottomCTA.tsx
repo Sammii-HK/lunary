@@ -11,7 +11,8 @@ interface StickyBottomCTAProps {
   nudge: ContextualNudge;
 }
 
-const DISMISS_KEY = 'lunary_sticky_cta_dismissed';
+const DISMISS_PREFIX = 'lunary_sticky_cta_dismissed_';
+const DISMISS_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes — not forever
 
 export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
   const authState = useAuthStatus();
@@ -24,32 +25,43 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
   // Don't show to logged-in users
   const isAuthenticated = authState.isAuthenticated;
 
-  // Check session dismissal
+  // Dismiss key is per-page so dismissing on one grimoire page
+  // doesn't affect any other page
+  const dismissKey = `${DISMISS_PREFIX}${pathname}`;
+
+  // Check dismiss — per-hub with 30min expiry
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const dismissedAt = sessionStorage.getItem(DISMISS_KEY);
+      const dismissedAt = sessionStorage.getItem(dismissKey);
       if (dismissedAt) {
-        setDismissed(true);
+        const elapsed = Date.now() - parseInt(dismissedAt, 10);
+        if (elapsed < DISMISS_EXPIRY_MS) {
+          setDismissed(true);
+        } else {
+          // Expired — clear it
+          sessionStorage.removeItem(dismissKey);
+        }
       }
     }
-  }, []);
+  }, [dismissKey]);
 
-  // Show after 30% scroll, or after 3s delay on short pages
+  // Show after 15% scroll (not 30% — long grimoire pages need earlier trigger),
+  // or after 2s delay on short pages
   useEffect(() => {
     if (dismissed || isAuthenticated) return;
 
     const scrollable =
       document.documentElement.scrollHeight - window.innerHeight;
 
-    // Short page (no scroll): show after 3 second delay
+    // Short page (no scroll): show after 2 second delay
     if (scrollable <= 50) {
-      const timer = setTimeout(() => setVisible(true), 3000);
+      const timer = setTimeout(() => setVisible(true), 2000);
       return () => clearTimeout(timer);
     }
 
     const handleScroll = () => {
       const scrollPercent = window.scrollY / scrollable;
-      if (scrollPercent > 0.3) {
+      if (scrollPercent > 0.15) {
         setVisible(true);
       }
     };
@@ -89,7 +101,7 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
     setDismissed(true);
     setVisible(false);
     if (typeof window !== 'undefined') {
-      sessionStorage.setItem(DISMISS_KEY, Date.now().toString());
+      sessionStorage.setItem(dismissKey, Date.now().toString());
     }
   };
 
