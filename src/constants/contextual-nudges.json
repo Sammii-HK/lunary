@@ -1,41 +1,146 @@
 {
-  "version": 3,
+  "version": 4,
   "rules": [
-    { "match": "^/blog/week/", "hub": "weeklyForecast" },
-    { "match": "^/blog", "hub": "weeklyForecast" },
-    { "match": "^/grimoire/tarot/spreads$", "hub": "tarotSpreadsIndex" },
-    { "match": "^/grimoire/tarot/spreads/", "hub": "tarotSpreadsDetail" },
-    { "match": "^/tarot/spreads$", "hub": "tarotSpreadsIndex" },
-    { "match": "^/tarot/spreads/", "hub": "tarotSpreadsDetail" },
-    { "match": "^/grimoire/astronomy/planets", "hub": "planets" },
-    { "match": "^/grimoire/planets", "hub": "planets" },
-    { "match": "^/grimoire/houses", "hub": "houses" },
-    { "match": "^/grimoire/aspects", "hub": "aspects" },
-    { "match": "^/grimoire/transits", "hub": "transits" },
-    { "match": "^/grimoire/horoscopes", "hub": "horoscopes" },
-    { "match": "^/grimoire/moon", "hub": "moon" },
-    { "match": "^/grimoire/tarot", "hub": "tarot" },
-    { "match": "^/grimoire/numerology", "hub": "numerology" },
-    { "match": "^/grimoire/life-path", "hub": "numerology" },
-    { "match": "^/grimoire/double-hours", "hub": "clockNumbers" },
-    { "match": "^/grimoire/mirror-hours", "hub": "clockNumbers" },
-    { "match": "^/grimoire/angel-numbers", "hub": "angelNumbers" },
-    { "match": "^/grimoire/crystals", "hub": "crystals" },
-    { "match": "^/grimoire/spells", "hub": "spells" },
-    { "match": "^/grimoire/rituals", "hub": "spells" },
-    { "match": "^/grimoire/modern-witchcraft", "hub": "modernWitchcraft" },
-    { "match": "^/grimoire/practices", "hub": "practiceWithoutDogma" },
-    { "match": "^/grimoire/correspondences", "hub": "symbolicSystems" },
-    { "match": "^/grimoire/birth-chart", "hub": "personalContext" },
-    { "match": "^/grimoire/guides/birth-chart", "hub": "personalContext" },
-    { "match": "^/grimoire/events", "hub": "cosmicTiming" },
-    { "match": "^/grimoire/zodiac", "hub": "astrology" },
-    { "match": "^/grimoire/rising", "hub": "astrology" },
-    { "match": "^/grimoire/placements", "hub": "astrology" },
-    { "match": "^/grimoire/compatibility", "hub": "astrology" },
-    { "match": "^/grimoire/synastry", "hub": "astrology" },
-    { "match": "^/grimoire/archetypes", "hub": "archetypes" },
-    { "match": "^/grimoire", "hub": "grimoireReference" }
+    {
+      "match": "^/blog/week/",
+      "hub": "weeklyForecast"
+    },
+    {
+      "match": "^/blog",
+      "hub": "weeklyForecast"
+    },
+    {
+      "match": "^/grimoire/tarot/spreads$",
+      "hub": "tarotSpreadsIndex"
+    },
+    {
+      "match": "^/grimoire/tarot/spreads/",
+      "hub": "tarotSpreadsDetail"
+    },
+    {
+      "match": "^/tarot/spreads$",
+      "hub": "tarotSpreadsIndex"
+    },
+    {
+      "match": "^/tarot/spreads/",
+      "hub": "tarotSpreadsDetail"
+    },
+    {
+      "match": "^/grimoire/astronomy/planets",
+      "hub": "planets"
+    },
+    {
+      "match": "^/grimoire/planets",
+      "hub": "planets"
+    },
+    {
+      "match": "^/grimoire/houses",
+      "hub": "houses"
+    },
+    {
+      "match": "^/grimoire/aspects",
+      "hub": "aspects"
+    },
+    {
+      "match": "^/grimoire/transits",
+      "hub": "transits"
+    },
+    {
+      "match": "^/grimoire/horoscopes",
+      "hub": "horoscopes"
+    },
+    {
+      "match": "^/grimoire/moon",
+      "hub": "moon"
+    },
+    {
+      "match": "^/grimoire/tarot",
+      "hub": "tarot"
+    },
+    {
+      "match": "^/grimoire/numerology",
+      "hub": "numerology"
+    },
+    {
+      "match": "^/grimoire/life-path",
+      "hub": "numerology"
+    },
+    {
+      "match": "^/grimoire/double-hours",
+      "hub": "clockNumbers"
+    },
+    {
+      "match": "^/grimoire/mirror-hours",
+      "hub": "clockNumbers"
+    },
+    {
+      "match": "^/grimoire/angel-numbers",
+      "hub": "angelNumbers"
+    },
+    {
+      "match": "^/grimoire/crystals",
+      "hub": "crystals"
+    },
+    {
+      "match": "^/grimoire/spells",
+      "hub": "spells"
+    },
+    {
+      "match": "^/grimoire/rituals",
+      "hub": "spells"
+    },
+    {
+      "match": "^/grimoire/modern-witchcraft",
+      "hub": "modernWitchcraft"
+    },
+    {
+      "match": "^/grimoire/practices",
+      "hub": "practiceWithoutDogma"
+    },
+    {
+      "match": "^/grimoire/correspondences",
+      "hub": "symbolicSystems"
+    },
+    {
+      "match": "^/grimoire/birth-chart",
+      "hub": "personalContext"
+    },
+    {
+      "match": "^/grimoire/guides/birth-chart",
+      "hub": "personalContext"
+    },
+    {
+      "match": "^/grimoire/events",
+      "hub": "cosmicTiming"
+    },
+    {
+      "match": "^/grimoire/zodiac",
+      "hub": "astrology"
+    },
+    {
+      "match": "^/grimoire/rising",
+      "hub": "astrology"
+    },
+    {
+      "match": "^/grimoire/placements",
+      "hub": "astrology"
+    },
+    {
+      "match": "^/grimoire/compatibility",
+      "hub": "astrology"
+    },
+    {
+      "match": "^/grimoire/synastry",
+      "hub": "astrology"
+    },
+    {
+      "match": "^/grimoire/archetypes",
+      "hub": "archetypes"
+    },
+    {
+      "match": "^/grimoire",
+      "hub": "grimoireReference"
+    }
   ],
   "ctaNudges": {
     "universal": [
@@ -45,7 +150,7 @@
         "buttonLabel": "Get my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Generic meanings only go so far → see YOUR chart"
+        "inlineCopy": "Generic meanings only go so far \u2192 see YOUR chart"
       },
       {
         "headline": "This is reference. Your chart makes it personal.",
@@ -80,7 +185,6 @@
         "inlineCopy": "Every chart is unique. What does yours say?"
       }
     ],
-
     "astrology": [
       {
         "headline": "This is your sun sign. Your chart has 10 more.",
@@ -123,7 +227,6 @@
         "inlineCopy": "Your chart has aspects you've never seen."
       }
     ],
-
     "planets": [
       {
         "headline": "Which house does this planet rule in YOUR chart?",
@@ -158,7 +261,6 @@
         "inlineCopy": "What aspects does this planet make in your chart?"
       }
     ],
-
     "houses": [
       {
         "headline": "Empty house? Doesn't mean inactive.",
@@ -193,7 +295,6 @@
         "inlineCopy": "3+ planets in one house? That's a stellium. Check yours."
       }
     ],
-
     "aspects": [
       {
         "headline": "Do you have this aspect?",
@@ -220,7 +321,6 @@
         "inlineCopy": "Aspects show where the tension and flow are."
       }
     ],
-
     "transits": [
       {
         "headline": "Same transit, different experience",
@@ -263,7 +363,6 @@
         "inlineCopy": "This transit lasts weeks. See what it means for you."
       }
     ],
-
     "horoscopes": [
       {
         "headline": "This is your sun sign. Your chart has 10 more.",
@@ -306,7 +405,6 @@
         "inlineCopy": "Sun sign horoscopes miss 90% of the picture."
       }
     ],
-
     "moon": [
       {
         "headline": "The moon moves. Your natal moon doesn't.",
@@ -349,7 +447,6 @@
         "inlineCopy": "Your natal moon shapes how you feel everything."
       }
     ],
-
     "tarot": [
       {
         "headline": "Reading about it is not the same as pulling for yourself",
@@ -357,7 +454,7 @@
         "buttonLabel": "Pull a spread",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Reading about it ≠ pulling for yourself."
+        "inlineCopy": "Reading about it \u2260 pulling for yourself."
       },
       {
         "headline": "Card meanings are theory. Your pull is practice.",
@@ -392,7 +489,6 @@
         "inlineCopy": "One card. One question. Right now."
       }
     ],
-
     "tarotSpreadsIndex": [
       {
         "headline": "Pick a spread. Ask your question.",
@@ -419,7 +515,6 @@
         "inlineCopy": "Spreads are meant to be pulled, not just read about."
       }
     ],
-
     "tarotSpreadsDetail": [
       {
         "headline": "This spread. Your question. Right now.",
@@ -446,7 +541,6 @@
         "inlineCopy": "This layout is waiting for your question."
       }
     ],
-
     "numerology": [
       {
         "headline": "Your Personal Day number changes daily",
@@ -473,88 +567,84 @@
         "inlineCopy": "Numbers in theory vs. YOUR numbers."
       }
     ],
-
     "clockNumbers": [
       {
-        "headline": "You keep seeing this time. Now what?",
-        "subline": "Context matters. See what's active in your chart when these numbers keep appearing.",
-        "buttonLabel": "Connect this to my chart",
+        "headline": "Your personal day number explains why you noticed this time",
+        "subline": "Clock patterns and your numerology are connected. Check your number.",
+        "buttonLabel": "Get today's number",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "You keep seeing this time. Now what?"
+        "inlineCopy": "Your personal day number explains why you noticed this time"
       },
       {
-        "headline": "Repeating times catch your attention for a reason",
-        "subline": "See what's happening in your chart and transits when you notice these patterns.",
-        "buttonLabel": "Check my chart",
+        "headline": "The number you keep seeing has a numerological root",
+        "subline": "Your life path number reveals why certain numbers keep appearing.",
+        "buttonLabel": "Find my life path",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Repeating times catch your attention for a reason."
+        "inlineCopy": "Your life path number reveals why certain numbers keep appearing"
       },
       {
-        "headline": "The clock is one signal. Your chart is another.",
-        "subline": "See what transits are active and what your chart says about this moment.",
-        "buttonLabel": "See what's active",
+        "headline": "What is the universe trying to tell you today?",
+        "subline": "The universal day number adds context to repeating times. Check it now.",
+        "buttonLabel": "Check today's number",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "The clock is one signal. Your chart is another."
+        "inlineCopy": "Check today's universal day number for context on what you're seeing"
       }
     ],
-
     "angelNumbers": [
       {
-        "headline": "You saw the number. Now what?",
-        "subline": "Context matters. See what's active in your chart when this number keeps appearing.",
-        "buttonLabel": "Connect this to my chart",
+        "headline": "Your personal day number today is calculated from your birthday",
+        "subline": "Angel numbers show up for a reason. Your personal number reveals the deeper message.",
+        "buttonLabel": "Get my personal number",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "You saw the number. Now what?"
+        "inlineCopy": "Your personal day number reveals why you keep seeing this"
       },
       {
-        "headline": "Angel numbers are signals. Your chart shows the context.",
-        "subline": "What transits are active? What's your Personal Day number? See the full picture.",
-        "buttonLabel": "See my chart context",
+        "headline": "What is your life path number?",
+        "subline": "It takes 30 seconds to calculate. It explains why certain numbers follow you.",
+        "buttonLabel": "Calculate my life path",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Angel numbers are signals. Your chart shows the context."
+        "inlineCopy": "Calculate your life path number \u2014 it explains why certain numbers follow you"
       },
       {
-        "headline": "You noticed the pattern. Now check your timing.",
-        "subline": "See what's active in the sky and in your chart right now.",
-        "buttonLabel": "Check my timing",
+        "headline": "Numbers are not random. Your personal year number proves it.",
+        "subline": "Each year carries a numerological theme. Find out what 2026 means for you specifically.",
+        "buttonLabel": "See my year number",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "You noticed the pattern. Now check your timing."
+        "inlineCopy": "Find out what 2026 means for you \u2014 your personal year number"
       }
     ],
-
     "crystals": [
       {
-        "headline": "Not every crystal is for every moment",
-        "subline": "See which ones support what's active in your chart today, not a generic list.",
-        "buttonLabel": "Get my crystal recs",
+        "headline": "The best crystal for today depends on the moon phase",
+        "subline": "Lunar timing changes which crystals are most effective. Check today's recommendation.",
+        "buttonLabel": "See today's crystal",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Not every crystal is for every moment."
+        "inlineCopy": "Today's moon phase changes which crystals work best \u2014 see the recommendation"
       },
       {
-        "headline": "Crystals work better with timing",
-        "subline": "See what's active in your chart and which stones match this energy.",
-        "buttonLabel": "See my recommendations",
+        "headline": "Your birth chart reveals your power crystals",
+        "subline": "Each planet in your chart corresponds to specific stones. Find yours.",
+        "buttonLabel": "Find my crystals",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Crystals work better with timing."
+        "inlineCopy": "Your birth chart reveals which crystals resonate with your energy"
       },
       {
-        "headline": "Which crystal fits YOUR chart right now?",
-        "subline": "Generic lists help. Timing-based recommendations help more.",
-        "buttonLabel": "Get personalised recs",
+        "headline": "Crystal of the day, personalised to your chart",
+        "subline": "Not every crystal is for every person. Get a daily recommendation based on your transits.",
+        "buttonLabel": "Get my daily crystal",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Which crystal fits YOUR chart right now?"
+        "inlineCopy": "Get a daily crystal recommendation personalised to your chart and transits"
       }
     ],
-
     "spells": [
       {
         "headline": "Timing is half the spell",
@@ -581,7 +671,6 @@
         "inlineCopy": "When should you actually do this?"
       }
     ],
-
     "modernWitchcraft": [
       {
         "headline": "Correspondences without context are just lists",
@@ -608,7 +697,6 @@
         "inlineCopy": "Connect this to your actual practice."
       }
     ],
-
     "practiceWithoutDogma": [
       {
         "headline": "Not every practice fits every season",
@@ -635,7 +723,6 @@
         "inlineCopy": "Your path isn't generic. See your chart."
       }
     ],
-
     "cosmicTiming": [
       {
         "headline": "Same event, different impact",
@@ -662,7 +749,6 @@
         "inlineCopy": "The timing is universal. The impact is personal."
       }
     ],
-
     "personalContext": [
       {
         "headline": "You've got the concepts. Now see YOUR chart.",
@@ -689,7 +775,6 @@
         "inlineCopy": "This is how birth charts work. Here's yours."
       }
     ],
-
     "symbolicSystems": [
       {
         "headline": "Symbols connect. Your chart shows how.",
@@ -716,7 +801,6 @@
         "inlineCopy": "These systems point to something. Your chart makes it specific."
       }
     ],
-
     "integratedGuidance": [
       {
         "headline": "You've got the concepts. Now see your chart.",
@@ -735,7 +819,7 @@
         "inlineCopy": "Reference is a starting point. Your chart is the map."
       },
       {
-        "headline": "Knowledge → Application",
+        "headline": "Knowledge \u2192 Application",
         "subline": "You've been reading. Now see your actual chart, transits, and timing.",
         "buttonLabel": "See my chart",
         "href": "/auth?signup=true",
@@ -743,7 +827,6 @@
         "inlineCopy": "You've been reading. Now see your chart."
       }
     ],
-
     "learningThroughCycles": [
       {
         "headline": "Meanings shift as you do",
@@ -770,7 +853,6 @@
         "inlineCopy": "Today's chart context isn't tomorrow's."
       }
     ],
-
     "archetypes": [
       {
         "headline": "This archetype lives somewhere in your chart",
@@ -797,7 +879,6 @@
         "inlineCopy": "Archetypes are universal. Your expression is specific."
       }
     ],
-
     "grimoireReference": [
       {
         "headline": "Reference is a starting point. Your chart is the map.",
@@ -824,39 +905,30 @@
         "inlineCopy": "Knowledge becomes useful when it's about YOU."
       }
     ],
-
     "weeklyForecast": [
       {
-        "headline": "Same week, different impact for everyone",
-        "subline": "These transits hit your chart differently based on your placements. See where they land for you.",
-        "buttonLabel": "See this in my chart",
+        "headline": "This forecast is generic. Yours would be different.",
+        "subline": "Your rising sign, moon sign, and current transits change what this week means for you.",
+        "buttonLabel": "Get my forecast",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Same week, different impact. See YOUR chart."
+        "inlineCopy": "Your rising sign changes what this week means \u2014 get your personalised forecast"
       },
       {
-        "headline": "Generic weekly forecast? Your chart is more specific.",
-        "subline": "Which houses are these transits activating for you? Your placements tell a different story.",
-        "buttonLabel": "Get my personalised view",
-        "href": "/auth?signup=true",
-        "action": "authOrLink",
-        "inlineCopy": "Generic forecast? Your chart is more specific."
-      },
-      {
-        "headline": "This week's transits are hitting specific houses in your chart",
-        "subline": "The aspects and moon phases affect everyone differently based on their natal placements.",
+        "headline": "Which transits are actually hitting YOUR chart this week?",
+        "subline": "The same transit affects everyone differently based on where it lands in your chart.",
         "buttonLabel": "See my transits",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "This week's transits hit YOUR chart differently."
+        "inlineCopy": "See which of this week's transits are hitting your chart specifically"
       },
       {
-        "headline": "Your rising sign changes how you read this forecast",
-        "subline": "Many astrologers say read for your rising sign. See your full chart to know which houses are active.",
-        "buttonLabel": "Find my rising sign",
+        "headline": "Your personal day numbers for this week",
+        "subline": "Each day this week carries a different numerological energy for you.",
+        "buttonLabel": "See my week",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Your rising sign changes how you read this."
+        "inlineCopy": "Each day this week has a different personal number \u2014 see yours"
       }
     ]
   }
