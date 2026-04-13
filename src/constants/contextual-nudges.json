@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "rules": [
     {
       "match": "^/blog/week/",
@@ -297,112 +297,80 @@
     ],
     "aspects": [
       {
-        "headline": "Do you have this aspect?",
-        "subline": "Your chart might have it natally. Or today's sky might be forming it to one of your planets.",
-        "buttonLabel": "Check my aspects",
+        "headline": "Do you have this aspect in your birth chart?",
+        "subline": "It takes 30 seconds to find out. Your chart is calculated from real astronomical data.",
+        "buttonLabel": "Check my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Do you have this aspect? Check your chart."
+        "inlineCopy": "Find out if you have this aspect \u2014 30 seconds to check"
       },
       {
-        "headline": "This aspect might be in your chart right now",
-        "subline": "Natally or by transit. See what's actually active for you today.",
+        "headline": "People with this aspect tend to notice it most in their 20s and 30s",
+        "subline": "Your birth chart reveals which aspects shape your relationships, career, and inner life.",
         "buttonLabel": "See my aspects",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "This aspect might be in your chart right now."
+        "inlineCopy": "Your birth chart shows which aspects shape your life most \u2014 see yours"
       },
       {
-        "headline": "Aspects show where the tension and flow are",
-        "subline": "Your chart has its own pattern. See which planets are talking to each other.",
-        "buttonLabel": "View my chart",
+        "headline": "This aspect is active in the sky right now. Is it touching your chart?",
+        "subline": "Transiting aspects feel strongest when they connect to your natal placements.",
+        "buttonLabel": "Check now",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Aspects show where the tension and flow are."
+        "inlineCopy": "This aspect is active right now \u2014 check if it is connecting to your chart"
       }
     ],
     "transits": [
       {
-        "headline": "Same transit, different experience",
-        "subline": "Where this lands in YOUR chart changes everything. See which house it's activating.",
-        "buttonLabel": "See transits in my chart",
+        "headline": "Which house is this transit hitting in your chart?",
+        "subline": "The same transit affects your career, relationships, or health depending on where it lands.",
+        "buttonLabel": "Find my houses",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Same transit, different experience. See YOUR houses."
+        "inlineCopy": "This transit hits a different life area depending on your chart \u2014 find which one"
       },
       {
-        "headline": "This transit is hitting a specific house for you",
-        "subline": "Not the same as everyone else. See where it lands in your chart.",
-        "buttonLabel": "Find it in my chart",
+        "headline": "Get alerts when major transits hit YOUR chart",
+        "subline": "Lunary calculates your personal transits in real-time. Free daily updates.",
+        "buttonLabel": "Set up alerts",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "This transit is hitting a specific house for you."
+        "inlineCopy": "Get free alerts when major transits hit your personal chart"
       },
       {
-        "headline": "The sky moves. Your chart shows where it matters.",
-        "subline": "Today's planets are aspecting your natal placements. See what's active.",
-        "buttonLabel": "See today's transits",
+        "headline": "Is this transit making an exact aspect to your chart right now?",
+        "subline": "Exact aspects are when you feel it most. Check if this one is touching your placements.",
+        "buttonLabel": "Check my aspects",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "The sky moves. Your chart shows where it matters."
-      },
-      {
-        "headline": "Is this transit making an aspect to your chart?",
-        "subline": "It depends on your natal placements. Some people feel it strongly, others barely notice.",
-        "buttonLabel": "Check my chart",
-        "href": "/auth?signup=true",
-        "action": "authOrLink",
-        "inlineCopy": "Is this transit making an aspect to your chart?"
-      },
-      {
-        "headline": "This transit lasts weeks. Your chart shows what it means for you.",
-        "subline": "Which house is it activating? Which natal planets does it aspect? See your specifics.",
-        "buttonLabel": "See my transit report",
-        "href": "/auth?signup=true",
-        "action": "authOrLink",
-        "inlineCopy": "This transit lasts weeks. See what it means for you."
+        "inlineCopy": "Check if this transit is making an exact aspect to your chart right now"
       }
     ],
     "horoscopes": [
       {
-        "headline": "This is your sun sign. Your chart has 10 more.",
-        "subline": "See your full birth chart with all your placements, houses, and aspects.",
-        "buttonLabel": "See my full chart",
-        "href": "/auth?signup=true",
-        "action": "authOrLink",
-        "inlineCopy": "This is your sun sign. Your chart has 10 more."
-      },
-      {
-        "headline": "Generic horoscope? Your chart is more specific.",
-        "subline": "Sun sign forecasts are broad. Your actual transits tell a different story.",
-        "buttonLabel": "See my transits",
-        "href": "/auth?signup=true",
-        "action": "authOrLink",
-        "inlineCopy": "Generic horoscope? Your chart is more specific."
-      },
-      {
-        "headline": "Your rising sign gets a horoscope too",
-        "subline": "Many astrologers say read your rising. See your full chart to know what that is.",
+        "headline": "Your rising sign gets a different forecast this month",
+        "subline": "Most people only read their sun sign. Your rising sign horoscope is often more accurate.",
         "buttonLabel": "Find my rising sign",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Your rising sign gets a horoscope too."
+        "inlineCopy": "Your rising sign horoscope is often more accurate than your sun sign"
       },
       {
-        "headline": "Which planets are transiting your chart today?",
-        "subline": "Your daily forecast based on actual planetary positions hitting your natal chart.",
-        "buttonLabel": "See today's transits",
+        "headline": "Get next month's forecast before everyone else",
+        "subline": "Signed-in users see next month's horoscope 2 weeks early. Free forever.",
+        "buttonLabel": "Get early access",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Which planets are transiting your chart today?"
+        "inlineCopy": "Get next month's horoscope 2 weeks early, free forever"
       },
       {
-        "headline": "Sun sign horoscopes miss 90% of the picture",
-        "subline": "Your Moon, Rising, Venus, Mars... each gets its own transits. See the full story.",
-        "buttonLabel": "Get the full picture",
+        "headline": "Your personal day number today changes how this horoscope lands",
+        "subline": "Numerology adds a layer most horoscopes miss. Takes 30 seconds to calculate.",
+        "buttonLabel": "See today's number",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Sun sign horoscopes miss 90% of the picture."
+        "inlineCopy": "Your personal day number changes how today's horoscope lands for you"
       }
     ],
     "moon": [
