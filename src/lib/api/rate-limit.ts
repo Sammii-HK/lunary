@@ -23,7 +23,7 @@ export async function withApiKeyAuth(
   request: NextRequest,
   handler: (
     req: NextRequest,
-    apiKey: { tier: ApiTier; userId: string },
+    apiKey: { tier: ApiTier; userId: string; keyPrefix: string },
   ) => Promise<NextResponse>,
 ): Promise<NextResponse> {
   const authHeader = request.headers.get('authorization');
@@ -105,6 +105,7 @@ export async function withApiKeyAuth(
   const response = await handler(request, {
     tier: keyData.tier as ApiTier,
     userId: keyData.user_id,
+    keyPrefix: keyData.key_prefix,
   });
 
   Object.entries(getRateLimitHeaders(rateLimitInfo)).forEach(([key, value]) => {

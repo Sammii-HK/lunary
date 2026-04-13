@@ -11,15 +11,18 @@ const TIER_LEVELS: Record<ApiTier, number> = {
   business: 3,
 };
 
+const PAID_TIERS = new Set<ApiTier>(['starter', 'developer', 'business']);
+
 /**
  * Wrap a v1 API handler with API key auth + tier checking.
- * Free-tier endpoints allow unauthenticated access with IP rate limiting.
+ * All requests require an API key (even free tier).
+ * Free tier responses include attribution; paid tiers get white-label.
  */
 export function v1Handler(
   minTier: TierRequirement,
   handler: (
     req: NextRequest,
-    context: { tier: ApiTier; userId: string },
+    context: { tier: ApiTier; userId: string; keyPrefix: string },
   ) => Promise<NextResponse>,
 ) {
   return async (request: NextRequest) => {
@@ -36,6 +39,29 @@ export function v1Handler(
       }
 
       const response = await handler(req, apiKey);
+
+      // Inject attribution for free tier, paid tiers get clean responses
+      if (!PAID_TIERS.has(apiKey.tier)) {
+        try {
+          const body = await response.json();
+          const attributed = {
+            ...body,
+            attribution: {
+              text: 'Powered by Lunary',
+              url: `https://lunary.app?utm_source=api&utm_medium=partner&utm_content=${apiKey.keyPrefix}`,
+              required: true,
+              remove_with_paid_plan: 'https://lunary.app/developers/dashboard',
+            },
+          };
+          return NextResponse.json(attributed, {
+            status: response.status,
+            headers: response.headers,
+          });
+        } catch {
+          // If response isn't JSON, return as-is
+          return response;
+        }
+      }
 
       response.headers.set(
         'Cache-Control',
