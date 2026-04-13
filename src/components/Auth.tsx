@@ -69,6 +69,7 @@ export function AuthComponent({
   const [appleLoading, setAppleLoading] = useState(false);
   const [showEmailForm, setShowEmailForm] = useState(false);
   const turnstileTokenRef = useRef<string | null>(null);
+  const turnstileFailedRef = useRef(false);
 
   useEffect(() => {
     setIsNative(Capacitor.isNativePlatform());
@@ -146,21 +147,35 @@ export function AuthComponent({
         }
 
         // Verify Turnstile token (web only — native apps skip this, skipped if key not configured)
-        if (!isNative && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
-          const turnstileToken = turnstileTokenRef.current;
+        // If Turnstile failed to load (ad blocker, network), skip gracefully — don't block real users.
+        if (
+          !isNative &&
+          process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY &&
+          !turnstileFailedRef.current
+        ) {
+          let turnstileToken = turnstileTokenRef.current;
+          // If token isn't ready yet, wait briefly for Turnstile to complete
           if (!turnstileToken) {
-            throw new Error('Please wait for the security check to complete.');
+            await new Promise((r) => setTimeout(r, 2000));
+            turnstileToken = turnstileTokenRef.current;
           }
-          const verifyRes = await fetch('/api/auth/verify-turnstile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: turnstileToken }),
-          });
-          if (!verifyRes.ok) {
-            throw new Error('Security check failed. Please try again.');
+          if (!turnstileToken) {
+            // Still no token after waiting — skip rather than block the user
+            console.warn(
+              '[turnstile] Token not available after wait — proceeding without bot check',
+            );
+          } else {
+            const verifyRes = await fetch('/api/auth/verify-turnstile', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: turnstileToken }),
+            });
+            if (!verifyRes.ok) {
+              throw new Error('Security check failed. Please try again.');
+            }
+            // Reset token after use so it cannot be replayed
+            turnstileTokenRef.current = null;
           }
-          // Reset token after use so it cannot be replayed
-          turnstileTokenRef.current = null;
         }
 
         // No timeout - let the request complete naturally
@@ -819,9 +834,16 @@ export function AuthComponent({
               siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
               onSuccess={(token) => {
                 turnstileTokenRef.current = token;
+                turnstileFailedRef.current = false;
               }}
               onExpire={() => {
                 turnstileTokenRef.current = null;
+              }}
+              onError={() => {
+                console.warn(
+                  '[turnstile] Widget failed to load — skipping bot check',
+                );
+                turnstileFailedRef.current = true;
               }}
               options={{ theme: 'dark', size: 'invisible' }}
             />
