@@ -10,7 +10,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { getABTestVariantClient } from '@/lib/ab-tests-client';
-import { trackEvent } from '@/lib/analytics';
+import { trackEvent, getCtaAttribution } from '@/lib/analytics';
 
 /** PostHog test name -> admin dashboard test name */
 const TEST_NAME_MAPPING: Record<string, string> = {
@@ -102,8 +102,18 @@ export function useABTestTracking(
 }
 
 /**
- * Track a conversion event with ALL active A/B test metadata.
- * Fires one conversion per active test so each records conversions independently.
+ * Track a conversion event attributed to the correct A/B test.
+ *
+ * Previously this fired one conversion per active test, which meant a single
+ * signup created 6+ conversion events (one for every PostHog experiment the
+ * user happened to be enrolled in). This inflated conversion counts and made
+ * app-level tests show more conversions than impressions.
+ *
+ * Now: if the user clicked a CTA with A/B test metadata (stored in
+ * sessionStorage by storeCtaAttribution), we attribute the conversion ONLY
+ * to that specific test. If no CTA attribution exists (e.g. direct signup),
+ * we attribute to the single most relevant active test (the first one), not
+ * all of them.
  */
 export function useABTestConversion() {
   const activeTests = useMemo(() => {
@@ -127,20 +137,39 @@ export function useABTestConversion() {
       eventName: string,
       data?: { featureName?: string; pagePath?: string; [key: string]: any },
     ) => {
-      if (activeTests.length === 0) {
-        trackEvent(eventName as any, data);
-        return;
-      }
+      // Check if we have CTA attribution — this tells us exactly which
+      // test drove this conversion
+      const ctaAttribution = getCtaAttribution();
 
-      for (const abMeta of activeTests) {
+      if (ctaAttribution?.cta_ab_test && ctaAttribution?.cta_ab_variant) {
+        // Attribute conversion to the specific test the user clicked
         trackEvent(eventName as any, {
           ...data,
           metadata: {
-            ...abMeta,
+            abTest: ctaAttribution.cta_ab_test,
+            abVariant: ctaAttribution.cta_ab_variant,
+            ...ctaAttribution,
             ...data?.metadata,
           },
         });
+        return;
       }
+
+      // No CTA attribution — attribute to the first active test only
+      // (not all of them, which would inflate conversion counts)
+      if (activeTests.length > 0) {
+        trackEvent(eventName as any, {
+          ...data,
+          metadata: {
+            ...activeTests[0],
+            ...data?.metadata,
+          },
+        });
+        return;
+      }
+
+      // No active tests at all
+      trackEvent(eventName as any, data);
     };
   }, [activeTests]);
 

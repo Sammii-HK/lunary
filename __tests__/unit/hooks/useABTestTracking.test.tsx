@@ -15,6 +15,7 @@ jest.mock('@/lib/ab-tests-client', () => ({
 
 jest.mock('@/lib/analytics', () => ({
   trackEvent: jest.fn((...args) => mockTrackEvent(...args)),
+  getCtaAttribution: jest.fn(() => null),
 }));
 
 describe('useABTestTracking', () => {
@@ -266,7 +267,7 @@ describe('useABTestConversion', () => {
     });
   });
 
-  it('should fire one conversion event PER active test', () => {
+  it('should fire one conversion event for the first active test (not all)', () => {
     mockGetABTestVariantClient.mockImplementation((testName: string) => {
       const variants: Record<string, string> = {
         'cta-copy-test': 'mystical',
@@ -282,21 +283,12 @@ describe('useABTestConversion', () => {
       featureName: 'tarot_full_reading',
     });
 
-    expect(mockTrackEvent).toHaveBeenCalledTimes(3);
+    // Hook now attributes to the first active test only to avoid inflating conversion counts
+    expect(mockTrackEvent).toHaveBeenCalledTimes(1);
 
     expect(mockTrackEvent).toHaveBeenCalledWith('upgrade_clicked', {
       featureName: 'tarot_full_reading',
       metadata: { abTest: 'cta_copy', abVariant: 'mystical' },
-    });
-
-    expect(mockTrackEvent).toHaveBeenCalledWith('upgrade_clicked', {
-      featureName: 'tarot_full_reading',
-      metadata: { abTest: 'paywall_preview', abVariant: 'blur' },
-    });
-
-    expect(mockTrackEvent).toHaveBeenCalledWith('upgrade_clicked', {
-      featureName: 'tarot_full_reading',
-      metadata: { abTest: 'feature_preview', abVariant: 'peek' },
     });
   });
 

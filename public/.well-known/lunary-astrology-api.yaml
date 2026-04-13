@@ -1,0 +1,294 @@
+openapi: 3.1.0
+info:
+  title: Lunary Astrology API
+  version: 1.0.0
+  description: |
+    Real-time astronomical calculations for developers. 15 RESTful endpoints powered by
+    the VSOP87 planetary model from the Bureau des Longitudes. Accurate to within 1 arcminute,
+    unit tested against NOVAS C 3.1 (US Naval Observatory) and JPL Horizons.
+    Uses IAU 2000B nutation model with JPL DE405 gravitational constants.
+    Birth charts (5 house systems), synastry, transits, eclipses, progressions,
+    Vedic dasha, and a searchable 2,000+ entry grimoire.
+  contact:
+    email: api@lunary.app
+    url: https://lunary.app/developers
+  termsOfService: https://lunary.app/terms
+  x-logo:
+    url: https://lunary.app/icon-512.png
+servers:
+  - url: https://lunary.app/api/v1/astrology
+    description: Production
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: 'lun_xxx'
+      description: 'API key from https://lunary.app/developers/dashboard'
+paths:
+  /moon-phase:
+    get:
+      summary: Get current moon phase
+      operationId: getMoonPhase
+      tags: [Free]
+      parameters:
+        - name: date
+          in: query
+          schema: { type: string, format: date }
+          description: ISO date (defaults to today)
+      responses:
+        '200':
+          description: Moon phase data
+  /planetary-positions:
+    get:
+      summary: Get all planetary positions
+      operationId: getPlanetaryPositions
+      tags: [Free]
+      parameters:
+        - name: date
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Array of 10 planets with sign, degree, retrograde, transit duration
+  /aspects:
+    get:
+      summary: Get active planetary aspects
+      operationId: getAspects
+      tags: [Free]
+      parameters:
+        - name: date
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Active aspects with orb values
+  /cosmic-events:
+    get:
+      summary: Get active retrogrades
+      operationId: getCosmicEvents
+      tags: [Free]
+      parameters:
+        - name: date
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Active retrogrades
+  /grimoire/search:
+    get:
+      summary: Search the grimoire
+      operationId: searchGrimoire
+      tags: [Free]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10, maximum: 50 }
+      responses:
+        '200':
+          description: Search results
+  /grimoire/entry:
+    get:
+      summary: Get grimoire entry by slug
+      operationId: getGrimoireEntry
+      tags: [Free]
+      parameters:
+        - name: slug
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Full grimoire entry
+  /grimoire/stats:
+    get:
+      summary: Grimoire statistics
+      operationId: getGrimoireStats
+      tags: [Free]
+      responses:
+        '200':
+          description: Total entries and category breakdown
+  /birth-chart:
+    post:
+      summary: Calculate birth chart
+      operationId: calculateBirthChart
+      tags: [Starter]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [birthDate, latitude, longitude]
+              properties:
+                birthDate: { type: string, format: date }
+                birthTime: { type: string, example: '14:30' }
+                latitude: { type: number }
+                longitude: { type: number }
+                houseSystem:
+                  {
+                    type: string,
+                    enum: [placidus, koch, whole-sign, porphyry, alcabitius],
+                  }
+      responses:
+        '200':
+          description: Birth chart with planets and houses
+  /houses:
+    post:
+      summary: Calculate house cusps
+      operationId: calculateHouses
+      tags: [Starter]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [birthDate, latitude, longitude]
+              properties:
+                birthDate: { type: string }
+                birthTime: { type: string }
+                latitude: { type: number }
+                longitude: { type: number }
+                houseSystem:
+                  {
+                    type: string,
+                    enum: [placidus, koch, whole-sign, porphyry, alcabitius],
+                  }
+      responses:
+        '200':
+          description: House cusps for the specified system
+  /eclipses:
+    get:
+      summary: Upcoming eclipses
+      operationId: getEclipses
+      tags: [Starter]
+      parameters:
+        - name: date
+          in: query
+          schema: { type: string, format: date }
+        - name: months
+          in: query
+          schema: { type: integer, default: 6, maximum: 24 }
+      responses:
+        '200':
+          description: Upcoming solar and lunar eclipses
+  /ephemeris:
+    get:
+      summary: Full ephemeris for a location
+      operationId: getEphemeris
+      tags: [Starter]
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema: { type: number }
+        - name: longitude
+          in: query
+          required: true
+          schema: { type: number }
+        - name: date
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Sunrise, sunset, moonrise, moonset, planet visibility
+  /synastry:
+    post:
+      summary: Relationship compatibility
+      operationId: calculateSynastry
+      tags: [Developer]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [personA, personB]
+              properties:
+                personA:
+                  type: object
+                  required: [birthDate, latitude, longitude]
+                  properties:
+                    birthDate: { type: string }
+                    birthTime: { type: string }
+                    latitude: { type: number }
+                    longitude: { type: number }
+                personB:
+                  type: object
+                  required: [birthDate, latitude, longitude]
+                  properties:
+                    birthDate: { type: string }
+                    birthTime: { type: string }
+                    latitude: { type: number }
+                    longitude: { type: number }
+      responses:
+        '200':
+          description: Compatibility score, aspects, strengths, challenges
+  /transits:
+    post:
+      summary: Personal transits
+      operationId: getPersonalTransits
+      tags: [Developer]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [birthDate, latitude, longitude]
+              properties:
+                birthDate: { type: string }
+                birthTime: { type: string }
+                latitude: { type: number }
+                longitude: { type: number }
+                days: { type: integer, default: 30, maximum: 90 }
+      responses:
+        '200':
+          description: Upcoming personal transit events
+  /progressions:
+    post:
+      summary: Secondary progressions
+      operationId: calculateProgressions
+      tags: [Developer]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [birthDate]
+              properties:
+                birthDate: { type: string, format: date-time }
+                targetDate: { type: string, format: date }
+      responses:
+        '200':
+          description: Progressed planet positions
+  /dasha:
+    post:
+      summary: Vedic dasha periods
+      operationId: calculateDasha
+      tags: [Developer]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [moonDegree, birthDate]
+              properties:
+                moonDegree: { type: number, minimum: 0, maximum: 360 }
+                birthDate: { type: string, format: date }
+                upcomingCount: { type: integer, default: 5, maximum: 20 }
+      responses:
+        '200':
+          description: Current dasha state and upcoming periods
