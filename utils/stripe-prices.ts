@@ -325,6 +325,28 @@ export const STRIPE_PRICE_MAPPING = {
       currency: 'usd',
     },
   },
+  // API tier subscriptions — created 2026-04-13
+  api_starter: {
+    USD: {
+      priceId: 'price_1TLkr4PsyR7YcHgY62XIhASb',
+      amount: 9,
+      currency: 'usd',
+    },
+  },
+  api_developer: {
+    USD: {
+      priceId: 'price_1TLkr5PsyR7YcHgYe4K0buER',
+      amount: 29,
+      currency: 'usd',
+    },
+  },
+  api_business: {
+    USD: {
+      priceId: 'price_1TLkr6PsyR7YcHgYrLRomNQu',
+      amount: 99,
+      currency: 'usd',
+    },
+  },
 } as const;
 
 export type PlanId = keyof typeof STRIPE_PRICE_MAPPING;
