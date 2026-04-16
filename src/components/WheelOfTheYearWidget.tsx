@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { wheelOfTheYearSabbats } from '@/constants/sabbats';
-import { getSpellsBySabbat } from '@/lib/spells/index';
-import dayjs from 'dayjs';
+import { getSpellsBySabbat } from '@/lib/spells';
+import {
+  getUpcomingSabbat,
+  getSeasonalSabbat,
+} from '@/lib/grimoire/data-accessor';
 
 export const WheelOfTheYearWidget = () => {
   const [currentSabbat, setCurrentSabbat] = useState<string | null>(null);
@@ -11,64 +14,34 @@ export const WheelOfTheYearWidget = () => {
   const [_relevantSpells, setRelevantSpells] = useState<any[]>([]);
 
   useEffect(() => {
-    const getCurrentSabbat = () => {
-      const now = dayjs();
-      const _currentMonth = now.month() + 1;
-      const _currentDay = now.date();
+    const resolveSabbats = () => {
+      const now = new Date();
 
-      // Define date ranges for each sabbat
-      const sabbatDates = [
-        { name: 'Samhain', month: 10, day: 31, season: 'autumn' },
-        { name: 'Yule', month: 12, day: 21, season: 'winter' },
-        { name: 'Imbolc', month: 2, day: 1, season: 'winter' },
-        { name: 'Ostara', month: 3, day: 21, season: 'spring' },
-        { name: 'Beltane', month: 5, day: 1, season: 'spring' },
-        { name: 'Litha', month: 6, day: 21, season: 'summer' },
-        { name: 'Lammas or Lughnasadh', month: 8, day: 1, season: 'summer' },
-        { name: 'Mabon', month: 9, day: 21, season: 'autumn' },
-      ];
+      // Use the shared seasonal sabbat logic — matches how the rest of the
+      // app (cosmic-recommender, spell API) decides what's "current". Only
+      // treat as current if it's active (±7 days); recently-passed sabbats
+      // are NOT shown as current here because the widget is a "what's
+      // happening now" surface, not a retrospective.
+      const seasonal = getSeasonalSabbat(now);
+      const current =
+        seasonal && Math.abs(seasonal.daysOffset) <= 7
+          ? seasonal.sabbat.name
+          : null;
 
-      // Find current or approaching sabbat (only show if upcoming or today, not after)
-      let current = null;
-      let next = null;
-
-      for (let i = 0; i < sabbatDates.length; i++) {
-        const sabbat = sabbatDates[i];
-        const sabbatDate = dayjs()
-          .month(sabbat.month - 1)
-          .date(sabbat.day);
-
-        // Check if we're within 7 days BEFORE or ON the sabbat (not after)
-        const daysDiff = sabbatDate.diff(now, 'days');
-
-        // Only show if sabbat is upcoming (daysDiff > 0) or today (daysDiff === 0) or within 7 days before
-        if (daysDiff >= 0 && daysDiff <= 7) {
-          current = sabbat.name;
-          break;
-        }
-
-        // Find next upcoming sabbat
-        if (daysDiff > 0 && !next) {
-          next = sabbat.name;
-        }
-      }
-
-      // If no next sabbat found in this year, use first sabbat of next year
-      if (!next) {
-        next = sabbatDates[0].name;
-      }
+      // Next upcoming sabbat (strictly after today).
+      const upcoming = getUpcomingSabbat(now);
+      const next = upcoming?.name ?? null;
 
       setCurrentSabbat(current);
       setNextSabbat(next);
 
-      // Get relevant spells for current sabbat
       if (current) {
         const spells = getSpellsBySabbat(current);
-        setRelevantSpells(spells.slice(0, 2)); // Show top 2 spells
+        setRelevantSpells(spells.slice(0, 2));
       }
     };
 
-    getCurrentSabbat();
+    resolveSabbats();
   }, []);
 
   const getSabbatInfo = (sabbatName: string) => {

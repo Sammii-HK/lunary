@@ -11,6 +11,12 @@ import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 
+// Pre-generate every valid sign pair at build time and reject unknown slugs
+// with a proper 404. Without this, unknown slugs (e.g. "aries-taurus" without
+// the -and-) render the not-found component but with HTTP 200, producing
+// soft 404s that Google demotes. 144 pairs × static generation is cheap.
+export const dynamicParams = false;
+
 const ZODIAC_SYMBOLS: Record<string, string> = {
   aries: '♈',
   taurus: '♉',
@@ -25,6 +31,18 @@ const ZODIAC_SYMBOLS: Record<string, string> = {
   aquarius: '♒',
   pisces: '♓',
 };
+
+const ZODIAC_SIGNS = Object.keys(ZODIAC_SYMBOLS);
+
+export function generateStaticParams() {
+  const params: { match: string }[] = [];
+  for (const a of ZODIAC_SIGNS) {
+    for (const b of ZODIAC_SIGNS) {
+      params.push({ match: `${a}-and-${b}` });
+    }
+  }
+  return params;
+}
 
 interface PageProps {
   params: Promise<{ match: string }>;

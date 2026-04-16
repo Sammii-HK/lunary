@@ -8,8 +8,16 @@ import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
 export const revalidate = 2592000;
 const coreNumberKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+// Pre-generate the 9 valid core numbers and reject unknown slugs with a
+// proper 404. Without generateStaticParams + dynamicParams=false, unknown
+// slugs render the not-found state with HTTP 200 — soft 404s that Google
+// demotes (GSC reported /core-numbers/7 as soft 404 despite the page
+// existing; the issue is bad slugs being cached with 200).
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return coreNumberKeys.map((number) => ({ number }));
+}
 
 export async function generateMetadata({
   params,

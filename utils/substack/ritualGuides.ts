@@ -3,7 +3,12 @@ import {
   MoonPhaseEvent,
   BestDaysGuidance,
 } from '../blog/weeklyContentGenerator';
-import { getSpellsByCategory, getSpellsByMoonPhase } from '@/lib/spells/index';
+import {
+  getSpellsByCategory,
+  getSpellsByMoonPhase,
+  filterOutOfSeasonSabbatSpells,
+} from '@/lib/spells/index';
+import { isSabbatSeasonallyRelevant } from '@/lib/grimoire/seasonal-sabbat';
 
 export function generateWeeklyRitualGuides(data: WeeklyCosmicData): string {
   if (
@@ -111,7 +116,13 @@ function findBestDaysForPhase(
 
 function findRelevantSpells(phase: MoonPhaseEvent): any[] {
   const moonPhaseName = phase.phase;
-  const spells = getSpellsByMoonPhase(moonPhaseName);
+  // Drop sabbat-locked spells that are out of season (e.g. avoid surfacing
+  // the Samhain ancestor ritual in an April Substack newsletter just
+  // because the moon phase tag happens to match).
+  const spells = filterOutOfSeasonSabbatSpells(
+    getSpellsByMoonPhase(moonPhaseName),
+    isSabbatSeasonallyRelevant,
+  );
 
   if (spells.length === 0) {
     const categorySpells = getSpellsByCategory('manifestation');

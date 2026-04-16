@@ -1528,9 +1528,17 @@ const generateTinyAction = (
   birthChart: any,
   moonPhase: string,
   today: dayjs.Dayjs,
+  fallbackSunSign?: string,
 ): string => {
   const currentMoon = currentChart.find((p) => p.body === 'Moon');
   const natalSun = birthChart?.find((p: any) => p.body === 'Sun');
+  // Reconcile: if the birth chart disagrees with the birthday-derived sun sign,
+  // trust the birthday. Prevents cached/mis-computed natal charts from showing
+  // the wrong "Your X spirit" line (e.g. "Gemini" for a Capricorn user).
+  const reconciledSunSign =
+    fallbackSunSign && natalSun?.sign && natalSun.sign !== fallbackSunSign
+      ? fallbackSunSign
+      : (natalSun?.sign ?? fallbackSunSign);
 
   // Phase-based anchors
   const phaseAnchors: Record<string, string[]> = {
@@ -1575,9 +1583,10 @@ const generateTinyAction = (
   ];
   const dayIndex = today.dayOfYear() % anchors.length;
 
-  // Add sign-specific flavor if we have natal data
-  if (natalSun && currentMoon) {
-    return `${anchors[dayIndex]} Your ${natalSun.sign} spirit knows how.`;
+  // Add sign-specific flavor if we have natal data (use reconciled value
+  // so a mis-computed birth chart never contradicts the user's actual birthday)
+  if (reconciledSunSign && currentMoon) {
+    return `${anchors[dayIndex]} Your ${reconciledSunSign} spirit knows how.`;
   }
 
   return `${anchors[dayIndex]}`;
@@ -1603,13 +1612,26 @@ export const getEnhancedPersonalizedHoroscope = (
   // Get current astrological chart
   const currentChart = getAstrologicalChart(today.toDate(), observer);
 
-  // Get birth chart from profile
-  const birthChart = getBirthChartFromProfile(profile);
-
-  // Determine sun sign
+  // Determine sun sign from birthday (simple, deterministic, reliable)
   const sunSign = birthDate
     ? getSunSign(birthDate.month() + 1, birthDate.date())
     : 'Unknown';
+
+  // Get birth chart from profile — but discard it if it disagrees with the
+  // birthday-derived sun sign. The birthday is the most reliable signal we
+  // have; a mis-computed or stale-cached natal chart that says Sun is in
+  // Gemini when the user is actually a Capricorn has cascading effects
+  // across every downstream horoscope string (spirit line, natal Moon
+  // commentary, Venus aspects, etc). Degrading to "no birth chart" is far
+  // better than surfacing wrong identity text everywhere.
+  const rawBirthChart = getBirthChartFromProfile(profile);
+  const natalSunFromChart = rawBirthChart?.find((p: any) => p.body === 'Sun');
+  const birthChartMatchesBirthday =
+    !rawBirthChart ||
+    !natalSunFromChart ||
+    sunSign === 'Unknown' ||
+    natalSunFromChart.sign === sunSign;
+  const birthChart = birthChartMatchesBirthday ? rawBirthChart : null;
 
   // Get detailed moon phase
   const moonPhase = getDetailedMoonPhase(today.toDate());
@@ -1655,6 +1677,7 @@ export const getEnhancedPersonalizedHoroscope = (
     birthChart,
     moonPhase,
     today,
+    sunSign,
   );
 
   return {
