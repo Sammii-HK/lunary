@@ -8,8 +8,12 @@ import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
 export const revalidate = 2592000;
 const masterNumberKeys = ['11', '22', '33'];
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+// Pre-generate + reject unknown slugs with proper 404 (not soft-404 with 200)
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return masterNumberKeys.map((number) => ({ number }));
+}
 
 export async function generateMetadata({
   params,

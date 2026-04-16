@@ -9,8 +9,12 @@ import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 export const revalidate = 2592000;
 const lifePathKeys = Object.keys(lifePathNumbers);
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+// Pre-generate + reject unknown slugs with proper 404 (not soft-404 with 200)
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return lifePathKeys.map((number) => ({ number }));
+}
 
 export async function generateMetadata({
   params,

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getSpellById, spellCategories } from '@/lib/spells';
+import { getSpellById, spellCategories, spellDatabase } from '@/lib/spells';
 import { Clock, Star, Moon, Leaf } from 'lucide-react';
 import { createHowToSchema, renderJsonLd } from '@/lib/schema';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
@@ -9,8 +9,16 @@ import { stringToKebabCase } from '../../../../../utils/string';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+
+// Pre-generate + reject unknown slugs with proper 404 (not soft-404 with 200).
+// Google's "URL unknown to Google" bucket is filled with bogus spell IDs that
+// 200 with a "Spell Not Found" title — Google crawls, classifies as junk,
+// and never returns. Explicit allow-list makes unknown slugs a real 404.
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return spellDatabase.map((spell) => ({ spellId: spell.id }));
+}
 
 export async function generateMetadata({
   params,
