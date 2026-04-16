@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v285';
+const CACHE_NAME = 'lunary-v286';
 const STATIC_CACHE_URLS = [
   '/app',
   '/manifest.json?v=20251103-1',
