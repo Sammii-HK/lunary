@@ -45,32 +45,43 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
     }
   }, [dismissKey]);
 
-  // Show after 15% scroll (not 30% — long grimoire pages need earlier trigger),
-  // or after 2s delay on short pages
+  // Show after 15% scroll OR after 10 seconds of dwell time (whichever is
+  // first). Previously the scroll-only trigger meant most anonymous readers
+  // never saw the sticky CTA — they read the top of the article, clicked
+  // the inline CTA or bounced, and the sticky never fired. Sticky got
+  // 0.3-2% of inline impressions in prod (LUN-221). The 10s fallback
+  // ensures any reader who dwells on a page sees it.
   useEffect(() => {
     if (dismissed || isAuthenticated) return;
 
-    const scrollable =
-      document.documentElement.scrollHeight - window.innerHeight;
-
-    // Short page (no scroll): show after 2 second delay
-    if (scrollable <= 50) {
-      const timer = setTimeout(() => setVisible(true), 2000);
-      return () => clearTimeout(timer);
-    }
+    let dwellTimer: ReturnType<typeof setTimeout> | null = null;
 
     const handleScroll = () => {
+      // Recompute scrollable each check — content can lazy-load and change
+      // scrollHeight after the effect mounts.
+      const scrollable =
+        document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollable <= 50) {
+        // No-scroll page — rely on dwell timer instead.
+        return;
+      }
       const scrollPercent = window.scrollY / scrollable;
       if (scrollPercent > 0.15) {
         setVisible(true);
       }
     };
 
-    // Check on mount in case user already scrolled
+    // Check on mount in case user already scrolled.
     handleScroll();
 
+    // Dwell fallback — fire after 10s regardless of scroll position.
+    dwellTimer = setTimeout(() => setVisible(true), 10_000);
+
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (dwellTimer) clearTimeout(dwellTimer);
+    };
   }, [dismissed, isAuthenticated]);
 
   // A/B test is scoped per hub so we can compare copy variants within each hub
