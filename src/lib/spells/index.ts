@@ -219,6 +219,31 @@ export function getSpellsByMoonPhase(phase: string): Spell[] {
   );
 }
 
+/**
+ * Drop spells that are locked to a specific sabbat that is not currently
+ * seasonally relevant (active ±7 days or recently passed ≤21 days).
+ *
+ * Without this filter, sabbat-locked spells whose moon-phase tag happens
+ * to match the current phase surface out of season — e.g. the Samhain
+ * Ancestor Connection Ritual (moonPhase: ['New Moon', 'Waning Crescent'])
+ * appearing during an April new moon.
+ *
+ * Callers of getSpellsByMoonPhase that surface to users should wrap with
+ * this filter. See src/app/api/grimoire/spells/route.ts and
+ * utils/substack/ritualGuides.ts for usage.
+ */
+export function filterOutOfSeasonSabbatSpells(
+  spells: Spell[],
+  isSabbatSeasonallyRelevant: (sabbatName: string) => boolean,
+): Spell[] {
+  return spells.filter((spell) => {
+    const sabbats = spell.timing?.sabbat ?? [];
+    if (!sabbats.length) return true;
+    if (sabbats.includes('Any')) return true;
+    return sabbats.some((s) => isSabbatSeasonallyRelevant(s));
+  });
+}
+
 export function getSpellsBySabbat(sabbat: string): Spell[] {
   return spellDatabase.filter(
     (s) =>

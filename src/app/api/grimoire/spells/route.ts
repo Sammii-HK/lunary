@@ -5,7 +5,9 @@ import {
   getSpellsByCategory,
   getSpellsBySabbat,
   getSpellsByMoonPhase,
+  filterOutOfSeasonSabbatSpells,
 } from '@/lib/spells';
+import { isSabbatSeasonallyRelevant } from '@/lib/grimoire/seasonal-sabbat';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +24,13 @@ export async function GET(request: Request) {
   } else if (sabbat) {
     data = getSpellsBySabbat(sabbat);
   } else if (moonPhase) {
-    data = getSpellsByMoonPhase(moonPhase);
+    // Filter out sabbat-locked spells whose sabbat isn't seasonally relevant.
+    // Without this, a random New Moon in April surfaces Samhain spells
+    // because the Samhain ritual has moonPhase=['New Moon','Waning Crescent'].
+    data = filterOutOfSeasonSabbatSpells(
+      getSpellsByMoonPhase(moonPhase),
+      isSabbatSeasonallyRelevant,
+    );
   } else {
     data = {
       spells: spellDatabase,
