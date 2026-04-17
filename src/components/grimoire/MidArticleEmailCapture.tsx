@@ -16,7 +16,9 @@ interface MidArticleEmailCaptureProps {
 const HOROSCOPE_EMAIL_CAPTURE_TEST = 'horoscope_email_capture_proposition_v1';
 
 function getHoroscopeSignFromPath(pathname: string): string | undefined {
-  const match = pathname.match(/\/grimoire\/horoscopes\/(?:today\/)?([a-z-]+)/i);
+  const match = pathname.match(
+    /\/grimoire\/horoscopes\/(?:today\/)?([a-z-]+)/i,
+  );
   return match?.[1];
 }
 
@@ -321,9 +323,7 @@ export function MidArticleEmailCapture({
               </svg>
             </button>
           </div>
-          <p className='mb-4 text-sm text-lunary-primary-400'>
-            {description}
-          </p>
+          <p className='mb-4 text-sm text-lunary-primary-400'>{description}</p>
 
           <form onSubmit={handleSubmit} className='space-y-3'>
             <div
