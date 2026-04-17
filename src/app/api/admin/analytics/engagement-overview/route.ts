@@ -47,6 +47,9 @@ export async function GET(request: NextRequest) {
       const rangeEndDate = new Date(range.end);
       rangeEndDate.setUTCHours(0, 0, 0, 0);
       const includesToday = rangeEndDate.getTime() >= today.getTime();
+      const snapshotEndDate = includesToday
+        ? new Date(today.getTime() - 24 * 60 * 60 * 1000)
+        : range.end;
       const tomorrow = new Date(today);
       tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
 
@@ -54,16 +57,18 @@ export async function GET(request: NextRequest) {
       const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 
       const [snapshotResult, todaySignupsResult] = await Promise.all([
-        sql.query(
-          `SELECT *
-        FROM daily_metrics
-        WHERE metric_date >= $1 AND metric_date <= $2
-        ORDER BY metric_date ASC`,
-          [
-            range.start.toISOString().split('T')[0],
-            range.end.toISOString().split('T')[0],
-          ],
-        ),
+        snapshotEndDate >= range.start
+          ? sql.query(
+              `SELECT *
+            FROM daily_metrics
+            WHERE metric_date >= $1 AND metric_date <= $2
+            ORDER BY metric_date ASC`,
+              [
+                range.start.toISOString().split('T')[0],
+                snapshotEndDate.toISOString().split('T')[0],
+              ],
+            )
+          : Promise.resolve({ rows: [] }),
         // Real-time: count today's signups (cheap query, ~5ms)
         includesToday
           ? sql.query(

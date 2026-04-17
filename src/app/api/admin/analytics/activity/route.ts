@@ -17,26 +17,35 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const effectiveEnd =
+      range.end >= today
+        ? new Date(today.getTime() - 24 * 60 * 60 * 1000)
+        : range.end;
 
     // FAST PATH: Query pre-computed metrics from daily_metrics table
     // This is 99% cheaper than querying conversion_events!
-    const result = await sql.query(
-      `SELECT
-        signed_in_product_mau,
-        app_opened_mau,
-        signed_in_product_dau,
-        signed_in_product_wau,
-        d1_retention,
-        returning_dau
-      FROM daily_metrics
-      WHERE metric_date >= $1 AND metric_date <= $2
-      ORDER BY metric_date DESC
-      LIMIT 1`,
-      [
-        range.start.toISOString().split('T')[0],
-        range.end.toISOString().split('T')[0],
-      ],
-    );
+    const result =
+      effectiveEnd >= range.start
+        ? await sql.query(
+            `SELECT
+              signed_in_product_mau,
+              app_opened_mau,
+              signed_in_product_dau,
+              signed_in_product_wau,
+              d1_retention,
+              returning_dau
+            FROM daily_metrics
+            WHERE metric_date >= $1 AND metric_date <= $2
+            ORDER BY metric_date DESC
+            LIMIT 1`,
+            [
+              range.start.toISOString().split('T')[0],
+              effectiveEnd.toISOString().split('T')[0],
+            ],
+          )
+        : { rows: [] };
 
     let signedInProductMau = 0;
     let appOpenedMau = 0;

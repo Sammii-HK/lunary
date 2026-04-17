@@ -19,8 +19,17 @@ const TEST_EMAIL_EXACT = 'test@test.lunary.app';
  * plus real-time DAU for today
  */
 async function getSnapshotRows(rangeStart: Date, rangeEnd: Date) {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
   const startDateStr = rangeStart.toISOString().split('T')[0];
-  const endDateStr = rangeEnd.toISOString().split('T')[0];
+  const effectiveEnd =
+    rangeEnd >= today ? new Date(today.getTime() - 1) : rangeEnd;
+  const endDateStr = effectiveEnd.toISOString().split('T')[0];
+
+  if (effectiveEnd < rangeStart) {
+    return [];
+  }
 
   const snapshotResult = await sql.query(
     `SELECT *

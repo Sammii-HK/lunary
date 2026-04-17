@@ -39,15 +39,18 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
 
-    const startDateStr = range.start.toISOString().split('T')[0];
-    const endDateStr = range.end.toISOString().split('T')[0];
-
     // Check if query includes today
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
     const rangeEndDate = new Date(range.end);
     rangeEndDate.setUTCHours(0, 0, 0, 0);
     const includesToday = rangeEndDate.getTime() >= today.getTime();
+
+    const startDateStr = range.start.toISOString().split('T')[0];
+    const snapshotEndDate = includesToday
+      ? new Date(today.getTime() - 24 * 60 * 60 * 1000)
+      : range.end;
+    const endDateStr = snapshotEndDate.toISOString().split('T')[0];
 
     const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
