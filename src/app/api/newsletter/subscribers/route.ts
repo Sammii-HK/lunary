@@ -115,29 +115,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify Turnstile token (skip if key not configured)
+    // Verify Turnstile token when available. If the widget failed to load on the
+    // client, fall back to rate limiting rather than blocking a legitimate signup.
     if (process.env.TURNSTILE_SECRET_KEY) {
-      if (!turnstileToken) {
-        return NextResponse.json(
-          { error: 'Security check required' },
-          { status: 403 },
+      if (turnstileToken) {
+        const formData = new FormData();
+        formData.append('secret', process.env.TURNSTILE_SECRET_KEY);
+        formData.append('response', turnstileToken);
+
+        const cfResponse = await fetch(
+          'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+          { method: 'POST', body: formData },
         );
-      }
+        const cfResult = (await cfResponse.json()) as { success: boolean };
 
-      const formData = new FormData();
-      formData.append('secret', process.env.TURNSTILE_SECRET_KEY);
-      formData.append('response', turnstileToken);
-
-      const cfResponse = await fetch(
-        'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-        { method: 'POST', body: formData },
-      );
-      const cfResult = (await cfResponse.json()) as { success: boolean };
-
-      if (!cfResult.success) {
-        return NextResponse.json(
-          { error: 'Security check failed. Please try again.' },
-          { status: 403 },
+        if (!cfResult.success) {
+          return NextResponse.json(
+            { error: 'Security check failed. Please try again.' },
+            { status: 403 },
+          );
+        }
+      } else {
+        console.warn(
+          '[newsletter-turnstile] Missing token, allowing signup without Turnstile verification',
+          { source, hasUserId: !!userId },
         );
       }
     }
@@ -191,7 +192,7 @@ export async function POST(request: NextRequest) {
           ELSE newsletter_subscribers.verified_at
         END,
         updated_at = NOW(),
-        preferences = COALESCE(EXCLUDED.preferences, newsletter_subscribers.preferences)
+        preferences = COALESCE(newsletter_subscribers.preferences, '{}'::jsonb) || COALESCE(EXCLUDED.preferences, '{}'::jsonb)
       RETURNING id, email, is_verified, verification_token
     `;
 

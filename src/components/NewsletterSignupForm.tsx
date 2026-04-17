@@ -58,6 +58,7 @@ export function NewsletterSignupForm({
     null,
   );
   const turnstileTokenRef = useRef<string | null>(null);
+  const turnstileFailedRef = useRef(false);
   const honeypotRef = useRef<HTMLInputElement>(null);
   const impressionTracked = useRef(false);
   const pathname = usePathname() || '';
@@ -136,13 +137,21 @@ export function NewsletterSignupForm({
       return;
     }
 
-    // Turnstile check
-    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
-      const turnstileToken = turnstileTokenRef.current;
+    let turnstileToken = turnstileTokenRef.current;
+
+    if (
+      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY &&
+      !turnstileFailedRef.current
+    ) {
       if (!turnstileToken) {
-        setStatus('error');
-        setMessage('Please wait for the security check to complete.');
-        return;
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        turnstileToken = turnstileTokenRef.current;
+      }
+
+      if (!turnstileToken) {
+        console.warn(
+          '[newsletter-turnstile] Token not available after wait, proceeding without bot check',
+        );
       }
     }
 
@@ -163,7 +172,7 @@ export function NewsletterSignupForm({
         body: JSON.stringify({
           email: submittedEmail,
           source,
-          turnstileToken: turnstileTokenRef.current,
+          turnstileToken,
           preferences: {
             weeklyNewsletter: true,
             blogUpdates: true,
@@ -310,9 +319,18 @@ export function NewsletterSignupForm({
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
             onSuccess={(token) => {
               turnstileTokenRef.current = token;
+              turnstileFailedRef.current = false;
             }}
             onExpire={() => {
               turnstileTokenRef.current = null;
+            }}
+            onError={() => {
+              turnstileTokenRef.current = null;
+              turnstileFailedRef.current = true;
+            }}
+            onUnsupported={() => {
+              turnstileTokenRef.current = null;
+              turnstileFailedRef.current = true;
             }}
             options={{ theme: 'dark', size: 'invisible' }}
           />
