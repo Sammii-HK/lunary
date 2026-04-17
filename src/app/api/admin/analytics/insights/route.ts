@@ -177,7 +177,9 @@ export async function GET(request: NextRequest) {
 
       // Revenue (API returns 0-100)
       mrr: revenue.mrr || 0,
-      conversionRate: pct(revenue.free_to_trial_rate),
+      conversionRate: pct(
+        revenue.signup_to_paid_rate ?? revenue.free_to_trial_rate,
+      ),
 
       // Tracking quality
       trackingIssues: detectTrackingIssues(
