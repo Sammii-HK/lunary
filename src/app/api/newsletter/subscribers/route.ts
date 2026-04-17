@@ -159,6 +159,7 @@ export async function POST(request: NextRequest) {
           .join('');
 
     const verifiedAt = shouldAutoVerify ? new Date().toISOString() : null;
+    const captureContext = preferences?.captureContext || {};
 
     const result = await sql`
       INSERT INTO newsletter_subscribers (
@@ -228,10 +229,20 @@ export async function POST(request: NextRequest) {
         const html = generateNewsletterVerificationEmailHTML(
           verificationUrl,
           subscriber.email,
+          {
+            sign: captureContext.sign,
+            proposition: captureContext.proposition,
+            upsellVariant: captureContext.upsellVariant,
+          },
         );
         const text = generateNewsletterVerificationEmailText(
           verificationUrl,
           subscriber.email,
+          {
+            sign: captureContext.sign,
+            proposition: captureContext.proposition,
+            upsellVariant: captureContext.upsellVariant,
+          },
         );
 
         await sendEmail({

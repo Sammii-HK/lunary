@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Sparkles, ArrowRight } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { trackCtaImpression, trackCtaClick } from '@/lib/analytics';
@@ -10,6 +10,7 @@ interface MidArticleEmailCaptureProps {
   topic?: string;
   hub?: string;
   propositionVariant?: 'cosmic_newsletter' | 'daily_horoscope';
+  upsellVariant?: 'full_chart' | 'exact_degree' | 'exact_timing';
 }
 
 const HOROSCOPE_EMAIL_CAPTURE_TEST = 'horoscope_email_capture_proposition_v1';
@@ -23,7 +24,9 @@ export function MidArticleEmailCapture({
   topic,
   hub,
   propositionVariant = 'daily_horoscope',
+  upsellVariant = 'exact_degree',
 }: MidArticleEmailCaptureProps) {
+  const router = useRouter();
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [email, setEmail] = useState('');
@@ -60,6 +63,22 @@ export function MidArticleEmailCapture({
     ? `grimoire_horoscope_${propositionVariant}`
     : 'grimoire_mid_article_capture';
 
+  const signupHeadline = sign
+    ? `Unlock your ${sign} chart`
+    : 'Unlock your personal chart';
+  const signupSubline =
+    upsellVariant === 'exact_degree'
+      ? `Your sign gives the theme. Your exact degree shows whether today's transit is actually hitting you.`
+      : upsellVariant === 'exact_timing'
+        ? `Your sign gives the headline. Your full chart shows the exact timing and where today's astrology lands for you.`
+        : `See how today's transits affect your full chart, not just your Sun sign.`;
+  const signupLabel =
+    upsellVariant === 'exact_degree'
+      ? 'Find my exact degree'
+      : upsellVariant === 'exact_timing'
+        ? 'See my exact timing'
+        : 'See my full chart';
+
   useEffect(() => {
     // Don't show if already signed up or dismissed this session
     if (sessionStorage.getItem('email_capture_dismissed')) {
@@ -89,13 +108,34 @@ export function MidArticleEmailCapture({
             abTest: isHoroscope ? HOROSCOPE_EMAIL_CAPTURE_TEST : undefined,
             abVariant: isHoroscope ? propositionVariant : undefined,
           });
+
+          if (isHoroscope) {
+            trackCtaImpression({
+              hub: hub || 'unknown',
+              ctaId: 'horoscope_email_signup_upsell',
+              location: 'seo_mid_article_email_success',
+              label: signupLabel,
+              pagePath: pathname,
+              abTest: 'horoscope_email_signup_upsell_v1',
+              abVariant: upsellVariant,
+            });
+          }
         }
       }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [visible, ctaLabel, hub, isHoroscope, pathname, propositionVariant]);
+  }, [
+    visible,
+    ctaLabel,
+    hub,
+    isHoroscope,
+    pathname,
+    propositionVariant,
+    signupLabel,
+    upsellVariant,
+  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,6 +200,10 @@ export function MidArticleEmailCapture({
               pagePath: pathname,
               abTest: isHoroscope ? HOROSCOPE_EMAIL_CAPTURE_TEST : undefined,
               abVariant: isHoroscope ? propositionVariant : undefined,
+              upsellTest: isHoroscope
+                ? 'horoscope_email_signup_upsell_v1'
+                : undefined,
+              upsellVariant: isHoroscope ? upsellVariant : undefined,
             },
           },
         }),
@@ -186,6 +230,32 @@ export function MidArticleEmailCapture({
     sessionStorage.setItem('email_capture_dismissed', 'true');
   };
 
+  const handleUpsellClick = () => {
+    trackCtaClick({
+      hub: hub || 'unknown',
+      ctaId: 'horoscope_email_signup_upsell',
+      location: 'seo_mid_article_email_success',
+      label: signupLabel,
+      pagePath: pathname,
+      abTest: 'horoscope_email_signup_upsell_v1',
+      abVariant: upsellVariant,
+    });
+
+    const params = new URLSearchParams({
+      hub: hub || 'horoscopes',
+      headline: signupHeadline,
+      subline: signupSubline,
+      location: 'seo_mid_article_email_success',
+      pagePath: pathname,
+    });
+
+    if (sign) {
+      params.set('sign', sign);
+    }
+
+    router.push(`/signup/chart?${params.toString()}`);
+  };
+
   if (dismissed || (!visible && !submitted)) return null;
 
   return (
@@ -208,6 +278,25 @@ export function MidArticleEmailCapture({
                 : 'We will send you weekly cosmic updates by email.'
               : 'We have sent you a link to see your personalised chart.'}
           </p>
+          {isHoroscope && (
+            <div className='mt-5 rounded-lg border border-lunary-primary-500/20 bg-layer-deep/40 p-4 text-left'>
+              <p className='text-sm font-medium text-content-secondary'>
+                {upsellVariant === 'exact_degree'
+                  ? `Want to know your exact ${sign ? `${sign} ` : ''}degree and whether today's transit is actually hitting it?`
+                  : upsellVariant === 'exact_timing'
+                    ? 'Your sign gives the headline. Your chart gives the exact timing.'
+                    : 'Want to see how today’s transits affect your full chart, not just your Sun sign?'}
+              </p>
+              <button
+                type='button'
+                onClick={handleUpsellClick}
+                className='mt-3 inline-flex items-center gap-2 rounded-lg bg-lunary-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-500'
+              >
+                {signupLabel}
+                <ArrowRight className='h-4 w-4' />
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className='px-6 py-6'>

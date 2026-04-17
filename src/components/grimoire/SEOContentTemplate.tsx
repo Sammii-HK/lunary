@@ -171,6 +171,7 @@ export interface SEOContentTemplateProps {
 }
 
 const HOROSCOPE_EMAIL_CAPTURE_TEST = 'horoscope_email_capture_proposition_v1';
+const HOROSCOPE_EMAIL_UPSELL_TEST = 'horoscope_email_signup_upsell_v1';
 
 export async function SEOContentTemplate({
   title,
@@ -331,6 +332,14 @@ export async function SEOContentTemplate({
           HOROSCOPE_EMAIL_CAPTURE_TEST,
           anonId || canonicalPathname,
           ['cosmic_newsletter', 'daily_horoscope'] as const,
+        )
+      : undefined;
+  const horoscopeEmailUpsellVariant =
+    contextualHub === 'horoscopes'
+      ? assignVariantServer(
+          HOROSCOPE_EMAIL_UPSELL_TEST,
+          anonId || canonicalPathname,
+          ['full_chart', 'exact_degree', 'exact_timing'] as const,
         )
       : undefined;
 
@@ -740,6 +749,7 @@ export async function SEOContentTemplate({
             topic="today's horoscope"
             hub={contextualHub}
             propositionVariant={horoscopeEmailCaptureVariant}
+            upsellVariant={horoscopeEmailUpsellVariant}
           />
         )}
 
