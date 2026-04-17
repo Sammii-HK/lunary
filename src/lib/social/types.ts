@@ -27,6 +27,8 @@ export interface EnrichmentData {
   keywords?: string[];
   element?: string;
   ruler?: string;
+  traditionalRuler?: string;
+  modernRuler?: string;
   affirmation?: string;
   meaning?: string;
   description?: string;

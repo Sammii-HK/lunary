@@ -8,6 +8,10 @@ import {
   getDecanForDate,
   getNumerologyNumber,
 } from '@/constants/seo/birthday-zodiac';
+import {
+  formatRulershipValue,
+  getPrimaryRuler,
+} from '@/lib/astrology/rulerships';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
@@ -114,6 +118,8 @@ export default async function BirthdayZodiacPage({
     zodiac,
   );
   const numerology = getNumerologyNumber(birthday.month, birthday.day);
+  const primaryRuler = getPrimaryRuler(zodiac.sign);
+  const rulership = formatRulershipValue(zodiac.sign);
 
   const prevDay =
     birthday.day > 1
@@ -142,11 +148,11 @@ export default async function BirthdayZodiacPage({
       articleSection='Birthday Zodiac'
       whatIs={{
         question: `What zodiac sign is ${birthday.dateString}?`,
-        answer: `People born on ${birthday.dateString} are ${zodiac.sign}. ${zodiac.sign} is a ${zodiac.modality} ${zodiac.element} sign ruled by ${zodiac.ruler}. Those born on this date are in the ${decan}${getOrdinalSuffix(decan)} decan of ${zodiac.sign}, which is sub-ruled by ${decanRuler}, adding extra depth to their personality.`,
+        answer: `People born on ${birthday.dateString} are ${zodiac.sign}. ${zodiac.sign} is a ${zodiac.modality} ${zodiac.element} sign with rulership ${rulership}. Those born on this date are in the ${decan}${getOrdinalSuffix(decan)} decan of ${zodiac.sign}, which is sub-ruled by ${decanRuler}, adding extra depth to their personality.`,
       }}
       tldr={`${birthday.dateString} birthday: ${zodiac.sign} (${zodiac.element} sign). ${decan}${getOrdinalSuffix(decan)} decan ruled by ${decanRuler}. Life path number ${numerology}. Key traits: ${zodiac.traits.slice(0, 3).join(', ')}.`}
       meaning={`
-Those born on ${birthday.dateString} fall under the zodiac sign of ${zodiac.sign}, symbolized by the ${zodiac.symbol}. As a ${zodiac.modality} ${zodiac.element} sign ruled by ${zodiac.ruler}, ${zodiac.sign} individuals are known for being ${zodiac.traits.slice(0, 4).join(', ')}.
+Those born on ${birthday.dateString} fall under the zodiac sign of ${zodiac.sign}, symbolized by the ${zodiac.symbol}. As a ${zodiac.modality} ${zodiac.element} sign with rulership ${rulership}, ${zodiac.sign} individuals are known for being ${zodiac.traits.slice(0, 4).join(', ')}.
 
 Being in the ${decan}${getOrdinalSuffix(decan)} decan of ${zodiac.sign}, those born on ${birthday.dateString} receive additional influence from ${decanRuler}. This planetary influence adds unique nuances to the core ${zodiac.sign} personality, often manifesting as enhanced ${decan === 1 ? 'core' : decan === 2 ? 'creative' : 'transformative'} qualities.
 
@@ -155,7 +161,7 @@ Your numerology life path number is ${numerology}, which brings ${numerology ===
       rituals={[
         `Birthday candle ritual: Light a ${zodiac.luckyColors[0]} candle on your birthday to honor your ${zodiac.sign} energy`,
         `${zodiac.element} element meditation: Connect with ${zodiac.element.toLowerCase()} energy through ${zodiac.element === 'Fire' ? 'candle gazing' : zodiac.element === 'Earth' ? 'grounding exercises' : zodiac.element === 'Air' ? 'breathwork' : 'water blessing'}`,
-        `Intention setting with ${zodiac.ruler}: Work with ${zodiac.ruler} energy on your birthday for manifestation`,
+        `Intention setting with ${primaryRuler}: Work with ${primaryRuler} energy on your birthday for manifestation`,
       ]}
       emotionalThemes={zodiac.traits.map(
         (t) => t.charAt(0).toUpperCase() + t.slice(1),
@@ -170,7 +176,7 @@ Your numerology life path number is ${numerology}, which brings ${numerology ===
             ['Symbol', zodiac.symbol],
             ['Element', zodiac.element],
             ['Modality', zodiac.modality],
-            ['Ruling Planet', zodiac.ruler],
+            ['Rulership', rulership],
             ['Decan', `${decan}${getOrdinalSuffix(decan)} (${decanRuler})`],
             ['Life Path Number', numerology.toString()],
             ['Lucky Numbers', zodiac.luckyNumbers.join(', ')],
@@ -191,8 +197,8 @@ Your numerology life path number is ${numerology}, which brings ${numerology ===
           type: 'Zodiac',
         },
         {
-          name: `${zodiac.ruler} in Astrology`,
-          href: `/grimoire/astronomy/planets/${zodiac.ruler.toLowerCase()}`,
+          name: `${primaryRuler} in Astrology`,
+          href: `/grimoire/astronomy/planets/${primaryRuler.toLowerCase()}`,
           type: 'Planet',
         },
         ...zodiac.compatibleSigns.slice(0, 2).map((sign) => ({

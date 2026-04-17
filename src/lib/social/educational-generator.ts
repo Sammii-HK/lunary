@@ -4,6 +4,7 @@ import {
   type TopicSelectionStrategy,
   getGrimoireSnippetBySlug,
 } from './grimoire-content';
+import { formatRulershipSentence } from '@/lib/astrology/rulerships';
 
 export interface EducationalPost {
   content: string;
@@ -279,10 +280,8 @@ function buildLongPost(
 
   if (fc) {
     // Element/Planet info
-    if (fc.element && fc.planet) {
-      parts.push(
-        `${snippet.title} is a ${fc.element} sign ruled by ${fc.planet}.`,
-      );
+    if (fc.element && (fc.traditionalRuler || fc.planet)) {
+      parts.push(`${snippet.title} is a ${fc.element} sign that ${formatRulershipSentence(snippet.title)}.`);
       parts.push('');
     }
 

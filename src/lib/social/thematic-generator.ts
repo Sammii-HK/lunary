@@ -56,6 +56,10 @@ import chakras from '@/data/chakras.json';
 import sabbats from '@/data/sabbats.json';
 import planetaryBodies from '@/data/planetary-bodies.json';
 import correspondences from '@/data/correspondences.json';
+import {
+  formatRulershipSentence,
+  formatRulershipValue,
+} from '@/lib/astrology/rulerships';
 
 export interface ThematicContent {
   longForm: string;
@@ -309,10 +313,8 @@ const buildMechanicsSentence = (
       `${topic} is associated with ${formatList(data.rules, 2)}`,
     );
   }
-  if (data?.rulingPlanet || data?.ruler) {
-    return sentenceSafe(
-      `${topic} is associated with ${(data.rulingPlanet || data.ruler).toString()}`,
-    );
+  if (data?.traditionalRuler || data?.modernRuler || data?.rulingPlanet || data?.ruler) {
+    return sentenceSafe(`${topic} ${formatRulershipSentence(topic)}`);
   }
   if (data?.houseMeaning) {
     return sentenceSafe(String(data.houseMeaning));
@@ -691,8 +693,8 @@ const buildDeepShortForm = (
   }
   if (Array.isArray(data?.rules) && data.rules.length > 0) {
     sentences.push(`It rules ${formatList(data.rules, 3)}.`);
-  } else if (data?.rulingPlanet || data?.ruler) {
-    sentences.push(`Its ruling planet is ${data.rulingPlanet || data.ruler}.`);
+  } else if (data?.traditionalRuler || data?.modernRuler || data?.rulingPlanet || data?.ruler) {
+    sentences.push(`Its rulership is ${formatRulershipValue(facet.title)}.`);
   }
   if (data?.exalted || data?.detriment || data?.fall) {
     const parts = [
@@ -765,10 +767,8 @@ const buildDeepDiveShortForms = (
   }
   if (Array.isArray(data?.rules) && data.rules.length > 0) {
     structureSentences.push(`It rules ${formatList(data.rules, 3)}.`);
-  } else if (data?.rulingPlanet || data?.ruler) {
-    structureSentences.push(
-      `Its ruling planet is ${data.rulingPlanet || data.ruler}.`,
-    );
+  } else if (data?.traditionalRuler || data?.modernRuler || data?.rulingPlanet || data?.ruler) {
+    structureSentences.push(`Its rulership is ${formatRulershipValue(facet.title)}.`);
   }
   if (data?.exalted || data?.detriment || data?.fall) {
     const parts = [
@@ -1270,8 +1270,8 @@ export function generateVideoBasedLongFormContent(
     keywords.push(...data.keywords.slice(0, 3));
   }
   if (data?.element) keywords.push(data.element);
-  if (data?.rulingPlanet || data?.ruler) {
-    keywords.push(data.rulingPlanet || data.ruler);
+  if (data?.traditionalRuler || data?.modernRuler || data?.rulingPlanet || data?.ruler) {
+    keywords.push(...formatRulershipValue(facet.title).split(', ').map((part) => part.split(' ')[0]));
   }
 
   // Integrate keywords naturally if not already mentioned
@@ -1328,7 +1328,13 @@ export function generateLongFormContent(
 
     if (data.element) attributes.push(`Element: ${data.element}`);
     if (data.modality) attributes.push(`Modality: ${data.modality}`);
-    if (data.rulingPlanet) attributes.push(`Ruler: ${data.rulingPlanet}`);
+    if (
+      data.traditionalRuler ||
+      data.modernRuler ||
+      data.rulingPlanet
+    ) {
+      attributes.push(`Rulership: ${formatRulershipValue(facet.title)}`);
+    }
     if (data.planet) attributes.push(`Planet: ${data.planet}`);
     if (data.symbol) attributes.push(`Symbol: ${data.symbol}`);
     if (data.color) attributes.push(`Color: ${data.color}`);

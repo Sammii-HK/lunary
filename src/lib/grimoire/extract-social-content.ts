@@ -10,6 +10,8 @@
  *   const threadsPost = formatForPlatform(assets.contrarian, 'threads');
  */
 
+import { formatRulershipSentence } from '@/lib/astrology/rulerships';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -568,9 +570,12 @@ export function extractFromSnippet(snippet: {
     parts.push(`In career: ${snippet.fullContent.careerTrait}`);
   }
 
-  if (snippet.fullContent?.element && snippet.fullContent?.planet) {
+  if (
+    snippet.fullContent?.element &&
+    (snippet.fullContent?.traditionalRuler || snippet.fullContent?.planet)
+  ) {
     parts.push(
-      `${snippet.title} is associated with the ${snippet.fullContent.element} element and ruled by ${snippet.fullContent.planet}.`,
+      `${snippet.title} is associated with the ${snippet.fullContent.element} element and ${formatRulershipSentence(snippet.title)}.`,
     );
   }
 
