@@ -1,12 +1,15 @@
 'use client';
 
 import { trackCtaClick } from '@/lib/analytics';
+import { captureEvent } from '@/lib/posthog-client';
 import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import { CheckCircle, XCircle, Mail } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useRef } from 'react';
 
 export default function NewsletterVerifyPage() {
   const searchParams = useSafeSearchParams();
+  const successTracked = useRef(false);
   const success = searchParams.get('success') === 'true';
   const error = searchParams.get('error');
   const alreadyVerified = searchParams.get('already_verified') === 'true';
@@ -38,8 +41,34 @@ export default function NewsletterVerifyPage() {
     subline: signupSubline,
     location: 'newsletter_verification_success',
     pagePath,
+    proposition,
+    upsellVariant,
     ...(sign ? { sign } : {}),
   }).toString()}`;
+
+  useEffect(() => {
+    if (!success || error || !isHoroscopeFlow || successTracked.current) return;
+    successTracked.current = true;
+
+    captureEvent('horoscope_email_verification_success_viewed', {
+      hub,
+      pagePath,
+      sign: sign || undefined,
+      proposition,
+      upsellVariant: upsellVariant || undefined,
+      alreadyVerified,
+    });
+  }, [
+    alreadyVerified,
+    error,
+    hub,
+    isHoroscopeFlow,
+    pagePath,
+    proposition,
+    sign,
+    success,
+    upsellVariant,
+  ]);
 
   const handleUpsellClick = () => {
     trackCtaClick({
@@ -50,6 +79,15 @@ export default function NewsletterVerifyPage() {
       pagePath,
       abTest: 'horoscope_email_signup_upsell_v1',
       abVariant: upsellVariant || undefined,
+    });
+
+    captureEvent('horoscope_email_signup_upsell_clicked', {
+      hub,
+      pagePath,
+      sign: sign || undefined,
+      proposition,
+      upsellVariant: upsellVariant || undefined,
+      source: 'newsletter_verification_success',
     });
   };
 

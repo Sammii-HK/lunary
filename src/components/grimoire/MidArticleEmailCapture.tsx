@@ -249,6 +249,8 @@ export function MidArticleEmailCapture({
       subline: signupSubline,
       location: 'seo_mid_article_email_success',
       pagePath: pathname,
+      proposition: propositionVariant,
+      upsellVariant,
     });
 
     if (sign) {
