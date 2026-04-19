@@ -670,7 +670,10 @@ function condenseToKeyPoints(
   }
 
   // Element/Planet connection
-  if (fullContent.element && (fullContent.traditionalRuler || fullContent.planet)) {
+  if (
+    fullContent.element &&
+    (fullContent.traditionalRuler || fullContent.planet)
+  ) {
     keyPoints.push(
       `${title} is associated with ${fullContent.element} and ${formatRulershipSentence(title)}.`,
     );

@@ -26,7 +26,10 @@ export function getSignRulership(sign: string): Rulership | null {
   return SIGN_RULERS[toKey(sign)] || null;
 }
 
-export function getPrimaryRuler(sign: string, system: RulershipSystem = 'traditional'): string {
+export function getPrimaryRuler(
+  sign: string,
+  system: RulershipSystem = 'traditional',
+): string {
   const rulership = getSignRulership(sign);
   if (!rulership) return 'Unknown';
   return rulership[system];

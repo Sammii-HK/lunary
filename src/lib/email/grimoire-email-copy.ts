@@ -9,7 +9,10 @@
  */
 
 import zodiacSignsData from '@/data/zodiac-signs.json';
-import { formatRulershipValue, getPrimaryRuler } from '@/lib/astrology/rulerships';
+import {
+  formatRulershipValue,
+  getPrimaryRuler,
+} from '@/lib/astrology/rulerships';
 
 type ZodiacSign = {
   name: string;

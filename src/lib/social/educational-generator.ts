@@ -281,7 +281,9 @@ function buildLongPost(
   if (fc) {
     // Element/Planet info
     if (fc.element && (fc.traditionalRuler || fc.planet)) {
-      parts.push(`${snippet.title} is a ${fc.element} sign that ${formatRulershipSentence(snippet.title)}.`);
+      parts.push(
+        `${snippet.title} is a ${fc.element} sign that ${formatRulershipSentence(snippet.title)}.`,
+      );
       parts.push('');
     }
 
