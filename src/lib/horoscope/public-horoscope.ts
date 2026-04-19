@@ -1,0 +1,293 @@
+import {
+  getRealPlanetaryPositions,
+  getAccurateMoonPhase,
+} from '../../../utils/astrology/cosmic-og';
+
+export const ZODIAC_SIGNS = [
+  'aries',
+  'taurus',
+  'gemini',
+  'cancer',
+  'leo',
+  'virgo',
+  'libra',
+  'scorpio',
+  'sagittarius',
+  'capricorn',
+  'aquarius',
+  'pisces',
+] as const;
+
+export type ZodiacSign = (typeof ZODIAC_SIGNS)[number];
+
+const SIGN_DATA: Record<
+  ZodiacSign,
+  { element: string; ruler: string; modality: string }
+> = {
+  aries: { element: 'Fire', ruler: 'Mars', modality: 'Cardinal' },
+  taurus: { element: 'Earth', ruler: 'Venus', modality: 'Fixed' },
+  gemini: { element: 'Air', ruler: 'Mercury', modality: 'Mutable' },
+  cancer: { element: 'Water', ruler: 'Moon', modality: 'Cardinal' },
+  leo: { element: 'Fire', ruler: 'Sun', modality: 'Fixed' },
+  virgo: { element: 'Earth', ruler: 'Mercury', modality: 'Mutable' },
+  libra: { element: 'Air', ruler: 'Venus', modality: 'Cardinal' },
+  scorpio: { element: 'Water', ruler: 'Pluto', modality: 'Fixed' },
+  sagittarius: { element: 'Fire', ruler: 'Jupiter', modality: 'Mutable' },
+  capricorn: { element: 'Earth', ruler: 'Saturn', modality: 'Cardinal' },
+  aquarius: { element: 'Air', ruler: 'Uranus', modality: 'Fixed' },
+  pisces: { element: 'Water', ruler: 'Neptune', modality: 'Mutable' },
+};
+
+const WEEKLY_HOROSCOPE_TEMPLATES: Record<ZodiacSign, string[]> = {
+  aries: [
+    "This week carries the energy of Bold Beginnings. You'll feel the call to initiate something new, especially in your career or creative pursuits. When momentum builds, let the Astral Guide help you channel it with intention.",
+    "The week moves under Courageous Momentum. Your drive may surface in how you approach challenges at work and in personal projects. Consider journaling in your Book of Shadows about what you're ready to fight for.",
+    "You're in a phase of Pioneering Spirit this week. This energy shows up most in your relationships—you may feel compelled to lead or take initiative. Pull a tarot card to see what's asking for your attention.",
+  ],
+  taurus: [
+    'This week holds the energy of Grounded Abundance. Your focus naturally turns toward material security and sensory pleasures. The Astral Guide can help you explore what true abundance means for you now.',
+    'The week unfolds under Steady Growth. This influence shows up in your work life and financial matters—patience yields rewards. Write about your values in your Book of Shadows to anchor this clarity.',
+    "You're moving through a phase of Rooted Comfort this week. Home, body, and security matters take center stage. Your tarot patterns may reveal what foundation you're building.",
+  ],
+  gemini: [
+    'This week carries the energy of Curious Connections. Your mind is alive with ideas, especially in social and intellectual pursuits. Let the Astral Guide help you sort through which conversations matter most.',
+    'The week moves under Versatile Expression. Communication flows easily in both work and personal relationships. Consider capturing your insights in your Book of Shadows before they scatter.',
+    "You're in a phase of Mental Expansion this week. Learning and sharing take priority—your inner world buzzes with possibility. A tarot reading may help focus your curiosity.",
+  ],
+  cancer: [
+    'This week holds the energy of Nurturing Depths. Your emotional world asks for attention, especially in family and close relationships. The Astral Guide can help you navigate these sensitive waters.',
+    'The week unfolds under Intuitive Care. This influence surfaces in how you tend to your home and inner sanctuary. Journaling in your Book of Shadows supports emotional processing.',
+    "You're moving through a phase of Heart-Centered Protection this week. Boundaries and belonging are central themes. Your tarot patterns may illuminate what needs your gentle attention.",
+  ],
+  leo: [
+    'This week carries the energy of Radiant Expression. Your creative gifts and desire for recognition are amplified, especially in work and romance. The Astral Guide can help you shine authentically.',
+    'The week moves under Generous Warmth. Your heart leads in relationships and creative projects—let joy be your compass. Write about what makes you feel alive in your Book of Shadows.',
+    "You're in a phase of Courageous Visibility this week. Your inner world calls for self-celebration, not just validation. Pull a tarot card to explore what wants to be expressed.",
+  ],
+  virgo: [
+    'This week holds the energy of Discerning Service. Your analytical gifts are heightened, especially in work and health matters. Let the Astral Guide help you discern between perfectionism and genuine improvement.',
+    "The week unfolds under Practical Devotion. Details matter in your relationships and daily routines—small acts carry weight. Your Book of Shadows can help you track patterns you're ready to refine.",
+    "You're moving through a phase of Healing Precision this week. Body, mind, and environment ask for your attention. A tarot reading may reveal what's ready for integration.",
+  ],
+  libra: [
+    'This week carries the energy of Harmonious Connection. Relationships and aesthetic matters take priority—you’re seeking balance in partnerships and beauty in your surroundings. The Astral Guide can help you navigate relational dynamics.',
+    'The week moves under Diplomatic Grace. Fairness surfaces as a theme in work and personal bonds—your inner world craves equilibrium. Reflect on your needs in your Book of Shadows.',
+    "You're in a phase of Balanced Partnership this week. One-on-one connections deepen, asking for presence and reciprocity. Your tarot patterns may show where to give and where to receive.",
+  ],
+  scorpio: [
+    'This week holds the energy of Transformative Depths. Intensity surfaces in your emotional world and intimate bonds—something is ready to shift. The Astral Guide can support you through necessary endings and beginnings.',
+    "The week unfolds under Regenerative Power. Work and personal matters invite you to release what's no longer serving your growth. Your Book of Shadows is a safe space for shadow work.",
+    "You're moving through a phase of Profound Insight this week. Hidden truths may surface in relationships or within yourself. A tarot reading can help you see what's emerging.",
+  ],
+  sagittarius: [
+    'This week carries the energy of Expansive Vision. Adventure calls in your inner world and outer pursuits—meaning-making is central. Let the Astral Guide help you discern which horizon to chase.',
+    'The week moves under Optimistic Exploration. Learning and travel themes surface in work and personal growth. Capture your philosophical musings in your Book of Shadows.',
+    "You're in a phase of Bold Seeking this week. Relationships may feel like journeys, and your spirit craves truth. Your tarot patterns may reveal what you're ready to believe in.",
+  ],
+  capricorn: [
+    'This week holds the energy of Ambitious Structure. Career and long-term goals demand focus—your patience is your power. The Astral Guide can help you align ambition with meaning.',
+    'The week unfolds under Disciplined Achievement. Authority and responsibility surface in work and family matters. Reflect on your legacy in your Book of Shadows.',
+    "You're moving through a phase of Steady Ascent this week. Inner world themes include purpose and mastery. A tarot reading may clarify your next step on the mountain.",
+  ],
+  aquarius: [
+    'This week carries the energy of Visionary Community. Friendships and collective causes ask for your unique perspective. Let the Astral Guide help you balance individuality with belonging.',
+    'The week moves under Innovative Liberation. Work and social circles may feel ripe for change—your inner world craves freedom. Write about what revolution means for you in your Book of Shadows.',
+    "You're in a phase of Authentic Rebellion this week. Relationships may test your need for independence and connection. Your tarot patterns may reveal what's ready to break free.",
+  ],
+  pisces: [
+    'This week holds the energy of Compassionate Flow. Intuition and creativity surface in your inner world and spiritual pursuits. The Astral Guide can help you discern between empathy and overwhelm.',
+    'The week unfolds under Dreamy Connection. Relationships carry a mystical quality—boundaries may blur. Capture your dreams and visions in your Book of Shadows.',
+    "You're moving through a phase of Spiritual Surrender this week. Rest, imagination, and healing take priority. A tarot reading may reveal what's emerging from the depths.",
+  ],
+};
+
+const DAILY_HOROSCOPE_TEMPLATES: Record<string, string[]> = {
+  Fire: [
+    'Your fiery energy is amplified today. Channel it into creative projects.',
+    'Passion drives you forward. Let your enthusiasm inspire others.',
+    'Your natural leadership shines. Take the initiative on something meaningful.',
+  ],
+  Earth: [
+    'Ground yourself in practical matters today. Steady progress wins.',
+    'Your patient approach pays off. Trust the process and keep building.',
+    'Material concerns are highlighted. Focus on security and stability.',
+  ],
+  Air: [
+    'Communication flows easily today. Share your ideas freely.',
+    'Your mind is sharp and curious. Learn something new.',
+    'Social connections bring opportunities. Network and collaborate.',
+  ],
+  Water: [
+    'Trust your intuition today—it guides you true.',
+    'Emotional depth brings insight. Honor your feelings.',
+    'Your empathy is a strength. Connect deeply with loved ones.',
+  ],
+};
+
+function getSeededIndex(key: string, length: number): number {
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  }
+  return hash % length;
+}
+
+function pickByKey<T>(items: T[], key: string): T {
+  return items[getSeededIndex(key, items.length)];
+}
+
+function generateDailyHoroscope(
+  sign: ZodiacSign,
+  moonPhase: string,
+  dateKey: string,
+): string {
+  const { element } = SIGN_DATA[sign];
+  const templates = DAILY_HOROSCOPE_TEMPLATES[element];
+  const baseHoroscope = pickByKey(templates, `${dateKey}:${sign}:daily`);
+
+  const moonAdditions: Record<string, string> = {
+    'New Moon': ' The New Moon supports fresh starts and intention-setting.',
+    'Waxing Crescent': ' Building momentum—take action on recent ideas.',
+    'First Quarter':
+      ' Face challenges head-on. Obstacles lead to breakthroughs.',
+    'Waxing Gibbous': ' Refine your approach as the Full Moon approaches.',
+    'Full Moon': ' Emotions run high. Celebrate achievements and release.',
+    'Waning Gibbous': ' Share wisdom gained. Gratitude amplifies blessings.',
+    'Last Quarter': ' Let go of what no longer serves your growth.',
+    'Waning Crescent': ' Rest and reflect. Recharge before the new cycle.',
+  };
+
+  return baseHoroscope + (moonAdditions[moonPhase] || '');
+}
+
+function generateWeeklyHoroscope(sign: ZodiacSign, dateKey: string): string {
+  const templates = WEEKLY_HOROSCOPE_TEMPLATES[sign];
+  return pickByKey(templates, `${dateKey}:${sign}:weekly`);
+}
+
+function getLuckyNumber(sign: ZodiacSign, dateKey: string): number {
+  const baseNumbers: Record<ZodiacSign, number[]> = {
+    aries: [1, 9, 17],
+    taurus: [2, 6, 24],
+    gemini: [3, 7, 12],
+    cancer: [2, 7, 11],
+    leo: [1, 4, 19],
+    virgo: [5, 14, 23],
+    libra: [6, 15, 24],
+    scorpio: [8, 11, 22],
+    sagittarius: [3, 9, 21],
+    capricorn: [4, 8, 22],
+    aquarius: [4, 7, 11],
+    pisces: [3, 9, 12],
+  };
+  const numbers = baseNumbers[sign];
+  return pickByKey(numbers, `${dateKey}:${sign}:lucky-number`);
+}
+
+function getLuckyColor(sign: ZodiacSign, dateKey: string): string {
+  const colors: Record<ZodiacSign, string[]> = {
+    aries: ['Red', 'Orange', 'Gold'],
+    taurus: ['Green', 'Pink', 'Earth tones'],
+    gemini: ['Yellow', 'Light blue', 'Silver'],
+    cancer: ['Silver', 'White', 'Sea green'],
+    leo: ['Gold', 'Orange', 'Purple'],
+    virgo: ['Navy', 'Brown', 'Forest green'],
+    libra: ['Pink', 'Light blue', 'Lavender'],
+    scorpio: ['Black', 'Deep red', 'Burgundy'],
+    sagittarius: ['Purple', 'Blue', 'Turquoise'],
+    capricorn: ['Brown', 'Black', 'Dark green'],
+    aquarius: ['Electric blue', 'Silver', 'Violet'],
+    pisces: ['Sea green', 'Lavender', 'Aqua'],
+  };
+  const signColors = colors[sign];
+  return pickByKey(signColors, `${dateKey}:${sign}:lucky-colour`);
+}
+
+function getCompatibility(sign: ZodiacSign, dateKey: string): string {
+  const compatible: Record<ZodiacSign, string[]> = {
+    aries: ['Leo', 'Sagittarius', 'Gemini'],
+    taurus: ['Virgo', 'Capricorn', 'Cancer'],
+    gemini: ['Libra', 'Aquarius', 'Aries'],
+    cancer: ['Scorpio', 'Pisces', 'Taurus'],
+    leo: ['Aries', 'Sagittarius', 'Gemini'],
+    virgo: ['Taurus', 'Capricorn', 'Cancer'],
+    libra: ['Gemini', 'Aquarius', 'Leo'],
+    scorpio: ['Cancer', 'Pisces', 'Virgo'],
+    sagittarius: ['Aries', 'Leo', 'Libra'],
+    capricorn: ['Taurus', 'Virgo', 'Scorpio'],
+    aquarius: ['Gemini', 'Libra', 'Sagittarius'],
+    pisces: ['Cancer', 'Scorpio', 'Capricorn'],
+  };
+  const signs = compatible[sign];
+  return pickByKey(signs, `${dateKey}:${sign}:compatibility`);
+}
+
+function getMood(moonPhase: string, dateKey: string, sign: ZodiacSign): string {
+  const moods: Record<string, string[]> = {
+    'New Moon': ['Reflective', 'Hopeful', 'Introspective'],
+    'Waxing Crescent': ['Optimistic', 'Determined', 'Energized'],
+    'First Quarter': ['Motivated', 'Challenged', 'Focused'],
+    'Waxing Gibbous': ['Anticipatory', 'Productive', 'Refined'],
+    'Full Moon': ['Emotional', 'Illuminated', 'Celebratory'],
+    'Waning Gibbous': ['Grateful', 'Wise', 'Sharing'],
+    'Last Quarter': ['Releasing', 'Processing', 'Clearing'],
+    'Waning Crescent': ['Restful', 'Contemplative', 'Peaceful'],
+  };
+  const options = moods[moonPhase] || ['Balanced'];
+  return pickByKey(options, `${dateKey}:${sign}:${moonPhase}:mood`);
+}
+
+export function normalizeZodiacSign(
+  value?: string | null,
+): ZodiacSign | undefined {
+  if (!value) return undefined;
+  const normalized = value.trim().toLowerCase();
+  if ((ZODIAC_SIGNS as readonly string[]).includes(normalized)) {
+    return normalized as ZodiacSign;
+  }
+  return undefined;
+}
+
+export function buildPublicHoroscopeResponse(
+  sign: ZodiacSign,
+  type: 'daily' | 'weekly' = 'daily',
+  date = new Date(),
+) {
+  const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  const targetDate = new Date(`${dateKey}T12:00:00Z`);
+  const weekKey = `${targetDate.getUTCFullYear()}-W${String(
+    Math.floor(
+      (Date.UTC(
+        targetDate.getUTCFullYear(),
+        targetDate.getUTCMonth(),
+        targetDate.getUTCDate(),
+      ) -
+        Date.UTC(targetDate.getUTCFullYear(), 0, 1)) /
+        (7 * 24 * 60 * 60 * 1000),
+    ),
+  ).padStart(2, '0')}`;
+
+  getRealPlanetaryPositions(targetDate);
+  const moonPhase = getAccurateMoonPhase(targetDate);
+
+  const horoscope =
+    type === 'weekly'
+      ? generateWeeklyHoroscope(sign, weekKey)
+      : generateDailyHoroscope(sign, moonPhase.name, dateKey);
+
+  return {
+    sign: sign.charAt(0).toUpperCase() + sign.slice(1),
+    date: dateKey,
+    type,
+    horoscope,
+    mood: getMood(moonPhase.name, dateKey, sign),
+    luckyNumber: getLuckyNumber(sign, dateKey),
+    luckyColor: getLuckyColor(sign, dateKey),
+    compatibility: getCompatibility(sign, dateKey),
+    moonPhase: moonPhase.name,
+    element: SIGN_DATA[sign].element,
+    ctaUrl: `https://lunary.app/signup/chart?hub=horoscopes&headline=${encodeURIComponent(`Unlock your ${sign.charAt(0).toUpperCase() + sign.slice(1)} chart`)}&subline=${encodeURIComponent("See how today's transits affect your full chart, not just your Sun sign.")}&location=daily_horoscope_email&sign=${sign}&proposition=daily_horoscope&upsellVariant=exact_degree`,
+    ctaText: 'See how this lands in your full chart',
+    source: 'Lunary.app - Personalized astrology with real astronomical data',
+  };
+}
