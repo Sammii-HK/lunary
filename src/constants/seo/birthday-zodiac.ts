@@ -261,7 +261,7 @@ export const ZODIAC_DATE_RANGES: ZodiacDateRange[] = [
     endDay: 21,
     element: 'Water',
     modality: 'Fixed',
-    ruler: 'Pluto',
+    ruler: 'Mars',
     symbol: 'Scorpion',
     traits: [
       'resourceful',
@@ -361,7 +361,7 @@ export const ZODIAC_DATE_RANGES: ZodiacDateRange[] = [
     endDay: 18,
     element: 'Air',
     modality: 'Fixed',
-    ruler: 'Uranus',
+    ruler: 'Saturn',
     symbol: 'Water Bearer',
     traits: [
       'progressive',
@@ -391,7 +391,7 @@ export const ZODIAC_DATE_RANGES: ZodiacDateRange[] = [
     endDay: 20,
     element: 'Water',
     modality: 'Mutable',
-    ruler: 'Neptune',
+    ruler: 'Jupiter',
     symbol: 'Fish',
     traits: [
       'compassionate',

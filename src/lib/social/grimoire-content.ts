@@ -14,6 +14,11 @@ import spells from '@/data/spells.json';
 import correspondences from '@/data/correspondences.json';
 import sabbats from '@/data/sabbats.json';
 import planetaryBodies from '@/data/planetary-bodies.json';
+import {
+  formatRulershipSentence,
+  getPrimaryRuler,
+  getSignRulership,
+} from '@/lib/astrology/rulerships';
 
 export interface GrimoireSnippet {
   title: string;
@@ -37,6 +42,8 @@ export interface GrimoireSnippet {
     symbolism?: string;
     element?: string;
     planet?: string;
+    traditionalRuler?: string;
+    modernRuler?: string;
     modality?: string;
     spiritualMeaning?: string;
     message?: string;
@@ -111,6 +118,7 @@ function getCurrentCosmicContext(): {
 function getZodiacData(signKey: string): GrimoireSnippet['fullContent'] | null {
   const sign = zodiacSigns[signKey as keyof typeof zodiacSigns];
   if (!sign) return null;
+  const rulership = getSignRulership(sign.name);
   return {
     description: sign.description,
     keywords: sign.keywords,
@@ -120,7 +128,9 @@ function getZodiacData(signKey: string): GrimoireSnippet['fullContent'] | null {
     affirmation: sign.affirmation,
     element: sign.element,
     modality: sign.modality,
-    planet: sign.rulingPlanet,
+    planet: getPrimaryRuler(sign.name),
+    traditionalRuler: rulership?.traditional,
+    modernRuler: rulership?.modern,
   };
 }
 
@@ -660,9 +670,12 @@ function condenseToKeyPoints(
   }
 
   // Element/Planet connection
-  if (fullContent.element && fullContent.planet) {
+  if (
+    fullContent.element &&
+    (fullContent.traditionalRuler || fullContent.planet)
+  ) {
     keyPoints.push(
-      `${title} is associated with ${fullContent.element} and ruled by ${fullContent.planet}.`,
+      `${title} is associated with ${fullContent.element} and ${formatRulershipSentence(title)}.`,
     );
   } else if (fullContent.element) {
     keyPoints.push(`Associated with the ${fullContent.element} element.`);

@@ -18,6 +18,10 @@ import { getZodiacSymbol } from 'utils/astrology/cosmic-og';
 import { ShareMoonPhase } from '@/components/share/ShareMoonPhase';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { iosLabel } from '@/lib/ios-labels';
+import {
+  formatRulershipValue,
+  getPrimaryRuler,
+} from '@/lib/astrology/rulerships';
 
 const ZODIAC_ELEMENTS: Record<string, string> = {
   aries: 'Fire',
@@ -129,21 +133,6 @@ const getZodiacInfo = (sign: string) => {
   const signKey = sign.toLowerCase();
   const element = ZODIAC_ELEMENTS[signKey] || 'Unknown';
 
-  const rulingPlanets: Record<string, string> = {
-    aries: 'Mars',
-    taurus: 'Venus',
-    gemini: 'Mercury',
-    cancer: 'Moon',
-    leo: 'Sun',
-    virgo: 'Mercury',
-    libra: 'Venus',
-    scorpio: 'Pluto',
-    sagittarius: 'Jupiter',
-    capricorn: 'Saturn',
-    aquarius: 'Uranus',
-    pisces: 'Neptune',
-  };
-
   const modalities: Record<string, string> = {
     aries: 'Cardinal',
     taurus: 'Fixed',
@@ -193,10 +182,10 @@ const getZodiacInfo = (sign: string) => {
   return {
     element,
     elementSymbol: elementSymbols[element] || '',
-    rulingPlanet: rulingPlanets[signKey] || 'Unknown',
+    rulingPlanet: formatRulershipValue(sign),
     rulingPlanetSymbol:
       bodiesSymbols[
-        rulingPlanets[signKey]?.toLowerCase() as keyof typeof bodiesSymbols
+        getPrimaryRuler(sign).toLowerCase() as keyof typeof bodiesSymbols
       ] || '',
     modality: modalities[signKey] || 'Unknown',
     modalitySymbol: modalitySymbols[modalities[signKey] || ''] || '',

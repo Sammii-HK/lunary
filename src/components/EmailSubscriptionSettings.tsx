@@ -1,28 +1,38 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Mail, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Mail, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuthStatus } from './AuthStatus';
 import { betterAuthClient } from '@/lib/auth-client';
+import { conversionTracking } from '@/lib/analytics';
+
+type EmailPreferences = {
+  weeklyNewsletter: boolean;
+  dailyHoroscope: boolean;
+  blogUpdates: boolean;
+  productUpdates: boolean;
+  cosmicAlerts: boolean;
+};
+
+const DEFAULT_PREFERENCES: EmailPreferences = {
+  weeklyNewsletter: true,
+  dailyHoroscope: false,
+  blogUpdates: true,
+  productUpdates: false,
+  cosmicAlerts: false,
+};
 
 export function EmailSubscriptionSettings() {
   const authState = useAuthStatus();
-  const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
+  const [updatingKey, setUpdatingKey] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
-  const [resendLoading, setResendLoading] = useState(false);
-  const [resendMessage, setResendMessage] = useState<{
-    type: 'success' | 'error';
-    text: string;
-  } | null>(null);
-  const [statusMessage, setStatusMessage] = useState<{
-    type: 'success' | 'error' | 'info';
-    text: string;
-  } | null>(null);
+  const [isActive, setIsActive] = useState(false);
+  const [preferences, setPreferences] =
+    useState<EmailPreferences>(DEFAULT_PREFERENCES);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const resolveSessionIdentity = useCallback(async () => {
     try {
@@ -35,193 +45,145 @@ export function EmailSubscriptionSettings() {
         id: (sessionUser as any)?.id ?? null,
         emailVerified: (sessionUser as any)?.emailVerified ?? false,
       };
-    } catch (error) {
-      console.error(
-        'Error fetching auth session while loading newsletter preferences',
-        error,
-      );
+    } catch {
       return { email: null, id: null, emailVerified: false };
     }
   }, []);
 
-  const authUserId =
-    ((authState.user as any)?.id as string | undefined) ?? null;
-  const authProfileId =
-    ((authState.profile as any)?.id as string | undefined) ?? null;
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const resolveEmail = async () => {
-      const profileEmail = (authState.user as any)?.email || null;
-      const profileUserId = authUserId || null;
-      const profileEmailVerified =
-        (authState.user as any)?.emailVerified ?? false;
-
-      if (profileEmail) {
-        if (isMounted) {
-          setUserEmail(profileEmail);
-          setUserId(profileUserId);
-          setEmailVerified(profileEmailVerified);
-          setAuthChecked(true);
-        }
-        return;
-      }
-
-      const sessionIdentity = await resolveSessionIdentity();
-
-      if (isMounted) {
-        setUserEmail(sessionIdentity.email ?? null);
-        setUserId(sessionIdentity.id ?? profileUserId ?? authProfileId ?? null);
-        setEmailVerified(sessionIdentity.emailVerified ?? false);
-        setAuthChecked(true);
-      }
-    };
-
-    setUserEmail(null);
-    setAuthChecked(false);
-    setUserId(null);
-    setEmailVerified(null);
-
-    resolveEmail();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [authState.user, authUserId, authProfileId, resolveSessionIdentity]);
-
-  const checkSubscriptionStatus = useCallback(async (email: string) => {
-    setLoading(true);
-
+  const loadSubscription = useCallback(async (email: string) => {
     try {
       const response = await fetch(
         `/api/newsletter/subscribers/${encodeURIComponent(email)}`,
       );
-      if (response.ok) {
-        const data = await response.json();
-        setIsSubscribed(data.subscriber?.is_active ?? false);
-      } else {
-        setIsSubscribed(false);
+
+      if (!response.ok) {
+        setIsActive(false);
+        setPreferences(DEFAULT_PREFERENCES);
+        return;
       }
-    } catch (error) {
-      console.error('Error checking subscription:', error);
-      setIsSubscribed(false);
-    } finally {
-      setLoading(false);
+
+      const data = await response.json();
+      const subscriber = data.subscriber;
+      const prefs = subscriber?.preferences || {};
+
+      setIsActive(Boolean(subscriber?.is_active));
+      setPreferences({
+        ...DEFAULT_PREFERENCES,
+        ...prefs,
+      });
+    } catch {
+      setIsActive(false);
+      setPreferences(DEFAULT_PREFERENCES);
     }
   }, []);
 
   useEffect(() => {
-    if (userEmail) {
-      checkSubscriptionStatus(userEmail);
-    } else if (authChecked) {
-      setLoading(false);
-    }
-  }, [userEmail, authChecked, checkSubscriptionStatus]);
+    let mounted = true;
 
-  const toggleSubscription = async () => {
-    if (!userEmail) {
-      if (!authState.isAuthenticated) {
-        setStatusMessage({
-          type: 'info',
-          text: 'Please sign in to manage email subscriptions.',
-        });
-      } else {
-        setStatusMessage({
-          type: 'info',
-          text: 'We could not find an email for your account yet.',
-        });
+    const init = async () => {
+      const sessionIdentity = await resolveSessionIdentity();
+      if (!mounted) return;
+
+      setUserEmail(sessionIdentity.email);
+      setUserId(sessionIdentity.id);
+      setEmailVerified(sessionIdentity.emailVerified);
+
+      if (sessionIdentity.email) {
+        await loadSubscription(sessionIdentity.email);
       }
-      return;
+
+      if (mounted) setLoading(false);
+    };
+
+    init();
+    return () => {
+      mounted = false;
+    };
+  }, [loadSubscription, resolveSessionIdentity]);
+
+  const updatePreferences = async (
+    nextPreferences: EmailPreferences,
+    trackingPreference?: string,
+  ) => {
+    if (!userEmail) return;
+
+    setPreferences(nextPreferences);
+    setIsActive(
+      Object.values(nextPreferences).some((value) => Boolean(value)) || false,
+    );
+
+    const response = await fetch(
+      `/api/newsletter/subscribers/${encodeURIComponent(userEmail)}`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          preferences: nextPreferences,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to update email preferences');
     }
 
-    // Optimistically flip the toggle immediately
-    const previousValue = isSubscribed;
-    const newStatus = !isSubscribed;
-    setIsSubscribed(newStatus);
-
-    try {
-      const resolvedUserId = userId || authUserId || null;
-
-      if (newStatus) {
-        const payload = {
-          email: userEmail,
-          preferences: {
-            weeklyNewsletter: true,
-            blogUpdates: true,
-            productUpdates: false,
-            cosmicAlerts: false,
-          },
-          source: 'profile_settings',
-          ...(resolvedUserId ? { userId: resolvedUserId } : {}),
-        };
-
-        const response = await fetch('/api/newsletter/subscribers', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to subscribe');
-        }
-      } else {
-        const response = await fetch(
-          `/api/newsletter/subscribers/${encodeURIComponent(userEmail)}`,
-          {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ isActive: false }),
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to unsubscribe');
-        }
-      }
-    } catch (error) {
-      console.error('Error toggling subscription:', error);
-      // Revert on failure
-      setIsSubscribed(previousValue);
-      setStatusMessage({
-        type: 'error',
-        text: 'Failed to update subscription. Please try again.',
+    if (trackingPreference && userId) {
+      conversionTracking.preferencesUpdated(userId, {
+        preference: trackingPreference,
+        enabled: nextPreferences[
+          trackingPreference as keyof EmailPreferences
+        ] as boolean,
       });
     }
   };
 
-  const handleResendVerificationEmail = async () => {
-    setResendLoading(true);
-    setResendMessage(null);
+  const handleToggle = async (key: keyof EmailPreferences) => {
+    if (!userEmail) return;
+
+    const previousPreferences = preferences;
+    const nextPreferences = {
+      ...preferences,
+      [key]: !preferences[key],
+    };
+
+    setUpdatingKey(key);
+    setStatusMessage(null);
 
     try {
-      const response = await fetch('/api/auth/resend-verification-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setResendMessage({
-          type: 'error',
-          text: data.error || 'Failed to resend verification email',
-        });
-      } else {
-        setResendMessage({
-          type: 'success',
-          text: 'Verification email sent! Check your inbox.',
-        });
-      }
+      await updatePreferences(nextPreferences, key);
     } catch (error) {
-      console.error('Error resending verification email:', error);
-      setResendMessage({
-        type: 'error',
-        text: 'An error occurred. Please try again.',
-      });
+      setPreferences(previousPreferences);
+      setIsActive(Object.values(previousPreferences).some(Boolean));
+      setStatusMessage('Failed to update preferences. Please try again.');
     } finally {
-      setResendLoading(false);
+      setUpdatingKey(null);
+    }
+  };
+
+  const handleUnsubscribeAll = async () => {
+    if (!userEmail) return;
+
+    const previousPreferences = preferences;
+    setUpdatingKey('all');
+    setStatusMessage(null);
+
+    const nextPreferences = {
+      weeklyNewsletter: false,
+      dailyHoroscope: false,
+      blogUpdates: false,
+      productUpdates: false,
+      cosmicAlerts: false,
+    };
+
+    try {
+      await updatePreferences(nextPreferences);
+      setStatusMessage('All marketing emails turned off.');
+    } catch {
+      setPreferences(previousPreferences);
+      setIsActive(Object.values(previousPreferences).some(Boolean));
+      setStatusMessage('Failed to unsubscribe. Please try again.');
+    } finally {
+      setUpdatingKey(null);
     }
   };
 
@@ -240,12 +202,11 @@ export function EmailSubscriptionSettings() {
       <div className='w-full max-w-md rounded-lg border border-stroke-default bg-surface-card p-4'>
         <h3 className='mb-3 flex items-center gap-2 text-lg font-semibold text-content-primary'>
           <Mail className='h-5 w-5' />
-          Email Newsletter
+          Email preferences
         </h3>
         <p className='text-sm text-content-muted'>
-          {authState.isAuthenticated
-            ? 'Add an email address to your profile to manage subscriptions.'
-            : 'Sign in to manage your email subscriptions.'}
+          Sign in to manage your email preferences from your profile. If you are
+          using an email link, use the public email preferences page instead.
         </p>
       </div>
     );
@@ -253,134 +214,116 @@ export function EmailSubscriptionSettings() {
 
   return (
     <div className='w-full max-w-md space-y-4'>
-      {/* Email Verification Section */}
       {emailVerified !== null && (
         <div
-          className={`p-4 rounded-lg border ${
+          className={`rounded-lg border p-4 ${
             emailVerified
-              ? 'bg-layer-base/20 border-lunary-success-700'
-              : 'bg-layer-base/20 border-lunary-error-700'
+              ? 'border-lunary-success-700 bg-layer-base/20'
+              : 'border-lunary-error-700 bg-layer-base/20'
           }`}
         >
           <div className='flex items-start gap-3'>
-            <div className='mt-0.5'>
-              {emailVerified ? (
-                <CheckCircle className='h-5 w-5 text-lunary-success' />
-              ) : (
-                <AlertCircle className='h-5 w-5 text-lunary-error' />
-              )}
-            </div>
-            <div className='flex-1'>
+            {emailVerified ? (
+              <CheckCircle className='mt-0.5 h-5 w-5 text-lunary-success' />
+            ) : (
+              <AlertCircle className='mt-0.5 h-5 w-5 text-lunary-error' />
+            )}
+            <div>
               <p className='text-sm font-medium text-content-primary'>
-                {emailVerified ? 'Email Verified' : 'Email Not Verified'}
+                {emailVerified ? 'Email verified' : 'Email not verified'}
               </p>
-              <p className='text-xs text-content-secondary mt-1'>
-                {emailVerified
-                  ? `Your email ${userEmail} is verified.`
-                  : `We need to verify your email ${userEmail} to enable all features.`}
-              </p>
-              {!emailVerified && (
-                <button
-                  onClick={handleResendVerificationEmail}
-                  disabled={resendLoading}
-                  className='mt-3 px-3 py-1.5 text-xs font-medium bg-lunary-error-600 hover:bg-lunary-error-700 text-white rounded transition-colors disabled:opacity-50'
-                >
-                  {resendLoading ? 'Sending...' : 'Resend Verification Email'}
-                </button>
-              )}
-              {resendMessage && (
-                <p
-                  className={`text-xs mt-2 ${
-                    resendMessage.type === 'success'
-                      ? 'text-lunary-success'
-                      : 'text-lunary-error'
-                  }`}
-                >
-                  {resendMessage.text}
-                </p>
-              )}
+              <p className='mt-1 text-xs text-content-secondary'>{userEmail}</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Newsletter Subscription Section */}
-      <div className='p-4 bg-surface-card rounded-lg border border-stroke-default'>
-        <h3 className='text-lg font-semibold text-content-primary mb-3 flex items-center gap-2'>
+      <div className='rounded-lg border border-stroke-default bg-surface-card p-4'>
+        <h3 className='mb-2 flex items-center gap-2 text-lg font-semibold text-content-primary'>
           <Mail className='h-5 w-5' />
-          Email Newsletter
+          Email preferences
         </h3>
-        <p className='text-xs text-content-muted mb-4'>
-          Receive weekly cosmic insights, blog updates, and special offers
+        <p className='mb-4 text-xs text-content-muted'>
+          Control which email streams you want from Lunary.
         </p>
 
         {statusMessage && (
-          <div
-            className={`mb-4 rounded-lg border px-3 py-2 text-xs flex items-start justify-between gap-2 ${
-              statusMessage.type === 'success'
-                ? 'bg-green-950/40 border-green-800/50 text-green-300'
-                : statusMessage.type === 'error'
-                  ? 'bg-red-950/40 border-red-800/50 text-red-300'
-                  : 'bg-blue-950/40 border-blue-800/50 text-blue-300'
-            }`}
-          >
-            <span>{statusMessage.text}</span>
-            <button
-              onClick={() => setStatusMessage(null)}
-              className='flex-shrink-0 text-content-muted hover:text-content-secondary'
-            >
-              &times;
-            </button>
+          <div className='mb-4 rounded-lg border border-stroke-default bg-layer-base/20 px-3 py-2 text-xs text-content-secondary'>
+            {statusMessage}
           </div>
         )}
 
-        <div className='space-y-4'>
-          <div className='flex items-center justify-between'>
-            <div>
-              <p className='text-sm text-content-primary font-medium'>
-                {isSubscribed ? (
-                  <span className='flex items-center gap-2 text-lunary-success'>
-                    <CheckCircle className='h-4 w-4' />
-                    Subscribed
-                  </span>
-                ) : (
-                  <span className='flex items-center gap-2 text-content-muted'>
-                    <XCircle className='h-4 w-4' />
-                    Not Subscribed
-                  </span>
-                )}
-              </p>
-              <p className='text-xs text-content-muted mt-1'>
-                {isSubscribed
-                  ? `Receiving emails at ${userEmail}`
-                  : 'You will not receive email newsletters'}
-              </p>
-            </div>
-            <button
-              onClick={toggleSubscription}
-              disabled={updating}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isSubscribed ? 'bg-lunary-primary-600' : 'bg-surface-overlay'
-              } disabled:opacity-50`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  isSubscribed ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
+        <div className='space-y-3'>
+          <PreferenceRow
+            label='Weekly cosmic newsletter'
+            description='Weekly cosmic updates, essays, and featured content.'
+            enabled={preferences.weeklyNewsletter}
+            updating={updatingKey === 'weeklyNewsletter'}
+            onToggle={() => handleToggle('weeklyNewsletter')}
+          />
+          <PreferenceRow
+            label='Daily horoscope emails'
+            description='Daily sign-based horoscope delivery when enabled.'
+            enabled={preferences.dailyHoroscope}
+            updating={updatingKey === 'dailyHoroscope'}
+            onToggle={() => handleToggle('dailyHoroscope')}
+          />
+        </div>
 
-          {isSubscribed && (
-            <div className='pt-3 border-t border-stroke-default'>
-              <p className='text-xs text-content-muted'>
-                You can unsubscribe at any time by clicking the link in any
-                email or disabling this toggle.
-              </p>
-            </div>
-          )}
+        <div className='mt-4 border-t border-stroke-default pt-4'>
+          <p className='text-xs text-content-muted'>
+            Status:{' '}
+            {isActive
+              ? 'At least one email stream enabled'
+              : 'All marketing email streams off'}
+          </p>
+          <button
+            type='button'
+            onClick={handleUnsubscribeAll}
+            disabled={updatingKey !== null}
+            className='mt-3 rounded-md border border-stroke-default px-3 py-2 text-sm text-content-primary transition-colors hover:bg-surface-elevated disabled:opacity-50'
+          >
+            Unsubscribe from all marketing emails
+          </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function PreferenceRow({
+  label,
+  description,
+  enabled,
+  updating,
+  onToggle,
+}: {
+  label: string;
+  description: string;
+  enabled: boolean;
+  updating: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className='flex items-center justify-between gap-4 rounded-lg border border-stroke-default p-3'>
+      <div>
+        <p className='text-sm font-medium text-content-primary'>{label}</p>
+        <p className='mt-1 text-xs text-content-muted'>{description}</p>
+      </div>
+      <button
+        type='button'
+        onClick={onToggle}
+        disabled={updating}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+          enabled ? 'bg-lunary-primary-600' : 'bg-surface-overlay'
+        } disabled:opacity-50`}
+      >
+        <span
+          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+            enabled ? 'translate-x-6' : 'translate-x-1'
+          }`}
+        />
+      </button>
     </div>
   );
 }

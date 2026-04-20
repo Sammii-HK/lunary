@@ -8,7 +8,18 @@ import { generateRefundRequestedEmailHTML } from '@/lib/email-components/Complia
 
 export const dynamic = 'force-dynamic';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+let stripeClient: Stripe | null = null;
+
+function getStripeClient() {
+  if (!stripeClient) {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      throw new Error('STRIPE_SECRET_KEY is not configured');
+    }
+    stripeClient = new Stripe(secretKey);
+  }
+  return stripeClient;
+}
 
 function generateId(): string {
   return `ref_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
@@ -65,7 +76,7 @@ export async function POST(request: Request) {
     let amountCents = 0;
 
     try {
-      stripeSubscription = await stripe.subscriptions.retrieve(
+      stripeSubscription = await getStripeClient().subscriptions.retrieve(
         sub.stripe_subscription_id,
       );
 
@@ -136,21 +147,23 @@ export async function POST(request: Request) {
     if (eligible && stripeSubscription) {
       try {
         // Get the latest invoice for this subscription
-        const invoices = await stripe.invoices.list({
+        const invoices = await getStripeClient().invoices.list({
           subscription: sub.stripe_subscription_id,
           limit: 1,
         });
 
         const invoice = invoices.data[0] as any;
         if (invoices.data.length > 0 && invoice?.payment_intent) {
-          const refund = await stripe.refunds.create({
+          const refund = await getStripeClient().refunds.create({
             payment_intent: invoice.payment_intent as string,
             amount: amountCents,
             reason: 'requested_by_customer',
           });
 
           // Cancel the subscription
-          await stripe.subscriptions.cancel(sub.stripe_subscription_id);
+          await getStripeClient().subscriptions.cancel(
+            sub.stripe_subscription_id,
+          );
 
           // Update refund request as processed
           await sql`

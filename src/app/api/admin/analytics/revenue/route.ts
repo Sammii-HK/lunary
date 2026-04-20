@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
 
-    const [mrr, aggregateResult] = await Promise.all([
+    const [mrr, aggregateResult, trialStartsResult] = await Promise.all([
       getStripeMRR(),
       sql.query(
         `SELECT
@@ -85,18 +85,41 @@ export async function GET(request: NextRequest) {
           range.end.toISOString().split('T')[0],
         ],
       ),
+      sql.query(
+        `SELECT COUNT(DISTINCT user_id) as trial_starts
+         FROM conversion_events
+         WHERE event_type = 'trial_started'
+           AND created_at >= $1
+           AND created_at <= $2
+           AND user_id IS NOT NULL
+           AND (user_email IS NULL OR (user_email NOT LIKE $3 AND user_email != $4))`,
+        [
+          range.start.toISOString(),
+          range.end.toISOString(),
+          '%@test.lunary.app',
+          'test@test.lunary.app',
+        ],
+      ),
     ]);
 
     const result = { rows: [{ ...aggregateResult.rows[0] }] };
     const signups = Number(result.rows[0]?.total_signups || 0);
     const conversions = Number(result.rows[0]?.total_conversions || 0);
+    const trialStarts = Number(trialStartsResult.rows[0]?.trial_starts || 0);
 
-    // Calculate conversion rate
-    const conversionRate = signups > 0 ? (conversions / signups) * 100 : 0;
+    const freeToTrialRate = signups > 0 ? (trialStarts / signups) * 100 : 0;
+    const signupToPaidRate = signups > 0 ? (conversions / signups) * 100 : 0;
+    const trialToPaidRate =
+      trialStarts > 0 ? (conversions / trialStarts) * 100 : 0;
 
     const response = NextResponse.json({
       mrr: Number(mrr.toFixed(2)),
-      free_to_trial_rate: Number(conversionRate.toFixed(2)),
+      free_to_trial_rate: Number(freeToTrialRate.toFixed(2)),
+      signup_to_paid_rate: Number(signupToPaidRate.toFixed(2)),
+      trial_to_paid_rate: Number(trialToPaidRate.toFixed(2)),
+      total_signups: signups,
+      trial_starts: trialStarts,
+      total_conversions: conversions,
     });
 
     // Cache revenue metrics for 30 minutes with stale-while-revalidate

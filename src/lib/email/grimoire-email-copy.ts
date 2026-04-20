@@ -9,6 +9,10 @@
  */
 
 import zodiacSignsData from '@/data/zodiac-signs.json';
+import {
+  formatRulershipValue,
+  getPrimaryRuler,
+} from '@/lib/astrology/rulerships';
 
 type ZodiacSign = {
   name: string;
@@ -75,7 +79,8 @@ function buildSunTemplates(d: ZodiacSign): string[] {
   const str1 = d.strengths[0]?.toLowerCase() ?? 'capable';
   const str2 = d.strengths[1]?.toLowerCase() ?? 'focused';
   const weak1 = d.weaknesses[0]?.toLowerCase() ?? 'cautious';
-  const planet = d.rulingPlanet;
+  const planet = getPrimaryRuler(d.name);
+  const rulershipLabel = formatRulershipValue(d.name);
   const element = d.element;
   const modality = d.modality;
 
@@ -87,7 +92,7 @@ function buildSunTemplates(d: ZodiacSign): string[] {
     `As a ${modality} ${element} sign, your ${d.name} Sun processes the world through action and ${kw2}. This week there is a specific invitation in that energy. What has been waiting for you to move on it?`,
 
     // Angle 3: ruling planet angle
-    `${planet} rules your chart, which means your drive and direction are tied to ${planet}'s current position. This week that influence is worth paying attention to. Your ${kw1} instinct is accurate.`,
+    `${rulershipLabel} shapes your ${d.name} energy, which means your drive and direction are tied to ${planet}'s current position. This week that influence is worth paying attention to. Your ${kw1} instinct is accurate.`,
 
     // Angle 4: strength as the week's asset
     `Your natural ${str1} and ${str2} are your greatest assets this week. ${d.name} energy tends to ${kw3} forward, and right now the conditions are supporting that impulse rather than blocking it.`,

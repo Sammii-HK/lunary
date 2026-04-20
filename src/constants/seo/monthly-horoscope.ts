@@ -100,11 +100,11 @@ export const SIGN_RULERS: Record<ZodiacSign, string> = {
   leo: 'Sun',
   virgo: 'Mercury',
   libra: 'Venus',
-  scorpio: 'Pluto',
+  scorpio: 'Mars',
   sagittarius: 'Jupiter',
   capricorn: 'Saturn',
-  aquarius: 'Uranus',
-  pisces: 'Neptune',
+  aquarius: 'Saturn',
+  pisces: 'Jupiter',
 };
 
 export interface MonthlyTheme {

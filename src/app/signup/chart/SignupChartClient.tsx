@@ -35,6 +35,9 @@ export default function SignupChartClient() {
     'Sign up to see your full birth chart, placements, and 7 days of personalised insights.';
   const location = searchParams.get('location') || 'seo_contextual_nudge';
   const pagePath = searchParams.get('pagePath') || '';
+  const sign = searchParams.get('sign') || '';
+  const proposition = searchParams.get('proposition') || '';
+  const upsellVariant = searchParams.get('upsellVariant') || '';
 
   // Redirect authenticated users to /app
   useEffect(() => {
@@ -63,8 +66,11 @@ export default function SignupChartClient() {
       location,
       pagePath,
       variant: abVariant,
+      sign: sign || undefined,
+      proposition: proposition || undefined,
+      upsellVariant: upsellVariant || undefined,
     });
-  }, [hub, location, pagePath]);
+  }, [abVariant, hub, location, pagePath, proposition, sign, upsellVariant]);
 
   const handleAuthSuccess = () => {
     // Mark source for onboarding
@@ -92,6 +98,9 @@ export default function SignupChartClient() {
       location,
       pagePath,
       variant: abVariant,
+      sign: sign || undefined,
+      proposition: proposition || undefined,
+      upsellVariant: upsellVariant || undefined,
     });
 
     // Redirect to app — onboarding flow triggers automatically for new users

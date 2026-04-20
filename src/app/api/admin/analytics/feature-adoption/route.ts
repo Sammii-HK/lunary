@@ -36,26 +36,35 @@ export async function GET(request: NextRequest) {
     const range = resolveDateRange(searchParams, 30);
     const family = searchParams.get('family');
     const eventType = familyToEventType(family);
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const effectiveEnd =
+      range.end >= today
+        ? new Date(today.getTime() - 24 * 60 * 60 * 1000)
+        : range.end;
 
     // FAST PATH: Query pre-computed adoption rates from daily_metrics table
-    const result = await sql.query(
-      `SELECT
-        signed_in_product_mau as mau,
-        dashboard_adoption,
-        horoscope_adoption,
-        tarot_adoption,
-        chart_adoption,
-        guide_adoption,
-        ritual_adoption
-      FROM daily_metrics
-      WHERE metric_date >= $1 AND metric_date <= $2
-      ORDER BY metric_date DESC
-      LIMIT 1`,
-      [
-        range.start.toISOString().split('T')[0],
-        range.end.toISOString().split('T')[0],
-      ],
-    );
+    const result =
+      effectiveEnd >= range.start
+        ? await sql.query(
+            `SELECT
+              signed_in_product_mau as mau,
+              dashboard_adoption,
+              horoscope_adoption,
+              tarot_adoption,
+              chart_adoption,
+              guide_adoption,
+              ritual_adoption
+            FROM daily_metrics
+            WHERE metric_date >= $1 AND metric_date <= $2
+            ORDER BY metric_date DESC
+            LIMIT 1`,
+            [
+              range.start.toISOString().split('T')[0],
+              effectiveEnd.toISOString().split('T')[0],
+            ],
+          )
+        : { rows: [] };
 
     if (result.rows.length > 0) {
       // Got pre-computed metrics - FAST!

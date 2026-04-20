@@ -217,7 +217,7 @@ async function sendNewsletter(
     console.log(`🧪 Test mode: sending to ${testEmail}`);
     try {
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
-      const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(testEmail)}`;
+      const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(testEmail)}&type=weekly_newsletter`;
       const personalizedHtml = newsletter.html.replace(
         /{{UNSUBSCRIBE_URL}}/g,
         unsubscribeUrl,
@@ -292,7 +292,7 @@ async function sendNewsletter(
 
     // Replace unsubscribe URLs per email
     const personalizedEmails = emailList.map((email) => {
-      const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(email)}`;
+      const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(email)}&type=weekly_newsletter`;
       const personalizedHtml = newsletter.html.replace(
         /{{UNSUBSCRIBE_URL}}/g,
         unsubscribeUrl,

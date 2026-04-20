@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
         headers: fetchHeaders,
       }),
       fetch(
-        `${baseUrl}/api/admin/analytics/subscription-lifecycle?${queryParams}`,
+        `${baseUrl}/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1`,
         { headers: fetchHeaders },
       ),
     ]);

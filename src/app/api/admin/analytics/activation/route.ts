@@ -90,9 +90,9 @@ export async function GET(request: NextRequest) {
           user_id,
           event_type,
           CASE
-            WHEN resolved_plan_type IN ('monthly', 'yearly') THEN 'paid'
-            WHEN resolved_plan_type = 'free' THEN 'free'
-            ELSE 'unknown'
+            WHEN LOWER(COALESCE(resolved_plan_type, 'free')) = 'free' THEN 'free'
+            WHEN LOWER(COALESCE(resolved_plan_type, 'free')) IN ('unknown', '') THEN 'unknown'
+            ELSE 'paid'
           END as bucket
         FROM activation_with_plans
       `,

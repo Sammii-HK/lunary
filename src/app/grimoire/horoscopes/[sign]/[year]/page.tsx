@@ -12,10 +12,13 @@ import {
   SIGN_DISPLAY_NAMES,
   SIGN_SYMBOLS,
   SIGN_ELEMENTS,
-  SIGN_RULERS,
   MONTH_DISPLAY_NAMES,
   ZodiacSign,
 } from '@/constants/seo/monthly-horoscope';
+import {
+  formatRulershipValue,
+  getPrimaryRuler,
+} from '@/lib/astrology/rulerships';
 
 // 30-day revalidation for yearly horoscopes
 export const revalidate = 2592000;
@@ -100,13 +103,14 @@ export default async function YearHoroscopePage({
   const signName = SIGN_DISPLAY_NAMES[signKey];
   const symbol = SIGN_SYMBOLS[signKey];
   const element = SIGN_ELEMENTS[signKey];
-  const ruler = SIGN_RULERS[signKey];
+  const ruler = getPrimaryRuler(signName);
+  const rulership = formatRulershipValue(signName);
 
   const heroContent = (
     <div className='text-center space-y-3'>
       <span className='text-6xl'>{symbol}</span>
       <p className='text-sm uppercase tracking-[0.3em] text-content-muted'>
-        {element} Sign • Ruled by {ruler}
+        {element} Sign • Rulership: {rulership}
       </p>
     </div>
   );
@@ -203,7 +207,7 @@ export default async function YearHoroscopePage({
       transitSignDisplay={signName}
       whatIs={{
         question: `What does the ${signName} horoscope for ${year} include?`,
-        answer: `The ${signName} horoscope for ${year} provides complete monthly forecasts covering love, career, health, and personal growth. As a ${element} sign ruled by ${ruler}, ${signName} experiences ${year} through themes of consistency and growth. This guide includes all 12 monthly predictions, key transits, and practical guidance for the year ahead.`,
+        answer: `The ${signName} horoscope for ${year} provides complete monthly forecasts covering love, career, health, and personal growth. ${signName} is a ${element} sign with rulership ${rulership}, so this guide tracks how those themes play out across the year. This guide includes all 12 monthly predictions, key transits, and practical guidance for the year ahead.`,
       }}
       intro={`Dive into every month of ${year} with forecasts for ${signName} that weave together the Moon, planetary transits, and practical rituals so you can plan ahead.`}
       meaning={`## What to Expect for ${signName} in ${year}
@@ -211,15 +215,15 @@ export default async function YearHoroscopePage({
 ${year} brings important themes for ${signName}. This comprehensive guide covers all 12 months with detailed predictions for:
 
 - **Love & Relationships:** Building deeper connections through ${element.toLowerCase()} consistency
-- **Career & Finance:** Long-term momentum guided by ${ruler}
+- **Career & Finance:** Long-term momentum guided by ${rulership}
 - **Health & Wellness:** Honoring your ${element.toLowerCase()} nature
 - **Personal Growth:** Aligning monthly choices with your bigger vision
 
-The year emphasizes steady progress and visible wins. Your element (${element}) and ruling planet (${ruler}) provide the framework for growth.
+The year emphasizes steady progress and visible wins. Your element (${element}) and rulership (${rulership}) provide the framework for growth.
 
 Select any month below for your detailed forecast.
 
-This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate planning infused with ${element.toLowerCase()} energy and the guidance of ${ruler} to own visible progress throughout the year.`}
+This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate planning infused with ${element.toLowerCase()} energy and the guidance of ${rulership} to own visible progress throughout the year.`}
       additionalSchemas={[monthsItemListSchema]}
       heroContent={heroContent}
       breadcrumbs={[
@@ -239,7 +243,7 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
       }
       components={null}
       faqs={faqItems}
-      tldr={`${year} keeps ${signName} rooted in ${element.toLowerCase()} consistency while ${ruler} asks you to tell a longer story with your choices.`}
+      tldr={`${year} keeps ${signName} rooted in ${element.toLowerCase()} consistency while ${rulership} shapes the longer story of your choices.`}
       ctaText='See your full birth-chart horoscope in the app'
       ctaHref='/horoscope'
       childrenPosition='after-description'

@@ -3,15 +3,7 @@ import {
   getSentEvents,
   cleanupOldDates,
 } from '@/app/api/cron/shared-notification-tracker';
-import {
-  sendUnifiedNotification,
-  NotificationEvent,
-} from '@/lib/notifications/unified-service';
-import {
-  processAccountDeletions,
-  sendPromoEndingReminders,
-  sendTrialReminders,
-} from '@/lib/cron';
+import type { NotificationEvent } from '@/lib/notifications/unified-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +11,16 @@ export const dynamic = 'force-dynamic';
 // It runs every hour and handles all scheduled tasks directly (no fetch calls)
 export async function GET(request: NextRequest) {
   try {
+    const [{ sendUnifiedNotification }, cronModule] = await Promise.all([
+      import('@/lib/notifications/unified-service'),
+      import('@/lib/cron'),
+    ]);
+    const {
+      processAccountDeletions,
+      sendPromoEndingReminders,
+      sendTrialReminders,
+    } = cronModule;
+
     const isVercelCron = request.headers.get('x-vercel-cron') === '1';
     const authHeader = request.headers.get('authorization');
 

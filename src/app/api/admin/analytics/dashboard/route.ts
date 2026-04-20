@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { resolveDateRange } from '@/lib/analytics/date-range';
 import { ANALYTICS_REALTIME_TTL_SECONDS } from '@/lib/analytics-cache-config';
+import { PRODUCT_EVENTS } from '@/lib/analytics/product-events';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
-
 /**
  * Consolidated dashboard endpoint using hybrid query strategy
  *
@@ -111,11 +111,48 @@ export async function GET(request: NextRequest) {
              WHERE created_at >= $1 AND created_at <= $2
                AND user_id IS NOT NULL
                AND user_id NOT LIKE 'anon:%'
-               AND event_type NOT IN ('app_opened', 'page_viewed')
-               AND (user_email IS NULL OR (user_email NOT LIKE $3 AND user_email != $4))`,
+               AND event_type = ANY($3::text[])
+               AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))`,
             [
               todayStart.toISOString(),
               todayEnd.toISOString(),
+              PRODUCT_EVENTS,
+              TEST_EMAIL_PATTERN,
+              TEST_EMAIL_EXACT,
+            ],
+          ),
+
+          // Current Product WAU (7-day window)
+          sql.query(
+            `SELECT COUNT(DISTINCT user_id) as count
+             FROM conversion_events
+             WHERE created_at >= $1 AND created_at <= $2
+               AND user_id IS NOT NULL
+               AND user_id NOT LIKE 'anon:%'
+               AND event_type = ANY($3::text[])
+               AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))`,
+            [
+              wauStart.toISOString(),
+              todayEnd.toISOString(),
+              PRODUCT_EVENTS,
+              TEST_EMAIL_PATTERN,
+              TEST_EMAIL_EXACT,
+            ],
+          ),
+
+          // Current Product MAU (30-day window)
+          sql.query(
+            `SELECT COUNT(DISTINCT user_id) as count
+             FROM conversion_events
+             WHERE created_at >= $1 AND created_at <= $2
+               AND user_id IS NOT NULL
+               AND user_id NOT LIKE 'anon:%'
+               AND event_type = ANY($3::text[])
+               AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))`,
+            [
+              mauStart.toISOString(),
+              todayEnd.toISOString(),
+              PRODUCT_EVENTS,
               TEST_EMAIL_PATTERN,
               TEST_EMAIL_EXACT,
             ],
@@ -194,9 +231,9 @@ export async function GET(request: NextRequest) {
     ) as any[];
     const historicalMetrics = historicalRows.map((row: any) => ({
       date: row.metric_date,
-      dau: Number(row.reach_dau || 0),
-      wau: Number(row.reach_wau || 0),
-      mau: Number(row.reach_mau || 0),
+      dau: Number(row.dau || 0),
+      wau: Number(row.wau || 0),
+      mau: Number(row.mau || 0),
       productDau: Number(row.signed_in_product_dau || 0),
       productWau: Number(row.signed_in_product_wau || 0),
       productMau: Number(row.signed_in_product_mau || 0),
@@ -217,11 +254,21 @@ export async function GET(request: NextRequest) {
     // Process today's data (if applicable)
     let todayMetrics = null;
     if (todayResults && Array.isArray(todayResults)) {
-      const [dauRes, productDauRes, wauRes, mauRes, signupsRes, mrrRes] =
-        todayResults;
+      const [
+        dauRes,
+        productDauRes,
+        productWauRes,
+        productMauRes,
+        wauRes,
+        mauRes,
+        signupsRes,
+        mrrRes,
+      ] = todayResults;
 
       const dau = Number(dauRes.rows[0]?.count || 0);
       const productDau = Number(productDauRes.rows[0]?.count || 0);
+      const productWau = Number(productWauRes.rows[0]?.count || 0);
+      const productMau = Number(productMauRes.rows[0]?.count || 0);
       const wau = Number(wauRes.rows[0]?.count || 0);
       const mau = Number(mauRes.rows[0]?.count || 0);
       const signups = Number(signupsRes.rows[0]?.count || 0);
@@ -237,8 +284,8 @@ export async function GET(request: NextRequest) {
         wau,
         mau,
         productDau,
-        productWau: 0,
-        productMau: 0,
+        productWau,
+        productMau,
         signups,
         activationRate: 0,
         mrr,
