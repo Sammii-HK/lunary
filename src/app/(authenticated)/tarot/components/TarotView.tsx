@@ -85,6 +85,12 @@ export function TarotView({
   const subscription = useSubscription();
   const variantRaw = useFeatureFlagVariant('paywall_preview_style_v1');
   const variant = variantRaw || 'blur';
+  const weeklyLockVariantRaw = useFeatureFlagVariant('weekly-lock-style');
+  const weeklyLockVariant = weeklyLockVariantRaw || 'blur';
+  const tarotTruncationVariantRaw = useFeatureFlagVariant(
+    'tarot-truncation-length',
+  );
+  const tarotTruncationVariant = tarotTruncationVariantRaw || 'medium';
   const ctaCopy = useCTACopy();
   const userId = user?.id;
   const tarotPlan = {
@@ -889,6 +895,7 @@ export function TarotView({
                       captureEvent('locked_content_clicked', {
                         feature: 'weekly_tarot_card',
                         tier: 'free',
+                        weekly_lock_variant: weeklyLockVariant,
                       });
                       router.push('/pricing?nav=app');
                     }}
@@ -923,6 +930,7 @@ export function TarotView({
                       captureEvent('locked_content_clicked', {
                         feature: 'daily_tarot_interpretation',
                         tier: 'free',
+                        tarot_truncation_variant: tarotTruncationVariant,
                       });
                       router.push('/pricing?nav=app');
                     }}
@@ -966,6 +974,7 @@ export function TarotView({
                     captureEvent('locked_content_clicked', {
                       feature: 'weekly_tarot',
                       tier: 'free',
+                      weekly_lock_variant: weeklyLockVariant,
                     });
                     router.push('/pricing?nav=app');
                   }}

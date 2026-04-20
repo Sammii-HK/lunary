@@ -4,12 +4,6 @@ import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
-const UNINSTRUMENTED_TESTS = new Set([
-  'weekly_lock',
-  'tarot_truncation',
-  'transit_limit',
-]);
-
 export interface AutoApplySuggestion {
   testName: string;
   currentVariant: 'A' | 'B';
@@ -61,10 +55,6 @@ async function getVariantConversions(
   variant: string,
   dateCutoffIso: string,
 ): Promise<number> {
-  if (UNINSTRUMENTED_TESTS.has(testName)) {
-    return 0;
-  }
-
   if (testName === 'paywall_preview' || testName === 'feature_preview') {
     const result = await sql`
       SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
@@ -82,6 +72,39 @@ async function getVariantConversions(
       FROM conversion_events
       WHERE event_type = 'locked_content_clicked'
         AND metadata->>'overflow_variant' = ${variant}
+        AND created_at >= ${dateCutoffIso}
+    `;
+    return parseInt(result.rows[0]?.count || '0');
+  }
+
+  if (testName === 'weekly_lock') {
+    const result = await sql`
+      SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+      FROM conversion_events
+      WHERE event_type = 'locked_content_clicked'
+        AND metadata->>'weekly_lock_variant' = ${variant}
+        AND created_at >= ${dateCutoffIso}
+    `;
+    return parseInt(result.rows[0]?.count || '0');
+  }
+
+  if (testName === 'tarot_truncation') {
+    const result = await sql`
+      SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+      FROM conversion_events
+      WHERE event_type = 'locked_content_clicked'
+        AND metadata->>'tarot_truncation_variant' = ${variant}
+        AND created_at >= ${dateCutoffIso}
+    `;
+    return parseInt(result.rows[0]?.count || '0');
+  }
+
+  if (testName === 'transit_limit') {
+    const result = await sql`
+      SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+      FROM conversion_events
+      WHERE event_type = 'locked_content_clicked'
+        AND metadata->>'transit_limit_variant' = ${variant}
         AND created_at >= ${dateCutoffIso}
     `;
     return parseInt(result.rows[0]?.count || '0');
@@ -121,7 +144,6 @@ export async function GET(request: NextRequest) {
     for (const row of abTests.rows) {
       const testName = row.test_name;
       if (!testName) continue;
-      if (UNINSTRUMENTED_TESTS.has(testName)) continue;
 
       // Get all variants for this test
       const variantsResult = await sql`

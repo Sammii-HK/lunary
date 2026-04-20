@@ -156,6 +156,8 @@ export function UnifiedTransitList({
 }: UnifiedTransitListProps) {
   const router = useRouter();
   const ctaCopy = useCTACopy();
+  const transitLimitVariantRaw = useFeatureFlagVariant('transit-limit-test');
+  const transitLimitVariant = transitLimitVariantRaw || 'one-transit';
   const overflowVariantRaw = useFeatureFlagVariant('transit-overflow-style');
   const overflowVariant = overflowVariantRaw || 'blurred';
 
@@ -164,6 +166,7 @@ export function UnifiedTransitList({
     captureEvent('locked_content_clicked', {
       feature: 'personal_transit_impact',
       tier: 'free',
+      transit_limit_variant: transitLimitVariant,
       overflow_variant: overflowVariant,
     });
     router.push('/pricing?nav=app');
