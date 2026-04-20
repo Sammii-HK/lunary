@@ -50,6 +50,7 @@ import { useRouter } from 'next/navigation';
 import { mutate } from 'swr';
 import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
 import { Heading } from '@/components/ui/Heading';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
 
 interface CollectionFolder {
   id: number;
@@ -389,12 +390,14 @@ function BookOfShadowsContent() {
     planId,
     dailyHighlight,
     error,
+    limitReached,
     clearError,
     addMessage,
     threadId,
   } = useAssistantChat({ birthday: userBirthday });
 
   const [cacheInitialized, setCacheInitialized] = useState(false);
+  const [astralLimitModalOpen, setAstralLimitModalOpen] = useState(false);
   const [savedCollections, setSavedCollections] = useState<SavedCollection[]>(
     [],
   );
@@ -409,6 +412,17 @@ function BookOfShadowsContent() {
     return localStorage.getItem('daily-thread-collapsed') !== 'true';
   });
   const [hasDailyModules, setHasDailyModules] = useState(false);
+
+  // Astral guide daily message limit is a hard paywall moment: surface an
+  // UpgradePrompt modal (not just the inline error toast) so the upgrade
+  // path is clear. Fires paywall tracking once per limit hit.
+  useEffect(() => {
+    if (limitReached && !astralLimitModalOpen) {
+      setAstralLimitModalOpen(true);
+      conversionTracking.paywallShown(authState.user?.id, 'astral-guide');
+      conversionTracking.featureGated('astral-guide');
+    }
+  }, [limitReached, astralLimitModalOpen, authState.user?.id]);
 
   useEffect(() => {
     if (!authState.isAuthenticated || authState.loading) return;
@@ -1295,6 +1309,17 @@ function BookOfShadowsContent() {
           </form>
         </div>
       </div>
+      <UpgradePrompt
+        variant='modal'
+        featureName='astral-guide'
+        title="You've reached your daily messages"
+        description='Upgrade to Lunary+ for a higher daily message limit, richer grimoire context, and unlimited ritual guidance.'
+        isOpen={astralLimitModalOpen}
+        onClose={() => {
+          setAstralLimitModalOpen(false);
+          clearError();
+        }}
+      />
     </div>
   );
 }
