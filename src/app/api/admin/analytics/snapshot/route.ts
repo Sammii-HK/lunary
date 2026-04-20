@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { resolveDateRange } from '@/lib/analytics/date-range';
 import { getAnalyticsCacheTTL } from '@/lib/analytics-cache-config';
 import { PRODUCT_EVENTS } from '@/lib/analytics/product-events';
+import { getStripeMRR } from '@/lib/analytics/stripe-subscriptions';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
     const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
     // Query ALL rows in date range (not LIMIT 1)
-    const [allRowsResult, realtimeDauResult, todaySignupsResult] =
+    const [allRowsResult, realtimeDauResult, todaySignupsResult, stripeMrr] =
       await Promise.all([
         sql.query(
           `SELECT *
@@ -84,6 +85,7 @@ export async function GET(request: NextRequest) {
               ],
             )
           : Promise.resolve(null),
+        getStripeMRR(),
       ]);
 
     if (allRowsResult.rows.length === 0) {
@@ -271,7 +273,7 @@ export async function GET(request: NextRequest) {
       })(),
 
       // Revenue
-      mrr: Number(latest.mrr || 0),
+      mrr: Number(stripeMrr || latest.mrr || 0),
       active_subscriptions: Number(latest.active_subscriptions || 0),
       trial_subscriptions: Number(latest.trial_subscriptions || 0),
       new_conversions: Number(latest.new_conversions || 0),

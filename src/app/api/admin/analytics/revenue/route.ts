@@ -1,63 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import Stripe from 'stripe';
 import { resolveDateRange } from '@/lib/analytics/date-range';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
+import { getStripeMRR } from '@/lib/analytics/stripe-subscriptions';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
-
-/**
- * Calculate MRR directly from Stripe (single source of truth).
- * Iterates all active subscriptions and sums their actual monthly revenue
- * after discounts, avoiding stale local DB records.
- */
-async function getStripeMRR(): Promise<number> {
-  const stripeKey = process.env.STRIPE_SECRET_KEY;
-  if (!stripeKey) {
-    console.warn('[analytics/revenue] STRIPE_SECRET_KEY not set, returning 0');
-    return 0;
-  }
-
-  const stripe = new Stripe(stripeKey);
-  let mrr = 0;
-
-  for await (const sub of stripe.subscriptions.list({
-    status: 'active',
-    expand: ['data.discounts'],
-    limit: 100,
-  })) {
-    for (const item of sub.items.data) {
-      const price = item.price;
-      if (!price?.unit_amount) continue;
-
-      const isYearly = price.recurring?.interval === 'year';
-      let monthlyAmount = isYearly
-        ? price.unit_amount / 100 / 12
-        : price.unit_amount / 100;
-
-      // Apply discount if present
-      const discounts = sub.discounts || [];
-      if (discounts.length > 0) {
-        const discount = discounts[0];
-        if (typeof discount !== 'string' && discount?.coupon) {
-          if (discount.coupon.percent_off) {
-            monthlyAmount *= 1 - discount.coupon.percent_off / 100;
-          } else if (discount.coupon.amount_off) {
-            monthlyAmount = Math.max(
-              0,
-              monthlyAmount - discount.coupon.amount_off / 100,
-            );
-          }
-        }
-      }
-
-      mrr += monthlyAmount;
-    }
-  }
-
-  return Math.round(mrr * 100) / 100;
-}
 
 /**
  * Revenue endpoint for insights
