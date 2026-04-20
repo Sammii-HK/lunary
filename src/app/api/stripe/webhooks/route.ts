@@ -6,6 +6,7 @@ import { sql } from '@vercel/postgres';
 import { trackConversionEvent } from '@/lib/analytics/tracking';
 import { captureEvent } from '@/lib/posthog-server';
 import { conversionTracking } from '@/lib/analytics';
+import { deterministicEventId } from '@/lib/analytics/deterministic-event-id';
 import { sendEmail } from '@/lib/email';
 import {
   generateCancellationWinBackEmailHTML,
@@ -773,6 +774,62 @@ async function handleSubscriptionChange(
         daysToConvert,
         metadata: { stripeSubscriptionId: subscription.id },
       });
+
+      // Write a canonical trial_converted row to conversion_events so the
+      // conversion funnel + KPI dashboards see this as a real paid conversion.
+      // Skip beta-comp trial rolls (100% off coupons produce £0 / $0 invoices),
+      // which would otherwise inflate trial_converted counts.
+      const effectivePaidAmount = discountInfo.monthlyAmountDue ?? 0;
+      const isRealPaidConversion =
+        !discountInfo.hasDiscount ||
+        discountInfo.discountPercent < 100 ||
+        effectivePaidAmount > 0;
+
+      if (isRealPaidConversion) {
+        const price = subscription.items.data[0]?.price;
+        const currency = price?.currency?.toUpperCase() || 'GBP';
+        const eventIdForTrialConverted = deterministicEventId(
+          'trial_converted',
+          userId,
+          subscription.id,
+        );
+
+        try {
+          await sql`
+            INSERT INTO conversion_events (
+              event_type,
+              event_id,
+              user_id,
+              user_email,
+              plan_type,
+              feature_name,
+              metadata
+            ) VALUES (
+              'trial_converted',
+              ${eventIdForTrialConverted}::uuid,
+              ${userId},
+              ${userEmail},
+              ${planType},
+              ${subscription.metadata?.triggerFeature || null},
+              ${JSON.stringify({
+                stripeSubscriptionId: subscription.id,
+                amount: effectivePaidAmount,
+                currency,
+                daysToConvert,
+                discountPercent: discountInfo.discountPercent || 0,
+                hasDiscount: discountInfo.hasDiscount,
+              })}
+            )
+            ON CONFLICT (event_id) DO NOTHING
+          `;
+        } catch (error) {
+          console.error(
+            '[Webhook] Failed to write trial_converted conversion event:',
+            error,
+          );
+          // Non-critical: trackConversionEvent already wrote to analytics_conversions
+        }
+      }
 
       // Send welcome email on trial-to-paid conversion
       try {

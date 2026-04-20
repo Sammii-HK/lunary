@@ -10,6 +10,7 @@ import { SmartTrialButton } from './SmartTrialButton';
 import { IOSPaywall } from './IOSPaywall';
 import { X } from 'lucide-react';
 import { captureEvent } from '@/lib/posthog-client';
+import { conversionTracking } from '@/lib/analytics';
 import { Button } from './ui/button';
 import type { FeatureKey } from '../../utils/pricing';
 
@@ -43,6 +44,10 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
         is_trial_active: isTrialActive,
         trial_days_remaining: trialDaysRemaining,
       });
+      // Fire paywall_shown to conversion_events so the conversion funnel
+      // captures paywall impressions (not just clicks). Debounced per-mount
+      // via paywallTracked so each render of the blurred surface only fires once.
+      conversionTracking.paywallShown(undefined, feature);
       setPaywallTracked(true);
     }
   }, [
