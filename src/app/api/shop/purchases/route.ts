@@ -5,7 +5,18 @@ import { sql } from '@vercel/postgres';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+let stripeClient: Stripe | null = null;
+
+function getStripeClient() {
+  if (!stripeClient) {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      throw new Error('STRIPE_SECRET_KEY is not configured');
+    }
+    stripeClient = new Stripe(secretKey);
+  }
+  return stripeClient;
+}
 
 /* -------------------------------------------------------------------------- */
 /* POST – Create Stripe Checkout session                                       */
@@ -26,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     const downloadToken = crypto.randomUUID().replace(/-/g, '');
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripeClient().checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
       allow_promotion_codes: true,
@@ -112,9 +123,12 @@ export async function GET(request: NextRequest) {
     // Fetch customer email from Stripe session (best-effort, non-blocking)
     let customerEmail: string | null = null;
     try {
-      const stripeSession = await stripe.checkout.sessions.retrieve(sessionId, {
-        expand: ['customer_details'],
-      });
+      const stripeSession = await getStripeClient().checkout.sessions.retrieve(
+        sessionId,
+        {
+          expand: ['customer_details'],
+        },
+      );
       customerEmail =
         stripeSession.customer_details?.email ||
         stripeSession.customer_email ||

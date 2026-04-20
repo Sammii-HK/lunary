@@ -10,7 +10,18 @@ import {
   generatePromoEndingEmailText,
 } from '@/lib/email-templates/promo-ending';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+let stripeClient: Stripe | null = null;
+
+function getStripeClient() {
+  if (!stripeClient) {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      throw new Error('STRIPE_SECRET_KEY is not configured');
+    }
+    stripeClient = new Stripe(secretKey);
+  }
+  return stripeClient;
+}
 
 export interface DeletionResult {
   processed: number;
@@ -62,7 +73,7 @@ export async function processAccountDeletions(): Promise<DeletionResult> {
 
       if (subscription.rows[0]?.stripe_subscription_id) {
         try {
-          await stripe.subscriptions.cancel(
+          await getStripeClient().subscriptions.cancel(
             subscription.rows[0].stripe_subscription_id,
           );
         } catch {

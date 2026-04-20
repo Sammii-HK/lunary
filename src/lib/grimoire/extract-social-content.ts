@@ -513,6 +513,8 @@ export function extractFromSnippet(snippet: {
     symbolism?: string;
     element?: string;
     planet?: string;
+    traditionalRuler?: string;
+    modernRuler?: string;
     modality?: string;
     spiritualMeaning?: string;
     message?: string;
