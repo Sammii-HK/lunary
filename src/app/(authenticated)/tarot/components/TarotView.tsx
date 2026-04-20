@@ -20,7 +20,7 @@ import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { TarotCardModal } from '@/components/TarotCardModal';
 import { getTarotCardByName } from '@/utils/tarot/getCardByName';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
-import { conversionTracking } from '@/lib/analytics';
+import { conversionTracking, trackCtaImpression } from '@/lib/analytics';
 import { useModal } from '@/hooks/useModal';
 import {
   SubscriptionStatus,
@@ -105,6 +105,45 @@ export function TarotView({
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState<string | null>(null);
   const [expandedSuit, setExpandedSuit] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (hasPaidAccess) return;
+
+    void trackCtaImpression({
+      ctaId: 'weekly_tarot_lock',
+      location: 'tarot_weekly_lock',
+      label: ctaCopy.tarotWeekly,
+      href: '/pricing?nav=app',
+      pagePath: '/tarot',
+      abTest: 'weekly_lock',
+      abVariant: weeklyLockVariant,
+    });
+  }, [hasPaidAccess, ctaCopy.tarotWeekly, weeklyLockVariant]);
+
+  useEffect(() => {
+    if (hasPaidAccess) return;
+    if (
+      generalTarot?.guidance.dailyMessage.length <=
+      FREE_DAILY_TAROT_TRUNCATE_LENGTH
+    ) {
+      return;
+    }
+
+    void trackCtaImpression({
+      ctaId: 'daily_tarot_truncation',
+      location: 'tarot_daily_truncation',
+      label: ctaCopy.tarotDaily,
+      href: '/pricing?nav=app',
+      pagePath: '/tarot',
+      abTest: 'tarot_truncation',
+      abVariant: tarotTruncationVariant,
+    });
+  }, [
+    hasPaidAccess,
+    generalTarot?.guidance.dailyMessage,
+    ctaCopy.tarotDaily,
+    tarotTruncationVariant,
+  ]);
 
   // Free users are limited to 7-day patterns view
   useEffect(() => {

@@ -7,7 +7,8 @@ import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { captureEvent } from '@/lib/posthog-client';
 import { Sparkles } from 'lucide-react';
 import type { FeatureKey } from '../../../../../utils/pricing';
-import { ReactNode, useCallback } from 'react';
+import { ReactNode, useCallback, useEffect } from 'react';
+import { trackCtaImpression } from '@/lib/analytics';
 
 interface FeaturePreviewProps {
   title: string;
@@ -39,6 +40,20 @@ export function FeaturePreview({
   const variantRaw = useFeatureFlagVariant('paywall_preview_style_v1');
   // feature_preview_blur_v1 takes priority when set (blur vs peek test)
   const variant = previewBlurVariant || variantRaw || 'blur';
+
+  useEffect(() => {
+    if (!ctaKey) return;
+
+    void trackCtaImpression({
+      ctaId: `${ctaKey}_feature_preview`,
+      location: `${page}_feature_preview`,
+      label: ctaCopy[ctaKey],
+      href: '/pricing?nav=app',
+      pagePath: `/${page}`,
+      abTest: 'feature_preview',
+      abVariant: variant,
+    });
+  }, [ctaKey, ctaCopy, page, variant]);
 
   const handleUpgradeClick = useCallback(() => {
     if (ctaKey) {

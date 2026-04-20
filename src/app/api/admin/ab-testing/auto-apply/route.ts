@@ -38,6 +38,25 @@ async function getVariantImpressions(
   variant: string,
   dateCutoffIso: string,
 ): Promise<number> {
+  if (
+    testName === 'feature_preview' ||
+    testName === 'transit_overflow' ||
+    testName === 'weekly_lock' ||
+    testName === 'tarot_truncation' ||
+    testName === 'transit_limit'
+  ) {
+    const result = await sql`
+      SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+      FROM conversion_events
+      WHERE metadata->>'abTest' = ${testName}
+        AND metadata->>'abVariant' = ${variant}
+        AND event_type = 'cta_impression'
+        AND created_at >= ${dateCutoffIso}
+    `;
+
+    return parseInt(result.rows[0]?.count || '0');
+  }
+
   const result = await sql`
     SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
     FROM conversion_events
