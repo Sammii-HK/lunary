@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { ACTIVATION_EVENTS } from '@/lib/analytics/activation-events';
+import { PRODUCT_EVENTS } from '@/lib/analytics/product-events';
 import { syncStripeDiscounts } from '@/lib/analytics/sync-stripe-discounts';
 import {
   TEST_EMAIL_PATTERN,
@@ -130,7 +131,7 @@ export async function GET(request: NextRequest) {
            SELECT ${signedInId} as resolved_id
            FROM conversion_events ce ${idJoin}
            WHERE ce.created_at >= $1 AND ce.created_at <= $2
-             AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+             AND ce.event_type = ANY($6::text[])
              AND ${whereBase}
              AND EXISTS (
                SELECT 1 FROM "user" u
@@ -140,7 +141,7 @@ export async function GET(request: NextRequest) {
          ) sub
          ON CONFLICT (metric_date, segment) DO UPDATE SET
            user_ids = EXCLUDED.user_ids, user_count = EXCLUDED.user_count`,
-        snapshotParams,
+        [...snapshotParams, PRODUCT_EVENTS],
       ),
 
       // app_opened: any user who opened the app
@@ -388,7 +389,7 @@ export async function GET(request: NextRequest) {
                    LEFT JOIN analytics_identity_links ail
                      ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
                    WHERE (ce.user_id = u.id OR ail.user_id = u.id)
-                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.event_type = ANY($4::text[])
                      AND ce.created_at >= u."createdAt"
                      AND ce.created_at <= u."createdAt" + INTERVAL '7 days'
                  )
@@ -401,7 +402,7 @@ export async function GET(request: NextRequest) {
                    LEFT JOIN analytics_identity_links ail
                      ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
                    WHERE (ce.user_id = c.id OR ail.user_id = c.id)
-                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.event_type = ANY($4::text[])
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '1 day'
                  )
                ) as d1_returned,
@@ -411,7 +412,7 @@ export async function GET(request: NextRequest) {
                    LEFT JOIN analytics_identity_links ail
                      ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
                    WHERE (ce.user_id = c.id OR ail.user_id = c.id)
-                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.event_type = ANY($4::text[])
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '7 days'
                  )
                ) as d7_returned,
@@ -421,7 +422,7 @@ export async function GET(request: NextRequest) {
                    LEFT JOIN analytics_identity_links ail
                      ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
                    WHERE (ce.user_id = c.id OR ail.user_id = c.id)
-                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.event_type = ANY($4::text[])
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '30 days'
                  )
                ) as d30_returned
@@ -435,7 +436,7 @@ export async function GET(request: NextRequest) {
                  AND EXISTS (
                    SELECT 1 FROM conversion_events ce
                    WHERE ce.user_id = u.id
-                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.event_type = ANY($4::text[])
                      AND ce.created_at >= u."createdAt"
                      AND ce.created_at <= u."createdAt" + INTERVAL '7 days'
                  )
@@ -446,7 +447,7 @@ export async function GET(request: NextRequest) {
                  WHERE EXISTS (
                    SELECT 1 FROM conversion_events ce
                    WHERE ce.user_id = c.id
-                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.event_type = ANY($4::text[])
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '1 day'
                  )
                ) as d1_returned,
@@ -454,7 +455,7 @@ export async function GET(request: NextRequest) {
                  WHERE EXISTS (
                    SELECT 1 FROM conversion_events ce
                    WHERE ce.user_id = c.id
-                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.event_type = ANY($4::text[])
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '7 days'
                  )
                ) as d7_returned,
@@ -462,12 +463,12 @@ export async function GET(request: NextRequest) {
                  WHERE EXISTS (
                    SELECT 1 FROM conversion_events ce
                    WHERE ce.user_id = c.id
-                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.event_type = ANY($4::text[])
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '30 days'
                  )
                ) as d30_returned
              FROM cohort c`,
-        [dateStr, TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
+        [dateStr, TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT, PRODUCT_EVENTS],
       ),
 
       // ── D7 placeholder (kept for result array index compat — data comes from unified query above) ──
@@ -490,7 +491,7 @@ export async function GET(request: NextRequest) {
                    LEFT JOIN analytics_identity_links ail
                      ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
                    WHERE (ce.user_id = u.id OR ail.user_id = u.id)
-                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.event_type = ANY($4::text[])
                      AND ce.created_at >= u."createdAt"
                      AND ce.created_at <= u."createdAt" + INTERVAL '7 days'
                  )
@@ -503,7 +504,7 @@ export async function GET(request: NextRequest) {
                    LEFT JOIN analytics_identity_links ail
                      ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
                    WHERE (ce.user_id = c.id OR ail.user_id = c.id)
-                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.event_type = ANY($4::text[])
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '7 days'
                  )
                ) as returned
@@ -517,7 +518,7 @@ export async function GET(request: NextRequest) {
                  AND EXISTS (
                    SELECT 1 FROM conversion_events ce
                    WHERE ce.user_id = u.id
-                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.event_type = ANY($4::text[])
                      AND ce.created_at >= u."createdAt"
                      AND ce.created_at <= u."createdAt" + INTERVAL '7 days'
                  )
@@ -528,12 +529,12 @@ export async function GET(request: NextRequest) {
                  WHERE EXISTS (
                    SELECT 1 FROM conversion_events ce
                    WHERE ce.user_id = c.id
-                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.event_type = ANY($4::text[])
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '7 days'
                  )
                ) as returned
              FROM cohort c`,
-        [dateStr, TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
+        [dateStr, TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT, PRODUCT_EVENTS],
       ),
 
       // ── New signups (verified only — excludes bots) ──
@@ -718,7 +719,7 @@ export async function GET(request: NextRequest) {
          FROM conversion_events ce
          ${idJoin}
          WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+           AND ce.event_type = ANY($5::text[])
            AND ${whereBase}
            AND EXISTS (
              SELECT 1 FROM "user" u
@@ -730,6 +731,7 @@ export async function GET(request: NextRequest) {
           dayEnd.toISOString(),
           TEST_EMAIL_PATTERN,
           TEST_EMAIL_EXACT,
+          PRODUCT_EVENTS,
         ],
       ),
 

@@ -1,0 +1,16 @@
+export const PRODUCT_EVENTS = [
+  'product_opened',
+  'grimoire_viewed',
+  'tarot_drawn',
+  'chart_viewed',
+  'birth_chart_viewed',
+  'personalized_horoscope_viewed',
+  'personalized_tarot_viewed',
+  'astral_chat_used',
+  'ritual_completed',
+  'horoscope_viewed',
+  'daily_dashboard_viewed',
+  'journal_entry_created',
+  'dream_entry_created',
+  'cosmic_pulse_opened',
+] as const;

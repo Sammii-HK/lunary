@@ -2,28 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { resolveDateRange } from '@/lib/analytics/date-range';
 import { getAnalyticsCacheTTL } from '@/lib/analytics-cache-config';
+import { PRODUCT_EVENTS } from '@/lib/analytics/product-events';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
-
-const PRODUCT_EVENTS = [
-  'grimoire_viewed',
-  'tarot_drawn',
-  'chart_viewed',
-  'birth_chart_viewed',
-  'personalized_horoscope_viewed',
-  'personalized_tarot_viewed',
-  'astral_chat_used',
-  'ritual_completed',
-  'horoscope_viewed',
-  'daily_dashboard_viewed',
-  'journal_entry_created',
-  'dream_entry_created',
-  'cosmic_pulse_opened',
-];
 
 /**
  * Consolidated analytics snapshot endpoint
