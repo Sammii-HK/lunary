@@ -18,6 +18,7 @@ import { formatRulershipValue } from '@/lib/astrology/rulerships';
 
 // 30-day revalidation for sign overview pages
 export const revalidate = 2592000;
+export const dynamicParams = false;
 
 const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
 
@@ -48,8 +49,9 @@ function resolveCanonicalUrl(value: unknown, fallback: string): string {
   return fallback;
 }
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return ZODIAC_SIGNS.map((sign) => ({ sign }));
+}
 
 export async function generateMetadata({
   params,

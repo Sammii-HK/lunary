@@ -20,6 +20,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 // 30-day revalidation for monthly horoscopes
 export const revalidate = 2592000;
+export const dynamicParams = false;
 
 function resolveOgImageUrl(value: unknown): string | undefined {
   if (!value) return undefined;
@@ -59,8 +60,19 @@ function validateParams(params: PageParams): {
   return { sign, year, month, monthNumber };
 }
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
+
+export function generateStaticParams() {
+  return ZODIAC_SIGNS.flatMap((sign) =>
+    AVAILABLE_YEARS.flatMap((year) =>
+      MONTHS.map((month) => ({
+        sign,
+        year: String(year),
+        month,
+      })),
+    ),
+  );
+}
 
 export async function generateMetadata({
   params,

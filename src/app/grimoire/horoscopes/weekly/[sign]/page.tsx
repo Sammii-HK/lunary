@@ -12,6 +12,7 @@ import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmi
 import { PlacementSelector } from '@/components/grimoire/PlacementSelector';
 
 export const revalidate = 604800;
+export const dynamicParams = false;
 
 const signs = [
   { name: 'Aries', symbol: '♈', dates: 'Mar 21 - Apr 19', element: 'Fire' },
@@ -38,8 +39,9 @@ const signs = [
   { name: 'Pisces', symbol: '♓', dates: 'Feb 19 - Mar 20', element: 'Water' },
 ];
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 7-day revalidation
+export function generateStaticParams() {
+  return signs.map((sign) => ({ sign: sign.name.toLowerCase() }));
+}
 
 export async function generateMetadata({
   params,
