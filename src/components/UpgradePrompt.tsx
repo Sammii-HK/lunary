@@ -36,6 +36,16 @@ interface UpgradePromptProps {
   showTrialCountdown?: boolean;
   className?: string;
   onShow?: () => void;
+  /**
+   * Modal-only: controls whether the modal is visible.
+   * Ignored for non-modal variants. Required for modal variant consumers.
+   */
+  isOpen?: boolean;
+  /**
+   * Modal-only: called when the user dismisses the modal via the close
+   * button or the backdrop. Ignored for non-modal variants.
+   */
+  onClose?: () => void;
 }
 
 const PLAN_LABELS: Record<PlanType, string> = {
@@ -57,6 +67,8 @@ export function UpgradePrompt({
   showTrialCountdown = true,
   className = '',
   onShow,
+  isOpen,
+  onClose,
 }: UpgradePromptProps) {
   const isNativeIOS = useIsNativeIOS();
   const subscription = useSubscription();
@@ -133,11 +145,19 @@ export function UpgradePrompt({
     upgradePromptVariant,
   ]);
 
-  // For trial-specific prompts, only show if user is actually on trial AND not dismissed
-  // For general upgrade prompts, show if showUpgradePrompt is true (free users)
-  // This prevents showing trial upsells to paid users who are not on trial
-  if (isTrialActive && isDismissed) return null;
-  if (!isTrialActive && !showUpgradePrompt) return null;
+  // Modal variant is controlled by the caller (via isOpen/onClose) so it
+  // bypasses the ambient showUpgradePrompt / dismissal gating. All other
+  // variants keep their original gating behaviour.
+  const isControlledModal = variant === 'modal';
+  if (!isControlledModal) {
+    // For trial-specific prompts, only show if user is actually on trial AND not dismissed
+    // For general upgrade prompts, show if showUpgradePrompt is true (free users)
+    // This prevents showing trial upsells to paid users who are not on trial
+    if (isTrialActive && isDismissed) return null;
+    if (!isTrialActive && !showUpgradePrompt) return null;
+  } else if (!isOpen) {
+    return null;
+  }
 
   const planLabel = requiredPlan ? PLAN_LABELS[requiredPlan] : undefined;
   const dayLabel = trialDaysRemaining === 1 ? 'day' : 'days';
@@ -266,6 +286,59 @@ export function UpgradePrompt({
         <div className={`text-center py-6 ${className}`}>
           <p className='text-sm text-gray-400 mb-4'>{promptDescription}</p>
           <SmartTrialButton />
+        </div>
+      );
+
+    case 'modal':
+      return (
+        <div
+          className='fixed inset-0 z-50 flex items-center justify-center p-4'
+          role='dialog'
+          aria-modal='true'
+          aria-labelledby='upgrade-modal-title'
+        >
+          <button
+            type='button'
+            aria-label='Close upgrade prompt'
+            className='absolute inset-0 bg-surface-base/70 backdrop-blur-sm cursor-default'
+            onClick={onClose}
+          />
+          <div
+            className={`relative bg-surface-elevated border border-stroke-default rounded-2xl p-6 max-w-md w-full shadow-xl ${className}`}
+          >
+            <button
+              type='button'
+              onClick={onClose}
+              className='absolute top-3 right-3 text-content-muted hover:text-content-primary transition-colors p-1'
+              aria-label='Dismiss'
+            >
+              <X className='w-4 h-4' />
+            </button>
+            <div className='w-12 h-12 bg-gradient-to-br from-lunary-primary to-lunary-secondary rounded-full flex items-center justify-center mx-auto mb-4'>
+              <Star className='w-6 h-6 text-content-primary' />
+            </div>
+            <h3
+              id='upgrade-modal-title'
+              className='text-xl font-medium text-content-primary mb-2 text-center'
+            >
+              {promptTitle}
+            </h3>
+            <p className='text-sm text-gray-400 mb-6 text-center'>
+              {promptDescription}
+            </p>
+            <div className='space-y-3'>
+              <SmartTrialButton fullWidth />
+              {authState.isAuthenticated && (
+                <Link
+                  href='/pricing?nav=app'
+                  onClick={handleUpgradeClick}
+                  className='block text-center text-xs text-content-muted hover:text-content-primary transition-colors'
+                >
+                  Compare plans
+                </Link>
+              )}
+            </div>
+          </div>
         </div>
       );
 
