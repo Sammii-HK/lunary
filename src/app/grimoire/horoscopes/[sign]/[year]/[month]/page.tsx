@@ -15,7 +15,7 @@ import {
 } from '@/constants/seo/monthly-horoscope';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
-import { monthMeta, articleSchema } from '@/lib/horoscope-meta';
+import { monthMeta } from '@/lib/horoscope-meta';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 // 30-day revalidation for monthly horoscopes
@@ -155,12 +155,6 @@ export default async function MonthlyHoroscopePage({
     .map(resolveOgImageUrl)
     .find((value): value is string => typeof value === 'string');
   const image = resolvedImage ?? 'https://lunary.app/api/og/cosmic';
-  const articleLd = articleSchema(
-    signName,
-    String(year),
-    monthName,
-    monthNumber,
-  );
 
   return (
     <SEOContentTemplate
@@ -277,7 +271,6 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
         { name: 'Planetary transit calculations' },
         { name: 'Traditional astrological interpretations' },
       ]}
-      additionalSchemas={[articleLd]}
     >
       <div className='mt-8 flex justify-between text-lg'>
         <div className='space-x-4'>
