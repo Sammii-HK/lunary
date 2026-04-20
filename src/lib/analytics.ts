@@ -76,6 +76,8 @@ export type ConversionEvent =
   | 'payment_method_added'
   | 'checkout_started'
   | 'checkout_abandoned'
+  | 'trial_countdown_view'
+  | 'trial_countdown_cta_click'
   | 'subscription_cancellation_reason'
   | 'subscription_plan_upgraded'
   | 'subscription_plan_downgraded'
