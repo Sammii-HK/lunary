@@ -34,6 +34,16 @@ const REWRITTEN_TESTS = new Set([
 const TESTS_WITH_LEGACY_HUB_VARIANTS = new Set(['cta_copy', 'sticky_cta_copy']);
 const LEGACY_HUB_VARIANT_PATTERN = /^[a-zA-Z]+_\d+$/;
 
+// These tests currently do not emit a trustworthy variant-specific conversion
+// event. Showing them with the generic app/page -> trial/subscription funnel
+// creates impossible rates (>100%) and should be suppressed until they are
+// instrumented properly.
+const UNINSTRUMENTED_TESTS = new Set([
+  'weekly_lock',
+  'tarot_truncation',
+  'transit_limit',
+]);
+
 export interface VariantMetrics {
   name: string;
   impressions: number;
@@ -69,6 +79,66 @@ function getDateCutoff(timeRange: string): Date {
   }
 }
 
+async function getVariantImpressions(
+  testName: string,
+  variant: string,
+  dateCutoffIso: string,
+): Promise<number> {
+  const result = await sql`
+    SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+    FROM conversion_events
+    WHERE metadata->>'abTest' = ${testName}
+      AND metadata->>'abVariant' = ${variant}
+      AND event_type IN ('app_opened', 'pricing_page_viewed', 'cta_impression', 'page_viewed')
+      AND created_at >= ${dateCutoffIso}
+  `;
+
+  return parseInt(result.rows[0]?.count || '0');
+}
+
+async function getVariantConversions(
+  testName: string,
+  variant: string,
+  dateCutoffIso: string,
+): Promise<number> {
+  if (UNINSTRUMENTED_TESTS.has(testName)) {
+    return 0;
+  }
+
+  if (testName === 'paywall_preview' || testName === 'feature_preview') {
+    const result = await sql`
+      SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+      FROM conversion_events
+      WHERE event_type = 'locked_content_clicked'
+        AND metadata->>'preview_variant' = ${variant}
+        AND created_at >= ${dateCutoffIso}
+    `;
+    return parseInt(result.rows[0]?.count || '0');
+  }
+
+  if (testName === 'transit_overflow') {
+    const result = await sql`
+      SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+      FROM conversion_events
+      WHERE event_type = 'locked_content_clicked'
+        AND metadata->>'overflow_variant' = ${variant}
+        AND created_at >= ${dateCutoffIso}
+    `;
+    return parseInt(result.rows[0]?.count || '0');
+  }
+
+  const result = await sql`
+    SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+    FROM conversion_events
+    WHERE metadata->>'abTest' = ${testName}
+      AND metadata->>'abVariant' = ${variant}
+      AND event_type IN ('trial_started', 'subscription_started', 'trial_converted', 'cta_clicked')
+      AND created_at >= ${dateCutoffIso}
+  `;
+
+  return parseInt(result.rows[0]?.count || '0');
+}
+
 export async function GET(request: NextRequest) {
   try {
     const authResult = await requireAdminAuth(request);
@@ -95,6 +165,7 @@ export async function GET(request: NextRequest) {
     for (const row of testsAndVariants.rows) {
       if (!row.test_name || !row.variant) continue;
       if (CONCLUDED_TESTS.has(row.test_name)) continue;
+      if (UNINSTRUMENTED_TESTS.has(row.test_name)) continue;
       // Filter out legacy hub-specific variants (e.g. "horoscopes_4", "angelNumbers_2")
       // from tests that had them accidentally bundled in. These are already tracked
       // under per-hub tests (seo_cta_{hub}).
@@ -122,30 +193,17 @@ export async function GET(request: NextRequest) {
         : dateCutoff;
 
       for (const variant of variants) {
-        // Get impressions for this variant
-        // Include cta_impression for SEO page A/B tests, app_opened/pricing_page_viewed for app tests
-        const impressionsResult = await sql`
-          SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
-          FROM conversion_events
-          WHERE metadata->>'abTest' = ${testName}
-            AND metadata->>'abVariant' = ${variant}
-            AND event_type IN ('app_opened', 'pricing_page_viewed', 'cta_impression', 'page_viewed')
-            AND created_at >= ${effectiveCutoff.toISOString()}
-        `;
-
-        // Get conversions for this variant
-        // Include cta_click for CTA tests (click is the conversion), plus hard conversions
-        const conversionsResult = await sql`
-          SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
-          FROM conversion_events
-          WHERE metadata->>'abTest' = ${testName}
-            AND metadata->>'abVariant' = ${variant}
-            AND event_type IN ('trial_started', 'subscription_started', 'trial_converted', 'cta_clicked')
-            AND created_at >= ${effectiveCutoff.toISOString()}
-        `;
-
-        const impressions = parseInt(impressionsResult.rows[0]?.count || '0');
-        const conversions = parseInt(conversionsResult.rows[0]?.count || '0');
+        const cutoffIso = effectiveCutoff.toISOString();
+        const impressions = await getVariantImpressions(
+          testName,
+          variant,
+          cutoffIso,
+        );
+        const conversions = await getVariantConversions(
+          testName,
+          variant,
+          cutoffIso,
+        );
         // null when no impressions - can't calculate rate without a denominator
         const conversionRate =
           impressions > 0 ? (conversions / impressions) * 100 : null;
