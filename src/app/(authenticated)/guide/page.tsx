@@ -28,7 +28,9 @@ import { SaveToCollection } from '@/components/SaveToCollection';
 import { parseMessageContent } from '@/utils/messageParser';
 import { recordCheckIn } from '@/lib/streak/check-in';
 import { captureEvent } from '@/lib/posthog-client';
-import { conversionTracking } from '@/lib/analytics';
+import { conversionTracking, trackEvent } from '@/lib/analytics';
+import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
+import { getABTestMetadataFromVariant } from '@/lib/ab-test-tracking';
 import { getPublicPlanName } from '@/lib/ai/plans';
 import {
   dismissRitualBadge,
@@ -398,6 +400,18 @@ function BookOfShadowsContent() {
 
   const [cacheInitialized, setCacheInitialized] = useState(false);
   const [astralLimitModalOpen, setAstralLimitModalOpen] = useState(false);
+  const astralPaywallVariantRaw = useFeatureFlagVariant('astral_paywall_v1');
+  const astralPaywallVariant =
+    typeof astralPaywallVariantRaw === 'string'
+      ? astralPaywallVariantRaw
+      : 'control';
+  const isAstralPaywallCurious = astralPaywallVariant === 'curious';
+  const astralPaywallTitle = isAstralPaywallCurious
+    ? 'Keep going? Upgrade to Pro for unlimited questions'
+    : "You've reached your daily messages";
+  const astralPaywallDescription = isAstralPaywallCurious
+    ? "You've had all your free questions today. Pro lifts the limit so you can keep exploring whenever the cosmos nudges you."
+    : 'Upgrade to Lunary+ for a higher daily message limit, richer grimoire context, and unlimited ritual guidance.';
   const [savedCollections, setSavedCollections] = useState<SavedCollection[]>(
     [],
   );
@@ -415,14 +429,34 @@ function BookOfShadowsContent() {
 
   // Astral guide daily message limit is a hard paywall moment: surface an
   // UpgradePrompt modal (not just the inline error toast) so the upgrade
-  // path is clear. Fires paywall tracking once per limit hit.
+  // path is clear. Fires paywall tracking (with astral_paywall_v1 A/B
+  // metadata) once per limit hit.
   useEffect(() => {
     if (limitReached && !astralLimitModalOpen) {
       setAstralLimitModalOpen(true);
-      conversionTracking.paywallShown(authState.user?.id, 'astral-guide');
+
+      const abMetadata = getABTestMetadataFromVariant(
+        'astral_paywall_v1',
+        astralPaywallVariantRaw,
+      );
+
+      trackEvent('astral_paywall_view', {
+        userId: authState.user?.id,
+        featureName: 'astral-guide',
+        metadata: {
+          variant: astralPaywallVariant,
+          ...(abMetadata ?? {}),
+        },
+      });
       conversionTracking.featureGated('astral-guide');
     }
-  }, [limitReached, astralLimitModalOpen, authState.user?.id]);
+  }, [
+    limitReached,
+    astralLimitModalOpen,
+    authState.user?.id,
+    astralPaywallVariant,
+    astralPaywallVariantRaw,
+  ]);
 
   useEffect(() => {
     if (!authState.isAuthenticated || authState.loading) return;
@@ -1312,12 +1346,26 @@ function BookOfShadowsContent() {
       <UpgradePrompt
         variant='modal'
         featureName='astral-guide'
-        title="You've reached your daily messages"
-        description='Upgrade to Lunary+ for a higher daily message limit, richer grimoire context, and unlimited ritual guidance.'
+        title={astralPaywallTitle}
+        description={astralPaywallDescription}
         isOpen={astralLimitModalOpen}
         onClose={() => {
           setAstralLimitModalOpen(false);
           clearError();
+        }}
+        onCtaClick={() => {
+          const abMetadata = getABTestMetadataFromVariant(
+            'astral_paywall_v1',
+            astralPaywallVariantRaw,
+          );
+          trackEvent('astral_paywall_cta_click', {
+            userId: authState.user?.id,
+            featureName: 'astral-guide',
+            metadata: {
+              variant: astralPaywallVariant,
+              ...(abMetadata ?? {}),
+            },
+          });
         }}
       />
     </div>

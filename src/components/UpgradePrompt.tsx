@@ -46,6 +46,13 @@ interface UpgradePromptProps {
    * button or the backdrop. Ignored for non-modal variants.
    */
   onClose?: () => void;
+  /**
+   * Optional: fires when the user clicks the primary upgrade CTA (the
+   * SmartTrialButton / upgrade link in the modal). Used by callers that
+   * own an A/B test wrapping this prompt and need to fire their own
+   * per-variant tracking event on click.
+   */
+  onCtaClick?: () => void;
 }
 
 const PLAN_LABELS: Record<PlanType, string> = {
@@ -69,6 +76,7 @@ export function UpgradePrompt({
   onShow,
   isOpen,
   onClose,
+  onCtaClick,
 }: UpgradePromptProps) {
   const isNativeIOS = useIsNativeIOS();
   const subscription = useSubscription();
@@ -186,6 +194,10 @@ export function UpgradePrompt({
   );
 
   const handleUpgradeClick = () => {
+    // Let the caller fire its own per-variant tracking event first (used by
+    // callers that wrap this prompt in their own A/B test).
+    onCtaClick?.();
+
     // Track with A/B test metadata if available
     const abMetadata = getABTestMetadataFromVariant(
       'upgrade_prompt_test',
@@ -327,7 +339,9 @@ export function UpgradePrompt({
               {promptDescription}
             </p>
             <div className='space-y-3'>
-              <SmartTrialButton fullWidth />
+              <div onClick={handleUpgradeClick}>
+                <SmartTrialButton fullWidth />
+              </div>
               {authState.isAuthenticated && (
                 <Link
                   href='/pricing?nav=app'

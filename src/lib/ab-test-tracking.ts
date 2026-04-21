@@ -29,6 +29,7 @@ const POSTHOG_TEST_MAPPING: Record<string, string> = {
   sticky_free_card_v1: 'sticky_free_card', // Sticky free-tier card below hero (LUN-249)
   trial_countdown_v1: 'trial_countdown', // Trial countdown banner copy (control vs urgency)
   pill_destination_v1: 'pill_destination', // Lunary+ pill destination (pricing link vs modal)
+  astral_paywall_v1: 'astral_paywall', // Astral Guide daily-limit modal copy (control vs curious)
   // Note: LUN-250 (email capture on horoscope pages) — already live via
   // horoscope_email_capture_proposition_v1 + horoscope_email_signup_upsell_v1
   // in SEOContentTemplate.tsx. Do not re-register.

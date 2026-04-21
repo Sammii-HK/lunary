@@ -78,6 +78,8 @@ export type ConversionEvent =
   | 'checkout_abandoned'
   | 'trial_countdown_view'
   | 'trial_countdown_cta_click'
+  | 'astral_paywall_view'
+  | 'astral_paywall_cta_click'
   | 'subscription_cancellation_reason'
   | 'subscription_plan_upgraded'
   | 'subscription_plan_downgraded'
