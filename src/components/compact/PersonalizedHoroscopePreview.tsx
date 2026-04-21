@@ -428,6 +428,10 @@ export const PersonalizedHoroscopePreview = () => {
                             transitPlanet: topTransitAspects[0].transitPlanet,
                             natalPlanet: topTransitAspects[0].natalPlanet,
                             aspectType: topTransitAspects[0].aspectType,
+                            transitSign: topTransitAspects[0].transitSign,
+                            natalSign: topTransitAspects[0].natalSign,
+                            transitHouse: topTransitAspects[0].house,
+                            natalHouse: topTransitAspects[0].natalHouse,
                             userId: user?.id,
                           }).headline
                         }
@@ -509,6 +513,10 @@ export const PersonalizedHoroscopePreview = () => {
                     transitPlanet: aspect.transitPlanet,
                     natalPlanet: aspect.natalPlanet,
                     aspectType: aspect.aspectType,
+                    transitSign: aspect.transitSign,
+                    natalSign: aspect.natalSign,
+                    transitHouse: aspect.house,
+                    natalHouse: aspect.natalHouse,
                     remainingDays: aspect.duration?.remainingDays,
                     userId: user?.id,
                     seed: i,

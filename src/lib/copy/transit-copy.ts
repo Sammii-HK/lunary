@@ -95,6 +95,120 @@ export function getHouseMeaning(house: number): string {
   return HOUSE_MEANINGS[house] ?? 'personal growth';
 }
 
+// ─── Sign flavour (how each sign colours any planet passing through) ────────
+
+const SIGN_FLAVOUR: Record<string, string> = {
+  Aries: 'direct, initiating, and impatient for first steps',
+  Taurus: 'sensual, grounded, and unhurried',
+  Gemini: 'curious, quick, and juggling several threads',
+  Cancer: 'protective, emotionally textured, and attuned to belonging',
+  Leo: 'warm, expressive, and visible',
+  Virgo: 'discerning, practical, and attentive to craft',
+  Libra: 'relational, balance-seeking, and aesthetically careful',
+  Scorpio: 'deep, private, and willing to go underneath',
+  Sagittarius: 'expansive, meaning-seeking, and forward-leaning',
+  Capricorn: 'structured, long-view, and committed to what lasts',
+  Aquarius: 'detached, future-facing, and community-minded',
+  Pisces: 'porous, intuitive, and dissolving edges',
+};
+
+export function getSignFlavour(sign: string): string {
+  return SIGN_FLAVOUR[sign] ?? 'distinct in its own way';
+}
+
+// ─── Planet nature (the essential function of each planet) ──────────────────
+
+const PLANET_NATURE: Record<string, string> = {
+  Sun: 'identity, vitality, the self you are growing into',
+  Moon: 'feelings, reflex, the inner weather',
+  Mercury: 'thinking, speaking, connecting ideas',
+  Venus: 'relating, valuing, what you find beautiful',
+  Mars: 'drive, action, the way you push',
+  Jupiter: 'expansion, belief, how you enlarge life',
+  Saturn: 'structure, commitment, what endures',
+  Uranus: 'disruption, awakening, the break from convention',
+  Neptune: 'imagination, devotion, the dissolve of edges',
+  Pluto: 'power, depth, what transforms through loss',
+  Chiron: 'wound and teaching, where you heal others through your own scar',
+  Ascendant: 'the face you show first',
+  Descendant: 'the other you meet in partnership',
+  Midheaven: 'the public self and long-horizon direction',
+  IC: 'the private root, where you come from',
+  Vertex: 'fated encounters, what finds you',
+  'Anti-Vertex': 'what you go out to meet',
+  'Part of Fortune': 'ease, natural flow, inherited luck',
+  'North Node': 'the growth edge, unfamiliar ground',
+  'South Node': 'the well-worn groove, what to release',
+  Pallas: 'pattern recognition, strategy, creative intelligence',
+};
+
+export function getPlanetNature(planet: string): string {
+  return PLANET_NATURE[planet] ?? `your natal ${planet}`;
+}
+
+// ─── Dignity modifier ────────────────────────────────────────────────────────
+
+const DIGNITY_NOTE: Record<string, string> = {
+  domicile: 'at home in this sign — the expression lands without translation',
+  exalted: 'exalted here — the sign amplifies the planet at its best',
+  detriment:
+    'in detriment — the sign and the planet pull in opposite directions',
+  fall: 'in fall — the sign dampens what the planet wants to express',
+};
+
+export function getDignityNote(dignity?: string | null): string | null {
+  if (!dignity) return null;
+  return DIGNITY_NOTE[dignity] ?? null;
+}
+
+// ─── Placement narrative (Sky Now expanded rows) ────────────────────────────
+// Links planet nature × sign flavour × house area × dignity in 1-2 sentences.
+
+export interface PlacementNarrativeInput {
+  planet: string;
+  sign: string;
+  /** The user's natal house this planet currently falls in (whole-sign). */
+  house?: number | null;
+  /** Essential dignity: 'domicile' | 'exalted' | 'detriment' | 'fall'. */
+  dignity?: string | null;
+  retrograde?: boolean;
+}
+
+export function composePlacementNarrative({
+  planet,
+  sign,
+  house,
+  dignity,
+  retrograde,
+}: PlacementNarrativeInput): string {
+  const nature = getPlanetNature(planet);
+  const flavour = getSignFlavour(sign);
+  const houseArea = house ? HOUSE_MEANINGS[house] : null;
+  const dignityNote = getDignityNote(dignity);
+
+  // Sentence 1: planet + sign — how the sign colours the planet's nature.
+  const first = `${planet} (${nature}) moves through ${sign} ${flavour}`;
+
+  // Sentence 2: where in life it's active — house area + dignity.
+  const segments: string[] = [];
+  if (houseArea && house) {
+    segments.push(
+      `In your ${ordinal(house)} house of ${houseArea}, that's where you'll feel it landing`,
+    );
+  }
+  if (dignityNote) {
+    segments.push(dignityNote);
+  }
+  if (retrograde) {
+    segments.push(
+      `retrograde right now — its themes are turning inward before they resolve`,
+    );
+  }
+
+  const second = segments.length ? `${segments.join('. ')}.` : '';
+  return second ? `${first}. ${second}` : `${first}.`;
+}
+
 // ─── Ordinal helper ──────────────────────────────────────────────────────────
 
 export function ordinal(n: number): string {
@@ -255,6 +369,16 @@ export interface TransitCopyInput {
   isApplying?: boolean;
   userId?: string;
   seed?: number;
+  /** Sign the transiting planet is currently in. */
+  transitSign?: string;
+  /** Natal body's natal sign. */
+  natalSign?: string;
+  /** The user's natal house the transiting planet currently falls in. */
+  transitHouse?: number | null;
+  /** The user's natal house the natal body sits in. */
+  natalHouse?: number | null;
+  /** Essential dignity of the transiting planet in its current sign. */
+  transitDignity?: string | null;
 }
 
 export interface TransitCopyOutput {
@@ -275,6 +399,11 @@ export function getTransitCopy({
   isApplying = true,
   userId,
   seed: seedOverride,
+  transitSign,
+  natalSign,
+  transitHouse,
+  natalHouse,
+  transitDignity,
 }: TransitCopyInput): TransitCopyOutput {
   const seed = seedOverride ?? getTransitSeed(userId);
   const window = formatTransitWindow(remainingDays);
@@ -310,21 +439,42 @@ export function getTransitCopy({
             ? 'square'
             : 'sextile';
 
-  const headline = `${transitPlanet} ${aspectLabel} your natal ${natalPlanet}`;
+  // Richer headline when we have the sign + house context.
+  const transitLocator = transitSign
+    ? ` in ${transitSign}${transitHouse ? ` (your ${ordinal(transitHouse)})` : ''}`
+    : '';
+  const natalLocator =
+    natalSign || natalHouse
+      ? ` (${[natalSign, natalHouse ? `${ordinal(natalHouse)} house` : null]
+          .filter(Boolean)
+          .join(', ')})`
+      : '';
+  const headline = `${transitPlanet}${transitLocator} ${aspectLabel} your natal ${natalPlanet}${natalLocator}`;
 
-  // Meaning varies by aspect type for richer copy
+  // Meaning: planet-in-sign framing + aspect-to-natal area + house crossover.
+  const transitSigned = transitSign
+    ? `Transiting ${transitPlanet} in ${transitSign} (${getSignFlavour(transitSign)})`
+    : `Transiting ${transitPlanet}`;
+
+  const natalAnchor = natalHouse
+    ? `${natalTheme} — your ${ordinal(natalHouse)} house of ${getHouseMeaning(natalHouse)}`
+    : natalTheme;
+
   let meaning: string;
-  if (aspectType === 'conjunction') {
-    meaning = `Transiting ${transitPlanet} is ${energy} ${natalTheme} right now. ${aspectCtx.flavour}`;
-  } else if (aspectType === 'opposition') {
-    meaning = `Transiting ${transitPlanet} is illuminating ${natalTheme} from across your chart. ${aspectCtx.flavour}`;
-  } else if (isHarmonic) {
-    meaning = `Transiting ${transitPlanet} is ${energy} ${natalTheme}. ${aspectCtx.flavour}`;
+  if (aspectType === 'opposition') {
+    meaning = `${transitSigned} is illuminating ${natalAnchor} from across your chart. ${aspectCtx.flavour}`;
   } else {
-    meaning = `Transiting ${transitPlanet} is ${energy} ${natalTheme}. ${aspectCtx.flavour}`;
+    meaning = `${transitSigned} is ${energy} ${natalAnchor}. ${aspectCtx.flavour}`;
   }
 
-  // Add kw flavour for the slow planets which have real meaning
+  // Dignity note: only surface when the transiting planet is notably strong or
+  // strained in its current sign — it materially changes how the aspect lands.
+  const dignityNote = getDignityNote(transitDignity);
+  if (dignityNote) {
+    meaning += ` ${transitPlanet} is ${dignityNote}.`;
+  }
+
+  // Slow planets get a keyword beat so the tone matches the transit's weight.
   const isSlowPlanet = [
     'Jupiter',
     'Saturn',

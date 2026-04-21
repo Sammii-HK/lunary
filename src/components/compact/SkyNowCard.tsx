@@ -17,6 +17,7 @@ import {
 import { ShareSkyNow } from '@/components/share/ShareSkyNow';
 import { TransitDurationBadge } from '@/components/TransitDurationBadge';
 import { useLocation } from '@/hooks/useLocation';
+import { composePlacementNarrative } from '@/lib/copy/transit-copy';
 
 const getPlanetMeaning = (planet: string, sign: string): string => {
   const planetMeanings: Record<string, Record<string, string>> = {
@@ -646,7 +647,16 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
                 </div>
                 <TransitDurationBadge duration={planet.duration} />
               </div>
-              <p className='text-xs text-content-muted mt-1 ml-7'>
+              <p className='text-xs text-content-muted mt-1 ml-7 leading-relaxed'>
+                {composePlacementNarrative({
+                  planet: planet.body,
+                  sign: normalizedSign,
+                  house: natalSignHouseLookup[normalizedSign] ?? null,
+                  dignity,
+                  retrograde: planet.retrograde,
+                })}
+              </p>
+              <p className='text-xs text-content-muted/80 mt-1 ml-7'>
                 {getPlanetMeaning(planet.body, planet.sign)}
               </p>
               {planet.retrograde && (
