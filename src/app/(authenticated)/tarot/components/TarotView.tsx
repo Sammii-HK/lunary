@@ -105,6 +105,15 @@ export function TarotView({
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState<string | null>(null);
   const [expandedSuit, setExpandedSuit] = useState<string | null>(null);
+  const generalTarot = useMemo(() => {
+    if (hasPaidAccess) return null;
+    try {
+      return getGeneralTarotReading();
+    } catch (error) {
+      console.error('Failed to load general tarot reading:', error);
+      return null;
+    }
+  }, [hasPaidAccess]);
 
   useEffect(() => {
     if (hasPaidAccess) return;
@@ -168,17 +177,6 @@ export function TarotView({
     keywords: string[];
     information: string;
   } | null>(null);
-
-  // General tarot for free users
-  const generalTarot = useMemo(() => {
-    if (hasPaidAccess) return null;
-    try {
-      return getGeneralTarotReading();
-    } catch (error) {
-      console.error('Failed to load general tarot reading:', error);
-      return null;
-    }
-  }, [hasPaidAccess]);
 
   const firstName = useMemo(
     () => (userName ? userName.split(' ')[0] || userName : undefined),
