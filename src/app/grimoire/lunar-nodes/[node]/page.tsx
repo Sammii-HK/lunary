@@ -4,6 +4,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+export const dynamicParams = false;
 const lunarNodes = {
   'north-node': {
     name: 'North Node',
@@ -45,8 +46,9 @@ const lunarNodes = {
   },
 };
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return Object.keys(lunarNodes).map((node) => ({ node }));
+}
 
 export async function generateMetadata({
   params,

@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { resolveDateRange } from '@/lib/analytics/date-range';
 import { ANALYTICS_REALTIME_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { PRODUCT_EVENTS } from '@/lib/analytics/product-events';
+import { getStripeSubscriptionSnapshot } from '@/lib/analytics/stripe-subscriptions';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
     const includesToday = rangeEnd >= today;
 
     // Execute queries in parallel
-    const queries = [];
+    const queries = [getStripeSubscriptionSnapshot()];
 
     // 1. Get historical metrics from daily_metrics (fast!)
     if (rangeStart < today) {
@@ -204,14 +205,12 @@ export async function GET(request: NextRequest) {
             ],
           ),
 
-          // Current MRR (snapshot, not daily) — active only, trials excluded (not yet charged)
+          // Live access counts still come from local subscriptions, but MRR comes from Stripe.
           sql.query(
-            `SELECT COALESCE(SUM(COALESCE(monthly_amount_due, 0)), 0) as mrr,
-                    COUNT(*) FILTER (WHERE status = 'active') as active,
+            `SELECT COUNT(*) FILTER (WHERE status = 'active') as active,
                     COUNT(*) FILTER (WHERE status IN ('trial', 'trialing')) as trial
              FROM subscriptions
-             WHERE status = 'active'
-               AND stripe_subscription_id IS NOT NULL
+             WHERE stripe_subscription_id IS NOT NULL
                AND (user_email IS NULL OR (user_email NOT LIKE $1 AND user_email != $2))`,
             [TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
           ),
@@ -221,7 +220,8 @@ export async function GET(request: NextRequest) {
       queries.push(Promise.resolve(null));
     }
 
-    const [historicalResult, todayResults] = await Promise.all(queries);
+    const [stripeSnapshot, historicalResult, todayResults] =
+      await Promise.all(queries);
 
     // Process historical data
     const historicalRows = (
@@ -272,7 +272,7 @@ export async function GET(request: NextRequest) {
       const wau = Number(wauRes.rows[0]?.count || 0);
       const mau = Number(mauRes.rows[0]?.count || 0);
       const signups = Number(signupsRes.rows[0]?.count || 0);
-      const mrr = Number(mrrRes.rows[0]?.mrr || 0);
+      const mrr = Number(stripeSnapshot.mrr || 0);
       const activeSubscriptions = Number(mrrRes.rows[0]?.active || 0);
       const trialSubscriptions = Number(mrrRes.rows[0]?.trial || 0);
 
@@ -311,7 +311,10 @@ export async function GET(request: NextRequest) {
     // Combine historical + today
     const allMetrics = [...historicalMetrics];
     if (todayMetrics) {
-      allMetrics.push(todayMetrics);
+      allMetrics.push({
+        ...todayMetrics,
+        mrr: Number(stripeSnapshot.mrr || 0),
+      });
     }
 
     // Calculate aggregates
@@ -321,7 +324,7 @@ export async function GET(request: NextRequest) {
     );
     const latestMetric = allMetrics[allMetrics.length - 1];
     const currentMau = latestMetric?.mau || 0;
-    const currentMrr = todayMetrics?.mrr || latestMetric?.mrr || 0;
+    const currentMrr = Number(stripeSnapshot.mrr || latestMetric?.mrr || 0);
 
     const response = NextResponse.json({
       dateRange: {

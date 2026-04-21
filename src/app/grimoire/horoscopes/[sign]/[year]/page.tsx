@@ -22,6 +22,7 @@ import {
 
 // 30-day revalidation for yearly horoscopes
 export const revalidate = 2592000;
+export const dynamicParams = false;
 
 const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
 
@@ -67,8 +68,14 @@ const SIGN_SEASON_MONTHS: Record<ZodiacSign, string[]> = {
   pisces: ['February', 'March'],
 };
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return ZODIAC_SIGNS.flatMap((sign) =>
+    AVAILABLE_YEARS.map((year) => ({
+      sign,
+      year: String(year),
+    })),
+  );
+}
 
 export async function generateMetadata({
   params,

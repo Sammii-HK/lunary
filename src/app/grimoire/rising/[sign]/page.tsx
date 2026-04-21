@@ -11,14 +11,15 @@ import {
 } from '@/lib/rising-signs/getRisingSign';
 
 export const revalidate = 2592000; // 30 days
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 interface PageProps {
   params: Promise<{ sign: string }>;
 }
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return getAllRisingSigns().map((rising) => ({ sign: rising.slug }));
+}
 
 export async function generateMetadata({
   params,
@@ -55,6 +56,17 @@ export async function generateMetadata({
     },
     alternates: {
       canonical: `https://lunary.app/grimoire/rising/${sign}`,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
   };
 }

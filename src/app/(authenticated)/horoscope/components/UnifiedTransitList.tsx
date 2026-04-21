@@ -8,6 +8,8 @@ import { FREE_TRANSIT_LIMIT } from '../../../../../utils/entitlements';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { captureEvent } from '@/lib/posthog-client';
+import { useEffect } from 'react';
+import { trackCtaImpression } from '@/lib/analytics';
 
 interface UnifiedTransitListProps {
   transits: TransitEvent[];
@@ -156,14 +158,48 @@ export function UnifiedTransitList({
 }: UnifiedTransitListProps) {
   const router = useRouter();
   const ctaCopy = useCTACopy();
+  const transitLimitVariantRaw = useFeatureFlagVariant('transit-limit-test');
+  const transitLimitVariant = transitLimitVariantRaw || 'one-transit';
   const overflowVariantRaw = useFeatureFlagVariant('transit-overflow-style');
   const overflowVariant = overflowVariantRaw || 'blurred';
+
+  useEffect(() => {
+    if (hasPaidAccess) return;
+    if (transits.length <= FREE_TRANSIT_LIMIT) return;
+
+    void trackCtaImpression({
+      ctaId: 'transit_limit_lock',
+      location: 'horoscope_transit_limit',
+      label: ctaCopy.transitList,
+      href: '/pricing?nav=app',
+      pagePath: '/horoscope',
+      abTest: 'transit_limit',
+      abVariant: transitLimitVariant,
+    });
+
+    void trackCtaImpression({
+      ctaId: 'transit_overflow_lock',
+      location: 'horoscope_transit_overflow',
+      label: ctaCopy.transitList,
+      href: '/pricing?nav=app',
+      pagePath: '/horoscope',
+      abTest: 'transit_overflow',
+      abVariant: overflowVariant,
+    });
+  }, [
+    hasPaidAccess,
+    transits.length,
+    ctaCopy.transitList,
+    transitLimitVariant,
+    overflowVariant,
+  ]);
 
   const handleUpgradeClick = () => {
     ctaCopy.trackCTAClick('transitList', 'horoscope');
     captureEvent('locked_content_clicked', {
       feature: 'personal_transit_impact',
       tier: 'free',
+      transit_limit_variant: transitLimitVariant,
       overflow_variant: overflowVariant,
     });
     router.push('/pricing?nav=app');

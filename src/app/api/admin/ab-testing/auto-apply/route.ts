@@ -33,6 +33,114 @@ function getDateCutoff(timeRange: string): Date {
   }
 }
 
+async function getVariantImpressions(
+  testName: string,
+  variant: string,
+  dateCutoffIso: string,
+): Promise<number> {
+  if (
+    testName === 'feature_preview' ||
+    testName === 'transit_overflow' ||
+    testName === 'weekly_lock' ||
+    testName === 'tarot_truncation' ||
+    testName === 'transit_limit'
+  ) {
+    const result = await sql`
+      SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+      FROM conversion_events
+      WHERE metadata->>'abTest' = ${testName}
+        AND metadata->>'abVariant' = ${variant}
+        AND event_type = 'cta_impression'
+        AND created_at >= ${dateCutoffIso}
+    `;
+
+    return parseInt(result.rows[0]?.count || '0');
+  }
+
+  const result = await sql`
+    SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+    FROM conversion_events
+    WHERE metadata->>'abTest' = ${testName}
+      AND metadata->>'abVariant' = ${variant}
+      AND event_type IN ('app_opened', 'pricing_page_viewed', 'cta_impression', 'page_viewed')
+      AND created_at >= ${dateCutoffIso}
+  `;
+
+  return parseInt(result.rows[0]?.count || '0');
+}
+
+async function getVariantConversions(
+  testName: string,
+  variant: string,
+  dateCutoffIso: string,
+): Promise<number> {
+  if (testName === 'paywall_preview' || testName === 'feature_preview') {
+    const result = await sql`
+      SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+      FROM conversion_events
+      WHERE event_type = 'locked_content_clicked'
+        AND metadata->>'preview_variant' = ${variant}
+        AND created_at >= ${dateCutoffIso}
+    `;
+    return parseInt(result.rows[0]?.count || '0');
+  }
+
+  if (testName === 'transit_overflow') {
+    const result = await sql`
+      SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+      FROM conversion_events
+      WHERE event_type = 'locked_content_clicked'
+        AND metadata->>'overflow_variant' = ${variant}
+        AND created_at >= ${dateCutoffIso}
+    `;
+    return parseInt(result.rows[0]?.count || '0');
+  }
+
+  if (testName === 'weekly_lock') {
+    const result = await sql`
+      SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+      FROM conversion_events
+      WHERE event_type = 'locked_content_clicked'
+        AND metadata->>'weekly_lock_variant' = ${variant}
+        AND created_at >= ${dateCutoffIso}
+    `;
+    return parseInt(result.rows[0]?.count || '0');
+  }
+
+  if (testName === 'tarot_truncation') {
+    const result = await sql`
+      SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+      FROM conversion_events
+      WHERE event_type = 'locked_content_clicked'
+        AND metadata->>'tarot_truncation_variant' = ${variant}
+        AND created_at >= ${dateCutoffIso}
+    `;
+    return parseInt(result.rows[0]?.count || '0');
+  }
+
+  if (testName === 'transit_limit') {
+    const result = await sql`
+      SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+      FROM conversion_events
+      WHERE event_type = 'locked_content_clicked'
+        AND metadata->>'transit_limit_variant' = ${variant}
+        AND created_at >= ${dateCutoffIso}
+    `;
+    return parseInt(result.rows[0]?.count || '0');
+  }
+
+  const result = await sql`
+    SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+    FROM conversion_events
+    WHERE metadata->>'abTest' = ${testName}
+      AND metadata->>'abVariant' = ${variant}
+      AND event_type IN ('trial_started', 'subscription_started', 'trial_converted', 'cta_clicked')
+      AND created_at >= ${dateCutoffIso}
+  `;
+
+  return parseInt(result.rows[0]?.count || '0');
+}
+
 export async function GET(request: NextRequest) {
   try {
     const authResult = await requireAdminAuth(request);
@@ -79,26 +187,17 @@ export async function GET(request: NextRequest) {
       }> = [];
 
       for (const variant of variants) {
-        const impressionsResult = await sql`
-          SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
-          FROM conversion_events
-          WHERE metadata->>'abTest' = ${testName}
-            AND metadata->>'abVariant' = ${variant}
-            AND event_type IN ('app_opened', 'pricing_page_viewed', 'cta_impression', 'page_viewed')
-            AND created_at >= ${dateCutoff.toISOString()}
-        `;
-
-        const conversionsResult = await sql`
-          SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
-          FROM conversion_events
-          WHERE metadata->>'abTest' = ${testName}
-            AND metadata->>'abVariant' = ${variant}
-            AND event_type IN ('trial_started', 'subscription_started', 'trial_converted', 'cta_clicked')
-            AND created_at >= ${dateCutoff.toISOString()}
-        `;
-
-        const impressions = parseInt(impressionsResult.rows[0]?.count || '0');
-        const conversions = parseInt(conversionsResult.rows[0]?.count || '0');
+        const cutoffIso = dateCutoff.toISOString();
+        const impressions = await getVariantImpressions(
+          testName,
+          variant,
+          cutoffIso,
+        );
+        const conversions = await getVariantConversions(
+          testName,
+          variant,
+          cutoffIso,
+        );
         const rate = impressions > 0 ? (conversions / impressions) * 100 : 0;
 
         variantMetrics.push({ name: variant, impressions, conversions, rate });

@@ -90,12 +90,14 @@ export function Breadcrumbs({
           </span>
         ))}
       </nav>
-      <script
-        type='application/ld+json'
-        dangerouslySetInnerHTML={{
-          __html: stringifySafe(breadcrumbSchema),
-        }}
-      />
+      {renderSchema ? (
+        <script
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{
+            __html: stringifySafe(breadcrumbSchema),
+          }}
+        />
+      ) : null}
     </>
   );
 }
