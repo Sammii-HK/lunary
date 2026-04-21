@@ -149,7 +149,7 @@ export function OptimizedDemoIframe({
           <iframe
             ref={iframeRef}
             src='/demo-preview?v=2'
-            title='Lunary Demo'
+            title='Interactive personalised birth chart demo showing real-time planetary positions, moon phase, and daily transit insights'
             width='393'
             height='750'
             loading={loading}
