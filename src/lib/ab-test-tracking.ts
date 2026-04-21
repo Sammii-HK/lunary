@@ -24,6 +24,10 @@ const POSTHOG_TEST_MAPPING: Record<string, string> = {
   pricing_cta_test: 'pricing_cta', // Pricing page CTA variations
   pricing_display_test: 'pricing_display', // Pricing display format
   upgrade_prompt_test: 'upgrade_prompt', // Upgrade prompt messaging
+  // W17 conversion batch
+  hero_value_stack_v1: 'hero_value_stack', // Full-product value stack in hero (LUN-247)
+  sticky_free_card_v1: 'sticky_free_card', // Sticky free-tier card below hero (LUN-249)
+  horoscope_email_capture_v1: 'horoscope_email_capture', // Email capture on grimoire horoscope pages (LUN-250)
 };
 
 /**

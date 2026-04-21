@@ -49,6 +49,15 @@ const AB_TESTS: Record<string, { variants: string[]; weights?: number[] }> = {
   'transit-limit-test': {
     variants: ['one-transit', 'two-transit'],
   },
+  hero_value_stack_v1: {
+    variants: ['control', 'full-product'],
+  },
+  sticky_free_card_v1: {
+    variants: ['control', 'sticky-card'],
+  },
+  horoscope_email_capture_v1: {
+    variants: ['control', 'inline'],
+  },
 };
 
 // Simple hash function for deterministic variant assignment
