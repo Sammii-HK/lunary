@@ -27,7 +27,9 @@ const POSTHOG_TEST_MAPPING: Record<string, string> = {
   // W17 conversion batch
   hero_value_stack_v1: 'hero_value_stack', // Full-product value stack in hero (LUN-247)
   sticky_free_card_v1: 'sticky_free_card', // Sticky free-tier card below hero (LUN-249)
-  horoscope_email_capture_v1: 'horoscope_email_capture', // Email capture on grimoire horoscope pages (LUN-250)
+  // Note: LUN-250 (email capture on horoscope pages) — already live via
+  // horoscope_email_capture_proposition_v1 + horoscope_email_signup_upsell_v1
+  // in SEOContentTemplate.tsx. Do not re-register.
 };
 
 /**

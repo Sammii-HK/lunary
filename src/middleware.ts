@@ -55,9 +55,6 @@ const AB_TESTS: Record<string, { variants: string[]; weights?: number[] }> = {
   sticky_free_card_v1: {
     variants: ['control', 'sticky-card'],
   },
-  horoscope_email_capture_v1: {
-    variants: ['control', 'inline'],
-  },
 };
 
 // Simple hash function for deterministic variant assignment
