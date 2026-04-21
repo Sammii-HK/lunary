@@ -46,9 +46,12 @@ echo "✅ Type check passed."
 echo "🔍 Checking changed files for use-before-define..."
 CHANGED_TS_FILES=$(git diff origin/main --name-only -- '*.ts' '*.tsx')
 if [ -n "$CHANGED_TS_FILES" ]; then
-  if ! printf '%s\n' "$CHANGED_TS_FILES" | xargs pnpm eslint --rule 'no-use-before-define: [\"error\", {\"functions\": false, \"classes\": true, \"variables\": true}]' >/dev/null; then
+  # Pass the rule config via a heredoc to avoid shell-escaping the nested
+  # double quotes (xargs was mangling the \" sequences into literal \").
+  UBD_RULE='no-use-before-define: ["error", {"functions": false, "classes": true, "variables": true}]'
+  if ! printf '%s\n' "$CHANGED_TS_FILES" | xargs pnpm eslint --rule "$UBD_RULE" >/dev/null; then
     echo "❌ Use-before-define found in changed TypeScript files."
-    echo "   Run: pnpm eslint <changed-files> --rule 'no-use-before-define: [\"error\", {\"functions\": false, \"classes\": true, \"variables\": true}]'"
+    echo "   Run: pnpm eslint <changed-files> --rule '$UBD_RULE'"
     exit 1
   fi
 fi
