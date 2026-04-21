@@ -12,6 +12,9 @@ const shardId = process.env.SHARD_ID
 const totalShards = process.env.TOTAL_SHARDS
   ? parseInt(process.env.TOTAL_SHARDS)
   : undefined;
+const testPort = process.env.PLAYWRIGHT_TEST_PORT || '3003';
+const testBaseUrl =
+  process.env.PLAYWRIGHT_TEST_BASE_URL || `http://localhost:${testPort}`;
 
 export default defineConfig({
   testDir: './e2e',
@@ -38,7 +41,7 @@ export default defineConfig({
         ['json', { outputFile: 'test-results/results.json' }],
       ],
   use: {
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3003',
+    baseURL: testBaseUrl,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -76,9 +79,9 @@ export default defineConfig({
   ],
   webServer: {
     command: process.env.CI
-      ? 'next start -p 3003' // CI: app pre-built by "Build for E2E" step — instant startup
-      : 'lsof -ti:3003 | xargs kill -9 2>/dev/null || true; next dev -p 3003',
-    url: 'http://localhost:3003',
+      ? `next start -p ${testPort}` // CI: app pre-built by "Build for E2E" step — instant startup
+      : `lsof -ti:${testPort} | xargs kill -9 2>/dev/null || true; next dev -p ${testPort}`,
+    url: testBaseUrl,
     reuseExistingServer: !process.env.CI, // Reuse existing server in local dev, always start fresh in CI
     timeout: process.env.CI ? 30000 : 300000, // CI: next start is near-instant; local: allow cold compile
     stdout: process.env.CI ? 'ignore' : 'pipe',
