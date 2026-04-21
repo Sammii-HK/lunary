@@ -542,8 +542,11 @@ function BookOfShadowsContent() {
     }
   }, [authState.isAuthenticated, authState.loading]);
 
-  // Condense progress widget when messages are scrolled
+  // Condense progress widget when messages are scrolled.
+  // Ref is declared further down alongside the other refs; React runs effects
+  // after all hooks have initialised so this is safe at runtime.
   useEffect(() => {
+    // eslint-disable-next-line no-use-before-define
     const el = messagesContainerRef.current;
     if (!el) return;
     const handleScroll = () => setIsScrolled(el.scrollTop > 40);
@@ -782,6 +785,7 @@ function BookOfShadowsContent() {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       if (isJournalMode) {
+        // eslint-disable-next-line no-use-before-define
         handleJournalSubmit();
       } else {
         attemptSend();

@@ -416,6 +416,21 @@ export function ShareZodiacSeason({
     }
   };
 
+  const handleDownload = () => {
+    if (!imageBlob) return;
+
+    const url = URL.createObjectURL(imageBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${seasonData?.sign.toLowerCase()}-season.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    shareTracking.shareCompleted(user?.id, 'zodiac-season', 'download');
+  };
+
   const handleShare = async () => {
     if (!imageBlob) return;
 
@@ -451,21 +466,6 @@ export function ShareZodiacSeason({
     } else {
       handleDownload();
     }
-  };
-
-  const handleDownload = () => {
-    if (!imageBlob) return;
-
-    const url = URL.createObjectURL(imageBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${seasonData?.sign.toLowerCase()}-season.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    shareTracking.shareCompleted(user?.id, 'zodiac-season', 'download');
   };
 
   const handleCopyLink = async () => {
