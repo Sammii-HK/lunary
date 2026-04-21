@@ -149,11 +149,11 @@ export function getPlanetNature(planet: string): string {
 // ─── Dignity modifier ────────────────────────────────────────────────────────
 
 const DIGNITY_NOTE: Record<string, string> = {
-  domicile: 'at home in this sign — the expression lands without translation',
-  exalted: 'exalted here — the sign amplifies the planet at its best',
+  domicile: 'at home in this sign, so the expression lands without translation',
+  exalted: 'exalted here, so the sign amplifies the planet at its best',
   detriment:
-    'in detriment — the sign and the planet pull in opposite directions',
-  fall: 'in fall — the sign dampens what the planet wants to express',
+    'in detriment, so the sign and the planet pull in opposite directions',
+  fall: 'in fall, so the sign dampens what the planet wants to express',
 };
 
 export function getDignityNote(dignity?: string | null): string | null {
@@ -186,10 +186,10 @@ export function composePlacementNarrative({
   const houseArea = house ? HOUSE_MEANINGS[house] : null;
   const dignityNote = getDignityNote(dignity);
 
-  // Sentence 1: planet + sign — how the sign colours the planet's nature.
+  // Sentence 1: planet + sign, how the sign colours the planet's nature.
   const first = `${planet} (${nature}) moves through ${sign} ${flavour}`;
 
-  // Sentence 2: where in life it's active — house area + dignity.
+  // Sentence 2: where in life it's active, house area + dignity.
   const segments: string[] = [];
   if (houseArea && house) {
     segments.push(
@@ -201,7 +201,7 @@ export function composePlacementNarrative({
   }
   if (retrograde) {
     segments.push(
-      `retrograde right now — its themes are turning inward before they resolve`,
+      `retrograde right now, so its themes are turning inward before they resolve`,
     );
   }
 
@@ -457,7 +457,7 @@ export function getTransitCopy({
     : `Transiting ${transitPlanet}`;
 
   const natalAnchor = natalHouse
-    ? `${natalTheme} — your ${ordinal(natalHouse)} house of ${getHouseMeaning(natalHouse)}`
+    ? `${natalTheme}, your ${ordinal(natalHouse)} house of ${getHouseMeaning(natalHouse)}`
     : natalTheme;
 
   let meaning: string;
@@ -468,7 +468,7 @@ export function getTransitCopy({
   }
 
   // Dignity note: only surface when the transiting planet is notably strong or
-  // strained in its current sign — it materially changes how the aspect lands.
+  // strained in its current sign, it materially changes how the aspect lands.
   const dignityNote = getDignityNote(transitDignity);
   if (dignityNote) {
     meaning += ` ${transitPlanet} is ${dignityNote}.`;
@@ -511,7 +511,7 @@ const FREE_TEASE_TEMPLATES = [
     house: number;
     meaning: string;
   }) =>
-    `${planet} is moving through your ${ordinal(house)} house right now — the area of ${meaning}.`,
+    `${planet} is moving through your ${ordinal(house)} house right now, the area of ${meaning}.`,
   ({
     planet,
     house,
@@ -531,7 +531,7 @@ const FREE_TEASE_TEMPLATES = [
     house: number;
     meaning: string;
   }) =>
-    `Your ${ordinal(house)} house is lit up by ${planet} right now — that is the zone of ${meaning}.`,
+    `Your ${ordinal(house)} house is lit up by ${planet} right now, the zone of ${meaning}.`,
 ];
 
 /**

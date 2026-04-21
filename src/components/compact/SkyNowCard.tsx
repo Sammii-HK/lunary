@@ -252,10 +252,10 @@ const DIGNITY_ABBR: Record<Dignity, string> = {
 };
 
 const DIGNITY_LABEL: Record<Dignity, string> = {
-  domicile: 'domicile — at home, full strength',
-  exalted: 'exalted — peak expression',
-  detriment: 'detriment — uncomfortable placement',
-  fall: 'fall — weakened expression',
+  domicile: 'at home, full strength',
+  exalted: 'peak expression',
+  detriment: 'uncomfortable placement',
+  fall: 'weakened expression',
 };
 
 function DignityTooltip({
@@ -310,7 +310,7 @@ function DignityTooltip({
           <span className={`font-mono ${DIGNITY_TEXT_CLASS[dignity]}`}>
             {DIGNITY_ABBR[dignity]}
           </span>{' '}
-          — {planet} {DIGNITY_LABEL[dignity].split('—')[1]?.trim()}
+          {planet}, {DIGNITY_LABEL[dignity]}
         </span>
       )}
     </span>
