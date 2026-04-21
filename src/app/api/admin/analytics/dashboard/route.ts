@@ -3,7 +3,10 @@ import { sql } from '@vercel/postgres';
 import { resolveDateRange } from '@/lib/analytics/date-range';
 import { ANALYTICS_REALTIME_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { PRODUCT_EVENTS } from '@/lib/analytics/product-events';
-import { getStripeSubscriptionSnapshot } from '@/lib/analytics/stripe-subscriptions';
+import {
+  getStripeSubscriptionSnapshot,
+  type StripeSubscriptionSnapshot,
+} from '@/lib/analytics/stripe-subscriptions';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
@@ -40,8 +43,9 @@ export async function GET(request: NextRequest) {
     // Check if range includes today
     const includesToday = rangeEnd >= today;
 
-    // Execute queries in parallel
-    const queries = [getStripeSubscriptionSnapshot()];
+    // Execute queries in parallel. Heterogeneous array (snapshot + sql results
+    // + nullable), so type explicitly so push() accepts each variant.
+    const queries: Promise<unknown>[] = [getStripeSubscriptionSnapshot()];
 
     // 1. Get historical metrics from daily_metrics (fast!)
     if (rangeStart < today) {
@@ -220,12 +224,15 @@ export async function GET(request: NextRequest) {
       queries.push(Promise.resolve(null));
     }
 
-    const [stripeSnapshot, historicalResult, todayResults] =
+    const [stripeSnapshotRaw, historicalResult, todayResults] =
       await Promise.all(queries);
+    const stripeSnapshot = stripeSnapshotRaw as StripeSubscriptionSnapshot;
 
     // Process historical data
     const historicalRows = (
-      historicalResult && 'rows' in historicalResult
+      historicalResult &&
+      typeof historicalResult === 'object' &&
+      'rows' in historicalResult
         ? historicalResult.rows
         : []
     ) as any[];

@@ -556,10 +556,10 @@ export async function GET(request: NextRequest) {
       // Table may not exist
     }
 
-    const stripe = getStripe();
     let stripeSnapshot: StripeSubscriptionSnapshot | null = null;
     try {
-      stripeSnapshot = await getStripeSubscriptionSnapshot(stripe);
+      // Default-initialised Stripe client; no need to pre-resolve getStripe().
+      stripeSnapshot = await getStripeSubscriptionSnapshot();
     } catch (error) {
       console.warn(
         '[success-metrics] Stripe snapshot failed, falling back to local subscription sync:',
