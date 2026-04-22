@@ -356,7 +356,7 @@ export function composeChartRulerResult(
     if (risingEntry?.famousExamples) {
       sections.push({
         heading: 'Others who share this chart ruler',
-        body: `Anyone with ${risingSignDisplay} Rising has ${planetDisplay} as their chart ruler — the exact sign and house their ${planetDisplay} sits in will differ from yours, but the planet directing their chart is the same. Known ${risingSignDisplay} Risings include ${risingEntry.famousExamples}.`,
+        body: `Anyone with ${risingSignDisplay} Rising has ${planetDisplay} as their chart ruler — the exact sign and house their ${planetDisplay} sits in will differ from yours, but the planet directing their chart is the same. Traditionally attributed as ${risingSignDisplay} Risings: ${risingEntry.famousExamples}. Celebrity rising signs often rely on disputed or rectified birth times — treat these as cultural attributions, not certified placements.`,
       });
     }
 
