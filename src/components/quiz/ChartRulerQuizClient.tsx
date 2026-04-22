@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Heading } from '@/components/ui/Heading';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BirthdayInput } from '@/components/ui/birthday-input';
 import { Lock, Sparkles, ArrowRight } from 'lucide-react';
+import { captureEvent } from '@/lib/posthog-client';
 import type { QuizResult } from '@/lib/quiz/types';
+
+const QUIZ_SLUG = 'chart-ruler';
 
 type Phase = 'form' | 'loading' | 'result' | 'error';
 
@@ -32,9 +35,17 @@ export function ChartRulerQuizClient() {
   const [result, setResult] = useState<QuizResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
+  useEffect(() => {
+    captureEvent('quiz_started', { quizSlug: QUIZ_SLUG });
+  }, []);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.birthDate || !form.birthLocation) return;
+    captureEvent('quiz_submitted', {
+      quizSlug: QUIZ_SLUG,
+      hasBirthTime: !form.skipTime && !!form.birthTime,
+    });
     setPhase('loading');
     setErrorMessage('');
     try {
@@ -53,13 +64,31 @@ export function ChartRulerQuizClient() {
         setErrorMessage(
           data?.error ?? 'Something went wrong computing your chart.',
         );
+        captureEvent('quiz_error', {
+          quizSlug: QUIZ_SLUG,
+          status: res.status,
+          source: 'api',
+        });
         setPhase('error');
         return;
       }
       const data = (await res.json()) as QuizResult;
+      captureEvent('quiz_result_viewed', {
+        quizSlug: data.quizSlug,
+        archetype: data.archetype?.label,
+        dignity: data.meta?.signals?.dignity ?? null,
+        houseNature: data.meta?.signals?.houseNature,
+        houseNumber: data.meta?.signals?.houseNumber,
+        rulerInRising: data.meta?.signals?.rulerInRising,
+        retrograde: data.meta?.signals?.retrograde,
+      });
       setResult(data);
       setPhase('result');
     } catch {
+      captureEvent('quiz_error', {
+        quizSlug: QUIZ_SLUG,
+        source: 'network',
+      });
       setErrorMessage('Network error. Please try again.');
       setPhase('error');
     }
@@ -175,6 +204,15 @@ export function ChartRulerQuizClient() {
 
 function ChartRulerResultView({ result }: { result: QuizResult }) {
   const signupHref = `/auth?quiz=${result.quizSlug}&k=${encodeURIComponent(result.meta.chartKey)}`;
+
+  function handleSignupClick() {
+    captureEvent('quiz_signup_clicked', {
+      quizSlug: result.quizSlug,
+      archetype: result.archetype?.label,
+      chartKey: result.meta.chartKey,
+    });
+  }
+
   return (
     <section className='mx-auto w-full max-w-3xl px-4 py-8'>
       <div className='flex flex-col gap-8 rounded-2xl border border-lunary-primary-800/60 bg-layer-base p-6 sm:p-10'>
@@ -248,7 +286,7 @@ function ChartRulerResultView({ result }: { result: QuizResult }) {
         <div className='border-lunary-primary-700/60 bg-layer-raised flex flex-col gap-3 rounded-xl border p-6 text-center'>
           <p className='text-content-primary text-base'>{result.tease}</p>
           <Button asChild variant='lunary-solid' size='lg'>
-            <Link href={signupHref}>
+            <Link href={signupHref} onClick={handleSignupClick}>
               Unlock my full profile (free 7-day trial) <ArrowRight />
             </Link>
           </Button>
