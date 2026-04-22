@@ -178,16 +178,31 @@ function ChartRulerResultView({ result }: { result: QuizResult }) {
   return (
     <section className='mx-auto w-full max-w-3xl px-4 py-8'>
       <div className='flex flex-col gap-8 rounded-2xl border border-lunary-primary-800/60 bg-layer-base p-6 sm:p-10'>
-        <div className='flex flex-col gap-3 text-center'>
+        <div className='flex flex-col gap-4 text-center'>
           <span className='text-lunary-accent text-xs tracking-widest uppercase'>
             {result.hero.eyebrow}
           </span>
-          <Heading as='h1' variant='h1'>
+          {result.archetype && (
+            <div className='flex flex-col gap-2'>
+              <Heading as='h1' variant='h1' className='text-lunary-primary-100'>
+                {result.archetype.label}
+              </Heading>
+              <p className='text-content-primary mx-auto max-w-xl text-base italic'>
+                {result.archetype.tagline}
+              </p>
+            </div>
+          )}
+          <p className='text-content-secondary mx-auto max-w-2xl text-sm sm:text-base'>
             {result.hero.headline}
-          </Heading>
-          <p className='text-content-secondary mx-auto max-w-xl text-base'>
+          </p>
+          <p className='text-content-secondary mx-auto max-w-xl text-sm'>
             {result.hero.subhead}
           </p>
+          {result.archetype && (
+            <p className='text-content-secondary mx-auto mt-2 max-w-2xl text-sm leading-relaxed'>
+              {result.archetype.rationale}
+            </p>
+          )}
         </div>
 
         <div className='flex flex-col gap-6'>

@@ -4,6 +4,9 @@ import type {
 } from '@utils/astrology/birthChart';
 import { getHouse, getPlanetInSign, getRisingSign } from '../grimoire-lookup';
 import { getRulingPlanet, normalizeSign } from '../rulers';
+import { getDignity } from '../dignities';
+import { getHouseNature } from '../chart-analysis';
+import { selectArchetype } from '../archetypes';
 import type { HouseNumber, PlanetKey, QuizResult, QuizSection } from '../types';
 
 const PLANET_DISPLAY: Record<PlanetKey, string> = {
@@ -55,13 +58,94 @@ export function composeChartRulerResult(
   const houseEntry = rulerHouse ? getHouse(rulerHouse) : null;
   const risingEntry = getRisingSign(risingSignKey);
 
+  // --- Derived signals ---
+  const dignity = getDignity(rulerPlanet, rulerSignKey);
+  const houseNature = rulerHouse ? getHouseNature(rulerHouse) : 'cadent';
+  const rulerInRising = rulerSignKey === risingSignKey;
+  const retrograde = rulerBody.retrograde === true;
+
+  const archetype = selectArchetype({
+    dignity,
+    houseNature,
+    houseNumber: rulerHouse ?? null,
+    rulerInRising,
+    retrograde,
+  });
+
   const planetDisplay = PLANET_DISPLAY[rulerPlanet];
   const rulerSignDisplay = rulerBody.sign;
   const risingSignDisplay = ascendant.sign;
   const houseDisplay = rulerHouse ? `${ordinal(rulerHouse)} house` : 'chart';
 
+  // Build the flavour tags shown in the headline chip row
+  const headlineTags: string[] = [];
+  if (dignity === 'domicile') headlineTags.push('In rulership');
+  else if (dignity === 'exaltation') headlineTags.push('Exalted');
+  else if (dignity === 'detriment') headlineTags.push('In detriment');
+  else if (dignity === 'fall') headlineTags.push('In fall');
+  if (rulerInRising) headlineTags.push('Rules itself');
+  if (houseNature === 'angular') headlineTags.push('Angular');
+  if (retrograde) headlineTags.push('Retrograde');
+
   const sections: QuizSection[] = [];
 
+  // --- Section: practical translation of the signals ---
+  // This section never re-states what the hero already said. It translates each
+  // detected signal into "because X, your lived experience is Y". No technical
+  // terminology unless the reader needs it to decode a single specific phrase.
+  const practicalParts: string[] = [];
+  if (dignity === 'domicile') {
+    practicalParts.push(
+      `Because ${planetDisplay} is in its own sign, this side of you doesn't feel performed or translated. It's your default mode, not an effort. You don't "switch on" to be ${rulerSignDisplay} — you are.`,
+    );
+  } else if (dignity === 'exaltation') {
+    practicalParts.push(
+      `Because ${planetDisplay} is exalted here, you show this side of yourself at its brightest. When you lean into it, people respond with unusual clarity — they recognise the signal, even if they can't name it.`,
+    );
+  } else if (dignity === 'detriment') {
+    practicalParts.push(
+      `Because ${planetDisplay} operates against the grain of ${rulerSignDisplay}, you've had to reshape the standard ${rulerSignDisplay} template to fit what ${planetDisplay} actually wants. It's more work, but it's also why you don't read as a ${rulerSignDisplay} stereotype.`,
+    );
+  } else if (dignity === 'fall') {
+    practicalParts.push(
+      `Because ${planetDisplay} is in fall here, this is the placement you grow through. It's the source of your most transformative work — usually the hard way, first. But the depth you build here is legitimately rare.`,
+    );
+  }
+
+  if (rulerInRising) {
+    practicalParts.push(
+      `Because your chart ruler is in the sign that also rises for you, there is no translation layer between who you appear to be and who you actually are. Your rising isn't a mask over a different core. It's the same signal twice.`,
+    );
+  }
+
+  if (houseNature === 'angular') {
+    practicalParts.push(
+      `Because it sits in an angular house, people pick up on this about you fast — often within minutes of meeting you. It's visible before you've said anything. You can't hide it, and you probably shouldn't try.`,
+    );
+  } else if (houseNature === 'succedent') {
+    practicalParts.push(
+      `Because it sits in a succedent house, this side of you builds and accumulates rather than announces. It shows up in what you have, what you've made, what you've held on to — not in the first impression.`,
+    );
+  } else if (houseNature === 'cadent') {
+    practicalParts.push(
+      `Because it sits in a cadent house, this side of you runs behind the scenes. It processes more than it performs. People who meet you casually may miss it entirely; people who know you long-term build their whole picture from it.`,
+    );
+  }
+
+  if (retrograde) {
+    practicalParts.push(
+      `Because ${planetDisplay} is retrograde at your birth, you process this side of you internally before you show it. What looks spontaneous in you has almost always been chewed on quietly first.`,
+    );
+  }
+
+  if (practicalParts.length > 0) {
+    sections.push({
+      heading: 'What this actually means for you',
+      body: practicalParts.join(' '),
+    });
+  }
+
+  // --- Section: rising sign framing ---
   if (risingEntry) {
     sections.push({
       heading: `Your ${risingSignDisplay} Rising sets the stage`,
@@ -73,6 +157,7 @@ export function composeChartRulerResult(
     });
   }
 
+  // --- Section: chart ruler interpretation ---
   if (planetInSign) {
     const body =
       (planetInSign.lifeThemes as string) ??
@@ -86,6 +171,7 @@ export function composeChartRulerResult(
     });
   }
 
+  // --- Section: house context ---
   if (houseEntry) {
     sections.push({
       heading: `Focused through your ${houseEntry.name.toLowerCase()}`,
@@ -94,40 +180,72 @@ export function composeChartRulerResult(
     });
   }
 
+  // --- Locked teaser ---
   if (planetInSign?.strengths) {
     sections.push({
-      heading: 'Your strengths through this chart ruler',
-      body: 'Sign in to unlock the full strengths profile, the challenges to work with, and how this placement shows up in your career and relationships.',
+      heading: 'Your strengths and challenges through this chart ruler',
+      body: 'Sign in to unlock the full strengths profile, the challenges to work with, and how this placement shows up in your career and relationships — plus the live transits activating your chart ruler right now.',
       bullets: (planetInSign.strengths as string[]).slice(0, 2),
       locked: true,
     });
   }
 
-  const tease = `You've just seen three insights from your chart ruler. Your full Lunary reading includes the six other patterns this configuration creates, plus the live transits activating it right now.`;
+  const tease = `You've just seen why your configuration is unusual. Your full Lunary reading covers the three live transits activating your chart ruler, the aspects shaping its expression, and how to work with it day-to-day.`;
 
   const chartKey = [
     risingSignKey,
     rulerPlanet,
     rulerSignKey,
     rulerHouse ?? 0,
+    dignity ?? 'none',
+    retrograde ? 'rx' : 'direct',
   ].join('_');
+
+  const subheadBase = `Your ${risingSignDisplay} Rising is ruled by ${planetDisplay}. That means ${planetDisplay}'s placement is the hidden director of your chart.`;
+
+  const shareCardTags: string[] = [];
+  if (dignity === 'domicile') shareCardTags.push('domicile');
+  if (dignity === 'exaltation') shareCardTags.push('exalted');
+  if (rulerInRising) shareCardTags.push('rules itself');
+  if (houseNature === 'angular') shareCardTags.push('angular');
+  if (retrograde) shareCardTags.push('retrograde');
+
+  const shareSubtitle = [
+    `${risingSignDisplay} Rising`,
+    rulerHouse ? `${ordinal(rulerHouse)} house` : null,
+    shareCardTags.length > 0 ? shareCardTags.join(' · ') : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return {
     quizSlug: 'chart-ruler',
+    archetype,
     hero: {
       eyebrow: 'Your Chart Ruler Profile',
-      headline: `${planetDisplay} in ${rulerSignDisplay}, in your ${houseDisplay}`,
-      subhead: `Your ${risingSignDisplay} Rising is ruled by ${planetDisplay}. That means ${planetDisplay}'s placement is the hidden director of your chart.`,
+      headline: `${planetDisplay} in ${rulerSignDisplay}, in your ${houseDisplay}${
+        headlineTags.length > 0
+          ? ` — ${headlineTags.join(', ').toLowerCase()}`
+          : ''
+      }`,
+      subhead: subheadBase,
     },
     sections,
     shareCard: {
-      title: `Chart Ruler: ${planetDisplay} in ${rulerSignDisplay}`,
-      subtitle: `${risingSignDisplay} Rising · ${rulerHouse ? ordinal(rulerHouse) + ' house' : 'chart'}`,
+      title: archetype.label,
+      subtitle: shareSubtitle,
     },
     tease,
     meta: {
       generatedAt: new Date().toISOString(),
       chartKey,
+      signals: {
+        dignity,
+        houseNature,
+        houseNumber: rulerHouse ?? null,
+        rulerInRising,
+        retrograde,
+      },
     },
   };
 }

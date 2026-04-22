@@ -42,8 +42,15 @@ export type QuizSection = {
   locked?: boolean;
 };
 
+export type QuizArchetype = {
+  label: string;
+  tagline: string;
+  rationale: string;
+};
+
 export type QuizResult = {
   quizSlug: string;
+  archetype?: QuizArchetype;
   hero: {
     eyebrow: string;
     headline: string;
@@ -58,5 +65,12 @@ export type QuizResult = {
   meta: {
     generatedAt: string;
     chartKey: string;
+    signals?: {
+      dignity?: 'domicile' | 'exaltation' | 'detriment' | 'fall' | null;
+      houseNature?: 'angular' | 'succedent' | 'cadent';
+      houseNumber?: number | null;
+      rulerInRising?: boolean;
+      retrograde?: boolean;
+    };
   };
 };
