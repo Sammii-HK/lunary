@@ -7,7 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BirthdayInput } from '@/components/ui/birthday-input';
-import { Lock, Sparkles, ArrowRight } from 'lucide-react';
+import {
+  Lock,
+  Sparkles,
+  ArrowRight,
+  Download,
+  Link2,
+  Share2,
+} from 'lucide-react';
 import { captureEvent } from '@/lib/posthog-client';
 import type { QuizResult } from '@/lib/quiz/types';
 
@@ -202,14 +209,81 @@ export function ChartRulerQuizClient() {
   );
 }
 
+function buildShareAssets(result: QuizResult) {
+  const label = result.archetype?.label ?? 'Your chart ruler';
+  const subtitle = result.shareCard.subtitle;
+  const tagline = result.hero.headline;
+
+  const params = new URLSearchParams({
+    format: 'story',
+    label,
+    subtitle,
+    tagline,
+  });
+  const ogPath = `/api/og/quiz/${result.quizSlug}?${params.toString()}`;
+  const pinterestParams = new URLSearchParams({
+    format: 'pinterest',
+    label,
+    subtitle,
+    tagline,
+  });
+  const pinterestOgPath = `/api/og/quiz/${result.quizSlug}?${pinterestParams.toString()}`;
+
+  const quizLandingPath = `/quiz/beyond-your-sun-sign/${result.quizSlug}`;
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const shareText = `I got "${label}" in the Beyond Your Sun Sign quiz. ${subtitle}.`;
+  const fullQuizUrl = `${origin}${quizLandingPath}`;
+
+  return {
+    ogPath,
+    pinterestOgPath,
+    fullQuizUrl,
+    shareText,
+    threadsUrl: `https://www.threads.net/intent/post?text=${encodeURIComponent(
+      `${shareText} Take it: ${fullQuizUrl}`,
+    )}`,
+    blueskyUrl: `https://bsky.app/intent/compose?text=${encodeURIComponent(
+      `${shareText} Take it: ${fullQuizUrl}`,
+    )}`,
+    pinterestShareUrl: `https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(
+      fullQuizUrl,
+    )}&media=${encodeURIComponent(origin + pinterestOgPath)}&description=${encodeURIComponent(shareText)}`,
+  };
+}
+
 function ChartRulerResultView({ result }: { result: QuizResult }) {
   const signupHref = `/auth?quiz=${result.quizSlug}&k=${encodeURIComponent(result.meta.chartKey)}`;
+  const [copied, setCopied] = useState(false);
+  const share = buildShareAssets(result);
 
   function handleSignupClick() {
     captureEvent('quiz_signup_clicked', {
       quizSlug: result.quizSlug,
       archetype: result.archetype?.label,
       chartKey: result.meta.chartKey,
+    });
+  }
+
+  async function handleCopyLink() {
+    try {
+      await navigator.clipboard.writeText(share.fullQuizUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      captureEvent('quiz_share_clicked', {
+        quizSlug: result.quizSlug,
+        archetype: result.archetype?.label,
+        destination: 'copy_link',
+      });
+    } catch {
+      // Clipboard API unavailable — fall back silently. User can still use other share options.
+    }
+  }
+
+  function handleShareClick(destination: string) {
+    captureEvent('quiz_share_clicked', {
+      quizSlug: result.quizSlug,
+      archetype: result.archetype?.label,
+      destination,
     });
   }
 
@@ -281,6 +355,70 @@ function ChartRulerResultView({ result }: { result: QuizResult }) {
               )}
             </article>
           ))}
+        </div>
+
+        <div className='border-lunary-primary-700/60 bg-layer-raised flex flex-col gap-5 rounded-xl border p-6 sm:p-8'>
+          <div className='flex flex-col gap-1 text-center'>
+            <Heading as='h3' variant='h4'>
+              Share your archetype
+            </Heading>
+            <p className='text-content-secondary text-sm'>
+              Your card is ready. Save it, post it, pin it.
+            </p>
+          </div>
+
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={share.ogPath}
+            alt={`${result.archetype?.label ?? 'Your chart ruler'} share card`}
+            className='border-lunary-primary-700/40 mx-auto w-full max-w-sm rounded-xl border'
+            loading='lazy'
+          />
+
+          <div className='flex flex-wrap justify-center gap-2'>
+            <Button asChild variant='lunary' size='sm'>
+              <a
+                href={share.ogPath}
+                download={`${result.archetype?.label?.replace(/\s+/g, '-').toLowerCase() ?? 'chart-ruler'}-lunary.png`}
+                onClick={() => handleShareClick('download')}
+              >
+                <Download /> Save image
+              </a>
+            </Button>
+            <Button variant='lunary' size='sm' onClick={handleCopyLink}>
+              <Link2 /> {copied ? 'Copied!' : 'Copy link'}
+            </Button>
+            <Button asChild variant='lunary' size='sm'>
+              <a
+                href={share.threadsUrl}
+                target='_blank'
+                rel='noopener noreferrer'
+                onClick={() => handleShareClick('threads')}
+              >
+                <Share2 /> Threads
+              </a>
+            </Button>
+            <Button asChild variant='lunary' size='sm'>
+              <a
+                href={share.blueskyUrl}
+                target='_blank'
+                rel='noopener noreferrer'
+                onClick={() => handleShareClick('bluesky')}
+              >
+                <Share2 /> Bluesky
+              </a>
+            </Button>
+            <Button asChild variant='lunary' size='sm'>
+              <a
+                href={share.pinterestShareUrl}
+                target='_blank'
+                rel='noopener noreferrer'
+                onClick={() => handleShareClick('pinterest')}
+              >
+                <Share2 /> Pinterest
+              </a>
+            </Button>
+          </div>
         </div>
 
         <div className='border-lunary-primary-700/60 bg-layer-raised flex flex-col gap-3 rounded-xl border p-6 text-center'>
