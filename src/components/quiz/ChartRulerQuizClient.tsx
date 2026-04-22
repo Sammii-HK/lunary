@@ -89,6 +89,18 @@ export function ChartRulerQuizClient() {
         rulerInRising: data.meta?.signals?.rulerInRising,
         retrograde: data.meta?.signals?.retrograde,
       });
+      try {
+        const payload = JSON.stringify({
+          quizSlug: data.quizSlug,
+          birthDate: form.birthDate,
+          birthTime:
+            form.skipTime || !form.birthTime ? undefined : form.birthTime,
+          birthLocation: form.birthLocation,
+        });
+        document.cookie = `lunary_pending_quiz=${encodeURIComponent(payload)}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+      } catch {
+        // Cookie write failed (private mode etc) — graceful degrade. User can still sign up, they just won't get the quiz-specific email.
+      }
       setResult(data);
       setPhase('result');
     } catch {

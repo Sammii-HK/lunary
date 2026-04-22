@@ -45,6 +45,25 @@ export default function VerifyEmailPage() {
             'Email verified successfully! You can now sign in to your account.',
           );
 
+          // If the user came from a quiz, claim their pending result. This
+          // reads the lunary_pending_quiz cookie set on the quiz result
+          // page, recomputes the result server-side, and fires the quiz
+          // delivery email. Fails silently — verification success must not
+          // depend on this.
+          if (
+            typeof document !== 'undefined' &&
+            document.cookie.includes('lunary_pending_quiz=')
+          ) {
+            try {
+              await fetch('/api/quiz/claim', {
+                method: 'POST',
+                credentials: 'include',
+              });
+            } catch {
+              // Graceful degrade — welcome drip still fires from existing cron.
+            }
+          }
+
           // Redirect to profile after successful verification
           setTimeout(() => {
             window.location.href = '/profile';
