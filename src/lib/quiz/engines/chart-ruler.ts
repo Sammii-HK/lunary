@@ -348,24 +348,29 @@ export function composeChartRulerResult(
       });
     }
 
-    // --- Full unlock: cohort framing (outer planets) OR famous examples ---
-    // Outer-planet rulers (Uranus/Neptune/Pluto) are generational — everyone
-    // born in a 7-15 year window shares them. So "famous examples" framing
-    // reads as misleading affinity. Replace it with a cohort-aware section.
+    // --- Full unlock: others who share this chart ruler ---
+    // Chart ruler is determined by rising sign. So the people who genuinely
+    // share YOUR chart ruler are people with the same rising — not people
+    // who share your specific planet-in-sign placement (that's a different
+    // axis). rising-signs.json has curated famous examples by rising sign.
+    if (risingEntry?.famousExamples) {
+      sections.push({
+        heading: 'Others who share this chart ruler',
+        body: `Anyone with ${risingSignDisplay} Rising has ${planetDisplay} as their chart ruler — the exact sign and house their ${planetDisplay} sits in will differ from yours, but the planet directing their chart is the same. Known ${risingSignDisplay} Risings include ${risingEntry.famousExamples}.`,
+      });
+    }
+
+    // --- Full unlock: generation context (outer planets only) ---
+    // For Uranus/Neptune/Pluto rulers, the planet-in-sign placement is
+    // generational. This section clarifies that your SPECIFIC placement is
+    // cohort-wide, but your chart ruler is still personal because of your
+    // rising sign. No celebrity list here — we don't know the risings of
+    // celebrities born in this window, so naming them would be misleading.
     if (OUTER_PLANETS.includes(rulerPlanet)) {
       const window = cohortWindow(rulerPlanet, rulerSignDisplay);
       sections.push({
-        heading: 'Your cohort',
-        body:
-          `${planetDisplay} is a slow-moving outer planet — it stays in each sign for years. ${planetDisplay} was in ${rulerSignDisplay} roughly ${window || 'across a multi-year window'}, so everyone born in that span shares this chart ruler with you. It marks a generation, not a personal placement. ` +
-          (planetInSign?.famousExamples
-            ? `Notable people born into that cohort include ${planetInSign.famousExamples}.`
-            : ''),
-      });
-    } else if (planetInSign?.famousExamples) {
-      sections.push({
-        heading: 'Sharing this chart ruler',
-        body: `${planetDisplay} moves quickly enough that sharing it is a meaningful affinity, not a generational marker. People with ${planetDisplay} in ${rulerSignDisplay}: ${planetInSign.famousExamples}.`,
+        heading: 'Your generation',
+        body: `${planetDisplay} in ${rulerSignDisplay} is a generational placement — ${planetDisplay} stays in one sign for years at a time. ${planetDisplay} was in ${rulerSignDisplay} roughly ${window || 'for over a decade'}, so everyone born in that span shares that placement. What makes it specifically YOUR chart ruler is your ${risingSignDisplay} Rising — a roughly two-hour window per day per location. The intersection (generational placement + personal rising) is what makes your chart ruler both cohort-wide in one sense and distinctly yours in another.`,
       });
     }
   } else {
