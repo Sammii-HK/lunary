@@ -45,29 +45,58 @@ export default function VerifyEmailPage() {
             'Email verified successfully! You can now sign in to your account.',
           );
 
-          // If the user came from a quiz, claim their pending result. This
-          // reads the lunary_pending_quiz cookie set on the quiz result
-          // page, recomputes the result server-side, and fires the quiz
-          // delivery email. Fails silently — verification success must not
-          // depend on this.
+          // If the user came from a quiz, claim their pending result and
+          // redirect to the full reading page instead of /profile. This
+          // snapshot's the cookie's birth data into sessionStorage so
+          // /full's "email this to me" button has what to post.
+          let redirectedToQuiz = false;
           if (
             typeof document !== 'undefined' &&
             document.cookie.includes('lunary_pending_quiz=')
           ) {
             try {
-              await fetch('/api/quiz/claim', {
+              const match = document.cookie.match(
+                /lunary_pending_quiz=([^;]+)/,
+              );
+              if (match) {
+                sessionStorage.setItem(
+                  'lunary_quiz_birth_data',
+                  decodeURIComponent(match[1]),
+                );
+              }
+              const res = await fetch('/api/quiz/claim', {
                 method: 'POST',
                 credentials: 'include',
               });
+              if (res.ok) {
+                const data = await res.json().catch(() => null);
+                if (data?.result?.quizSlug) {
+                  try {
+                    sessionStorage.setItem(
+                      'lunary_claimed_quiz_result',
+                      JSON.stringify(data.result),
+                    );
+                  } catch {
+                    // Non-fatal — /full will fall back to re-claiming.
+                  }
+                  const slug = data.result.quizSlug;
+                  setTimeout(() => {
+                    window.location.href = `/quiz/beyond-your-sun-sign/${encodeURIComponent(slug)}/full`;
+                  }, 1500);
+                  redirectedToQuiz = true;
+                }
+              }
             } catch {
-              // Graceful degrade — welcome drip still fires from existing cron.
+              // Graceful degrade — fall through to /profile redirect below.
             }
           }
 
-          // Redirect to profile after successful verification
-          setTimeout(() => {
-            window.location.href = '/profile';
-          }, 3000);
+          if (!redirectedToQuiz) {
+            // Redirect to profile after successful verification
+            setTimeout(() => {
+              window.location.href = '/profile';
+            }, 3000);
+          }
         }
       } catch (error) {
         console.error('Verification error:', error);
