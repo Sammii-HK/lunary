@@ -37,9 +37,15 @@ function ordinal(n: number): string {
   return `${n}${mod10 > 3 ? 'th' : suffix}`;
 }
 
+export type ChartRulerOptions = {
+  unlocked?: boolean;
+};
+
 export function composeChartRulerResult(
   chart: BirthChartResult,
+  options: ChartRulerOptions = {},
 ): QuizResult | null {
+  const unlocked = options.unlocked === true;
   const ascendant = findBody(chart, 'Ascendant');
   if (!ascendant) return null;
 
@@ -180,17 +186,55 @@ export function composeChartRulerResult(
     });
   }
 
-  // --- Locked teaser ---
-  if (planetInSign?.strengths) {
-    sections.push({
-      heading: 'Your strengths and challenges through this chart ruler',
-      body: 'Sign in to unlock the full strengths profile, the challenges to work with, and how this placement shows up in your career and relationships — plus the live transits activating your chart ruler right now.',
-      bullets: (planetInSign.strengths as string[]).slice(0, 2),
-      locked: true,
-    });
+  if (unlocked) {
+    // --- Full unlock: strengths ---
+    if (planetInSign?.strengths) {
+      sections.push({
+        heading: 'Your strengths through this chart ruler',
+        body: `How ${planetDisplay} in ${rulerSignDisplay} shows up at its best.`,
+        bullets: planetInSign.strengths as string[],
+      });
+    }
+
+    // --- Full unlock: challenges ---
+    if (planetInSign?.challenges) {
+      sections.push({
+        heading: 'The growth edge',
+        body: `Where this configuration asks for conscious work. These aren't flaws — they're the places your chart ruler's expression gets sharper with attention.`,
+        bullets: planetInSign.challenges as string[],
+      });
+    }
+
+    // --- Full unlock: career ---
+    if (planetInSign?.careerPaths) {
+      sections.push({
+        heading: 'Where this lands in career',
+        body: planetInSign.careerPaths as string,
+      });
+    }
+
+    // --- Full unlock: famous examples ---
+    if (planetInSign?.famousExamples) {
+      sections.push({
+        heading: 'Sharing this chart ruler',
+        body: `People with ${planetDisplay} in ${rulerSignDisplay}: ${planetInSign.famousExamples}.`,
+      });
+    }
+  } else {
+    // --- Teaser mode (locked) ---
+    if (planetInSign?.strengths) {
+      sections.push({
+        heading: 'Your strengths and challenges through this chart ruler',
+        body: 'Sign in to unlock the full strengths profile, the challenges to work with, and how this placement shows up in your career and relationships — plus the live transits activating your chart ruler right now.',
+        bullets: (planetInSign.strengths as string[]).slice(0, 2),
+        locked: true,
+      });
+    }
   }
 
-  const tease = `You've just seen why your configuration is unusual. Your full Lunary reading covers the three live transits activating your chart ruler, the aspects shaping its expression, and how to work with it day-to-day.`;
+  const tease = unlocked
+    ? `This is your full chart ruler reading. Your three most active transits are waiting in the app, along with the aspects shaping how your chart ruler expresses day to day.`
+    : `You've just seen why your configuration is unusual. Your full Lunary reading covers the three live transits activating your chart ruler, the aspects shaping its expression, and how to work with it day-to-day.`;
 
   const chartKey = [
     risingSignKey,

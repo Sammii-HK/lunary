@@ -76,7 +76,10 @@ export async function POST(request: NextRequest) {
       parsed.data.birthLocation,
       parsed.data.birthTimezone,
     );
-    const result = composeChartRulerResult(chart);
+    // Compose the FULL (unlocked) result for the authenticated welcome page.
+    // The same engine, with options.unlocked, emits strengths, challenges,
+    // career, and famous-examples sections instead of the locked teaser.
+    const result = composeChartRulerResult(chart, { unlocked: true });
     if (!result) {
       return NextResponse.json(
         { error: 'Could not compose quiz result' },
@@ -94,6 +97,7 @@ export async function POST(request: NextRequest) {
       success: true,
       sent: outcome.success,
       archetype: result.archetype?.label ?? null,
+      result,
     });
     response.cookies.set('lunary_pending_quiz', '', {
       path: '/',

@@ -46,7 +46,7 @@ export default function AuthPage() {
     if (!authState.loading && authState.isAuthenticated) {
       redirectExecuted.current = true;
 
-      const redirect = () => {
+      const goToApp = () => {
         if (Capacitor.isNativePlatform()) {
           router.replace('/app');
         } else {
@@ -55,18 +55,42 @@ export default function AuthPage() {
       };
 
       // If the user came in from a quiz (cookie set on the quiz result page),
-      // claim their pending result before redirecting. This fires the quiz
-      // result email and clears the cookie. Failures here are swallowed so
-      // the user still reaches /app.
+      // claim their pending result before redirecting. On success, stash the
+      // unlocked result in sessionStorage and land the user on the full quiz
+      // page instead of /app. Failures fall through to /app silently.
       if (document.cookie.includes('lunary_pending_quiz=')) {
         fetch('/api/quiz/claim', {
           method: 'POST',
           credentials: 'include',
         })
-          .catch(() => {})
-          .finally(redirect);
+          .then(async (res) => {
+            if (!res.ok) {
+              goToApp();
+              return;
+            }
+            const data = await res.json().catch(() => null);
+            if (data?.result?.quizSlug) {
+              try {
+                sessionStorage.setItem(
+                  'lunary_claimed_quiz_result',
+                  JSON.stringify(data.result),
+                );
+              } catch {
+                // sessionStorage unavailable — fall through to /app.
+                goToApp();
+                return;
+              }
+              const slug = data.result.quizSlug;
+              window.location.replace(
+                `/quiz/beyond-your-sun-sign/${encodeURIComponent(slug)}/full`,
+              );
+              return;
+            }
+            goToApp();
+          })
+          .catch(() => goToApp());
       } else {
-        redirect();
+        goToApp();
       }
     }
   }, [authState.isAuthenticated, authState.loading, router]);
