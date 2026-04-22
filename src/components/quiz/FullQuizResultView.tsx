@@ -11,6 +11,7 @@ import {
   Link2,
   Share2,
   CheckCircle2,
+  Mail,
 } from 'lucide-react';
 import { captureEvent } from '@/lib/posthog-client';
 import type { QuizResult } from '@/lib/quiz/types';
@@ -57,16 +58,19 @@ export function FullQuizResultView() {
       <section className='mx-auto w-full max-w-2xl px-4 py-12'>
         <div className='border-lunary-primary-800/60 bg-layer-base flex flex-col gap-4 rounded-2xl border p-8 text-center'>
           <Heading as='h1' variant='h2'>
-            Your reading is in your inbox
+            Take the quiz to see your reading
           </Heading>
           <p className='text-content-secondary'>
-            We've emailed you your full Chart Ruler Profile. Open the app to
-            explore your chart, transits, and daily readings.
+            Your session doesn't have a recent result loaded. Head back to the
+            quiz to generate one — it takes 90 seconds.
           </p>
           <Button asChild variant='lunary-solid' size='lg'>
-            <Link href='/app'>
-              Open the app <ArrowRight />
+            <Link href='/quiz/beyond-your-sun-sign/chart-ruler'>
+              Take the quiz <ArrowRight />
             </Link>
+          </Button>
+          <Button asChild variant='ghost' size='sm'>
+            <Link href='/app'>Go to app</Link>
           </Button>
         </div>
       </section>
@@ -118,9 +122,13 @@ function buildShareAssets(result: QuizResult) {
   };
 }
 
+type EmailState = 'idle' | 'sending' | 'sent' | 'error';
+
 function FullResultContent({ result }: { result: QuizResult }) {
   const share = buildShareAssets(result);
   const [copied, setCopied] = useState(false);
+  const [emailState, setEmailState] = useState<EmailState>('idle');
+  const [emailError, setEmailError] = useState<string>('');
 
   async function handleCopyLink() {
     try {
@@ -147,6 +155,57 @@ function FullResultContent({ result }: { result: QuizResult }) {
     });
   }
 
+  async function handleEmailMe() {
+    let birthPayload: unknown = null;
+    try {
+      const raw = sessionStorage.getItem('lunary_quiz_birth_data');
+      if (raw) birthPayload = JSON.parse(raw);
+    } catch {
+      // Fall through — handled below.
+    }
+
+    if (
+      !birthPayload ||
+      typeof birthPayload !== 'object' ||
+      !(birthPayload as Record<string, unknown>).birthDate
+    ) {
+      setEmailError(
+        'Your birth data isn\u2019t in this session any more. Re-take the quiz to email yourself.',
+      );
+      setEmailState('error');
+      return;
+    }
+
+    setEmailState('sending');
+    setEmailError('');
+    captureEvent('quiz_email_requested', {
+      quizSlug: result.quizSlug,
+      archetype: result.archetype?.label,
+    });
+
+    try {
+      const res = await fetch('/api/quiz/email-result', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quizSlug: result.quizSlug,
+          ...(birthPayload as Record<string, unknown>),
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setEmailError(data?.error ?? 'Email failed. Try again in a moment.');
+        setEmailState('error');
+        return;
+      }
+      setEmailState('sent');
+    } catch {
+      setEmailError('Network error. Try again in a moment.');
+      setEmailState('error');
+    }
+  }
+
   return (
     <section className='mx-auto w-full max-w-3xl px-4 py-8'>
       <div className='flex flex-col gap-8 rounded-2xl border border-lunary-primary-800/60 bg-layer-base p-6 sm:p-10'>
@@ -158,7 +217,8 @@ function FullResultContent({ result }: { result: QuizResult }) {
               You're in. Your 7-day Lunary+ trial is active.
             </p>
             <p className='text-content-secondary text-xs'>
-              We've also emailed this reading to you for safekeeping.
+              Your full reading is below. Email it to yourself if you want a
+              copy for reference.
             </p>
           </div>
         </div>
@@ -286,6 +346,34 @@ function FullResultContent({ result }: { result: QuizResult }) {
               </a>
             </Button>
           </div>
+        </div>
+
+        {/* Email opt-in */}
+        <div className='border-lunary-primary-700/60 bg-layer-raised flex flex-col gap-3 rounded-xl border p-6 text-center'>
+          <Heading as='h3' variant='h4'>
+            Want this for reference?
+          </Heading>
+          <p className='text-content-secondary text-sm'>
+            We can email you this reading so you can come back to it any time.
+          </p>
+          <Button
+            variant='lunary'
+            size='lg'
+            onClick={handleEmailMe}
+            disabled={emailState === 'sending' || emailState === 'sent'}
+          >
+            <Mail />
+            {emailState === 'sending'
+              ? 'Sending…'
+              : emailState === 'sent'
+                ? 'Sent to your inbox'
+                : 'Email this to me'}
+          </Button>
+          {emailState === 'error' && emailError && (
+            <p className='text-lunary-error text-xs' role='alert'>
+              {emailError}
+            </p>
+          )}
         </div>
 
         {/* Primary CTA into the app */}

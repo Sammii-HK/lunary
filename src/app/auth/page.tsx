@@ -55,10 +55,22 @@ export default function AuthPage() {
       };
 
       // If the user came in from a quiz (cookie set on the quiz result page),
-      // claim their pending result before redirecting. On success, stash the
-      // unlocked result in sessionStorage and land the user on the full quiz
-      // page instead of /app. Failures fall through to /app silently.
+      // claim their pending result before redirecting. Also stash the birth
+      // data (from the cookie) in sessionStorage so the full page can offer
+      // an opt-in "email this to me" button.
       if (document.cookie.includes('lunary_pending_quiz=')) {
+        // Snapshot the birth data from the cookie BEFORE the claim endpoint
+        // clears it. Stored client-side only — never transmitted to analytics.
+        try {
+          const match = document.cookie.match(/lunary_pending_quiz=([^;]+)/);
+          if (match) {
+            const decoded = decodeURIComponent(match[1]);
+            sessionStorage.setItem('lunary_quiz_birth_data', decoded);
+          }
+        } catch {
+          // No-op — claim will still work without it.
+        }
+
         fetch('/api/quiz/claim', {
           method: 'POST',
           credentials: 'include',
@@ -76,7 +88,6 @@ export default function AuthPage() {
                   JSON.stringify(data.result),
                 );
               } catch {
-                // sessionStorage unavailable — fall through to /app.
                 goToApp();
                 return;
               }

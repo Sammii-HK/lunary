@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { generateBirthChartWithHouses } from '@utils/astrology/birthChart';
 import { composeChartRulerResult } from '@/lib/quiz/engines/chart-ruler';
-import { sendQuizResultEmail } from '@/lib/quiz/email';
 
 export const runtime = 'nodejs';
 
@@ -87,15 +86,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const outcome = await sendQuizResultEmail({
-      to: session.user.email,
-      result,
-      userId: session.user.id,
-    });
+    // Email is NOT sent here — we show the result on-screen instead, and
+    // let the user opt in via the "Email this to me" button (POSTs to
+    // /api/quiz/email-result). Forcing users to their inbox to see their
+    // own result is poor UX.
 
     const response = NextResponse.json({
       success: true,
-      sent: outcome.success,
       archetype: result.archetype?.label ?? null,
       result,
     });
