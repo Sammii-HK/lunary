@@ -1,8 +1,72 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
 import { generateBirthChartWithHouses } from '@utils/astrology/birthChart';
 import { composeChartRulerResult } from '@/lib/quiz/engines/chart-ruler';
+import type { BirthChartData } from '@utils/astrology/birthChart';
+
+function extractRisingSign(
+  planets: BirthChartData[] | undefined,
+): string | undefined {
+  if (!planets) return undefined;
+  const asc = planets.find((p) => p.body === 'Ascendant');
+  return asc?.sign;
+}
+
+function extractSunSign(
+  planets: BirthChartData[] | undefined,
+): string | undefined {
+  if (!planets) return undefined;
+  const sun = planets.find((p) => p.body === 'Sun');
+  return sun?.sign;
+}
+
+async function recordQuizClaim(params: {
+  userId: string;
+  userEmail: string;
+  quizSlug: string;
+  archetype: string | null;
+  archetypeTagline: string | null;
+  risingSign: string | undefined;
+  sunSign: string | undefined;
+}) {
+  // Record in the existing conversion_events table so the welcome-drip cron
+  // can find it when routing Day 2 / Day 5 emails. Dedup on user_id + quiz
+  // so repeat claims don't stack.
+  try {
+    await sql.query(
+      `INSERT INTO conversion_events (
+        event_type, user_id, user_email, metadata, created_at
+      )
+      SELECT $1, $2, $3, $4::jsonb, NOW()
+      WHERE NOT EXISTS (
+        SELECT 1 FROM conversion_events
+        WHERE event_type = $1
+          AND user_id = $2
+          AND metadata->>'quizSlug' = $5
+      )`,
+      [
+        'quiz_claim',
+        params.userId,
+        params.userEmail,
+        JSON.stringify({
+          quizSlug: params.quizSlug,
+          archetype: params.archetype,
+          archetypeTagline: params.archetypeTagline,
+          risingSign: params.risingSign ?? null,
+          sunSign: params.sunSign ?? null,
+        }),
+        params.quizSlug,
+      ],
+    );
+  } catch (err) {
+    // Non-fatal — the claim can succeed even if the event isn't recorded.
+    // The user will just fall back to the generic welcome drip.
+    console.error('[quiz/claim] Failed to record quiz_claim event');
+    if (err instanceof Error) console.error(err.message);
+  }
+}
 
 export const runtime = 'nodejs';
 
@@ -90,6 +154,19 @@ export async function POST(request: NextRequest) {
     // let the user opt in via the "Email this to me" button (POSTs to
     // /api/quiz/email-result). Forcing users to their inbox to see their
     // own result is poor UX.
+
+    // Record the claim event so the welcome-drip cron can route this user
+    // to the quiz-personalised Day 2 / Day 5 emails (via drip registry)
+    // instead of the generic welcome drip.
+    await recordQuizClaim({
+      userId: session.user.id,
+      userEmail: session.user.email,
+      quizSlug: parsed.data.quizSlug,
+      archetype: result.archetype?.label ?? null,
+      archetypeTagline: result.archetype?.tagline ?? null,
+      risingSign: extractRisingSign(chart.planets),
+      sunSign: extractSunSign(chart.planets),
+    });
 
     const response = NextResponse.json({
       success: true,
