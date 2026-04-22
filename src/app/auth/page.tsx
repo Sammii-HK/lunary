@@ -45,10 +45,28 @@ export default function AuthPage() {
 
     if (!authState.loading && authState.isAuthenticated) {
       redirectExecuted.current = true;
-      if (Capacitor.isNativePlatform()) {
-        router.replace('/app');
+
+      const redirect = () => {
+        if (Capacitor.isNativePlatform()) {
+          router.replace('/app');
+        } else {
+          window.location.replace('/app');
+        }
+      };
+
+      // If the user came in from a quiz (cookie set on the quiz result page),
+      // claim their pending result before redirecting. This fires the quiz
+      // result email and clears the cookie. Failures here are swallowed so
+      // the user still reaches /app.
+      if (document.cookie.includes('lunary_pending_quiz=')) {
+        fetch('/api/quiz/claim', {
+          method: 'POST',
+          credentials: 'include',
+        })
+          .catch(() => {})
+          .finally(redirect);
       } else {
-        window.location.replace('/app');
+        redirect();
       }
     }
   }, [authState.isAuthenticated, authState.loading, router]);
