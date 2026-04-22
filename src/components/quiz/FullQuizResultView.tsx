@@ -25,22 +25,87 @@ export function FullQuizResultView() {
   const [result, setResult] = useState<QuizResult | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        setState('missing');
-        return;
+    let cancelled = false;
+
+    const loadFromStorage = (): QuizResult | null => {
+      try {
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw) as QuizResult;
+      } catch {
+        return null;
       }
-      const parsed = JSON.parse(raw) as QuizResult;
-      setResult(parsed);
+    };
+
+    const ready = (r: QuizResult) => {
+      if (cancelled) return;
+      setResult(r);
       setState('ready');
       captureEvent('quiz_full_result_viewed', {
-        quizSlug: parsed.quizSlug,
-        archetype: parsed.archetype?.label,
+        quizSlug: r.quizSlug,
+        archetype: r.archetype?.label,
       });
-    } catch {
-      setState('missing');
+    };
+
+    // Try sessionStorage first — fast path when arriving from /auth redirect.
+    const stored = loadFromStorage();
+    if (stored) {
+      ready(stored);
+      return;
     }
+
+    // Fallback: if the user has a pending claim cookie but never went through
+    // /auth's handoff (cached /auth JS, direct navigation, etc), claim now.
+    // Snapshot the cookie birth data into sessionStorage before calling
+    // claim, so the "Email this to me" button has what to post later.
+    const hasCookie =
+      typeof document !== 'undefined' &&
+      document.cookie.includes('lunary_pending_quiz=');
+
+    if (!hasCookie) {
+      setState('missing');
+      return;
+    }
+
+    try {
+      const match = document.cookie.match(/lunary_pending_quiz=([^;]+)/);
+      if (match) {
+        sessionStorage.setItem(
+          'lunary_quiz_birth_data',
+          decodeURIComponent(match[1]),
+        );
+      }
+    } catch {
+      // Non-fatal.
+    }
+
+    fetch('/api/quiz/claim', { method: 'POST', credentials: 'include' })
+      .then(async (res) => {
+        if (cancelled) return;
+        if (!res.ok) {
+          setState('missing');
+          return;
+        }
+        const data = await res.json().catch(() => null);
+        if (data?.result) {
+          try {
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data.result));
+          } catch {
+            // Non-fatal — we'll still render from memory below.
+          }
+          ready(data.result as QuizResult);
+        } else {
+          setState('missing');
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setState('missing');
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (state === 'loading') {
