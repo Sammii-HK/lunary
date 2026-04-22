@@ -91,6 +91,62 @@ export function selectArchetype(s: ArchetypeSignals): Archetype {
     };
   }
 
+  // House-specific archetypes (ordered by house — most specific wins)
+  if (s.houseNumber === 2) {
+    return {
+      label: 'The Vault',
+      tagline:
+        'Your identity is built around what you value, and what you keep.',
+      rationale:
+        'Your chart ruler lives in the house of resources, self-worth, and the things you hold on to. What you value, you become — and what you build stays built.',
+    };
+  }
+
+  if (s.houseNumber === 3) {
+    return {
+      label: 'The Voice',
+      tagline: 'Your identity lives in how you speak, write, and translate.',
+      rationale:
+        'Your chart ruler sits in the house of communication and local mind. Your core self expresses through language, ideas, and the way you connect the dots for other people.',
+    };
+  }
+
+  if (s.houseNumber === 4) {
+    return {
+      label: 'The Foundation',
+      tagline: 'Your core self is built from the inside out, from home.',
+      rationale:
+        "Your chart ruler lives in the house of roots, family, and the private inner world. You build outward from a foundation most people never see — and it's that foundation that defines everything else.",
+    };
+  }
+
+  if (s.houseNumber === 5) {
+    return {
+      label: 'The Creator',
+      tagline: 'You find yourself by making things that weren\u2019t there.',
+      rationale:
+        'Your chart ruler sits in the house of creativity, play, romance, and children. Your identity expresses through what you bring into being — art, projects, relationships, children of the literal or creative kind.',
+    };
+  }
+
+  if (s.houseNumber === 6) {
+    return {
+      label: 'The Craftsperson',
+      tagline: 'Your identity lives in the doing, the details, and the craft.',
+      rationale:
+        'Your chart ruler sits in the house of service, work, and daily practice. You find yourself through skill, repetition, and the quiet pride of doing something well.',
+    };
+  }
+
+  if (s.houseNumber === 8) {
+    return {
+      label: 'The Shadow Worker',
+      tagline: 'You do the work most people look away from.',
+      rationale:
+        "Your chart ruler lives in the house of intimacy, transformation, and what's buried. Your core self expresses through the conversations, relationships, and inner work other people avoid.",
+    };
+  }
+
   // The Seeker — 9th house
   if (s.houseNumber === 9) {
     return {
@@ -101,7 +157,34 @@ export function selectArchetype(s: ArchetypeSignals): Archetype {
     };
   }
 
-  // The Underground Current — default for cadent placements
+  if (s.houseNumber === 10) {
+    return {
+      label: 'The Legacy Builder',
+      tagline: 'Your identity is what you build in public, over time.',
+      rationale:
+        "Your chart ruler lives in the house of career, reputation, and long-arc visibility. You aren't wired for invisibility — you're wired for the record.",
+    };
+  }
+
+  if (s.houseNumber === 11) {
+    return {
+      label: 'The Network',
+      tagline: 'You find yourself through the people you gather around you.',
+      rationale:
+        'Your chart ruler sits in the house of friendship, community, and long-range vision. Your identity expresses through the circles you build and the future you can see from inside them.',
+    };
+  }
+
+  if (s.houseNumber === 12) {
+    return {
+      label: 'The Threshold',
+      tagline: 'Your core self lives just on the other side of the visible.',
+      rationale:
+        'Your chart ruler sits in the house of the unseen — dream, retreat, surrender, and what comes before form. Your identity expresses through what most people would call intuition, and you would call obvious.',
+    };
+  }
+
+  // The Underground Current — default for cadent placements (catches any cadent we missed)
   if (s.houseNature === 'cadent') {
     return {
       label: 'The Underground Current',
