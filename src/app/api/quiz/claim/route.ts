@@ -23,7 +23,7 @@ const ClaimPayloadSchema = z.object({
  * Called from the client after signup + email verification. Reads the
  * `lunary_pending_quiz` cookie (set on the quiz result page), recomputes
  * the user's quiz result server-side, and fires the quiz-specific delivery
- * email. After this, the user is in the existing nurture sequence — no
+ * email. After this, the user is in the existing nurture sequence, no
  * new drip from here.
  *
  * Requires an authenticated session. Fails cleanly if the cookie is
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Email is NOT sent here — we show the result on-screen instead, and
+    // Email is NOT sent here, we show the result on-screen instead, and
     // let the user opt in via the "Email this to me" button (POSTs to
     // /api/quiz/email-result). Forcing users to their inbox to see their
     // own result is poor UX.

@@ -3,7 +3,7 @@ import { Heading } from '@/components/ui/Heading';
 import { ChartRulerQuizClient } from '@/components/quiz/ChartRulerQuizClient';
 
 export const metadata: Metadata = {
-  title: 'Chart Ruler Profile — Beyond Your Sun Sign | Lunary',
+  title: 'Chart Ruler Profile, Beyond Your Sun Sign | Lunary',
   description:
     'Most people read their sun sign and stop. Your chart ruler is the hidden director of your whole chart. Take the 90-second quiz to find yours, using your full birth chart.',
   openGraph: {
@@ -31,9 +31,9 @@ export default function ChartRulerQuizPage() {
           The placement that actually runs your chart
         </Heading>
         <p className='text-content-secondary mx-auto max-w-2xl text-base sm:text-lg'>
-          Your rising sign is only the first layer. The planet that rules it —
-          your <em>chart ruler</em> — is the hidden director of your whole
-          chart. Ninety seconds, full birth chart, no sun sign guesswork.
+          Your rising sign is only the first layer. The planet that rules it -
+          your <em>chart ruler</em>, is the hidden director of your whole chart.
+          Ninety seconds, full birth chart, no sun sign guesswork.
         </p>
       </section>
 

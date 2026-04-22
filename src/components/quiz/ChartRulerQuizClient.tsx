@@ -99,7 +99,7 @@ export function ChartRulerQuizClient() {
         });
         document.cookie = `lunary_pending_quiz=${encodeURIComponent(payload)}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
       } catch {
-        // Cookie write failed (private mode etc) — graceful degrade. User can still sign up, they just won't get the quiz-specific email.
+        // Cookie write failed (private mode etc), graceful degrade. User can still sign up, they just won't get the quiz-specific email.
       }
       setResult(data);
       setPhase('result');
@@ -149,7 +149,7 @@ export function ChartRulerQuizClient() {
           <Label htmlFor='birthTime'>
             Birth time{' '}
             <span className='text-content-secondary text-xs'>
-              (optional — improves accuracy)
+              (optional, improves accuracy)
             </span>
           </Label>
           <Input
@@ -287,7 +287,7 @@ function ChartRulerResultView({ result }: { result: QuizResult }) {
         destination: 'copy_link',
       });
     } catch {
-      // Clipboard API unavailable — fall back silently. User can still use other share options.
+      // Clipboard API unavailable, fall back silently. User can still use other share options.
     }
   }
 

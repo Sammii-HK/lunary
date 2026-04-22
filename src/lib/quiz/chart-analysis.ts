@@ -14,10 +14,10 @@ export function getHouseNature(n: HouseNumber): HouseNature {
 export function describeHouseNature(nature: HouseNature): string {
   switch (nature) {
     case 'angular':
-      return 'an angular house — these are the loud houses of the chart. Planets placed here act visibly, on the outside world.';
+      return 'an angular house, these are the loud houses of the chart. Planets placed here act visibly, on the outside world.';
     case 'succedent':
-      return 'a succedent house — planets here build, accumulate, and consolidate. Steady rather than loud.';
+      return 'a succedent house, planets here build, accumulate, and consolidate. Steady rather than loud.';
     case 'cadent':
-      return 'a cadent house — planets here work in processing, learning, transition. Often behind the scenes.';
+      return 'a cadent house, planets here work in processing, learning, transition. Often behind the scenes.';
   }
 }

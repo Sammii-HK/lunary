@@ -47,7 +47,7 @@ export function FullQuizResultView() {
       });
     };
 
-    // Try sessionStorage first — fast path when arriving from /auth redirect.
+    // Try sessionStorage first, fast path when arriving from /auth redirect.
     const stored = loadFromStorage();
     if (stored) {
       ready(stored);
@@ -91,7 +91,7 @@ export function FullQuizResultView() {
           try {
             sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data.result));
           } catch {
-            // Non-fatal — we'll still render from memory below.
+            // Non-fatal, we'll still render from memory below.
           }
           ready(data.result as QuizResult);
         } else {
@@ -127,7 +127,7 @@ export function FullQuizResultView() {
           </Heading>
           <p className='text-content-secondary'>
             Your session doesn't have a recent result loaded. Head back to the
-            quiz to generate one — it takes 90 seconds.
+            quiz to generate one, it takes 90 seconds.
           </p>
           <Button asChild variant='lunary-solid' size='lg'>
             <Link href='/quiz/beyond-your-sun-sign/chart-ruler'>
@@ -226,7 +226,7 @@ function FullResultContent({ result }: { result: QuizResult }) {
       const raw = sessionStorage.getItem('lunary_quiz_birth_data');
       if (raw) birthPayload = JSON.parse(raw);
     } catch {
-      // Fall through — handled below.
+      // Fall through, handled below.
     }
 
     if (

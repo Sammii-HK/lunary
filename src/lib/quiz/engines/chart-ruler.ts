@@ -167,11 +167,11 @@ export function composeChartRulerResult(
   const practicalParts: string[] = [];
   if (dignity === 'domicile') {
     practicalParts.push(
-      `Because ${planetDisplay} is in its own sign, this side of you doesn't feel performed or translated. It's your default mode, not an effort. You don't "switch on" to be ${rulerSignDisplay} — you are.`,
+      `Because ${planetDisplay} is in its own sign, this side of you doesn't feel performed or translated. It's your default mode, not an effort. You don't "switch on" to be ${rulerSignDisplay}, you are.`,
     );
   } else if (dignity === 'exaltation') {
     practicalParts.push(
-      `Because ${planetDisplay} is exalted here, you show this side of yourself at its brightest. When you lean into it, people respond with unusual clarity — they recognise the signal, even if they can't name it.`,
+      `Because ${planetDisplay} is exalted here, you show this side of yourself at its brightest. When you lean into it, people respond with unusual clarity, they recognise the signal, even if they can't name it.`,
     );
   } else if (dignity === 'detriment') {
     practicalParts.push(
@@ -179,7 +179,7 @@ export function composeChartRulerResult(
     );
   } else if (dignity === 'fall') {
     practicalParts.push(
-      `Because ${planetDisplay} is in fall here, this is the placement you grow through. It's the source of your most transformative work — usually the hard way, first. But the depth you build here is legitimately rare.`,
+      `Because ${planetDisplay} is in fall here, this is the placement you grow through. It's the source of your most transformative work, usually the hard way, first. But the depth you build here is legitimately rare.`,
     );
   }
 
@@ -191,11 +191,11 @@ export function composeChartRulerResult(
 
   if (houseNature === 'angular') {
     practicalParts.push(
-      `Because it sits in an angular house, people pick up on this about you fast — often within minutes of meeting you. It's visible before you've said anything. You can't hide it, and you probably shouldn't try.`,
+      `Because it sits in an angular house, people pick up on this about you fast, often within minutes of meeting you. It's visible before you've said anything. You can't hide it, and you probably shouldn't try.`,
     );
   } else if (houseNature === 'succedent') {
     practicalParts.push(
-      `Because it sits in a succedent house, this side of you builds and accumulates rather than announces. It shows up in what you have, what you've made, what you've held on to — not in the first impression.`,
+      `Because it sits in a succedent house, this side of you builds and accumulates rather than announces. It shows up in what you have, what you've made, what you've held on to, not in the first impression.`,
     );
   } else if (houseNature === 'cadent') {
     practicalParts.push(
@@ -335,7 +335,7 @@ export function composeChartRulerResult(
     if (planetInSign?.challenges) {
       sections.push({
         heading: 'The growth edge',
-        body: `Where this configuration asks for conscious work. These aren't flaws — they're the places your chart ruler's expression gets sharper with attention.`,
+        body: `Where this configuration asks for conscious work. These aren't flaws, they're the places your chart ruler's expression gets sharper with attention.`,
         bullets: planetInSign.challenges as string[],
       });
     }
@@ -350,13 +350,13 @@ export function composeChartRulerResult(
 
     // --- Full unlock: others who share this chart ruler ---
     // Chart ruler is determined by rising sign. So the people who genuinely
-    // share YOUR chart ruler are people with the same rising — not people
+    // share YOUR chart ruler are people with the same rising, not people
     // who share your specific planet-in-sign placement (that's a different
     // axis). rising-signs.json has curated famous examples by rising sign.
     if (risingEntry?.famousExamples) {
       sections.push({
         heading: 'Others who share this chart ruler',
-        body: `Anyone with ${risingSignDisplay} Rising has ${planetDisplay} as their chart ruler — the exact sign and house their ${planetDisplay} sits in will differ from yours, but the planet directing their chart is the same. Traditionally attributed as ${risingSignDisplay} Risings: ${risingEntry.famousExamples}. Celebrity rising signs often rely on disputed or rectified birth times — treat these as cultural attributions, not certified placements.`,
+        body: `Anyone with ${risingSignDisplay} Rising has ${planetDisplay} as their chart ruler, the exact sign and house their ${planetDisplay} sits in will differ from yours, but the planet directing their chart is the same. Traditionally attributed as ${risingSignDisplay} Risings: ${risingEntry.famousExamples}. Celebrity rising signs often rely on disputed or rectified birth times, treat these as cultural attributions, not certified placements.`,
       });
     }
 
@@ -364,13 +364,13 @@ export function composeChartRulerResult(
     // For Uranus/Neptune/Pluto rulers, the planet-in-sign placement is
     // generational. This section clarifies that your SPECIFIC placement is
     // cohort-wide, but your chart ruler is still personal because of your
-    // rising sign. No celebrity list here — we don't know the risings of
+    // rising sign. No celebrity list here, we don't know the risings of
     // celebrities born in this window, so naming them would be misleading.
     if (OUTER_PLANETS.includes(rulerPlanet)) {
       const window = cohortWindow(rulerPlanet, rulerSignDisplay);
       sections.push({
         heading: 'Your generation',
-        body: `${planetDisplay} in ${rulerSignDisplay} is a generational placement — ${planetDisplay} stays in one sign for years at a time. ${planetDisplay} was in ${rulerSignDisplay} roughly ${window || 'for over a decade'}, so everyone born in that span shares that placement. What makes it specifically YOUR chart ruler is your ${risingSignDisplay} Rising — a roughly two-hour window per day per location. The intersection (generational placement + personal rising) is what makes your chart ruler both cohort-wide in one sense and distinctly yours in another.`,
+        body: `${planetDisplay} in ${rulerSignDisplay} is a generational placement, ${planetDisplay} stays in one sign for years at a time. ${planetDisplay} was in ${rulerSignDisplay} roughly ${window || 'for over a decade'}, so everyone born in that span shares that placement. What makes it specifically YOUR chart ruler is your ${risingSignDisplay} Rising, a roughly two-hour window per day per location. The intersection (generational placement + personal rising) is what makes your chart ruler both cohort-wide in one sense and distinctly yours in another.`,
       });
     }
   } else {
@@ -378,7 +378,7 @@ export function composeChartRulerResult(
     if (planetInSign?.strengths) {
       sections.push({
         heading: 'Your strengths and challenges through this chart ruler',
-        body: 'Sign in to unlock the full strengths profile, the challenges to work with, and how this placement shows up in your career and relationships — plus the live transits activating your chart ruler right now.',
+        body: 'Sign in to unlock the full strengths profile, the challenges to work with, and how this placement shows up in your career and relationships, plus the live transits activating your chart ruler right now.',
         bullets: (planetInSign.strengths as string[]).slice(0, 2),
         locked: true,
       });
@@ -422,7 +422,7 @@ export function composeChartRulerResult(
       eyebrow: 'Your Chart Ruler Profile',
       headline: `${planetDisplay} in ${rulerSignDisplay}, in your ${houseDisplay}${
         headlineTags.length > 0
-          ? ` — ${headlineTags.join(', ').toLowerCase()}`
+          ? `, ${headlineTags.join(', ').toLowerCase()}`
           : ''
       }`,
       subhead: subheadBase,

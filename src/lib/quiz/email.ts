@@ -22,7 +22,7 @@ export interface SendQuizResultEmailResult {
  *
  * Sends a single transactional email containing the user's full Chart Ruler
  * Profile. After this fires, the user falls into Lunary's existing nurture
- * sequence — do not chain additional drip emails from here.
+ * sequence, do not chain additional drip emails from here.
  *
  * Resend contact/audience tagging: this codebase does not currently use the
  * Resend Contacts/Audiences API, so the `quiz:chart-ruler` tag is attached

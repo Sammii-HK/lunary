@@ -78,14 +78,14 @@ export function getDignity(planet: PlanetKey, sign: SignKey): Dignity | null {
 export function describeDignity(d: Dignity | null): string {
   switch (d) {
     case 'domicile':
-      return 'in its own sign (domicile) — at home, uncompromised, operating at full strength';
+      return 'in its own sign (domicile), at home, uncompromised, operating at full strength';
     case 'exaltation':
-      return 'exalted — amplified, operating with unusual clarity and power';
+      return 'exalted, amplified, operating with unusual clarity and power';
     case 'detriment':
-      return 'in detriment — operating against its natural grain, working harder than usual';
+      return 'in detriment, operating against its natural grain, working harder than usual';
     case 'fall':
-      return 'in fall — the placement where this planet finds least traction, often the crucible of growth';
+      return 'in fall, the placement where this planet finds least traction, often the crucible of growth';
     default:
-      return 'in peregrine (no major dignity) — operating in neutral territory';
+      return 'in peregrine (no major dignity), operating in neutral territory';
   }
 }

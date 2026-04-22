@@ -91,7 +91,7 @@ function getQuizSizes(format: QuizShareFormat): QuizSizes {
       taglineMaxWidth: 780,
     };
   }
-  // pinterest (1000x1500) — slightly smaller hero, tighter layout
+  // pinterest (1000x1500), slightly smaller hero, tighter layout
   return {
     padding: 72,
     eyebrowSize: 22,
@@ -145,7 +145,7 @@ export async function GET(
       getStarCount(format === 'pinterest' ? 'square' : 'story'),
     );
 
-    // Lunary brand colours — pulled from existing OG templates for consistency
+    // Lunary brand colours, pulled from existing OG templates for consistency
     const BRAND_PRIMARY = '#8458D8'; // lunary-primary (Nebula Violet)
     const BRAND_ACCENT = '#C77DFF'; // Galaxy Haze
     const BRAND_SOFT = '#A78BFA'; // Soft violet (also used in SHARE_TITLE_GLOW)
@@ -215,7 +215,7 @@ export async function GET(
           }}
         />
 
-        {/* Content column — eyebrow pinned top, archetype centred, chips + tagline below, wordmark bottom */}
+        {/* Content column, eyebrow pinned top, archetype centred, chips + tagline below, wordmark bottom */}
         <div
           style={{
             display: 'flex',
@@ -343,7 +343,7 @@ export async function GET(
               </div>
             )}
 
-            {/* Wordmark — small, bottom-centre */}
+            {/* Wordmark, small, bottom-centre */}
             <div
               style={{
                 display: 'flex',
