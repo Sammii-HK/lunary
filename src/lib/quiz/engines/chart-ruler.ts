@@ -7,7 +7,72 @@ import { getRulingPlanet, normalizeSign } from '../rulers';
 import { getDignity } from '../dignities';
 import { getHouseNature } from '../chart-analysis';
 import { selectArchetype } from '../archetypes';
+import { findAspect, getAspectInterpretation } from '../aspects';
 import type { HouseNumber, PlanetKey, QuizResult, QuizSection } from '../types';
+
+const OUTER_PLANETS: PlanetKey[] = ['uranus', 'neptune', 'pluto'];
+
+// For the aspect section, we consider the chart ruler's aspects to the
+// seven traditional planets (minus itself if it happens to be one of them).
+const ASPECT_TARGETS: { key: PlanetKey; display: string }[] = [
+  { key: 'sun', display: 'Sun' },
+  { key: 'moon', display: 'Moon' },
+  { key: 'mercury', display: 'Mercury' },
+  { key: 'venus', display: 'Venus' },
+  { key: 'mars', display: 'Mars' },
+  { key: 'jupiter', display: 'Jupiter' },
+  { key: 'saturn', display: 'Saturn' },
+];
+
+function cohortWindow(planet: PlanetKey, sign: string): string {
+  // Rough generational windows for outer planets in each sign. Precise-enough
+  // for cohort framing; not meant for strict astro calculations.
+  const windows = {
+    uranus: {
+      Aries: '2010–2018',
+      Taurus: '2018–2026',
+      Gemini: '2026–2033',
+      Cancer: '1949–1956',
+      Leo: '1956–1962',
+      Virgo: '1962–1969',
+      Libra: '1969–1975',
+      Scorpio: '1975–1981',
+      Sagittarius: '1981–1988',
+      Capricorn: '1988–1996',
+      Aquarius: '1996–2003',
+      Pisces: '2003–2011',
+    },
+    neptune: {
+      Aries: '2025–2039',
+      Taurus: '1874–1889',
+      Gemini: '1887–1902',
+      Cancer: '1901–1915',
+      Leo: '1914–1929',
+      Virgo: '1928–1943',
+      Libra: '1942–1957',
+      Scorpio: '1955–1970',
+      Sagittarius: '1970–1984',
+      Capricorn: '1984–1998',
+      Aquarius: '1998–2012',
+      Pisces: '2011–2025',
+    },
+    pluto: {
+      Aries: '2023–2044',
+      Taurus: '1851–1884',
+      Gemini: '1882–1914',
+      Cancer: '1913–1939',
+      Leo: '1937–1958',
+      Virgo: '1956–1972',
+      Libra: '1971–1984',
+      Scorpio: '1983–1995',
+      Sagittarius: '1995–2008',
+      Capricorn: '2008–2024',
+      Aquarius: '2023–2044',
+      Pisces: '',
+    },
+  } as Partial<Record<PlanetKey, Record<string, string>>>;
+  return windows[planet]?.[sign] ?? '';
+}
 
 const PLANET_DISPLAY: Record<PlanetKey, string> = {
   sun: 'Sun',
@@ -187,6 +252,76 @@ export function composeChartRulerResult(
   }
 
   if (unlocked) {
+    // --- Full unlock: physical presence (from rising sign) ---
+    if (risingEntry?.physicalAppearance) {
+      sections.push({
+        heading: 'How you physically show up',
+        body: risingEntry.physicalAppearance,
+      });
+    }
+
+    // --- Full unlock: how others see you (from rising sign) ---
+    if (risingEntry?.howOthersSeeYou) {
+      sections.push({
+        heading: 'How others see you',
+        body: risingEntry.howOthersSeeYou,
+      });
+    }
+
+    // --- Full unlock: your life approach (from rising sign) ---
+    if (risingEntry?.lifeApproach) {
+      sections.push({
+        heading: 'How you approach life',
+        body: risingEntry.lifeApproach,
+      });
+    }
+
+    // --- Full unlock: aspects to the chart ruler ---
+    // Pull the top 3 tightest aspects between the chart ruler and the
+    // traditional seven (minus itself). These are the "secondary threads"
+    // shaping how the chart ruler actually expresses.
+    const rulerLongitude = rulerBody.eclipticLongitude;
+    type AspectEntry = {
+      targetDisplay: string;
+      aspectType: string;
+      orb: number;
+      meaning: string;
+      description: string;
+    };
+    const aspectEntries: AspectEntry[] = [];
+    for (const target of ASPECT_TARGETS) {
+      if (target.key === rulerPlanet) continue;
+      const targetBody = findBody(chart, target.display);
+      if (!targetBody) continue;
+      const aspect = findAspect(rulerLongitude, targetBody.eclipticLongitude);
+      if (!aspect) continue;
+      const interp = getAspectInterpretation(
+        planetDisplay,
+        target.display,
+        aspect.type,
+      );
+      if (!interp) continue;
+      aspectEntries.push({
+        targetDisplay: target.display,
+        aspectType: aspect.type,
+        orb: aspect.orb,
+        meaning: interp.meaning,
+        description: interp.description,
+      });
+    }
+    aspectEntries.sort((a, b) => a.orb - b.orb);
+    const topAspects = aspectEntries.slice(0, 3);
+    if (topAspects.length > 0) {
+      sections.push({
+        heading: `Aspects shaping your ${planetDisplay}`,
+        body: `These are the three tightest aspects your chart ruler makes with the classical seven. They colour how ${planetDisplay} actually shows up day to day.`,
+        bullets: topAspects.map(
+          (a) =>
+            `${planetDisplay} ${a.aspectType.toLowerCase()} ${a.targetDisplay} (${a.meaning}): ${a.description}`,
+        ),
+      });
+    }
+
     // --- Full unlock: strengths ---
     if (planetInSign?.strengths) {
       sections.push({
@@ -213,11 +348,24 @@ export function composeChartRulerResult(
       });
     }
 
-    // --- Full unlock: famous examples ---
-    if (planetInSign?.famousExamples) {
+    // --- Full unlock: cohort framing (outer planets) OR famous examples ---
+    // Outer-planet rulers (Uranus/Neptune/Pluto) are generational — everyone
+    // born in a 7-15 year window shares them. So "famous examples" framing
+    // reads as misleading affinity. Replace it with a cohort-aware section.
+    if (OUTER_PLANETS.includes(rulerPlanet)) {
+      const window = cohortWindow(rulerPlanet, rulerSignDisplay);
+      sections.push({
+        heading: 'Your cohort',
+        body:
+          `${planetDisplay} is a slow-moving outer planet — it stays in each sign for years. ${planetDisplay} was in ${rulerSignDisplay} roughly ${window || 'across a multi-year window'}, so everyone born in that span shares this chart ruler with you. It marks a generation, not a personal placement. ` +
+          (planetInSign?.famousExamples
+            ? `Notable people born into that cohort include ${planetInSign.famousExamples}.`
+            : ''),
+      });
+    } else if (planetInSign?.famousExamples) {
       sections.push({
         heading: 'Sharing this chart ruler',
-        body: `People with ${planetDisplay} in ${rulerSignDisplay}: ${planetInSign.famousExamples}.`,
+        body: `${planetDisplay} moves quickly enough that sharing it is a meaningful affinity, not a generational marker. People with ${planetDisplay} in ${rulerSignDisplay}: ${planetInSign.famousExamples}.`,
       });
     }
   } else {
