@@ -198,6 +198,23 @@ export async function GET(request: NextRequest): Promise<Response> {
     const positions = getRealPlanetaryPositions(today);
     const moonPhase = getAccurateMoonPhase(today);
 
+    // Compute label for the next upcoming major moon phase (New, First Quarter, Full, Last Quarter).
+    // Uses moonPhase.age (days since new moon, 0–29.53).
+    const nextPhaseLabel = (() => {
+      const age = moonPhase.age ?? 0;
+      const MAJOR: Array<{ at: number; name: string }> = [
+        { at: 7.4, name: 'First Quarter' },
+        { at: 14.77, name: 'Full Moon' },
+        { at: 22.15, name: 'Last Quarter' },
+        { at: 29.53, name: 'New Moon' },
+      ];
+      const next = MAJOR.find((m) => age < m.at) ?? MAJOR[MAJOR.length - 1];
+      const days = Math.max(0, Math.round(next.at - age));
+      if (days === 0) return `${next.name} today`;
+      if (days === 1) return `1 day until ${next.name}`;
+      return `${days} days until ${next.name}`;
+    })();
+
     // Format-aware sizing
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
@@ -413,7 +430,7 @@ export async function GET(request: NextRequest): Promise<Response> {
                 display: 'flex',
               }}
             >
-              4 days until Full Moon
+              {nextPhaseLabel}
             </div>
           </div>
 
@@ -1348,7 +1365,7 @@ export async function GET(request: NextRequest): Promise<Response> {
                   display: 'flex',
                 }}
               >
-                4 days until Full Moon
+                {nextPhaseLabel}
               </div>
             </div>
           </div>
