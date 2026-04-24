@@ -191,5 +191,7 @@ export function useABTestVariants() {
     tarotTruncation: getABTestVariantClient('tarot-truncation-length'),
     transitLimit: getABTestVariantClient('transit-limit-test'),
     heroSubhead: getABTestVariantClient('hero-subhead-test'),
+    heroValueStack: getABTestVariantClient('hero_value_stack_v1'),
+    stickyFreeCard: getABTestVariantClient('sticky_free_card_v1'),
   };
 }

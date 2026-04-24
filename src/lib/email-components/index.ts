@@ -74,3 +74,16 @@ export {
   renderRenewal7d,
   renderRenewal1d,
 } from './AnnualRenewalEmails';
+export {
+  PaymentFailedDay1Email,
+  PaymentFailedDay3Email,
+  PaymentFailedDay7Email,
+  generatePaymentFailedDay1HTML,
+  generatePaymentFailedDay1Text,
+  generatePaymentFailedDay3HTML,
+  generatePaymentFailedDay3Text,
+  generatePaymentFailedDay7HTML,
+  generatePaymentFailedDay7Text,
+  renderPaymentFailedEmail,
+  type PaymentFailedDayOffset,
+} from './PaymentFailedEmails';

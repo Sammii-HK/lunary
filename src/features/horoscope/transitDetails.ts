@@ -9,7 +9,10 @@ export interface TransitAspect {
   natalSign: string;
   natalDegree: string;
   orbDegrees: number;
+  /** Natal house the transiting planet currently falls in. */
   house?: number;
+  /** Natal house the natal body sits in (whole-sign). */
+  natalHouse?: number;
   transitLongitude?: number;
   natalLongitude?: number;
   duration?: {

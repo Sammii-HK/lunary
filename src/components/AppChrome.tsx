@@ -22,6 +22,7 @@ import { RateApp } from 'capacitor-rate-app';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { useAuthStatus } from './AuthStatus';
 import { TrialCountdownBanner } from './TrialCountdownBanner';
+import { PastDueBanner } from './PastDueBanner';
 
 const NAV_CONTEXT_KEY = 'lunary_nav_context';
 
@@ -396,6 +397,7 @@ export function AppChrome() {
           {showAppNav && (
             <>
               <TrialCountdownBanner />
+              <PastDueBanner />
               <Navbar />
             </>
           )}

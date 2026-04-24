@@ -71,6 +71,7 @@ export const useAssistantChat = (options?: { birthday?: string }) => {
   const [dailyHighlight, setDailyHighlight] = useState<any>(null);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
   const streamingMessageIdRef = useRef<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -217,6 +218,7 @@ export const useAssistantChat = (options?: { birthday?: string }) => {
             const errorData = await response.json().catch(() => ({}));
             const limitMessage =
               errorData.message || errorData.error || AI_LIMIT_REACHED_MESSAGE;
+            setLimitReached(true);
             throw new Error(limitMessage);
           }
           if (response.status === 503) {
@@ -384,7 +386,11 @@ export const useAssistantChat = (options?: { birthday?: string }) => {
     isLoadingHistory,
     threadId,
     error,
-    clearError: () => setError(null),
+    limitReached,
+    clearError: () => {
+      setError(null);
+      setLimitReached(false);
+    },
     addMessage,
   };
 };

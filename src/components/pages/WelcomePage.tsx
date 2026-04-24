@@ -64,18 +64,22 @@ export default function WelcomePage() {
   const [openFAQId, setOpenFAQId] = useState<string | null>(null);
   const homepageFAQs = getHomepageFAQs();
 
-  // Track page view with A/B test data (homepage-features-test, cta-copy-test, hero-subhead-test)
+  // Track page view with A/B test data
   useABTestTracking('welcome', 'page_viewed', [
     'homepage-features-test',
     'cta-copy-test',
     'hero-subhead-test',
+    'hero_value_stack_v1',
+    'sticky_free_card_v1',
   ]);
 
   // Get conversion tracker with A/B test metadata
   const { trackConversion } = useABTestConversion();
 
-  const { heroSubhead } = useABTestVariants();
+  const { heroSubhead, heroValueStack, stickyFreeCard } = useABTestVariants();
   const isCondensedHero = heroSubhead === 'condensed';
+  const showFullProductStack = heroValueStack === 'full-product';
+  const showStickyFreeCard = stickyFreeCard === 'sticky-card';
 
   // CTA click handler with A/B tracking
   const handleCtaClick = (location: string, label: string, href: string) => {
@@ -130,6 +134,30 @@ export default function WelcomePage() {
               After 2-3 months, you'll recognize patterns and interpret transits
               without depending on generic predictions.
             </p>
+            {showFullProductStack && (
+              <ul className='mx-auto max-w-md text-left text-xs md:text-sm text-content-secondary space-y-1.5 pt-2'>
+                <li className='flex gap-2 items-start'>
+                  <Check className='w-4 h-4 text-lunary-primary-400 shrink-0 mt-0.5' />
+                  <span>Your full birth chart with every placement</span>
+                </li>
+                <li className='flex gap-2 items-start'>
+                  <Check className='w-4 h-4 text-lunary-primary-400 shrink-0 mt-0.5' />
+                  <span>Compatibility with anyone you care about</span>
+                </li>
+                <li className='flex gap-2 items-start'>
+                  <Check className='w-4 h-4 text-lunary-primary-400 shrink-0 mt-0.5' />
+                  <span>Daily tarot and today's horoscope — always free</span>
+                </li>
+                <li className='flex gap-2 items-start'>
+                  <Check className='w-4 h-4 text-lunary-primary-400 shrink-0 mt-0.5' />
+                  <span>Real-time transits and moon phase for your chart</span>
+                </li>
+                <li className='flex gap-2 items-start'>
+                  <Check className='w-4 h-4 text-lunary-primary-400 shrink-0 mt-0.5' />
+                  <span>Astral Guide — ask questions about your chart</span>
+                </li>
+              </ul>
+            )}
             <div className='flex flex-col gap-3 justify-center items-center pt-2 pb-0 md:pb-6'>
               <Button variant='lunary-soft' size='lg' asChild>
                 <Link
@@ -171,6 +199,36 @@ export default function WelcomePage() {
               preload={true} // Max performance
             />
           </Reveal>
+
+          {showStickyFreeCard && (
+            <Reveal delayMs={180} className='mt-8 max-w-md mx-auto'>
+              <div className='rounded-xl border border-lunary-primary-700/40 bg-layer-raised/60 backdrop-blur-sm px-4 py-3 flex items-center gap-3 shadow-[0_8px_20px_rgba(178,126,255,0.12)]'>
+                <Sparkles className='w-5 h-5 text-lunary-primary-400 shrink-0' />
+                <div className='flex-1 min-w-0'>
+                  <p className='text-sm font-medium text-content-primary'>
+                    Daily tarot + today's horoscope, always free
+                  </p>
+                  <p className='text-xs text-content-muted mt-0.5'>
+                    Start with 7 days of Pro free for the personalised version.
+                  </p>
+                </div>
+                <Button variant='lunary-soft' size='sm' asChild>
+                  <Link
+                    href='/auth?signup=true'
+                    onClick={() =>
+                      handleCtaClick(
+                        'sticky_free_card',
+                        'Start free',
+                        '/auth?signup=true',
+                      )
+                    }
+                  >
+                    Start free
+                  </Link>
+                </Button>
+              </div>
+            </Reveal>
+          )}
         </section>
 
         <section className='py-2 px-4 md:py-8 leading-relaxed max-w-3xl mx-auto text-center'>
