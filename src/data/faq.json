@@ -226,7 +226,7 @@
         {
           "id": "house-system",
           "question": "What house system do you use?",
-          "answer": "We use **Whole Sign houses** as default, with **Placidus** available in settings.\n\n**What's Whole Sign?**\n- Each sign = exactly 30° = one house\n- Simpler, clearer boundaries\n- Original system used by ancient Greek astrologers\n\n**Why Whole Sign as default?**\n- Easier to learn\n- Traditional roots\n- Clean boundaries\n\nIf you prefer Placidus (most common modern system), switch in settings. Your chart recalculates instantly."
+          "answer": "Lunary supports **5 house systems**: **Whole Sign, Placidus, Koch, Porphyry, and Alcabitius**.\n\n**Whole Sign is the default** because it's easier to learn, has clear boundaries, and has deep traditional roots.\n\nIf you prefer a different system, you can switch your chart settings at any time and your chart recalculates instantly."
         }
       ]
     },
@@ -398,12 +398,12 @@
         {
           "id": "house-system",
           "question": "What house system do you use?",
-          "answer": "We use **Whole Sign houses** as default, with **Placidus** available in settings.\n\n**What's Whole Sign?**\n- Each sign = exactly 30° = one house\n- House 1 starts at your rising sign degree\n- Simpler, clearer boundaries\n- Original system used by ancient Greek astrologers\n\n**Why Whole Sign as default?**\n- Easier to learn\n- Traditional roots\n- Clean boundaries\n- Many modern astrologers prefer it\n\nIf you prefer Placidus (most common modern system), switch in settings. Your chart recalculates instantly."
+          "answer": "Lunary supports **5 house systems**: **Whole Sign, Placidus, Koch, Porphyry, and Alcabitius**.\n\n**Whole Sign is the default** because it's easier to learn, has clear boundaries, and has deep traditional roots.\n\nIf you prefer a different system, you can switch your chart settings at any time and your chart recalculates instantly."
         },
         {
           "id": "zodiac-system",
           "question": "What zodiac system do you use?",
-          "answer": "We use **Tropical zodiac** (Western astrology), not Sidereal (Vedic astrology).\n\n**Tropical (what we use):**\n- Based on seasons and equinoxes\n- Sun enters Aries at spring equinox (March 20ish)\n- This is Western astrology\n\n**Sidereal:**\n- Based on actual constellation positions\n- Sun enters Aries ~3 weeks later\n- This is Vedic astrology\n\nWe focus on Tropical because it's the most common system in Western astrology and aligns with seasons."
+          "answer": "Lunary supports **3 zodiac systems**: **Tropical, Sidereal (Lahiri), and Equatorial**.\n\n**Tropical is the default** and is the standard system in Western astrology.\n\nIf you prefer a different zodiac framework, you can change it in your chart settings and Lunary will recalculate your chart using that system."
         }
       ]
     }

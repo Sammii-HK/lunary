@@ -14,6 +14,10 @@ import {
 } from '@/constants/entity-relationships';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createZodiacSignSchema, renderJsonLd } from '@/lib/schema';
+import {
+  formatRulershipValue,
+  getPrimaryRuler,
+} from '@/lib/astrology/rulerships';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
@@ -167,28 +171,14 @@ export default async function ZodiacSignPage({
           ? ['Gemini', 'Libra', 'Aquarius', 'Aries', 'Leo', 'Sagittarius']
           : ['Cancer', 'Scorpio', 'Pisces', 'Taurus', 'Virgo', 'Capricorn'];
 
-  // Ruling planet mapping
-  const rulingPlanets: Record<string, string> = {
-    Aries: 'Mars',
-    Taurus: 'Venus',
-    Gemini: 'Mercury',
-    Cancer: 'Moon',
-    Leo: 'Sun',
-    Virgo: 'Mercury',
-    Libra: 'Venus',
-    Scorpio: 'Pluto',
-    Sagittarius: 'Jupiter',
-    Capricorn: 'Saturn',
-    Aquarius: 'Uranus',
-    Pisces: 'Neptune',
-  };
+  const rulershipValue = formatRulershipValue(signData.name);
 
   // Entity schema for Knowledge Graph
   const zodiacSchema = createZodiacSignSchema({
     sign: signData.name,
     element: signData.element,
     modality: quality,
-    rulingPlanet: rulingPlanets[signData.name] || 'Unknown',
+    rulingPlanet: getPrimaryRuler(signData.name),
     dates: signData.dates,
     description: `${signData.name} is ${elementArticle} ${signData.element} sign known for ${mysticalPropertiesMidSentence}`,
     traits: signData.mysticalProperties.split(',').map((t) => t.trim()),
@@ -253,7 +243,7 @@ Spiritually, ${signData.name} teaches lessons about ${signData.element.toLowerCa
         ]}
         astrologyCorrespondences={`Element: ${signData.element}
 Quality: ${quality}
-Ruling Planet: ${signData.rulingPlanet}
+Ruling Planet: ${rulershipValue}
 Symbol: ${unicodeSymbol}
 Dates: ${signData.dates}
 Tarot Card: ${signData.tarotCard}`}

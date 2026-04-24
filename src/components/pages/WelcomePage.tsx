@@ -121,7 +121,7 @@ export default function WelcomePage() {
               variant='h1'
               className='max-w-md md:max-w-2xl mx-auto'
             >
-              The astrology app that teaches you to read your own chart
+              Unlock the Secrets of the Stars with Lunary
             </Heading>
             <p className='text-xs md:text-sm text-content-muted leading-relaxed max-w-md mx-auto'>
               Track how planets affect YOU specifically.

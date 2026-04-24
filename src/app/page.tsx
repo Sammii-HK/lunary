@@ -5,26 +5,22 @@ import { Metadata } from 'next';
 import WelcomePage from '@/components/pages/WelcomePage';
 
 export const metadata: Metadata = {
-  title:
-    'Lunary: Learn to Read Your Birth Chart | Astrology App with Pattern Tracking',
+  title: 'Personalized Astrology App for Your Birth Chart | Lunary',
   description:
-    'Learn to read your own birth chart through daily practice. Track patterns, interpret transits, and understand relationships with full synastry analysis. 2,000+ free astrology articles.',
+    'Get daily horoscopes, tarot readings, and cosmic insights from your exact birth chart. Real astronomical data, not generic zodiac signs. Free 7-day trial.',
   keywords: [
-    'learn astrology app',
-    'birth chart reading',
-    'astrology pattern tracking',
-    'synastry analysis app',
-    'relationship astrology',
-    'transit tracking',
-    'personalised astrology app',
+    'personalized astrology',
     'birth chart astrology',
-    'daily astrology based on birth chart',
     'personalized horoscope',
-    'lunar cycles',
+    'daily horoscopes',
+    'tarot readings',
+    'cosmic insights',
+    'real astronomical data',
+    'astrology app',
+    'natal chart analysis',
     'planetary transits',
     'cosmic guidance',
-    'natal chart analysis',
-    'best times to connect',
+    'astral guide',
   ],
   authors: [{ name: 'Lunary' }],
   creator: 'Lunary',
@@ -33,9 +29,9 @@ export const metadata: Metadata = {
     canonical: 'https://lunary.app',
   },
   openGraph: {
-    title: 'Lunary: The Astrology App That Teaches You to Read Your Chart',
+    title: 'Personalized Astrology App for Your Birth Chart | Lunary',
     description:
-      'Track how planets affect YOU specifically. Pattern recognition, full synastry analysis, and 2,000+ free articles. After 2-3 months, interpret transits without generic predictions.',
+      'Get daily horoscopes, tarot readings, and cosmic insights from your exact birth chart. Real astronomical data, not generic zodiac signs.',
     url: 'https://lunary.app',
     siteName: 'Lunary',
     images: [
@@ -43,7 +39,7 @@ export const metadata: Metadata = {
         url: '/api/og/homepage',
         width: 1200,
         height: 630,
-        alt: 'Lunary - Learn to read your own birth chart',
+        alt: 'Lunary - Personalized Astrology App for Your Birth Chart',
       },
     ],
     locale: 'en_US',
@@ -51,9 +47,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Lunary: The Astrology App That Teaches You to Read Your Chart',
+    title: 'Personalized Astrology App for Your Birth Chart | Lunary',
     description:
-      'Track how planets affect YOU specifically. Pattern recognition, full synastry analysis, and 2,000+ free articles. After 2-3 months, interpret transits without generic predictions.',
+      'Get daily horoscopes, tarot readings, and cosmic insights from your exact birth chart. Real astronomical data, not generic zodiac signs.',
     images: ['/api/og/homepage'],
   },
   robots: {

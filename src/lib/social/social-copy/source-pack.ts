@@ -31,6 +31,7 @@ import {
 } from '../shared/text/normalize';
 import { hasTruncation } from '../shared/text/truncation';
 import type { SourcePack, SocialPostType } from './types';
+import { formatRulershipSentence } from '@/lib/astrology/rulerships';
 
 /**
  * Check if slug is allowed for domain
@@ -69,7 +70,10 @@ const buildTopicDefinition = (
 /**
  * Extract facts from Grimoire data
  */
-const extractFactsFromData = (data: Record<string, any> | null): string[] => {
+const extractFactsFromData = (
+  data: Record<string, any> | null,
+  topic?: string,
+): string[] => {
   if (!data) return [];
   const facts: string[] = [];
   const push = (value: string | undefined) => {
@@ -96,8 +100,8 @@ const extractFactsFromData = (data: Record<string, any> | null): string[] => {
   if (Array.isArray(data.rules) && data.rules.length > 0) {
     push(`Linked to ${data.rules.slice(0, 3).join(', ')}.`);
   }
-  if (data.rulingPlanet || data.ruler) {
-    push(`Ruled by ${data.rulingPlanet || data.ruler}.`);
+  if (topic && (data.traditionalRuler || data.rulingPlanet || data.ruler)) {
+    push(`${sentenceSafe(topic)} ${formatRulershipSentence(topic)}.`);
   }
   return facts;
 };
@@ -199,7 +203,7 @@ export function buildSourcePack({
   const disallowedAnalogies = DISALLOWED_ANALOGY_DOMAINS.filter(
     (domain) => domain !== topicDomain,
   );
-  const sourceFacts = extractFactsFromData(snippet?.fullContent || null);
+  const sourceFacts = extractFactsFromData(snippet?.fullContent || null, topic);
   if (sourceSummary) sourceFacts.unshift(sentenceSafe(sourceSummary));
   if (sourceFacts.length === 0) {
     const fallbackText =
