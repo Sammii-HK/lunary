@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { motion } from 'motion/react';
 
 type HouseSystem =
   | 'placidus'
@@ -29,6 +30,19 @@ interface ChartControlsProps {
   isFreeTier?: boolean;
   freeTierSwitchesRemaining?: number;
 }
+
+type ChipFilter = 'all' | 'harmonious' | 'challenging';
+
+const CHIPS: Array<{
+  value: ChipFilter;
+  label: string;
+  glyph: string;
+  color: string;
+}> = [
+  { value: 'all', label: 'All', glyph: '✦', color: '#c8b4ff' },
+  { value: 'harmonious', label: 'Harmonious', glyph: '△', color: '#7BFFB8' },
+  { value: 'challenging', label: 'Challenging', glyph: '□', color: '#f87171' },
+];
 
 export function ChartControls({
   showAspects,
@@ -61,8 +75,9 @@ export function ChartControls({
     sidereal: 'Sidereal',
     equatorial: 'Equatorial',
   };
+
   return (
-    <div className='flex flex-col items-center gap-2'>
+    <div className='flex flex-col items-center gap-3'>
       <div className='flex flex-wrap gap-2 items-center justify-center'>
         <Button onClick={onToggleAspects} variant='lunary-soft' size='sm'>
           {showAspects ? 'Hide Aspects' : 'Show Aspects'}
@@ -81,32 +96,43 @@ export function ChartControls({
           </Button>
         )}
       </div>
+
       {showAspects && (
-        <div className='flex gap-2 items-center'>
-          <span className='text-xs text-content-muted'>Filter:</span>
-          <Button
-            onClick={() => onAspectFilterChange('all')}
-            variant={aspectFilter === 'all' ? 'lunary-soft' : 'ghost'}
-            size='xs'
-          >
-            All
-          </Button>
-          <Button
-            onClick={() => onAspectFilterChange('harmonious')}
-            variant={aspectFilter === 'harmonious' ? 'lunary-soft' : 'ghost'}
-            size='xs'
-          >
-            Harmonious
-          </Button>
-          <Button
-            onClick={() => onAspectFilterChange('challenging')}
-            variant={aspectFilter === 'challenging' ? 'lunary-soft' : 'ghost'}
-            size='xs'
-          >
-            Challenging
-          </Button>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='flex flex-wrap items-center justify-center gap-1.5'
+        >
+          {CHIPS.map((c) => {
+            const active = aspectFilter === c.value;
+            return (
+              <motion.button
+                key={c.value}
+                onClick={() => onAspectFilterChange(c.value)}
+                whileTap={{ scale: 0.94 }}
+                className='flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors'
+                style={
+                  active
+                    ? {
+                        backgroundColor: `${c.color}22`,
+                        borderColor: `${c.color}88`,
+                        color: c.color,
+                      }
+                    : {
+                        backgroundColor: 'transparent',
+                        borderColor: 'var(--color-stroke-subtle, #3f3f46)',
+                        color: 'var(--color-content-muted, #a1a1aa)',
+                      }
+                }
+              >
+                <span className='text-sm leading-none'>{c.glyph}</span>
+                {c.label}
+              </motion.button>
+            );
+          })}
+        </motion.div>
       )}
+
       {onHouseSystemChange && (
         <div className='flex flex-col gap-2 w-full'>
           <span className='text-xs text-content-muted text-center'>

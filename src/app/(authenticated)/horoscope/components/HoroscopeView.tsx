@@ -25,6 +25,7 @@ import { HoroscopeReflectionPrompts } from '@/components/horoscope/HoroscopeRefl
 import { HoroscopeSeasonReading } from '@/components/horoscope/HoroscopeSeasonReading';
 import { HoroscopeRitualForDay } from '@/components/horoscope/HoroscopeRitualForDay';
 import { Heading } from '@/components/ui/Heading';
+import { TransitScrubber } from '@/components/charts/TransitScrubber';
 
 const GuideNudge = dynamic(
   () =>
@@ -385,6 +386,13 @@ export function HoroscopeView({
           </div>
         </div>
       </div>
+
+      {/* Animated transit scrubber — natal inner, transit outer, scrub through time */}
+      {birthChart && birthChart.length > 0 && (
+        <div className='rounded-2xl border border-stroke-subtle/70 bg-gradient-to-br from-surface-elevated/70 via-surface-base/70 to-layer-deep p-4'>
+          <TransitScrubber birthChart={birthChart} />
+        </div>
+      )}
 
       {/* Cosmic Highlight Card */}
       <div className='rounded-xl border border-stroke-subtle/70 bg-gradient-to-br from-surface-elevated/70 via-surface-base/70 to-layer-deep p-3 space-y-3'>
