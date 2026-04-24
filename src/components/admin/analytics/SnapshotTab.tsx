@@ -164,7 +164,7 @@ export function SnapshotTab({
               description={
                 successMetrics?.active_subscriptions?.paid_subscriptions !==
                 undefined
-                  ? `Paid: ${successMetrics.active_subscriptions.paid_subscriptions} | Free: ${successMetrics.active_subscriptions.free_users}`
+                  ? `Full price: ${successMetrics.active_subscriptions.full_price_paid_users ?? successMetrics.active_subscriptions.paid_subscriptions} | Discounted: ${successMetrics.active_subscriptions.discounted_paid_users ?? 0} | Coupon/comped: ${successMetrics.active_subscriptions.couponed_or_comped_users ?? 0} | Trial: ${successMetrics.active_subscriptions.trial_users ?? 0}`
                   : undefined
               }
             />

@@ -39,7 +39,26 @@ fi
 echo "✅ Type check passed."
 
 # ──────────────────────────────────────────────────
-# Gate 3: Unit tests (changed files since main)
+# Gate 3: Catch use-before-define in changed TS files
+# CodeQL flags this, but default ESLint config does not.
+# Keep this scoped to changed files so legacy debt elsewhere does not block.
+# ──────────────────────────────────────────────────
+echo "🔍 Checking changed files for use-before-define..."
+CHANGED_TS_FILES=$(git diff origin/main --name-only -- '*.ts' '*.tsx')
+if [ -n "$CHANGED_TS_FILES" ]; then
+  # Pass the rule config via a heredoc to avoid shell-escaping the nested
+  # double quotes (xargs was mangling the \" sequences into literal \").
+  UBD_RULE='no-use-before-define: ["error", {"functions": false, "classes": true, "variables": true}]'
+  if ! printf '%s\n' "$CHANGED_TS_FILES" | xargs pnpm eslint --rule "$UBD_RULE" >/dev/null; then
+    echo "❌ Use-before-define found in changed TypeScript files."
+    echo "   Run: pnpm eslint <changed-files> --rule '$UBD_RULE'"
+    exit 1
+  fi
+fi
+echo "✅ Use-before-define check passed."
+
+# ──────────────────────────────────────────────────
+# Gate 4: Unit tests (changed files since main)
 # --changedSince scopes to committed changes only — no stashing needed.
 # ──────────────────────────────────────────────────
 echo "🧪 Running tests..."
@@ -50,7 +69,7 @@ fi
 echo "✅ Tests passed."
 
 # ──────────────────────────────────────────────────
-# Gate 4: Security audit (block on critical only)
+# Gate 5: Security audit (block on critical only)
 # ──────────────────────────────────────────────────
 echo "🔒 Running security audit..."
 AUDIT_OUTPUT=$(pnpm audit --prod 2>&1 || true)
@@ -63,7 +82,7 @@ fi
 echo "✅ Security audit passed."
 
 # ──────────────────────────────────────────────────
-# Gate 5: Build stamp (build takes ~8min, use stamp)
+# Gate 6: Build stamp (build takes ~8min, use stamp)
 # Accept any of the last 5 commits so minor follow-up commits
 # (build stamp updates, hook fixes, etc.) don't require a full rebuild.
 # ──────────────────────────────────────────────────

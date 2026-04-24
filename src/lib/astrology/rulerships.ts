@@ -1,98 +1,58 @@
-type SignKey =
-  | 'aries'
-  | 'taurus'
-  | 'gemini'
-  | 'cancer'
-  | 'leo'
-  | 'virgo'
-  | 'libra'
-  | 'scorpio'
-  | 'sagittarius'
-  | 'capricorn'
-  | 'aquarius'
-  | 'pisces';
+export type RulershipSystem = 'traditional' | 'modern';
 
-const MODERN_RULERS: Record<SignKey, string> = {
-  aries: 'Mars',
-  taurus: 'Venus',
-  gemini: 'Mercury',
-  cancer: 'Moon',
-  leo: 'Sun',
-  virgo: 'Mercury',
-  libra: 'Venus',
-  scorpio: 'Pluto',
-  sagittarius: 'Jupiter',
-  capricorn: 'Saturn',
-  aquarius: 'Uranus',
-  pisces: 'Neptune',
+type Rulership = {
+  traditional: string;
+  modern: string;
 };
 
-const TRADITIONAL_RULERS: Record<SignKey, string> = {
-  aries: 'Mars',
-  taurus: 'Venus',
-  gemini: 'Mercury',
-  cancer: 'Moon',
-  leo: 'Sun',
-  virgo: 'Mercury',
-  libra: 'Venus',
-  scorpio: 'Mars',
-  sagittarius: 'Jupiter',
-  capricorn: 'Saturn',
-  aquarius: 'Saturn',
-  pisces: 'Jupiter',
+const SIGN_RULERS: Record<string, Rulership> = {
+  aries: { traditional: 'Mars', modern: 'Mars' },
+  taurus: { traditional: 'Venus', modern: 'Venus' },
+  gemini: { traditional: 'Mercury', modern: 'Mercury' },
+  cancer: { traditional: 'Moon', modern: 'Moon' },
+  leo: { traditional: 'Sun', modern: 'Sun' },
+  virgo: { traditional: 'Mercury', modern: 'Mercury' },
+  libra: { traditional: 'Venus', modern: 'Venus' },
+  scorpio: { traditional: 'Mars', modern: 'Pluto' },
+  sagittarius: { traditional: 'Jupiter', modern: 'Jupiter' },
+  capricorn: { traditional: 'Saturn', modern: 'Saturn' },
+  aquarius: { traditional: 'Saturn', modern: 'Uranus' },
+  pisces: { traditional: 'Jupiter', modern: 'Neptune' },
 };
 
-function normalise(sign: string): SignKey | null {
-  const lower = sign.trim().toLowerCase();
-  const valid: SignKey[] = [
-    'aries',
-    'taurus',
-    'gemini',
-    'cancer',
-    'leo',
-    'virgo',
-    'libra',
-    'scorpio',
-    'sagittarius',
-    'capricorn',
-    'aquarius',
-    'pisces',
-  ];
-  return (valid as string[]).includes(lower) ? (lower as SignKey) : null;
+const toKey = (sign: string) => sign.trim().toLowerCase();
+
+export function getSignRulership(sign: string): Rulership | null {
+  return SIGN_RULERS[toKey(sign)] || null;
 }
 
-export function getPrimaryRuler(sign: string): string {
-  const key = normalise(sign);
-  return key ? MODERN_RULERS[key] : 'Unknown';
+export function getPrimaryRuler(
+  sign: string,
+  system: RulershipSystem = 'traditional',
+): string {
+  const rulership = getSignRulership(sign);
+  if (!rulership) return 'Unknown';
+  return rulership[system];
 }
 
-export function getTraditionalRuler(sign: string): string {
-  const key = normalise(sign);
-  return key ? TRADITIONAL_RULERS[key] : 'Unknown';
+export function hasDualRulership(sign: string): boolean {
+  const rulership = getSignRulership(sign);
+  if (!rulership) return false;
+  return rulership.traditional !== rulership.modern;
 }
 
 export function formatRulershipValue(sign: string): string {
-  const key = normalise(sign);
-  if (!key) return 'Unknown';
-  const modern = MODERN_RULERS[key];
-  const traditional = TRADITIONAL_RULERS[key];
-  if (modern === traditional) return modern;
-  return `${modern} (modern) · ${traditional} (traditional)`;
-}
-
-export function getSignRulership(
-  sign: string,
-): { modern: string; traditional: string } | null {
-  const key = normalise(sign);
-  if (!key) return null;
-  return { modern: MODERN_RULERS[key], traditional: TRADITIONAL_RULERS[key] };
+  const rulership = getSignRulership(sign);
+  if (!rulership) return 'Unknown';
+  if (rulership.traditional === rulership.modern) return rulership.traditional;
+  return `${rulership.traditional} (traditional), ${rulership.modern} (modern)`;
 }
 
 export function formatRulershipSentence(sign: string): string {
-  const key = normalise(sign);
-  if (!key) return 'has no known rulership';
-  const modern = MODERN_RULERS[key];
-  const traditional = TRADITIONAL_RULERS[key];
-  if (modern === traditional) return `is ruled by ${modern}`;
-  return `is traditionally ruled by ${traditional} and, in modern astrology, by ${modern}`;
+  const rulership = getSignRulership(sign);
+  if (!rulership) return 'has an unknown ruler';
+  if (rulership.traditional === rulership.modern) {
+    return `is ruled by ${rulership.traditional}`;
+  }
+  return `is traditionally ruled by ${rulership.traditional} and modernly ruled by ${rulership.modern}`;
 }

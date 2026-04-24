@@ -5,6 +5,7 @@ import {
   ANALYTICS_REALTIME_TTL_SECONDS,
   ANALYTICS_CACHE_TTL_SECONDS,
 } from '@/lib/analytics-cache-config';
+import { PRODUCT_EVENTS } from '@/lib/analytics/product-events';
 import { filterFields, getFieldsParam } from '@/lib/analytics/field-selection';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
@@ -19,8 +20,17 @@ const TEST_EMAIL_EXACT = 'test@test.lunary.app';
  * plus real-time DAU for today
  */
 async function getSnapshotRows(rangeStart: Date, rangeEnd: Date) {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
   const startDateStr = rangeStart.toISOString().split('T')[0];
-  const endDateStr = rangeEnd.toISOString().split('T')[0];
+  const effectiveEnd =
+    rangeEnd >= today ? new Date(today.getTime() - 1) : rangeEnd;
+  const endDateStr = effectiveEnd.toISOString().split('T')[0];
+
+  if (effectiveEnd < rangeStart) {
+    return [];
+  }
 
   const snapshotResult = await sql.query(
     `SELECT *
@@ -62,21 +72,7 @@ async function getRealtimeDAU() {
       AND created_at < $3
       AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))`,
     [
-      [
-        'grimoire_viewed',
-        'tarot_drawn',
-        'chart_viewed',
-        'birth_chart_viewed',
-        'personalized_horoscope_viewed',
-        'personalized_tarot_viewed',
-        'astral_chat_used',
-        'ritual_completed',
-        'horoscope_viewed',
-        'daily_dashboard_viewed',
-        'journal_entry_created',
-        'dream_entry_created',
-        'cosmic_pulse_opened',
-      ],
+      PRODUCT_EVENTS,
       formatTimestamp(today),
       formatTimestamp(tomorrow),
       TEST_EMAIL_PATTERN,
@@ -108,21 +104,6 @@ const APP_OPENED_EVENTS = ['app_opened'];
 
 // Product interaction events - same as engagement events
 // The difference is Product requires signed-in users
-const PRODUCT_EVENTS = [
-  'grimoire_viewed',
-  'tarot_drawn',
-  'chart_viewed',
-  'birth_chart_viewed',
-  'personalized_horoscope_viewed',
-  'personalized_tarot_viewed',
-  'astral_chat_used',
-  'ritual_completed',
-  'horoscope_viewed',
-  'daily_dashboard_viewed',
-  'journal_entry_created',
-  'dream_entry_created',
-  'cosmic_pulse_opened',
-];
 const SITEWIDE_EVENTS = ['page_viewed'];
 const GRIMOIRE_EVENTS = ['grimoire_viewed'];
 const AUDIT_THRESHOLD_PERCENT = 2;

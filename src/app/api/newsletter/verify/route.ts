@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     // Verify token matches
     const result = await sql`
-      SELECT id, email, is_verified, verification_token
+      SELECT id, email, is_verified, verification_token, preferences
       FROM newsletter_subscribers
       WHERE email = ${email.toLowerCase()}
       AND verification_token = ${token}
@@ -31,14 +31,32 @@ export async function GET(request: NextRequest) {
     }
 
     const subscriber = result.rows[0];
+    const captureContext = subscriber.preferences?.captureContext || {};
+    const redirectParams = new URLSearchParams({ success: 'true' });
+
+    if (subscriber.is_verified) {
+      redirectParams.set('already_verified', 'true');
+    }
+    if (captureContext.sign) {
+      redirectParams.set('sign', captureContext.sign);
+    }
+    if (captureContext.proposition) {
+      redirectParams.set('proposition', captureContext.proposition);
+    }
+    if (captureContext.upsellVariant) {
+      redirectParams.set('upsellVariant', captureContext.upsellVariant);
+    }
+    if (captureContext.pagePath) {
+      redirectParams.set('pagePath', captureContext.pagePath);
+    }
+    if (captureContext.hub) {
+      redirectParams.set('hub', captureContext.hub);
+    }
 
     // Check if already verified
     if (subscriber.is_verified) {
       return NextResponse.redirect(
-        new URL(
-          '/newsletter/verify?success=true&already_verified=true',
-          request.url,
-        ),
+        new URL(`/newsletter/verify?${redirectParams.toString()}`, request.url),
       );
     }
 
@@ -61,7 +79,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.redirect(
-      new URL('/newsletter/verify?success=true', request.url),
+      new URL(`/newsletter/verify?${redirectParams.toString()}`, request.url),
     );
   } catch (error) {
     console.error('Newsletter verification error:', error);

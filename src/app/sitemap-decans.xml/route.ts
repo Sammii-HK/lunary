@@ -11,6 +11,12 @@ export async function GET(): Promise<Response> {
       changefreq: 'monthly',
       priority: '0.8',
     },
+    ...Array.from(new Set(decans.map((d) => d.sign))).map((sign) => ({
+      loc: `${baseUrl}/grimoire/decans/${sign}`,
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'monthly',
+      priority: '0.7',
+    })),
     ...decans.map((d) => ({
       loc: `${baseUrl}/grimoire/decans/${d.sign}/${d.decan}`,
       lastmod: new Date().toISOString().split('T')[0],

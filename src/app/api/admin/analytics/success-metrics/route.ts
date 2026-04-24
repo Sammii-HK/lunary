@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import Stripe from 'stripe';
 
 import {
   formatDate,
@@ -8,18 +7,15 @@ import {
   resolveDateRange,
 } from '@/lib/analytics/date-range';
 import { getSearchConsoleData } from '@/lib/google/search-console';
+import {
+  getStripeSubscriptionSnapshot,
+  type StripeSubscriptionSnapshot,
+} from '@/lib/analytics/stripe-subscriptions';
 import { summarizeEntitlements } from '@/lib/metrics/entitlement-metrics';
 import { ANALYTICS_HISTORICAL_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
-
-function getStripe() {
-  if (!process.env.STRIPE_SECRET_KEY) {
-    return null;
-  }
-  return new Stripe(process.env.STRIPE_SECRET_KEY);
-}
 
 /**
  * Get DAU/WAU/MRR from daily_metrics snapshot (fast path)
@@ -45,15 +41,31 @@ async function getSnapshotMetrics(endDate: Date) {
   return result.rows.length > 0 ? result.rows[0] : null;
 }
 
+function clampSnapshotEnd(endDate: Date) {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  return endDate >= today
+    ? new Date(today.getTime() - 24 * 60 * 60 * 1000)
+    : endDate;
+}
+
 // Test user exclusion patterns
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 const PRODUCT_INTERACTION_EVENTS = [
+  'grimoire_viewed',
+  'tarot_drawn',
+  'chart_viewed',
   'birth_chart_viewed',
   'personalized_horoscope_viewed',
   'personalized_tarot_viewed',
-  'dashboard_viewed',
-  'login',
+  'astral_chat_used',
+  'ritual_completed',
+  'horoscope_viewed',
+  'daily_dashboard_viewed',
+  'journal_entry_created',
+  'dream_entry_created',
+  'cosmic_pulse_opened',
 ];
 
 /**
@@ -87,10 +99,13 @@ export async function GET(request: NextRequest) {
     let weeklyReturningTrend: 'up' | 'down' | 'stable' = 'stable';
     let weeklyReturningChange = 0;
 
+    const snapshotEnd = clampSnapshotEnd(range.end);
+    const previousSnapshotEnd = clampSnapshotEnd(prevRangeEnd);
+
     // FAST PATH: Try daily_metrics snapshot first
     const [currentSnapshot, prevSnapshot] = await Promise.all([
-      getSnapshotMetrics(range.end),
-      getSnapshotMetrics(prevRangeEnd),
+      getSnapshotMetrics(snapshotEnd),
+      getSnapshotMetrics(previousSnapshotEnd),
     ]);
 
     if (currentSnapshot) {
@@ -331,13 +346,13 @@ export async function GET(request: NextRequest) {
           BOOL_OR(status IN ('active', 'trial', 'past_due', 'free')) AS has_active,
           MAX(
             CASE
-              WHEN status IN ('active', 'trial', 'past_due') THEN monthly_amount_due
+              WHEN status IN ('active', 'past_due') THEN monthly_amount_due
               ELSE 0
             END
           ) AS max_monthly,
           BOOL_OR(
             CASE
-              WHEN status IN ('active', 'trial', 'past_due') THEN is_paying
+              WHEN status IN ('active', 'past_due') THEN is_paying
               ELSE false
             END
           ) AS has_paying
@@ -362,10 +377,15 @@ export async function GET(request: NextRequest) {
 
     const currentEntitlementStats = summarizeEntitlements(entitlementEntries);
 
-    // Count paid subscriptions from subscriptions table
-    const paidSubscriptionsResult = await sql`
+    // Stripe-synced access buckets from subscriptions table
+    const accessBucketsResult = await sql`
       WITH scoped AS (
-        SELECT user_id, status
+        SELECT
+          user_id,
+          status,
+          COALESCE(monthly_amount_due, 0) AS monthly_amount_due,
+          COALESCE(has_discount, false) AS has_discount,
+          COALESCE(discount_percent, 0) AS discount_percent
         FROM subscriptions
         WHERE user_id IS NOT NULL
           AND COALESCE(updated_at, created_at) <= ${formatTimestamp(range.end)}
@@ -375,13 +395,36 @@ export async function GET(request: NextRequest) {
         SELECT
           user_id,
           BOOL_OR(status IN ('active', 'trial', 'past_due', 'free')) AS has_active,
-          BOOL_OR(status IN ('active', 'trial', 'past_due')) AS has_paid
+          BOOL_OR(status = 'trial') AS has_trial,
+          BOOL_OR(
+            status IN ('active', 'past_due') AND monthly_amount_due > 0
+          ) AS has_real_paid,
+          BOOL_OR(
+            status IN ('active', 'past_due')
+            AND monthly_amount_due > 0
+            AND has_discount = true
+            AND discount_percent > 0
+            AND discount_percent < 100
+          ) AS has_discounted_paid,
+          BOOL_OR(
+            status IN ('active', 'trial', 'past_due', 'free')
+            AND (
+              monthly_amount_due <= 0
+              OR status = 'free'
+              OR discount_percent >= 100
+            )
+          ) AS has_couponed_or_comped
         FROM scoped
         GROUP BY user_id
       )
       SELECT
         COUNT(*) FILTER (WHERE has_active) AS total_active,
-        COUNT(*) FILTER (WHERE has_paid) AS total_paid
+        COUNT(*) FILTER (WHERE has_real_paid) AS total_paid,
+        COUNT(*) FILTER (WHERE has_discounted_paid) AS discounted_paid,
+        COUNT(*) FILTER (WHERE has_trial AND NOT has_real_paid) AS trial_users,
+        COUNT(*) FILTER (
+          WHERE has_couponed_or_comped AND NOT has_real_paid AND NOT has_trial
+        ) AS couponed_or_comped_users
       FROM per_user
     `;
 
@@ -390,7 +433,8 @@ export async function GET(request: NextRequest) {
       WITH paid_users AS (
         SELECT DISTINCT user_id
         FROM subscriptions
-        WHERE status IN ('active', 'trial', 'past_due')
+        WHERE status IN ('active', 'past_due')
+          AND COALESCE(monthly_amount_due, 0) > 0
           AND user_id IS NOT NULL
           AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
       ),
@@ -409,8 +453,12 @@ export async function GET(request: NextRequest) {
     const activeSubscriptionsCountResult = {
       rows: [
         {
-          total_active: paidSubscriptionsResult.rows[0]?.total_active || 0,
-          total_paid: paidSubscriptionsResult.rows[0]?.total_paid || 0,
+          total_active: accessBucketsResult.rows[0]?.total_active || 0,
+          total_paid: accessBucketsResult.rows[0]?.total_paid || 0,
+          discounted_paid: accessBucketsResult.rows[0]?.discounted_paid || 0,
+          trial_users: accessBucketsResult.rows[0]?.trial_users || 0,
+          couponed_or_comped_users:
+            accessBucketsResult.rows[0]?.couponed_or_comped_users || 0,
           total_users: userCountsResult.rows[0]?.total_users || 0,
           free_users: userCountsResult.rows[0]?.free_users || 0,
         },
@@ -419,7 +467,7 @@ export async function GET(request: NextRequest) {
 
     const prevActiveSubscriptionsResult = await sql`
       WITH scoped AS (
-        SELECT user_id, status
+        SELECT user_id, status, COALESCE(monthly_amount_due, 0) AS monthly_amount_due
         FROM subscriptions
         WHERE user_id IS NOT NULL
           AND COALESCE(updated_at, created_at) <= ${formatTimestamp(prevRangeEnd)}
@@ -428,11 +476,16 @@ export async function GET(request: NextRequest) {
       per_user AS (
         SELECT
           user_id,
-          BOOL_OR(status IN ('active', 'trial', 'past_due', 'free')) AS has_active
+          BOOL_OR(status IN ('active', 'trial', 'past_due', 'free')) AS has_active,
+          BOOL_OR(
+            status IN ('active', 'past_due') AND monthly_amount_due > 0
+          ) AS has_paid
         FROM scoped
         GROUP BY user_id
       )
-      SELECT COUNT(*) FILTER (WHERE has_active) AS total_active
+      SELECT
+        COUNT(*) FILTER (WHERE has_active) AS total_active,
+        COUNT(*) FILTER (WHERE has_paid) AS total_paid
       FROM per_user
     `;
 
@@ -452,10 +505,16 @@ export async function GET(request: NextRequest) {
       SELECT
         user_id,
         1 AS subscription_count,
-        COALESCE(monthly_amount_due, 0) AS max_monthly,
-        is_paying
+        CASE
+          WHEN status IN ('active', 'past_due') THEN COALESCE(monthly_amount_due, 0)
+          ELSE 0
+        END AS max_monthly,
+        CASE
+          WHEN status IN ('active', 'past_due') THEN is_paying
+          ELSE false
+        END AS is_paying
       FROM latest_per_user
-      WHERE status IN ('active', 'trial', 'past_due')
+      WHERE status IN ('active', 'trial', 'past_due', 'free')
     `;
 
     const previousEntries = previousSubscriptionsResult.rows.map((row) => ({
@@ -471,13 +530,8 @@ export async function GET(request: NextRequest) {
     const duplicateUsers = currentEntitlementStats.duplicateUsers;
     const duplicateSubscriptionRate =
       activeEntitlements > 0 ? (duplicateUsers / activeEntitlements) * 100 : 0;
-    const mrr = currentEntitlementStats.dedupedMrr;
-    const payingCustomers = currentEntitlementStats.payingCustomers;
     const activeSubscriptions = Number(
       activeSubscriptionsCountResult.rows[0]?.total_active || 0,
-    );
-    const paidSubscriptions = Number(
-      activeSubscriptionsCountResult.rows[0]?.total_paid || 0,
     );
     const totalUsers = Number(
       activeSubscriptionsCountResult.rows[0]?.total_users || 0,
@@ -485,8 +539,8 @@ export async function GET(request: NextRequest) {
     const freeUsers = Number(
       activeSubscriptionsCountResult.rows[0]?.free_users || 0,
     );
-    const prevActiveSubscriptions = Number(
-      prevActiveSubscriptionsResult.rows[0]?.total_active || 0,
+    const prevPaidSubscriptionsTotal = Number(
+      prevActiveSubscriptionsResult.rows[0]?.total_paid || 0,
     );
 
     // Get orphaned subscriptions count (subscriptions that couldn't be linked to a user)
@@ -502,47 +556,39 @@ export async function GET(request: NextRequest) {
       // Table may not exist
     }
 
-    // Get direct Stripe subscription count for comparison
-    // Note: This is optional - if Stripe calls fail/timeout, we still return the rest of the metrics
-    let stripeActiveSubscriptions = 0;
-    let stripeActiveCustomers = 0;
-    const stripe = getStripe();
-    if (stripe) {
-      try {
-        // Use a simple approach with expand to get counts without iteration
-        // Fetch first page of active and trialing subscriptions
-        const [activeSubs, trialingSubs] = await Promise.all([
-          stripe.subscriptions.list({ status: 'active', limit: 100 }),
-          stripe.subscriptions.list({ status: 'trialing', limit: 100 }),
-        ]);
-
-        // Count subscriptions from first page (good enough for comparison)
-        stripeActiveSubscriptions =
-          activeSubs.data.length + trialingSubs.data.length;
-
-        // Count unique customers from first page
-        const customerIds = new Set<string>();
-        for (const sub of activeSubs.data) {
-          if (typeof sub.customer === 'string') {
-            customerIds.add(sub.customer);
-          }
-        }
-        for (const sub of trialingSubs.data) {
-          if (typeof sub.customer === 'string') {
-            customerIds.add(sub.customer);
-          }
-        }
-        stripeActiveCustomers = customerIds.size;
-      } catch (error) {
-        // Stripe calls are optional - log and continue with 0 values
-        console.warn(
-          '[success-metrics] Stripe count failed (non-fatal):',
-          error,
-        );
-        stripeActiveSubscriptions = 0;
-        stripeActiveCustomers = 0;
-      }
+    let stripeSnapshot: StripeSubscriptionSnapshot | null = null;
+    try {
+      // Default-initialised Stripe client; no need to pre-resolve getStripe().
+      stripeSnapshot = await getStripeSubscriptionSnapshot();
+    } catch (error) {
+      console.warn(
+        '[success-metrics] Stripe snapshot failed, falling back to local subscription sync:',
+        error,
+      );
     }
+
+    const fullPricePaidCustomers =
+      stripeSnapshot?.fullPricePaidCustomers ??
+      Math.max(
+        Number(accessBucketsResult.rows[0]?.total_paid || 0) -
+          Number(accessBucketsResult.rows[0]?.discounted_paid || 0),
+        0,
+      );
+    const discountedPaidUsers =
+      stripeSnapshot?.discountedPaidCustomers ??
+      Number(accessBucketsResult.rows[0]?.discounted_paid || 0);
+    const trialUsers =
+      stripeSnapshot?.trialCustomers ??
+      Number(accessBucketsResult.rows[0]?.trial_users || 0);
+    const couponedOrCompedUsers =
+      stripeSnapshot?.couponedOrCompedCustomers ??
+      Number(accessBucketsResult.rows[0]?.couponed_or_comped_users || 0);
+    const activeAccessUsers =
+      stripeSnapshot?.activeAccessCustomers ?? activeSubscriptions;
+    const stripeActiveSubscriptions =
+      stripeSnapshot?.activeSubscriptions ?? activeSubscriptions;
+    const billedCustomers = fullPricePaidCustomers + discountedPaidUsers;
+    const mrr = stripeSnapshot?.mrr ?? currentEntitlementStats.dedupedMrr;
 
     const prevMrr = previousEntitlementStats.dedupedMrr;
     const startingPayingCustomers = previousEntitlementStats.payingCustomers;
@@ -558,21 +604,21 @@ export async function GET(request: NextRequest) {
       prevArr > 0 ? ((arr - prevArr) / prevArr) * 100 : arr > 0 ? 100 : 0;
 
     const activeSubscriptionsTrend =
-      activeSubscriptions > prevActiveSubscriptions
+      fullPricePaidCustomers > prevPaidSubscriptionsTotal
         ? 'up'
-        : activeSubscriptions < prevActiveSubscriptions
+        : fullPricePaidCustomers < prevPaidSubscriptionsTotal
           ? 'down'
           : 'stable';
     const activeSubscriptionsChange =
-      prevActiveSubscriptions > 0
-        ? ((activeSubscriptions - prevActiveSubscriptions) /
-            prevActiveSubscriptions) *
+      prevPaidSubscriptionsTotal > 0
+        ? ((fullPricePaidCustomers - prevPaidSubscriptionsTotal) /
+            prevPaidSubscriptionsTotal) *
           100
-        : activeSubscriptions > 0
+        : fullPricePaidCustomers > 0
           ? 100
           : 0;
 
-    const arpu = payingCustomers > 0 ? mrr / payingCustomers : 0;
+    const arpu = billedCustomers > 0 ? mrr / billedCustomers : 0;
     const prevArpu =
       startingPayingCustomers > 0 ? prevMrr / startingPayingCustomers : 0;
     const arpuTrend =
@@ -869,23 +915,24 @@ export async function GET(request: NextRequest) {
         target: null,
       },
       active_subscriptions: {
-        value: activeSubscriptions,
+        value: fullPricePaidCustomers,
         trend: activeSubscriptionsTrend,
         change: Number(activeSubscriptionsChange.toFixed(1)),
         target: null,
-        // Breakdown: paid vs free (free = registered users without paid subscription)
-        paid_subscriptions: paidSubscriptions,
+        // Breakdown: full price vs discounted vs coupon/comped vs trial access
+        paid_subscriptions: fullPricePaidCustomers,
+        billed_customers: billedCustomers,
+        full_price_paid_users: fullPricePaidCustomers,
+        discounted_paid_users: discountedPaidUsers,
+        trial_users: trialUsers,
+        couponed_or_comped_users: couponedOrCompedUsers,
+        access_users: activeAccessUsers,
         free_users: freeUsers,
         total_registered_users: totalUsers,
-        // Stripe direct counts for comparison (paid only)
         stripe_active_subscriptions: stripeActiveSubscriptions,
-        stripe_active_customers: stripeActiveCustomers,
+        stripe_active_customers: activeAccessUsers,
         orphaned_subscriptions: orphanedSubscriptionsCount,
-        // Discrepancy compares DB paid users to Stripe (not including free)
-        discrepancy:
-          stripeActiveCustomers > 0
-            ? stripeActiveCustomers - paidSubscriptions
-            : null,
+        discrepancy: activeAccessUsers - activeSubscriptions,
       },
       active_entitlements: {
         value: activeEntitlements,
@@ -894,7 +941,9 @@ export async function GET(request: NextRequest) {
         target: null,
       },
       paying_customers: {
-        value: payingCustomers,
+        value: billedCustomers,
+        full_price: fullPricePaidCustomers,
+        discounted: discountedPaidUsers,
         target: null,
       },
       subscription_cancels: subscriptionCancels,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { getStripeSubscriptionSnapshot } from '@/lib/analytics/stripe-subscriptions';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
@@ -18,16 +19,8 @@ export async function GET(request: NextRequest) {
       Date.now() - 7 * 24 * 60 * 60 * 1000,
     ).toISOString();
 
-    const [mrrResult, signupsResult, dauResult] = await Promise.all([
-      sql.query(
-        `SELECT COUNT(*) as subscriber_count,
-                COALESCE(SUM(COALESCE(monthly_amount_due, 0)), 0) as mrr
-         FROM subscriptions
-         WHERE status = 'active'
-           AND stripe_subscription_id IS NOT NULL
-           AND (user_email IS NULL OR (user_email NOT LIKE '%@test.lunary.app' AND user_email != 'test@test.lunary.app'))`,
-        [],
-      ),
+    const [stripeSnapshot, signupsResult, dauResult] = await Promise.all([
+      getStripeSubscriptionSnapshot(),
       sql.query(
         `SELECT COUNT(*) as count FROM "user"
          WHERE "createdAt" >= $1 AND "createdAt" <= $2
@@ -36,17 +29,22 @@ export async function GET(request: NextRequest) {
       ),
       sql
         .query(
-          `SELECT dau FROM daily_metrics WHERE dau IS NOT NULL ORDER BY metric_date DESC LIMIT 1`,
+          `SELECT signed_in_product_dau
+           FROM daily_metrics
+           WHERE metric_date < CURRENT_DATE
+             AND signed_in_product_dau IS NOT NULL
+           ORDER BY metric_date DESC
+           LIMIT 1`,
           [],
         )
         .catch(() => ({ rows: [] })),
     ]);
 
     return NextResponse.json({
-      subscriberCount: Number(mrrResult.rows[0]?.subscriber_count || 0),
-      mrr: Number(mrrResult.rows[0]?.mrr || 0),
+      subscriberCount: Number(stripeSnapshot.activeSubscriptions || 0),
+      mrr: Number(stripeSnapshot.mrr || 0),
       newSignups7d: Number(signupsResult.rows[0]?.count || 0),
-      dau: Number(dauResult.rows[0]?.dau || 0),
+      dau: Number(dauResult.rows[0]?.signed_in_product_dau || 0),
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';

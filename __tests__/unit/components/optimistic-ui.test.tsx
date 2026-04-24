@@ -12,6 +12,7 @@ import React from 'react';
 // ──────────────────────────────────────────────
 
 const mockUseAuthStatus = jest.fn();
+const mockGetSession = jest.fn();
 jest.mock('@/components/AuthStatus', () => ({
   useAuthStatus: () => mockUseAuthStatus(),
 }));
@@ -22,14 +23,17 @@ jest.mock('@/hooks/useHaptic', () => ({
 }));
 
 jest.mock('@/lib/analytics', () => ({
-  conversionTracking: { upgradeClicked: jest.fn() },
+  conversionTracking: {
+    upgradeClicked: jest.fn(),
+    preferencesUpdated: jest.fn(),
+  },
   trackCtaImpression: jest.fn(),
   trackCtaClick: jest.fn(),
 }));
 
 jest.mock('@/lib/auth-client', () => ({
   betterAuthClient: {
-    getSession: jest.fn().mockResolvedValue({ data: { user: null } }),
+    getSession: () => mockGetSession(),
   },
 }));
 
@@ -290,7 +294,7 @@ describe('SaveToCollection – optimistic UI', () => {
           status: 200,
         }),
       )
-      .mockImplementation(controllable.mockFn);
+      .mockImplementationOnce(controllable.mockFn);
 
     await act(async () => {
       render(
@@ -355,7 +359,7 @@ describe('SaveToCollection – optimistic UI', () => {
           status: 200,
         }),
       )
-      .mockImplementation(controllable.mockFn);
+      .mockImplementationOnce(controllable.mockFn);
 
     await act(async () => {
       render(
@@ -719,6 +723,15 @@ describe('EmailSubscriptionSettings – optimistic UI', () => {
       user: { id: '1', email: 'test@example.com' },
       profile: { id: '1' },
     });
+    mockGetSession.mockResolvedValue({
+      data: {
+        user: {
+          id: '1',
+          email: 'test@example.com',
+          emailVerified: true,
+        },
+      },
+    });
   });
 
   it('should flip subscription toggle immediately before API responds', async () => {
@@ -729,9 +742,23 @@ describe('EmailSubscriptionSettings – optimistic UI', () => {
       .fn()
       // GET subscription status
       .mockResolvedValueOnce(
-        new Response(JSON.stringify({ subscriber: { is_active: false } }), {
-          status: 200,
-        }),
+        new Response(
+          JSON.stringify({
+            subscriber: {
+              is_active: false,
+              preferences: {
+                weeklyNewsletter: false,
+                dailyHoroscope: false,
+                blogUpdates: false,
+                productUpdates: false,
+                cosmicAlerts: false,
+              },
+            },
+          }),
+          {
+            status: 200,
+          },
+        ),
       )
       // Toggle POST (controllable)
       .mockImplementation(controllable.mockFn);
@@ -742,30 +769,44 @@ describe('EmailSubscriptionSettings – optimistic UI', () => {
 
     // Wait for loading to complete
     await waitFor(() => {
-      expect(screen.getByText('Not Subscribed')).toBeInTheDocument();
+      expect(
+        screen.getByText(/Status:\s+All marketing email streams off/, {
+          selector: 'p',
+        }),
+      ).toBeInTheDocument();
     });
 
-    // Find the toggle button (the one with the sliding circle)
-    const toggleButtons = screen.getAllByRole('button');
-    // The toggle is the one with rounded-full class
-    const toggle = toggleButtons.find((btn) =>
-      btn.className.includes('rounded-full'),
-    )!;
+    const dailyRow = screen
+      .getByText('Daily horoscope emails')
+      .closest(
+        'div.flex.items-center.justify-between.gap-4.rounded-lg.border.border-stroke-default.p-3',
+      );
+    const toggle = dailyRow?.querySelector('button') as HTMLButtonElement;
     expect(toggle).toBeTruthy();
 
     await act(async () => {
       fireEvent.click(toggle);
     });
 
-    // Optimistically: should show Subscribed immediately
-    expect(screen.getByText('Subscribed')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Status:\s+At least one email stream enabled/, {
+          selector: 'p',
+        }),
+      ).toBeInTheDocument();
+    });
+    expect(toggle.className).toContain('bg-lunary-primary-600');
 
     // Resolve
     await act(async () => {
       controllable.resolve({ success: true });
     });
 
-    expect(screen.getByText('Subscribed')).toBeInTheDocument();
+    expect(
+      screen.getByText(/Status:\s+At least one email stream enabled/, {
+        selector: 'p',
+      }),
+    ).toBeInTheDocument();
   });
 
   it('should revert subscription toggle on API failure', async () => {
@@ -778,9 +819,23 @@ describe('EmailSubscriptionSettings – optimistic UI', () => {
     global.fetch = jest
       .fn()
       .mockResolvedValueOnce(
-        new Response(JSON.stringify({ subscriber: { is_active: false } }), {
-          status: 200,
-        }),
+        new Response(
+          JSON.stringify({
+            subscriber: {
+              is_active: false,
+              preferences: {
+                weeklyNewsletter: false,
+                dailyHoroscope: false,
+                blogUpdates: false,
+                productUpdates: false,
+                cosmicAlerts: false,
+              },
+            },
+          }),
+          {
+            status: 200,
+          },
+        ),
       )
       .mockImplementation(controllable.mockFn);
 
@@ -789,20 +844,30 @@ describe('EmailSubscriptionSettings – optimistic UI', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Not Subscribed')).toBeInTheDocument();
+      expect(
+        screen.getByText(/Status:\s+All marketing email streams off/, {
+          selector: 'p',
+        }),
+      ).toBeInTheDocument();
     });
 
-    const toggleButtons = screen.getAllByRole('button');
-    const toggle = toggleButtons.find((btn) =>
-      btn.className.includes('rounded-full'),
-    )!;
+    const dailyRow = screen
+      .getByText('Daily horoscope emails')
+      .closest(
+        'div.flex.items-center.justify-between.gap-4.rounded-lg.border.border-stroke-default.p-3',
+      );
+    const toggle = dailyRow?.querySelector('button') as HTMLButtonElement;
 
     await act(async () => {
       fireEvent.click(toggle);
     });
 
-    // Optimistically subscribed
-    expect(screen.getByText('Subscribed')).toBeInTheDocument();
+    // Optimistically enabled
+    expect(
+      screen.getByText(/Status:\s+At least one email stream enabled/, {
+        selector: 'p',
+      }),
+    ).toBeInTheDocument();
 
     // API fails
     await act(async () => {
@@ -811,7 +876,11 @@ describe('EmailSubscriptionSettings – optimistic UI', () => {
 
     // Should revert
     await waitFor(() => {
-      expect(screen.getByText('Not Subscribed')).toBeInTheDocument();
+      expect(
+        screen.getByText(/Status:\s+All marketing email streams off/, {
+          selector: 'p',
+        }),
+      ).toBeInTheDocument();
     });
 
     alertSpy.mockRestore();

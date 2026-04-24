@@ -6,8 +6,11 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return ZODIAC_CUSPS.map((cusp) => ({ cusp: cusp.id }));
+}
 
 export async function generateMetadata({
   params,

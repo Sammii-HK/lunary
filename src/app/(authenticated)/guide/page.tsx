@@ -28,7 +28,9 @@ import { SaveToCollection } from '@/components/SaveToCollection';
 import { parseMessageContent } from '@/utils/messageParser';
 import { recordCheckIn } from '@/lib/streak/check-in';
 import { captureEvent } from '@/lib/posthog-client';
-import { conversionTracking } from '@/lib/analytics';
+import { conversionTracking, trackEvent } from '@/lib/analytics';
+import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
+import { getABTestMetadataFromVariant } from '@/lib/ab-test-tracking';
 import { getPublicPlanName } from '@/lib/ai/plans';
 import {
   dismissRitualBadge,
@@ -50,6 +52,7 @@ import { useRouter } from 'next/navigation';
 import { mutate } from 'swr';
 import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
 import { Heading } from '@/components/ui/Heading';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
 
 interface CollectionFolder {
   id: number;
@@ -389,12 +392,26 @@ function BookOfShadowsContent() {
     planId,
     dailyHighlight,
     error,
+    limitReached,
     clearError,
     addMessage,
     threadId,
   } = useAssistantChat({ birthday: userBirthday });
 
   const [cacheInitialized, setCacheInitialized] = useState(false);
+  const [astralLimitModalOpen, setAstralLimitModalOpen] = useState(false);
+  const astralPaywallVariantRaw = useFeatureFlagVariant('astral_paywall_v1');
+  const astralPaywallVariant =
+    typeof astralPaywallVariantRaw === 'string'
+      ? astralPaywallVariantRaw
+      : 'control';
+  const isAstralPaywallCurious = astralPaywallVariant === 'curious';
+  const astralPaywallTitle = isAstralPaywallCurious
+    ? 'Keep going? Upgrade to Pro for unlimited questions'
+    : "You've reached your daily messages";
+  const astralPaywallDescription = isAstralPaywallCurious
+    ? "You've had all your free questions today. Pro lifts the limit so you can keep exploring whenever the cosmos nudges you."
+    : 'Upgrade to Lunary+ for a higher daily message limit, richer grimoire context, and unlimited ritual guidance.';
   const [savedCollections, setSavedCollections] = useState<SavedCollection[]>(
     [],
   );
@@ -409,6 +426,37 @@ function BookOfShadowsContent() {
     return localStorage.getItem('daily-thread-collapsed') !== 'true';
   });
   const [hasDailyModules, setHasDailyModules] = useState(false);
+
+  // Astral guide daily message limit is a hard paywall moment: surface an
+  // UpgradePrompt modal (not just the inline error toast) so the upgrade
+  // path is clear. Fires paywall tracking (with astral_paywall_v1 A/B
+  // metadata) once per limit hit.
+  useEffect(() => {
+    if (limitReached && !astralLimitModalOpen) {
+      setAstralLimitModalOpen(true);
+
+      const abMetadata = getABTestMetadataFromVariant(
+        'astral_paywall_v1',
+        astralPaywallVariantRaw,
+      );
+
+      trackEvent('astral_paywall_view', {
+        userId: authState.user?.id,
+        featureName: 'astral-guide',
+        metadata: {
+          variant: astralPaywallVariant,
+          ...(abMetadata ?? {}),
+        },
+      });
+      conversionTracking.featureGated('astral-guide');
+    }
+  }, [
+    limitReached,
+    astralLimitModalOpen,
+    authState.user?.id,
+    astralPaywallVariant,
+    astralPaywallVariantRaw,
+  ]);
 
   useEffect(() => {
     if (!authState.isAuthenticated || authState.loading) return;
@@ -494,8 +542,11 @@ function BookOfShadowsContent() {
     }
   }, [authState.isAuthenticated, authState.loading]);
 
-  // Condense progress widget when messages are scrolled
+  // Condense progress widget when messages are scrolled.
+  // Ref is declared further down alongside the other refs; React runs effects
+  // after all hooks have initialised so this is safe at runtime.
   useEffect(() => {
+    // eslint-disable-next-line no-use-before-define
     const el = messagesContainerRef.current;
     if (!el) return;
     const handleScroll = () => setIsScrolled(el.scrollTop > 40);
@@ -734,6 +785,7 @@ function BookOfShadowsContent() {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       if (isJournalMode) {
+        // eslint-disable-next-line no-use-before-define
         handleJournalSubmit();
       } else {
         attemptSend();
@@ -1295,6 +1347,31 @@ function BookOfShadowsContent() {
           </form>
         </div>
       </div>
+      <UpgradePrompt
+        variant='modal'
+        featureName='astral-guide'
+        title={astralPaywallTitle}
+        description={astralPaywallDescription}
+        isOpen={astralLimitModalOpen}
+        onClose={() => {
+          setAstralLimitModalOpen(false);
+          clearError();
+        }}
+        onCtaClick={() => {
+          const abMetadata = getABTestMetadataFromVariant(
+            'astral_paywall_v1',
+            astralPaywallVariantRaw,
+          );
+          trackEvent('astral_paywall_cta_click', {
+            userId: authState.user?.id,
+            featureName: 'astral-guide',
+            metadata: {
+              variant: astralPaywallVariant,
+              ...(abMetadata ?? {}),
+            },
+          });
+        }}
+      />
     </div>
   );
 }

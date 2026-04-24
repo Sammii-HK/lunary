@@ -15,7 +15,7 @@ import {
 } from '@/lib/copy/transit-copy';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
-import { Check, Circle, Orbit, ArrowRight, Sparkles, Lock } from 'lucide-react';
+import { Check, Circle, Orbit, ArrowRight, Lock } from 'lucide-react';
 import { mutate } from 'swr';
 import Link from 'next/link';
 import { recordCheckIn, type StreakRecord } from '@/lib/streak/check-in';
@@ -32,6 +32,7 @@ import { isInDemoMode } from '@/lib/demo-mode';
 import { IntentionPrompt } from '@/components/rituals/IntentionPrompt';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { iosLabel } from '@/lib/ios-labels';
+import { LunaryPlusPill } from '@/components/LunaryPlusPill';
 
 type FocusArea = {
   area: 'love' | 'work' | 'inner';
@@ -427,6 +428,10 @@ export const PersonalizedHoroscopePreview = () => {
                             transitPlanet: topTransitAspects[0].transitPlanet,
                             natalPlanet: topTransitAspects[0].natalPlanet,
                             aspectType: topTransitAspects[0].aspectType,
+                            transitSign: topTransitAspects[0].transitSign,
+                            natalSign: topTransitAspects[0].natalSign,
+                            transitHouse: topTransitAspects[0].house,
+                            natalHouse: topTransitAspects[0].natalHouse,
                             userId: user?.id,
                           }).headline
                         }
@@ -446,10 +451,9 @@ export const PersonalizedHoroscopePreview = () => {
 
               <div className='relative mt-1'>
                 {renderPreview()}
-                <span className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-layer-base/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-content-brand'>
-                  <Sparkles className='w-2.5 h-2.5' />
-                  Lunary+
-                </span>
+                <div className='absolute top-0 right-0'>
+                  <LunaryPlusPill featureName='personalised-horoscope' />
+                </div>
               </div>
 
               <span className='flex items-center gap-1.5 text-xs text-content-secondary hover:text-content-secondary transition-colors'>
@@ -509,6 +513,10 @@ export const PersonalizedHoroscopePreview = () => {
                     transitPlanet: aspect.transitPlanet,
                     natalPlanet: aspect.natalPlanet,
                     aspectType: aspect.aspectType,
+                    transitSign: aspect.transitSign,
+                    natalSign: aspect.natalSign,
+                    transitHouse: aspect.house,
+                    natalHouse: aspect.natalHouse,
                     remainingDays: aspect.duration?.remainingDays,
                     userId: user?.id,
                     seed: i,

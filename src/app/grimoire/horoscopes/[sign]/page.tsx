@@ -11,13 +11,14 @@ import {
   SIGN_DISPLAY_NAMES,
   SIGN_SYMBOLS,
   SIGN_ELEMENTS,
-  SIGN_RULERS,
   ZodiacSign,
   MONTHS,
 } from '@/constants/seo/monthly-horoscope';
+import { formatRulershipValue } from '@/lib/astrology/rulerships';
 
 // 30-day revalidation for sign overview pages
 export const revalidate = 2592000;
+export const dynamicParams = false;
 
 const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
 
@@ -48,8 +49,9 @@ function resolveCanonicalUrl(value: unknown, fallback: string): string {
   return fallback;
 }
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return ZODIAC_SIGNS.map((sign) => ({ sign }));
+}
 
 export async function generateMetadata({
   params,
@@ -82,13 +84,13 @@ export default async function SignHoroscopePage({
   const signName = SIGN_DISPLAY_NAMES[signKey];
   const symbol = SIGN_SYMBOLS[signKey];
   const element = SIGN_ELEMENTS[signKey];
-  const ruler = SIGN_RULERS[signKey];
+  const rulership = formatRulershipValue(signName);
 
   const heroContent = (
     <div className='text-center space-y-3'>
       <span className='text-6xl'>{symbol}</span>
       <p className='text-sm uppercase tracking-[0.3em] text-content-muted'>
-        {element} Sign • Ruled by {ruler}
+        {element} Sign • Rulership: {rulership}
       </p>
     </div>
   );
@@ -136,7 +138,7 @@ export default async function SignHoroscopePage({
       image={image}
       imageAlt={`${signName} Horoscopes | Lunary`}
       intro={`Select a year to read ${signName} horoscopes written with real planetary context. Each month includes lunations, transits, and practical guidance tailored to ${element.toLowerCase()} energy.`}
-      meaning={`As a ${element} sign ruled by ${ruler}, ${signName} thrives on ${element.toLowerCase()} momentum, persistence, and emotional depth. These horoscopes help you channel your natural strengths into the rituals, relationships, and work that matter most.`}
+      meaning={`${signName} is a ${element} sign with rulership ${rulership}. These horoscopes help you channel your natural strengths into the rituals, relationships, and work that matter most.`}
       heroContent={heroContent}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },

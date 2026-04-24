@@ -78,8 +78,10 @@ export function calculateTransitAspects(
         const orbDiff = Math.abs(diff - aspectDef.angle);
 
         if (orbDiff <= aspectDef.orb) {
-          // Calculate house position
+          // Transit planet's current house in the native's chart
           const house = calculateHouse(transitLongitude, ascendantLongitude);
+          // Natal body's own house in the native's chart
+          const natalHouse = calculateHouse(natalLongitude, ascendantLongitude);
 
           aspects.push({
             transitPlanet,
@@ -91,6 +93,7 @@ export function calculateTransitAspects(
             natalDegree: formatDegree(natalLongitude, natalSign),
             orbDegrees: orbDiff,
             house,
+            natalHouse,
           });
         }
       });

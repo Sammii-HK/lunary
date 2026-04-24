@@ -6,15 +6,12 @@ import { sql } from '@vercel/postgres';
 import { trackConversionEvent } from '@/lib/analytics/tracking';
 import { captureEvent } from '@/lib/posthog-server';
 import { conversionTracking } from '@/lib/analytics';
+import { deterministicEventId } from '@/lib/analytics/deterministic-event-id';
 import { sendEmail } from '@/lib/email';
 import {
   generateCancellationWinBackEmailHTML,
   generateCancellationWinBackEmailText,
 } from '@/lib/email-components/CancellationWinBackEmail';
-import {
-  generateOverdueInvoiceEmailHTML,
-  generateOverdueInvoiceEmailText,
-} from '@/lib/email-components/OverdueInvoiceEmail';
 import {
   pickBestSubscription,
   getTrialLevel,
@@ -778,6 +775,62 @@ async function handleSubscriptionChange(
         metadata: { stripeSubscriptionId: subscription.id },
       });
 
+      // Write a canonical trial_converted row to conversion_events so the
+      // conversion funnel + KPI dashboards see this as a real paid conversion.
+      // Skip beta-comp trial rolls (100% off coupons produce £0 / $0 invoices),
+      // which would otherwise inflate trial_converted counts.
+      const effectivePaidAmount = discountInfo.monthlyAmountDue ?? 0;
+      const isRealPaidConversion =
+        !discountInfo.hasDiscount ||
+        discountInfo.discountPercent < 100 ||
+        effectivePaidAmount > 0;
+
+      if (isRealPaidConversion) {
+        const price = subscription.items.data[0]?.price;
+        const currency = price?.currency?.toUpperCase() || 'GBP';
+        const eventIdForTrialConverted = deterministicEventId(
+          'trial_converted',
+          userId,
+          subscription.id,
+        );
+
+        try {
+          await sql`
+            INSERT INTO conversion_events (
+              event_type,
+              event_id,
+              user_id,
+              user_email,
+              plan_type,
+              feature_name,
+              metadata
+            ) VALUES (
+              'trial_converted',
+              ${eventIdForTrialConverted}::uuid,
+              ${userId},
+              ${userEmail},
+              ${planType},
+              ${subscription.metadata?.triggerFeature || null},
+              ${JSON.stringify({
+                stripeSubscriptionId: subscription.id,
+                amount: effectivePaidAmount,
+                currency,
+                daysToConvert,
+                discountPercent: discountInfo.discountPercent || 0,
+                hasDiscount: discountInfo.hasDiscount,
+              })}
+            )
+            ON CONFLICT (event_id) DO NOTHING
+          `;
+        } catch (error) {
+          console.error(
+            '[Webhook] Failed to write trial_converted conversion event:',
+            error,
+          );
+          // Non-critical: trackConversionEvent already wrote to analytics_conversions
+        }
+      }
+
       // Send welcome email on trial-to-paid conversion
       try {
         const userRow = await sql`
@@ -1194,62 +1247,6 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     // Track retry if this is not the first attempt
     if (attemptCount > 1) {
       conversionTracking.paymentRetryAttempted(userId, attemptCount);
-    }
-
-    // Send overdue invoice email on first failure
-    if (attemptCount === 1) {
-      try {
-        const customer = await stripe.customers.retrieve(customerId);
-        if (customer && !customer.deleted && customer.email) {
-          const userName = customer.name || customer.email.split('@')[0];
-
-          // Create billing portal link for updating payment method
-          const baseUrl =
-            process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
-          let billingPortalUrl = `${baseUrl}/pricing`;
-          try {
-            const portalSession = await stripe.billingPortal.sessions.create({
-              customer: customerId,
-              return_url: baseUrl,
-            });
-            billingPortalUrl = portalSession.url;
-          } catch (portalError) {
-            console.error(
-              'Failed to create billing portal session:',
-              portalError,
-            );
-          }
-
-          const html = await generateOverdueInvoiceEmailHTML(
-            userName,
-            billingPortalUrl,
-            customer.email,
-          );
-          const text = generateOverdueInvoiceEmailText(
-            userName,
-            billingPortalUrl,
-            customer.email,
-          );
-          await sendEmail({
-            to: customer.email,
-            subject: 'Action required: Your payment failed — Lunary',
-            html,
-            text,
-            tracking: {
-              userId,
-              notificationType: 'overdue_invoice',
-            },
-          });
-          console.log(
-            `[Webhook] Overdue invoice email sent to ${customer.email}`,
-          );
-        }
-      } catch (emailError) {
-        console.error(
-          '[Webhook] Failed to send overdue invoice email:',
-          emailError,
-        );
-      }
     }
   }
 }

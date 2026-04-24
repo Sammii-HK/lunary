@@ -35,7 +35,13 @@ interface SuccessMetricsData {
   search_impressions_clicks: SearchMetricData;
   monthly_recurring_revenue: MetricData;
   annual_recurring_revenue: MetricData;
-  active_subscriptions: MetricData;
+  active_subscriptions: MetricData & {
+    billed_customers?: number;
+    full_price_paid_users?: number;
+    discounted_paid_users?: number;
+    trial_users?: number;
+    couponed_or_comped_users?: number;
+  };
   arpu?: MetricData;
   active_entitlements: {
     value: number;
@@ -44,6 +50,8 @@ interface SuccessMetricsData {
   };
   paying_customers: {
     value: number;
+    full_price?: number;
+    discounted?: number;
   };
   subscription_cancels: number;
   churn_rate: number;
@@ -149,12 +157,14 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
         `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
     },
     {
-      label: 'Active Subscriptions',
+      label: 'Full-price Paying Customers',
       value: data.active_subscriptions.value,
       trend: data.active_subscriptions.trend,
       change: data.active_subscriptions.change,
       target: null,
       format: (v: number) => v.toLocaleString(),
+      subtitle:
+        'Current Stripe count. Discounted, couponed/comped and trial access are excluded.',
     },
     {
       label: 'Active Entitlements',
@@ -169,13 +179,13 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
       subtitle: `${data.active_entitlements.duplicates} duplicate subscriptions`,
     },
     {
-      label: 'Paying Customers',
+      label: 'Billed Customers',
       value: data.paying_customers.value,
       trend: 'stable',
       change: 0,
       target: null,
       format: (v: number) => v.toLocaleString(),
-      subtitle: 'Unique paying customers',
+      subtitle: `Full price ${data.paying_customers.full_price ?? 0} | Discounted ${data.paying_customers.discounted ?? 0}`,
     },
     {
       label: 'Subscription Cancels',

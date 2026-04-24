@@ -9,7 +9,18 @@ import Stripe from 'stripe';
 
 export const dynamic = 'force-dynamic';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+let stripeClient: Stripe | null = null;
+
+function getStripeClient() {
+  if (!stripeClient) {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      throw new Error('STRIPE_SECRET_KEY is not configured');
+    }
+    stripeClient = new Stripe(secretKey);
+  }
+  return stripeClient;
+}
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization');
@@ -50,7 +61,7 @@ export async function GET(request: Request) {
 
         if (subscription?.stripe_subscription_id) {
           try {
-            await stripe.subscriptions.cancel(
+            await getStripeClient().subscriptions.cancel(
               subscription.stripe_subscription_id,
             );
           } catch {

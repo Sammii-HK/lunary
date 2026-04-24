@@ -172,7 +172,10 @@ jobs:
         run: pnpm test:e2e --grep "@smoke"
         env:
           NODE_ENV: test
-          PLAYWRIGHT_TEST_BASE_URL: ${{ secrets.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000' }}
+          # Always run CI smoke tests against the locally built app.
+          # Using a preview/prod URL here causes chunk mismatches because the
+          # build under test and the server under test no longer match.
+          PLAYWRIGHT_TEST_BASE_URL: http://localhost:3003
           # Bypass Better Auth if flag is set (or if TEST_EMAIL is invalid)
           BYPASS_AUTH: ${{ secrets.BYPASS_AUTH || 'false' }}
           SKIP_AUTH: ${{ secrets.SKIP_AUTH || 'false' }}

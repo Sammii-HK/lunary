@@ -1,8 +1,57 @@
+interface NewsletterVerificationContext {
+  sign?: string;
+  proposition?: 'cosmic_newsletter' | 'daily_horoscope';
+  upsellVariant?: 'full_chart' | 'exact_degree' | 'exact_timing';
+}
+
+function getVerificationCopy(context?: NewsletterVerificationContext) {
+  const signPrefix = context?.sign ? `${context.sign} ` : '';
+  const isDailyHoroscope = context?.proposition === 'daily_horoscope';
+
+  const intro = isDailyHoroscope
+    ? `Thank you for subscribing. To start receiving your ${signPrefix}horoscope by email, please confirm your address below.`
+    : 'Thank you for subscribing to the Lunary newsletter. Please confirm your email address below.';
+
+  const benefits = isDailyHoroscope
+    ? [
+        `Daily ${signPrefix}horoscope guidance in your inbox`,
+        'A simple way to keep up with the sky without opening the app',
+        context?.upsellVariant === 'exact_degree'
+          ? 'A free path into your exact degree and full-chart readings'
+          : context?.upsellVariant === 'exact_timing'
+            ? 'A free path into your chart-based timing and transit hits'
+            : 'A free path into your full-chart transits and personalised readings',
+      ]
+    : [
+        'Weekly cosmic insights and planetary guidance',
+        'Blog updates and mystical knowledge',
+        'Special offers and exclusive content',
+      ];
+
+  const upsell =
+    context?.upsellVariant === 'exact_degree'
+      ? `After you confirm, create your free account to find your exact ${signPrefix}degree and see whether today's transit is actually hitting it.`
+      : context?.upsellVariant === 'exact_timing'
+        ? 'After you confirm, create your free account to see the exact timing and where today’s astrology lands in your chart.'
+        : 'After you confirm, create your free account to see how today’s transits affect your full chart, not just your Sun sign.';
+
+  return { intro, benefits, upsell };
+}
+
 export function generateNewsletterVerificationEmailHTML(
   verificationUrl: string,
   email: string,
+  context?: NewsletterVerificationContext,
 ): string {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
+  const copy = getVerificationCopy(context);
+  const subtitle =
+    context?.proposition === 'daily_horoscope'
+      ? 'Confirm your horoscope email'
+      : 'Join the Lunary Newsletter';
+  const benefitsHtml = copy.benefits
+    .map((benefit) => `<li>${benefit}</li>`)
+    .join('');
 
   return `
     <!DOCTYPE html>
@@ -99,12 +148,12 @@ export function generateNewsletterVerificationEmailHTML(
           <div class="header">
             <img src="${baseUrl}/logo.png" alt="Lunary" class="logo" />
             <h1 class="title">Confirm Your Email</h1>
-            <p class="subtitle">Join the Lunary Newsletter</p>
+            <p class="subtitle">${subtitle}</p>
           </div>
           
           <div class="content">
             <p>Hi there,</p>
-            <p>Thank you for subscribing to the Lunary newsletter! To receive weekly cosmic insights, blog updates, and special offers, please confirm your email address.</p>
+            <p>${copy.intro}</p>
             
             <div style="text-align: center;">
               <a href="${verificationUrl}" class="verify-button">
@@ -119,10 +168,9 @@ export function generateNewsletterVerificationEmailHTML(
             
             <p>Once confirmed, you'll receive:</p>
             <ul>
-              <li>🌙 Weekly cosmic insights and planetary guidance</li>
-              <li>✨ Blog updates and mystical knowledge</li>
-              <li>🔮 Special offers and exclusive content</li>
+              ${benefitsHtml}
             </ul>
+            <p>${copy.upsell}</p>
           </div>
           
           <div class="footer">
@@ -139,20 +187,22 @@ export function generateNewsletterVerificationEmailHTML(
 export function generateNewsletterVerificationEmailText(
   verificationUrl: string,
   email: string,
+  context?: NewsletterVerificationContext,
 ): string {
+  const copy = getVerificationCopy(context);
   return `
 Confirm Your Email - Lunary Newsletter 🌙
 
-Thank you for subscribing to the Lunary newsletter! To receive weekly cosmic insights, blog updates, and special offers, please confirm your email address by clicking the link below:
+${copy.intro}
 
 ${verificationUrl}
 
 This link will expire in 7 days for security reasons.
 
 Once confirmed, you'll receive:
-- 🌙 Weekly cosmic insights and planetary guidance
-- ✨ Blog updates and mystical knowledge
-- 🔮 Special offers and exclusive content
+${copy.benefits.map((benefit) => `- ${benefit}`).join('\n')}
+
+${copy.upsell}
 
 If you didn't subscribe to Lunary, you can safely ignore this email.
 

@@ -112,75 +112,50 @@ const ZODIAC_METADATA: Record<
   },
 };
 
-const ZODIAC_SEASONS = [
-  { sign: 'Capricorn', startMonth: 12, startDay: 22, endMonth: 1, endDay: 19 },
-  { sign: 'Aquarius', startMonth: 1, startDay: 20, endMonth: 2, endDay: 18 },
-  { sign: 'Pisces', startMonth: 2, startDay: 19, endMonth: 3, endDay: 20 },
-  { sign: 'Aries', startMonth: 3, startDay: 21, endMonth: 4, endDay: 19 },
-  { sign: 'Taurus', startMonth: 4, startDay: 20, endMonth: 5, endDay: 20 },
-  { sign: 'Gemini', startMonth: 5, startDay: 21, endMonth: 6, endDay: 20 },
-  { sign: 'Cancer', startMonth: 6, startDay: 21, endMonth: 7, endDay: 22 },
-  { sign: 'Leo', startMonth: 7, startDay: 23, endMonth: 8, endDay: 22 },
-  { sign: 'Virgo', startMonth: 8, startDay: 23, endMonth: 9, endDay: 22 },
-  { sign: 'Libra', startMonth: 9, startDay: 23, endMonth: 10, endDay: 22 },
-  { sign: 'Scorpio', startMonth: 10, startDay: 23, endMonth: 11, endDay: 21 },
-  {
-    sign: 'Sagittarius',
-    startMonth: 11,
-    startDay: 22,
-    endMonth: 12,
-    endDay: 21,
-  },
-];
+// Fetch the real astronomical Sun sign from the global cosmic context.
+// Uses /api/cosmic/global which returns Sun's live ecliptic longitude →
+// current sign + the actual ingress start/end dates (astronomy-engine,
+// hourly server cache). Returns null outside the real season — fixes the
+// old calendar-date implementation that triggered the banner before the
+// Sun had actually ingressed into the sign.
+async function fetchAstronomicalSunSeason(): Promise<ZodiacSeasonData | null> {
+  try {
+    const response = await fetch('/api/cosmic/global', { cache: 'no-store' });
+    if (!response.ok) return null;
+    const data = await response.json();
+    const sun = data?.planetaryPositions?.Sun;
+    if (!sun?.sign) return null;
 
-// Helper function to check if we're in a season transition window (±3 days)
-function getCurrentSeasonIfTransitioning(): ZodiacSeasonData | null {
-  const today = new Date();
-  const year = today.getFullYear();
+    const metadata = ZODIAC_METADATA[sun.sign as keyof typeof ZODIAC_METADATA];
+    if (!metadata) return null;
 
-  for (const season of ZODIAC_SEASONS) {
-    const metadata = ZODIAC_METADATA[season.sign];
-    if (!metadata) continue;
+    // Prefer the real astronomical ingress dates; fall back to a sensible
+    // month window only if the global cache hasn't populated duration yet.
+    const startDate = sun.duration?.startDate
+      ? new Date(sun.duration.startDate)
+      : null;
+    const endDate = sun.duration?.endDate
+      ? new Date(sun.duration.endDate)
+      : null;
 
-    // Calculate season start date
-    let startDate = new Date(year, season.startMonth - 1, season.startDay);
+    const now = new Date();
+    // Guard: never show before the real ingress, even if cache is ahead.
+    if (startDate && now < startDate) return null;
+    // Guard: never show after the sign ends (Sun is in the next sign).
+    if (endDate && now > endDate) return null;
 
-    // Handle year transition for Capricorn
-    if (season.sign === 'Capricorn' && season.startMonth === 12) {
-      if (today.getMonth() === 0) {
-        // If today is in January, Capricorn season started last year
-        startDate = new Date(year - 1, season.startMonth - 1, season.startDay);
-      }
-    }
-
-    // Calculate end date
-    let endMonth = season.endMonth - 1;
-    let endYear = year;
-    if (season.startMonth > season.endMonth) {
-      endYear = year + 1;
-    }
-    const endDate = new Date(endYear, endMonth, season.endDay);
-
-    // Check if we're within ±3 days of season start
-    const threeDaysBefore = new Date(startDate);
-    threeDaysBefore.setDate(threeDaysBefore.getDate() - 3);
-    const threeDaysAfter = new Date(startDate);
-    threeDaysAfter.setDate(threeDaysAfter.getDate() + 3);
-
-    if (today >= threeDaysBefore && today <= threeDaysAfter) {
-      return {
-        sign: season.sign,
-        element: metadata.element,
-        modality: metadata.modality,
-        startDate: startDate.toISOString().split('T')[0],
-        endDate: endDate.toISOString().split('T')[0],
-        themes: metadata.themes,
-        symbol: metadata.symbol,
-      };
-    }
+    return {
+      sign: sun.sign,
+      element: metadata.element,
+      modality: metadata.modality,
+      startDate: (startDate ?? now).toISOString().split('T')[0],
+      endDate: (endDate ?? now).toISOString().split('T')[0],
+      themes: metadata.themes,
+      symbol: metadata.symbol,
+    };
+  } catch {
+    return null;
   }
-
-  return null;
 }
 
 // Demo data for testing/preview
@@ -315,20 +290,20 @@ export function ShareZodiacSeason({
     setError,
   } = useShareModal('square');
 
-  // Check if we're in a season transition
+  // Resolve the current zodiac season from real astronomy (Sun position +
+  // ingress dates) via /api/cosmic/global, never from fixed calendar dates.
   useEffect(() => {
     const checkSeason = async () => {
       if (onSeasonFetch) {
         const fetchedSeason = await onSeasonFetch();
         setSeasonData(fetchedSeason);
       } else if (demo) {
-        // In demo mode, use current season or create demo data
         const demoSeason =
-          getCurrentSeasonIfTransitioning() || getDemoSeasonData();
+          (await fetchAstronomicalSunSeason()) ?? getDemoSeasonData();
         setSeasonData(demoSeason);
       } else {
-        const currentTransition = getCurrentSeasonIfTransitioning();
-        setSeasonData(currentTransition);
+        const currentSeason = await fetchAstronomicalSunSeason();
+        setSeasonData(currentSeason);
       }
     };
     checkSeason();
@@ -441,6 +416,21 @@ export function ShareZodiacSeason({
     }
   };
 
+  const handleDownload = () => {
+    if (!imageBlob) return;
+
+    const url = URL.createObjectURL(imageBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${seasonData?.sign.toLowerCase()}-season.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    shareTracking.shareCompleted(user?.id, 'zodiac-season', 'download');
+  };
+
   const handleShare = async () => {
     if (!imageBlob) return;
 
@@ -476,21 +466,6 @@ export function ShareZodiacSeason({
     } else {
       handleDownload();
     }
-  };
-
-  const handleDownload = () => {
-    if (!imageBlob) return;
-
-    const url = URL.createObjectURL(imageBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${seasonData?.sign.toLowerCase()}-season.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    shareTracking.shareCompleted(user?.id, 'zodiac-season', 'download');
   };
 
   const handleCopyLink = async () => {

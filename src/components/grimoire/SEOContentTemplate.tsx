@@ -24,7 +24,11 @@ import { PeopleAlsoAsk } from './PeopleAlsoAsk';
 import { ContextualNudgeSection } from '../ui/ContextualNudgeSection';
 import { InlineContextualNudge } from './InlineContextualNudge';
 import { ReadFullGuidePrompt } from '@/app/grimoire/guides/ReadFullGuidePrompt';
-import { getInlineCtaVariant, getAnonId } from '@/lib/ab-tests-server';
+import {
+  assignVariantServer,
+  getInlineCtaVariant,
+  getAnonId,
+} from '@/lib/ab-tests-server';
 import { GrimoireSearch } from '@/app/grimoire/GrimoireSearch';
 import { StickyBottomCTA } from './StickyBottomCTA';
 import { MidArticleEmailCapture } from './MidArticleEmailCapture';
@@ -165,6 +169,9 @@ export interface SEOContentTemplateProps {
   transitSign?: string;
   transitSignDisplay?: string;
 }
+
+const HOROSCOPE_EMAIL_CAPTURE_TEST = 'horoscope_email_capture_proposition_v1';
+const HOROSCOPE_EMAIL_UPSELL_TEST = 'horoscope_email_signup_upsell_v1';
 
 export async function SEOContentTemplate({
   title,
@@ -319,6 +326,22 @@ export async function SEOContentTemplate({
   const inlineVariantIndex = contextualNudge?.ctaVariant
     ? parseInt(contextualNudge.ctaVariant.split('_').pop() || '0', 10)
     : undefined;
+  const horoscopeEmailCaptureVariant =
+    contextualHub === 'horoscopes'
+      ? assignVariantServer(
+          HOROSCOPE_EMAIL_CAPTURE_TEST,
+          anonId || canonicalPathname,
+          ['cosmic_newsletter', 'daily_horoscope'] as const,
+        )
+      : undefined;
+  const horoscopeEmailUpsellVariant =
+    contextualHub === 'horoscopes'
+      ? assignVariantServer(
+          HOROSCOPE_EMAIL_UPSELL_TEST,
+          anonId || canonicalPathname,
+          ['full_chart', 'exact_degree', 'exact_timing'] as const,
+        )
+      : undefined;
 
   return (
     <article className='max-w-4xl mx-auto px-4 pb-[120px]'>
@@ -725,6 +748,8 @@ export async function SEOContentTemplate({
           <MidArticleEmailCapture
             topic="today's horoscope"
             hub={contextualHub}
+            propositionVariant={horoscopeEmailCaptureVariant}
+            upsellVariant={horoscopeEmailUpsellVariant}
           />
         )}
 

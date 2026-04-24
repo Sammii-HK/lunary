@@ -257,6 +257,57 @@ interface Aspect {
   orb: number;
 }
 
+type CrystalReason = {
+  key: string;
+  text: string;
+  weight: number;
+};
+
+type CrystalScore = {
+  score: number;
+  reasons: CrystalReason[];
+};
+
+const TRANSIT_PLANET_WEIGHTS: Record<string, number> = {
+  Moon: 12,
+  Mercury: 10,
+  Venus: 10,
+  Mars: 10,
+  Sun: 8,
+  Jupiter: 6,
+  Saturn: 6,
+  Uranus: 4,
+  Neptune: 4,
+  Pluto: 4,
+};
+
+const EXACT_ASPECT_BONUS = (orb: number, planet: string) =>
+  Math.max(2, (TRANSIT_PLANET_WEIGHTS[planet] || 5) - Math.min(orb, 7));
+
+const formatAspectType = (type: string) =>
+  type === 'conjunction'
+    ? 'conjunct'
+    : type === 'opposition'
+      ? 'opposite'
+      : type;
+
+const pushReason = (
+  bucket: CrystalScore,
+  reason: CrystalReason,
+  scoreBoost = reason.weight,
+) => {
+  bucket.score += scoreBoost;
+  const existing = bucket.reasons.find((entry) => entry.key === reason.key);
+  if (!existing) {
+    bucket.reasons.push(reason);
+    return;
+  }
+  if (reason.weight > existing.weight) {
+    existing.text = reason.text;
+    existing.weight = reason.weight;
+  }
+};
+
 export const calculateKeyAspects = (
   birthChart: BirthChartData[],
   currentTransits: any[],
@@ -310,7 +361,7 @@ export const calculateCrystalRecommendation = (
   today: Date,
   userBirthday?: string,
 ): { crystal: Crystal; reasons: string[] } => {
-  const scores: Record<string, { score: number; reasons: string[] }> = {};
+  const scores: Record<string, CrystalScore> = {};
 
   crystalDatabase.forEach((crystal) => {
     scores[crystal.name] = { score: 0, reasons: [] };
@@ -323,47 +374,78 @@ export const calculateCrystalRecommendation = (
 
   const transitSun = currentTransits.find((p) => p.body === 'Sun');
   const transitMoon = currentTransits.find((p) => p.body === 'Moon');
-  const transitMercury = currentTransits.find((p) => p.body === 'Mercury');
-  const transitVenus = currentTransits.find((p) => p.body === 'Venus');
-  const transitMars = currentTransits.find((p) => p.body === 'Mars');
-
   const aspects = calculateKeyAspects(birthChart, currentTransits);
 
   crystalDatabase.forEach((crystal) => {
+    const bucket = scores[crystal.name];
+
     // Sun sign match
     if (crystal.sunSigns.includes(sunSign)) {
-      scores[crystal.name].score += 15;
-      scores[crystal.name].reasons.push(`Aligned with your ${sunSign} Sun`);
+      pushReason(
+        bucket,
+        {
+          key: `sun:${sunSign}`,
+          text: `Supports the steady themes of your ${sunSign} Sun`,
+          weight: 5,
+        },
+        6,
+      );
     }
 
     // Moon sign match
     if (crystal.moonSigns.includes(moonSign)) {
-      scores[crystal.name].score += 12;
-      scores[crystal.name].reasons.push(`Resonates with your ${moonSign} Moon`);
+      pushReason(
+        bucket,
+        {
+          key: `moon:${moonSign}`,
+          text: `Resonates with your ${moonSign} Moon's emotional tone`,
+          weight: 6,
+        },
+        6,
+      );
     }
 
     // Transit matches
     if (transitSun && crystal.sunSigns.includes(transitSun.sign)) {
-      scores[crystal.name].score += 8;
-      scores[crystal.name].reasons.push(
-        `Sun transiting ${transitSun.sign} activates this crystal`,
+      pushReason(
+        bucket,
+        {
+          key: `transit-sun:${transitSun.sign}`,
+          text: `The Sun moving through ${transitSun.sign} pulls this crystal forward today`,
+          weight: 5,
+        },
+        4,
       );
     }
 
     if (transitMoon && crystal.moonSigns.includes(transitMoon.sign)) {
-      scores[crystal.name].score += 6;
-      scores[crystal.name].reasons.push(
-        `Moon in ${transitMoon.sign} enhances this crystal's energy`,
+      pushReason(
+        bucket,
+        {
+          key: `transit-moon:${transitMoon.sign}`,
+          text: `Today's Moon in ${transitMoon.sign} heightens this crystal's sensitivity`,
+          weight: 7,
+        },
+        8,
       );
     }
 
     // Aspect matches
-    aspects.slice(0, 5).forEach((aspect) => {
+    aspects.slice(0, 7).forEach((aspect) => {
       const planetCode = aspect.transitPlanet.toUpperCase().slice(0, 3);
       if (crystal.aspects.includes(planetCode)) {
-        scores[crystal.name].score += 10 - aspect.orb;
-        scores[crystal.name].reasons.push(
-          `${aspect.transitPlanet} ${aspect.type} activates ${crystal.name}`,
+        const aspectWeight = EXACT_ASPECT_BONUS(
+          aspect.orb,
+          aspect.transitPlanet,
+        );
+        pushReason(
+          bucket,
+          {
+            key: `aspect:${aspect.transitPlanet}:${aspect.natalPlanet}:${aspect.type}`,
+            text: `${aspect.transitPlanet} ${formatAspectType(aspect.type)} your natal ${aspect.natalPlanet} within ${aspect.orb.toFixed(1)}°`,
+            weight: aspectWeight + 3,
+          },
+          aspectWeight + 2,
         );
       }
     });
@@ -376,17 +458,27 @@ export const calculateCrystalRecommendation = (
           dailyInfluences.dayEnergy.includes(p.toLowerCase()),
       )
     ) {
-      scores[crystal.name].score += 5;
-      scores[crystal.name].reasons.push(
-        `Supports today's ${dailyInfluences.dayEnergy} energy`,
+      pushReason(
+        bucket,
+        {
+          key: `day-energy:${dailyInfluences.dayEnergy}`,
+          text: `Matches today's ${dailyInfluences.dayEnergy} tone`,
+          weight: 4,
+        },
+        5,
       );
     }
 
     // Birthday boost
     if (dailyInfluences.birthdayBoost && crystal.sunSigns.includes(sunSign)) {
-      scores[crystal.name].score += 20;
-      scores[crystal.name].reasons.push(
-        `🎂 Birthday crystal - extra powerful for you today!`,
+      pushReason(
+        bucket,
+        {
+          key: 'birthday-boost',
+          text: `Birthday proximity makes this crystal especially charged for you today`,
+          weight: 8,
+        },
+        14,
       );
     }
   });
@@ -394,23 +486,43 @@ export const calculateCrystalRecommendation = (
   // Find highest scoring crystal
   const sortedCrystals = Object.entries(scores)
     .sort((a, b) => b[1].score - a[1].score)
-    .slice(0, 5);
+    .slice(0, 12);
+
+  const topScore = sortedCrystals[0]?.[1].score ?? 0;
+  const candidateNames = sortedCrystals
+    .filter(([, data]) => data.score >= Math.max(1, topScore - 6))
+    .map(([name]) => name);
+  const rotationPool =
+    candidateNames.length > 0
+      ? candidateNames
+      : sortedCrystals.map(([name]) => name);
 
   const dayOfYear = Math.floor(
     (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) /
       (1000 * 60 * 60 * 24),
   );
-  const candidateNames = [...new Set(sortedCrystals.map(([name]) => name))];
+  const dailySeed =
+    dayOfYear +
+    today.getUTCMonth() * 31 +
+    today.getUTCDate() +
+    aspects
+      .slice(0, 3)
+      .reduce(
+        (sum, aspect) =>
+          sum + Math.round(aspect.orb * 10) + aspect.transitPlanet.length,
+        0,
+      );
 
   const winnerName =
-    candidateNames.length > 1
-      ? candidateNames[
-          (dayOfYear + candidateNames.length) % candidateNames.length
-        ]
-      : candidateNames[0];
+    rotationPool.length > 1
+      ? rotationPool[dailySeed % rotationPool.length]
+      : rotationPool[0];
 
   const winner = crystalDatabase.find((c) => c.name === winnerName)!;
-  const reasons = scores[winnerName].reasons.slice(0, 4);
+  const reasons = scores[winnerName].reasons
+    .sort((a, b) => b.weight - a.weight)
+    .slice(0, 4)
+    .map((reason) => reason.text);
 
   return { crystal: winner, reasons };
 };

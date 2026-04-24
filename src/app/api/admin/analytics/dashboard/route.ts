@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { resolveDateRange } from '@/lib/analytics/date-range';
 import { ANALYTICS_REALTIME_TTL_SECONDS } from '@/lib/analytics-cache-config';
+import { PRODUCT_EVENTS } from '@/lib/analytics/product-events';
+import {
+  getStripeSubscriptionSnapshot,
+  type StripeSubscriptionSnapshot,
+} from '@/lib/analytics/stripe-subscriptions';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
-
 /**
  * Consolidated dashboard endpoint using hybrid query strategy
  *
@@ -39,8 +43,9 @@ export async function GET(request: NextRequest) {
     // Check if range includes today
     const includesToday = rangeEnd >= today;
 
-    // Execute queries in parallel
-    const queries = [];
+    // Execute queries in parallel. Heterogeneous array (snapshot + sql results
+    // + nullable), so type explicitly so push() accepts each variant.
+    const queries: Promise<unknown>[] = [getStripeSubscriptionSnapshot()];
 
     // 1. Get historical metrics from daily_metrics (fast!)
     if (rangeStart < today) {
@@ -111,11 +116,48 @@ export async function GET(request: NextRequest) {
              WHERE created_at >= $1 AND created_at <= $2
                AND user_id IS NOT NULL
                AND user_id NOT LIKE 'anon:%'
-               AND event_type NOT IN ('app_opened', 'page_viewed')
-               AND (user_email IS NULL OR (user_email NOT LIKE $3 AND user_email != $4))`,
+               AND event_type = ANY($3::text[])
+               AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))`,
             [
               todayStart.toISOString(),
               todayEnd.toISOString(),
+              PRODUCT_EVENTS,
+              TEST_EMAIL_PATTERN,
+              TEST_EMAIL_EXACT,
+            ],
+          ),
+
+          // Current Product WAU (7-day window)
+          sql.query(
+            `SELECT COUNT(DISTINCT user_id) as count
+             FROM conversion_events
+             WHERE created_at >= $1 AND created_at <= $2
+               AND user_id IS NOT NULL
+               AND user_id NOT LIKE 'anon:%'
+               AND event_type = ANY($3::text[])
+               AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))`,
+            [
+              wauStart.toISOString(),
+              todayEnd.toISOString(),
+              PRODUCT_EVENTS,
+              TEST_EMAIL_PATTERN,
+              TEST_EMAIL_EXACT,
+            ],
+          ),
+
+          // Current Product MAU (30-day window)
+          sql.query(
+            `SELECT COUNT(DISTINCT user_id) as count
+             FROM conversion_events
+             WHERE created_at >= $1 AND created_at <= $2
+               AND user_id IS NOT NULL
+               AND user_id NOT LIKE 'anon:%'
+               AND event_type = ANY($3::text[])
+               AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))`,
+            [
+              mauStart.toISOString(),
+              todayEnd.toISOString(),
+              PRODUCT_EVENTS,
               TEST_EMAIL_PATTERN,
               TEST_EMAIL_EXACT,
             ],
@@ -167,14 +209,12 @@ export async function GET(request: NextRequest) {
             ],
           ),
 
-          // Current MRR (snapshot, not daily) — active only, trials excluded (not yet charged)
+          // Live access counts still come from local subscriptions, but MRR comes from Stripe.
           sql.query(
-            `SELECT COALESCE(SUM(COALESCE(monthly_amount_due, 0)), 0) as mrr,
-                    COUNT(*) FILTER (WHERE status = 'active') as active,
+            `SELECT COUNT(*) FILTER (WHERE status = 'active') as active,
                     COUNT(*) FILTER (WHERE status IN ('trial', 'trialing')) as trial
              FROM subscriptions
-             WHERE status = 'active'
-               AND stripe_subscription_id IS NOT NULL
+             WHERE stripe_subscription_id IS NOT NULL
                AND (user_email IS NULL OR (user_email NOT LIKE $1 AND user_email != $2))`,
             [TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
           ),
@@ -184,19 +224,23 @@ export async function GET(request: NextRequest) {
       queries.push(Promise.resolve(null));
     }
 
-    const [historicalResult, todayResults] = await Promise.all(queries);
+    const [stripeSnapshotRaw, historicalResult, todayResults] =
+      await Promise.all(queries);
+    const stripeSnapshot = stripeSnapshotRaw as StripeSubscriptionSnapshot;
 
     // Process historical data
     const historicalRows = (
-      historicalResult && 'rows' in historicalResult
+      historicalResult &&
+      typeof historicalResult === 'object' &&
+      'rows' in historicalResult
         ? historicalResult.rows
         : []
     ) as any[];
     const historicalMetrics = historicalRows.map((row: any) => ({
       date: row.metric_date,
-      dau: Number(row.reach_dau || 0),
-      wau: Number(row.reach_wau || 0),
-      mau: Number(row.reach_mau || 0),
+      dau: Number(row.dau || 0),
+      wau: Number(row.wau || 0),
+      mau: Number(row.mau || 0),
       productDau: Number(row.signed_in_product_dau || 0),
       productWau: Number(row.signed_in_product_wau || 0),
       productMau: Number(row.signed_in_product_mau || 0),
@@ -217,15 +261,25 @@ export async function GET(request: NextRequest) {
     // Process today's data (if applicable)
     let todayMetrics = null;
     if (todayResults && Array.isArray(todayResults)) {
-      const [dauRes, productDauRes, wauRes, mauRes, signupsRes, mrrRes] =
-        todayResults;
+      const [
+        dauRes,
+        productDauRes,
+        productWauRes,
+        productMauRes,
+        wauRes,
+        mauRes,
+        signupsRes,
+        mrrRes,
+      ] = todayResults;
 
       const dau = Number(dauRes.rows[0]?.count || 0);
       const productDau = Number(productDauRes.rows[0]?.count || 0);
+      const productWau = Number(productWauRes.rows[0]?.count || 0);
+      const productMau = Number(productMauRes.rows[0]?.count || 0);
       const wau = Number(wauRes.rows[0]?.count || 0);
       const mau = Number(mauRes.rows[0]?.count || 0);
       const signups = Number(signupsRes.rows[0]?.count || 0);
-      const mrr = Number(mrrRes.rows[0]?.mrr || 0);
+      const mrr = Number(stripeSnapshot.mrr || 0);
       const activeSubscriptions = Number(mrrRes.rows[0]?.active || 0);
       const trialSubscriptions = Number(mrrRes.rows[0]?.trial || 0);
 
@@ -237,8 +291,8 @@ export async function GET(request: NextRequest) {
         wau,
         mau,
         productDau,
-        productWau: 0,
-        productMau: 0,
+        productWau,
+        productMau,
         signups,
         activationRate: 0,
         mrr,
@@ -264,7 +318,10 @@ export async function GET(request: NextRequest) {
     // Combine historical + today
     const allMetrics = [...historicalMetrics];
     if (todayMetrics) {
-      allMetrics.push(todayMetrics);
+      allMetrics.push({
+        ...todayMetrics,
+        mrr: Number(stripeSnapshot.mrr || 0),
+      });
     }
 
     // Calculate aggregates
@@ -274,7 +331,7 @@ export async function GET(request: NextRequest) {
     );
     const latestMetric = allMetrics[allMetrics.length - 1];
     const currentMau = latestMetric?.mau || 0;
-    const currentMrr = todayMetrics?.mrr || latestMetric?.mrr || 0;
+    const currentMrr = Number(stripeSnapshot.mrr || latestMetric?.mrr || 0);
 
     const response = NextResponse.json({
       dateRange: {

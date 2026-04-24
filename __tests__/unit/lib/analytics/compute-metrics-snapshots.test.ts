@@ -244,7 +244,7 @@ describe('compute-metrics cron (snapshot approach)', () => {
     }
   });
 
-  it('product segment excludes app_opened and page_viewed events', async () => {
+  it('product segment uses the canonical product event family', async () => {
     mockSqlQuery.mockImplementation(defaultMockImpl);
 
     await GET(makeRequest('2026-02-15'));
@@ -255,7 +255,11 @@ describe('compute-metrics cron (snapshot approach)', () => {
     );
 
     expect(productInsert).toBeTruthy();
-    expect(productInsert[0]).toContain("NOT IN ('app_opened', 'page_viewed')");
+    expect(productInsert[0]).toContain('ce.event_type = ANY($6::text[])');
+    expect(productInsert[1][5]).toContain('product_opened');
+    expect(productInsert[1][5]).toContain('daily_dashboard_viewed');
+    expect(productInsert[1][5]).not.toContain('app_opened');
+    expect(productInsert[1][5]).not.toContain('page_viewed');
   });
 
   it('grimoire segment filters to /grimoire% paths', async () => {

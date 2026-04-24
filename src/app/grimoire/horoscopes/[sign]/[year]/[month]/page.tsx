@@ -15,11 +15,12 @@ import {
 } from '@/constants/seo/monthly-horoscope';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
-import { monthMeta, articleSchema } from '@/lib/horoscope-meta';
+import { monthMeta } from '@/lib/horoscope-meta';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 // 30-day revalidation for monthly horoscopes
 export const revalidate = 2592000;
+export const dynamicParams = false;
 
 function resolveOgImageUrl(value: unknown): string | undefined {
   if (!value) return undefined;
@@ -59,8 +60,19 @@ function validateParams(params: PageParams): {
   return { sign, year, month, monthNumber };
 }
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
+
+export function generateStaticParams() {
+  return ZODIAC_SIGNS.flatMap((sign) =>
+    AVAILABLE_YEARS.flatMap((year) =>
+      MONTHS.map((month) => ({
+        sign,
+        year: String(year),
+        month,
+      })),
+    ),
+  );
+}
 
 export async function generateMetadata({
   params,
@@ -143,12 +155,6 @@ export default async function MonthlyHoroscopePage({
     .map(resolveOgImageUrl)
     .find((value): value is string => typeof value === 'string');
   const image = resolvedImage ?? 'https://lunary.app/api/og/cosmic';
-  const articleLd = articleSchema(
-    signName,
-    String(year),
-    monthName,
-    monthNumber,
-  );
 
   return (
     <SEOContentTemplate
@@ -265,7 +271,6 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
         { name: 'Planetary transit calculations' },
         { name: 'Traditional astrological interpretations' },
       ]}
-      additionalSchemas={[articleLd]}
     >
       <div className='mt-8 flex justify-between text-lg'>
         <div className='space-x-4'>

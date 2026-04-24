@@ -17,6 +17,7 @@ import {
 import { ShareSkyNow } from '@/components/share/ShareSkyNow';
 import { TransitDurationBadge } from '@/components/TransitDurationBadge';
 import { useLocation } from '@/hooks/useLocation';
+import { composePlacementNarrative } from '@/lib/copy/transit-copy';
 
 const getPlanetMeaning = (planet: string, sign: string): string => {
   const planetMeanings: Record<string, Record<string, string>> = {
@@ -251,10 +252,10 @@ const DIGNITY_ABBR: Record<Dignity, string> = {
 };
 
 const DIGNITY_LABEL: Record<Dignity, string> = {
-  domicile: 'domicile — at home, full strength',
-  exalted: 'exalted — peak expression',
-  detriment: 'detriment — uncomfortable placement',
-  fall: 'fall — weakened expression',
+  domicile: 'at home, full strength',
+  exalted: 'peak expression',
+  detriment: 'uncomfortable placement',
+  fall: 'weakened expression',
 };
 
 function DignityTooltip({
@@ -309,7 +310,7 @@ function DignityTooltip({
           <span className={`font-mono ${DIGNITY_TEXT_CLASS[dignity]}`}>
             {DIGNITY_ABBR[dignity]}
           </span>{' '}
-          — {planet} {DIGNITY_LABEL[dignity].split('—')[1]?.trim()}
+          {planet}, {DIGNITY_LABEL[dignity]}
         </span>
       )}
     </span>
@@ -646,7 +647,16 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
                 </div>
                 <TransitDurationBadge duration={planet.duration} />
               </div>
-              <p className='text-xs text-content-muted mt-1 ml-7'>
+              <p className='text-xs text-content-muted mt-1 ml-7 leading-relaxed'>
+                {composePlacementNarrative({
+                  planet: planet.body,
+                  sign: normalizedSign,
+                  house: natalSignHouseLookup[normalizedSign] ?? null,
+                  dignity,
+                  retrograde: planet.retrograde,
+                })}
+              </p>
+              <p className='text-xs text-content-muted/80 mt-1 ml-7'>
                 {getPlanetMeaning(planet.body, planet.sign)}
               </p>
               {planet.retrograde && (

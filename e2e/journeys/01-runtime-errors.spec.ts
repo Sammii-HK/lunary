@@ -28,6 +28,10 @@ const AUTHENTICATED_PAGES = [
   { path: '/book-of-shadows', name: 'Book of Shadows' },
 ];
 
+const isIgnorableMissingScript = (url: string) =>
+  url.includes('/_vercel/insights/script.js') ||
+  url.includes('/_vercel/speed-insights/script.js');
+
 test.describe('Runtime Error Detection @smoke', () => {
   for (const { path, name } of CRITICAL_PAGES) {
     test(`${name} (${path}) has no runtime JS errors`, async ({ page }) => {
@@ -44,7 +48,8 @@ test.describe('Runtime Error Detection @smoke', () => {
         const url = response.url();
         if (
           response.status() === 404 &&
-          (url.endsWith('.js') || url.includes('.js?'))
+          (url.endsWith('.js') || url.includes('.js?')) &&
+          !isIgnorableMissingScript(url)
         ) {
           chunk404s.push(url);
         }
@@ -220,7 +225,8 @@ test.describe('Runtime Error Detection @smoke', () => {
         const url = response.url();
         if (
           response.status() === 404 &&
-          (url.endsWith('.js') || url.includes('.js?'))
+          (url.endsWith('.js') || url.includes('.js?')) &&
+          !isIgnorableMissingScript(url)
         ) {
           chunk404s.push(url);
         }

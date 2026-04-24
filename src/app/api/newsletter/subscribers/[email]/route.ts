@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireAdminAuth } from '@/lib/admin-auth';
+import { getCurrentUser } from '@/lib/get-user-session';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,14 +9,45 @@ interface RouteParams {
   params: Promise<{ email: string }>;
 }
 
+function getDefaultPreferences() {
+  return {
+    weeklyNewsletter: true,
+    dailyHoroscope: false,
+    blogUpdates: true,
+    productUpdates: false,
+    cosmicAlerts: false,
+  };
+}
+
+async function canAccessSubscriber(
+  request: NextRequest,
+  email: string,
+  allowPublic = false,
+): Promise<boolean> {
+  if (allowPublic) return true;
+
+  const authResult = await requireAdminAuth(request);
+  if (!(authResult instanceof NextResponse)) return true;
+
+  const currentUser = await getCurrentUser(request);
+  return currentUser?.email?.toLowerCase() === email.toLowerCase();
+}
+
 // GET: Get single subscriber (admin only)
 export async function GET(request: NextRequest, { params }: RouteParams) {
-  const authResult = await requireAdminAuth(request);
-  if (authResult instanceof NextResponse) return authResult;
-
   try {
     const { email } = await params;
     const decodedEmail = decodeURIComponent(email);
+    const allowPublic = request.nextUrl.searchParams.get('public') === '1';
+
+    const hasAccess = await canAccessSubscriber(
+      request,
+      decodedEmail,
+      allowPublic,
+    );
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const result = await sql`
       SELECT 
@@ -63,7 +95,16 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const { email } = await params;
     const decodedEmail = decodeURIComponent(email).toLowerCase();
     const body = await request.json();
-    const { isActive, preferences, isVerified } = body;
+    const { isActive, preferences, isVerified, publicAccess } = body;
+
+    const hasAccess = await canAccessSubscriber(
+      request,
+      decodedEmail,
+      publicAccess === true,
+    );
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     // Handle unsubscribe (most common case)
     if (isActive === false) {
@@ -71,6 +112,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         UPDATE newsletter_subscribers
         SET 
           is_active = false,
+          preferences = COALESCE(preferences, '{}'::jsonb) || '{"weeklyNewsletter": false, "dailyHoroscope": false, "blogUpdates": false, "productUpdates": false, "cosmicAlerts": false}'::jsonb,
           unsubscribed_at = NOW(),
           updated_at = NOW()
         WHERE email = ${decodedEmail}
@@ -82,10 +124,30 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         // This handles the case where someone clicks unsubscribe from a transactional email
         // before ever subscribing to marketing emails
         const insertResult = await sql`
-          INSERT INTO newsletter_subscribers (email, is_active, unsubscribed_at, source)
-          VALUES (${decodedEmail}, false, NOW(), 'unsubscribe_link')
+          INSERT INTO newsletter_subscribers (
+            email,
+            is_active,
+            unsubscribed_at,
+            source,
+            preferences
+          )
+          VALUES (
+            ${decodedEmail},
+            false,
+            NOW(),
+            'unsubscribe_link',
+            ${JSON.stringify({
+              ...getDefaultPreferences(),
+              weeklyNewsletter: false,
+              dailyHoroscope: false,
+              blogUpdates: false,
+              productUpdates: false,
+              cosmicAlerts: false,
+            })}::jsonb
+          )
           ON CONFLICT (email) DO UPDATE SET
             is_active = false,
+            preferences = COALESCE(newsletter_subscribers.preferences, '{}'::jsonb) || '{"weeklyNewsletter": false, "dailyHoroscope": false, "blogUpdates": false, "productUpdates": false, "cosmicAlerts": false}'::jsonb,
             unsubscribed_at = NOW(),
             updated_at = NOW()
           RETURNING id, email, is_active, is_verified, preferences
@@ -111,6 +173,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         SET 
           is_active = true,
           unsubscribed_at = NULL,
+          preferences = COALESCE(preferences, '{}'::jsonb) || ${JSON.stringify(getDefaultPreferences())}::jsonb,
           updated_at = NOW()
         WHERE email = ${decodedEmail}
         RETURNING id, email, is_active, is_verified, preferences
@@ -135,7 +198,25 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       const result = await sql`
         UPDATE newsletter_subscribers
         SET 
-          preferences = ${prefsJson}::jsonb,
+          preferences = COALESCE(preferences, '{}'::jsonb) || ${prefsJson}::jsonb,
+          is_active = CASE
+            WHEN COALESCE((${prefsJson}::jsonb->>'weeklyNewsletter')::boolean, false)
+              OR COALESCE((${prefsJson}::jsonb->>'dailyHoroscope')::boolean, false)
+              OR COALESCE((${prefsJson}::jsonb->>'blogUpdates')::boolean, false)
+              OR COALESCE((${prefsJson}::jsonb->>'productUpdates')::boolean, false)
+              OR COALESCE((${prefsJson}::jsonb->>'cosmicAlerts')::boolean, false)
+            THEN true
+            ELSE false
+          END,
+          unsubscribed_at = CASE
+            WHEN COALESCE((${prefsJson}::jsonb->>'weeklyNewsletter')::boolean, false)
+              OR COALESCE((${prefsJson}::jsonb->>'dailyHoroscope')::boolean, false)
+              OR COALESCE((${prefsJson}::jsonb->>'blogUpdates')::boolean, false)
+              OR COALESCE((${prefsJson}::jsonb->>'productUpdates')::boolean, false)
+              OR COALESCE((${prefsJson}::jsonb->>'cosmicAlerts')::boolean, false)
+            THEN NULL
+            ELSE NOW()
+          END,
           updated_at = NOW()
         WHERE email = ${decodedEmail}
         RETURNING id, email, is_active, is_verified, preferences

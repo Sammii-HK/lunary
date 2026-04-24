@@ -266,6 +266,28 @@ function canonicaliseEventType(raw: unknown): {
     return { eventType: 'subscription_started', legacyEventType: value };
   }
 
+  // Trial countdown banner A/B test events. Map to canonical paywall
+  // impressions / CTA clicks so the KPI dashboards can read them without
+  // introducing new KPI event types. The legacy name is kept in metadata
+  // for admin drill-down by test name.
+  if (value === 'trial_countdown_view') {
+    return { eventType: 'paywall_shown', legacyEventType: value };
+  }
+  if (value === 'trial_countdown_cta_click') {
+    return { eventType: 'cta_clicked', legacyEventType: value };
+  }
+
+  // Astral Guide daily-limit paywall A/B test events. Same pattern as the
+  // trial countdown test: canonicalise to paywall_shown / cta_clicked so the
+  // KPI dashboards read them without schema churn. Legacy event name stays
+  // in metadata for admin drill-down by test variant.
+  if (value === 'astral_paywall_view') {
+    return { eventType: 'paywall_shown', legacyEventType: value };
+  }
+  if (value === 'astral_paywall_cta_click') {
+    return { eventType: 'cta_clicked', legacyEventType: value };
+  }
+
   return null;
 }
 

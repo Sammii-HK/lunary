@@ -12,13 +12,17 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+export const dynamicParams = false;
 interface PageParams {
   sign: string;
   decan: string;
 }
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return ZODIAC_SIGNS.flatMap((sign) =>
+    [1, 2, 3].map((decan) => ({ sign, decan: String(decan) })),
+  );
+}
 
 export async function generateMetadata({
   params,
