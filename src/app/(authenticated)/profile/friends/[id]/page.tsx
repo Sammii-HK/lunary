@@ -34,6 +34,12 @@ import {
 } from '@/components/charts/SynastryChart';
 import { CompatibilityBreakdown } from '@/components/charts/CompatibilityBreakdown';
 import { SendGiftModal } from '@/components/gifts/SendGiftModal';
+import { FriendPingPreview } from '@/components/friends/FriendPingPreview';
+import {
+  detectFriendMilestones,
+  type CurrentSky,
+  type MilestonePing,
+} from '@/lib/notifications/friend-pings';
 import type { BirthChartData } from '../../../../../../utils/astrology/birthChart';
 
 function extractBigThree(chart?: BirthChartData[]) {
@@ -51,6 +57,7 @@ type FriendProfile = {
   name: string;
   avatar?: string;
   sunSign?: string;
+  birthday?: string | null;
   relationshipType?: string;
   hasBirthChart: boolean;
   synastry?: SynastryData;
@@ -374,8 +381,71 @@ function OverviewTab({
       (a, b) => PLANET_ORDER.indexOf(a.body) - PLANET_ORDER.indexOf(b.body),
     );
 
+  const [milestonePing, setMilestonePing] = useState<MilestonePing | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (!friend.birthday) return;
+    let cancelled = false;
+    const today = new Date().toISOString().split('T')[0];
+    fetch(`/api/astrology/planetary-positions?date=${today}`, {
+      credentials: 'include',
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.data?.planets) return;
+        const positions: CurrentSky['positions'] = {};
+        for (const p of data.data.planets as Array<{
+          planet: string;
+          longitude: number;
+        }>) {
+          const key = p.planet.charAt(0).toUpperCase() + p.planet.slice(1);
+          if (
+            key === 'Saturn' ||
+            key === 'Jupiter' ||
+            key === 'Uranus' ||
+            key === 'Neptune' ||
+            key === 'Pluto'
+          ) {
+            positions[key] = p.longitude;
+          }
+        }
+        const pings = detectFriendMilestones(
+          friend.friendId,
+          [
+            {
+              id: friend.id,
+              friendId: friend.friendId,
+              name: friend.name,
+              birthday: friend.birthday,
+              birthChart: (friend.birthChart ?? null) as unknown as Record<
+                string,
+                unknown
+              > | null,
+            },
+          ],
+          { date: today, positions },
+        );
+        setMilestonePing(pings[0] ?? null);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    friend.id,
+    friend.friendId,
+    friend.name,
+    friend.birthday,
+    friend.birthChart,
+  ]);
+
   return (
     <div className='space-y-6' data-testid='overview-tab-content'>
+      {/* Friend Ping Preview */}
+      <FriendPingPreview ping={milestonePing} friendName={friend.name} />
+
       {/* Compatibility Card */}
       {friend.synastry && (
         <div

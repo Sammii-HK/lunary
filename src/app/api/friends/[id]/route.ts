@@ -146,6 +146,7 @@ export async function GET(
       name: connection.nickname || friendProfile.name || 'Friend',
       avatar: friendProfile.avatar,
       sunSign,
+      birthday: friendProfile.birthday ?? null,
       relationshipType: connection.relationship_type,
       hasBirthChart: !!friendBirthChart,
       birthChart: friendBirthChart || undefined,

@@ -213,6 +213,16 @@ const WeeklyChallengeCard = dynamic(
   },
 );
 
+const DailyRecapPlayer = dynamic(
+  () => import('@/components/daily-recap/DailyRecapPlayer'),
+  {
+    loading: () => (
+      <div className='h-24 bg-surface-elevated/50 rounded-xl animate-pulse' />
+    ),
+    ssr: false,
+  },
+);
+
 export default function AppDashboardClient() {
   const { user } = useUser();
   const authState = useAuthStatus();
@@ -486,6 +496,8 @@ export default function AppDashboardClient() {
 
         {showHoroscope && <PersonalizedHoroscopePreview />}
 
+        {authState.isAuthenticated && <DailyRecapPlayer />}
+
         <div
           id='dashboard-main-grid'
           className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}
@@ -523,6 +535,37 @@ export default function AppDashboardClient() {
             <ConditionalWheel />
           </div>
         </div>
+        {authState.isAuthenticated &&
+          (() => {
+            // Surface Year in Stars retrospective near the year boundary
+            // (mid-November through end of January).
+            const month = new Date().getMonth(); // 0-indexed
+            const showYearInStars = month >= 10 || month === 0;
+            if (!showYearInStars) return null;
+            return (
+              <Link
+                href='/year-in-stars'
+                className='block w-full rounded-xl border border-lunary-accent-700/50 bg-gradient-to-r from-lunary-accent-950/40 to-lunary-primary-950/40 p-4 hover:border-lunary-accent-500 transition-colors'
+              >
+                <div className='flex items-center gap-3'>
+                  <span className='text-2xl' aria-hidden>
+                    ✨
+                  </span>
+                  <div className='flex-1'>
+                    <p className='text-sm font-medium text-content-primary'>
+                      Your Year in Stars is ready
+                    </p>
+                    <p className='text-xs text-content-muted'>
+                      A swipeable retrospective of your transits, moods, and
+                      reflections.
+                    </p>
+                  </div>
+                  <span className='text-content-brand-accent text-sm'>→</span>
+                </div>
+              </Link>
+            );
+          })()}
+
         {authState.isAuthenticated && <ReferralShareCTA compact />}
 
         {authState.isAuthenticated && (

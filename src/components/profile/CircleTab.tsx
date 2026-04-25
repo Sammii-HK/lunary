@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
   Plus,
   Heart,
@@ -15,6 +16,7 @@ import {
   Check,
   UserPlus,
   Lock,
+  Globe2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BirthdayInput } from '@/components/ui/birthday-input';
@@ -550,7 +552,7 @@ export function CircleTab() {
         <p className='text-sm text-content-muted mb-3'>
           Connect with friends or add birth data manually
         </p>
-        <div className='flex gap-2'>
+        <div className='flex gap-2 flex-wrap'>
           <Button
             onClick={() => setShowInviteSection(!showInviteSection)}
             variant='outline'
@@ -569,6 +571,13 @@ export function CircleTab() {
             <Plus className='w-4 h-4' />
             Add Manual
           </Button>
+          <Link
+            href='/app/group-sky'
+            className='inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border border-stroke-default text-content-secondary hover:text-content-primary hover:border-lunary-primary-600 transition-colors'
+          >
+            <Globe2 className='w-4 h-4' />
+            Group Sky
+          </Link>
         </div>
       </div>
 

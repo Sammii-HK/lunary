@@ -2,12 +2,22 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { BookOpen, Plus, Sparkles, ArrowLeft, Moon, Star } from 'lucide-react';
+import {
+  BookOpen,
+  Plus,
+  Sparkles,
+  ArrowLeft,
+  Moon,
+  Star,
+  Mic,
+  Type,
+} from 'lucide-react';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { JournalEntry } from '@/app/api/journal/route';
 import { JournalPattern } from '@/lib/journal/pattern-analyzer';
 import { RecurringThemesCard } from '@/components/RecurringThemesCard';
 import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
+import { VoiceJournalInput } from '@/components/journal/VoiceJournalInput';
 
 interface PatternCardProps {
   pattern: JournalPattern;
@@ -88,6 +98,7 @@ export default function JournalPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newReflection, setNewReflection] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [inputMode, setInputMode] = useState<'text' | 'voice'>('text');
 
   const loadData = useCallback(async () => {
     try {
@@ -205,14 +216,48 @@ export default function JournalPage() {
       <div className='px-4 py-3 space-y-4'>
         {showAddForm ? (
           <form onSubmit={handleSubmit} className='space-y-3'>
-            <textarea
-              value={newReflection}
-              onChange={(e) => setNewReflection(e.target.value)}
-              placeholder="What's on your mind today?"
-              className='w-full bg-surface-elevated border border-stroke-default rounded-lg p-4 text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary resize-none'
-              rows={4}
-              autoFocus
-            />
+            <div className='flex gap-1 p-1 rounded-lg bg-surface-card/50 border border-stroke-default/50 w-fit'>
+              <button
+                type='button'
+                onClick={() => setInputMode('text')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors inline-flex items-center gap-1.5 ${
+                  inputMode === 'text'
+                    ? 'bg-layer-base/50 text-white border border-lunary-primary-700/50'
+                    : 'text-content-muted hover:text-content-primary'
+                }`}
+              >
+                <Type className='w-3.5 h-3.5' />
+                Type
+              </button>
+              <button
+                type='button'
+                onClick={() => setInputMode('voice')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors inline-flex items-center gap-1.5 ${
+                  inputMode === 'voice'
+                    ? 'bg-layer-base/50 text-white border border-lunary-primary-700/50'
+                    : 'text-content-muted hover:text-content-primary'
+                }`}
+              >
+                <Mic className='w-3.5 h-3.5' />
+                Voice
+              </button>
+            </div>
+            {inputMode === 'voice' ? (
+              <VoiceJournalInput
+                value={newReflection}
+                onChange={setNewReflection}
+                placeholder="What's on your mind today?"
+              />
+            ) : (
+              <textarea
+                value={newReflection}
+                onChange={(e) => setNewReflection(e.target.value)}
+                placeholder="What's on your mind today?"
+                className='w-full bg-surface-elevated border border-stroke-default rounded-lg p-4 text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary resize-none'
+                rows={4}
+                autoFocus
+              />
+            )}
             <div className='flex gap-2'>
               <button
                 type='submit'

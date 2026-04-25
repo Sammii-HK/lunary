@@ -7,12 +7,45 @@ import { useNotificationDeepLink } from '@/hooks/useNotificationDeepLink';
 import { hasFeatureAccess } from '../../../../utils/pricing';
 import { HoroscopeView } from './components/HoroscopeView';
 import { conversionTracking } from '@/lib/analytics';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import { useABTestTracking } from '@/hooks/useABTestTracking';
 import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { iosLabel } from '@/lib/ios-labels';
+import { AnniversaryMoment } from '@/components/journal/AnniversaryMoment';
+import type { AnniversaryRecord } from '@/lib/journal/anniversary-finder';
+
+function AnniversaryMomentLoader() {
+  const [record, setRecord] = useState<AnniversaryRecord | null>(null);
+
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    let cancelled = false;
+    fetch(`/api/journal/anniversaries?date=${today}`, {
+      credentials: 'include',
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.anniversary) setRecord(data.anniversary);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!record) return null;
+  return (
+    <AnniversaryMoment
+      date={record.anniversaryDate}
+      journalSnippet={record.journalSnippet ?? undefined}
+      transitsSnippet={record.transitsSnippet ?? undefined}
+      yearsAgo={record.yearsAgo}
+      className='mx-4 mt-4'
+    />
+  );
+}
 
 export default function HoroscopePage() {
   const { user, loading } = useUser();
@@ -97,6 +130,7 @@ export default function HoroscopePage() {
         />
       )}
       <div className='flex-1'>
+        {authStatus.isAuthenticated && <AnniversaryMomentLoader />}
         <HoroscopeView
           userBirthday={user?.birthday}
           userName={user?.name}

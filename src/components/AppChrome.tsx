@@ -23,6 +23,7 @@ import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { useAuthStatus } from './AuthStatus';
 import { TrialCountdownBanner } from './TrialCountdownBanner';
 import { PastDueBanner } from './PastDueBanner';
+import { SmartSearchTrigger } from '@/components/search/SmartSearchTrigger';
 
 const NAV_CONTEXT_KEY = 'lunary_nav_context';
 
@@ -399,6 +400,9 @@ export function AppChrome() {
               <TrialCountdownBanner />
               <PastDueBanner />
               <Navbar />
+              {authState.isAuthenticated && (
+                <SmartSearchTrigger className='fixed top-3 right-3 z-40' />
+              )}
             </>
           )}
         </>

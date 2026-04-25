@@ -70,6 +70,14 @@ const AppleAccountLink = dynamic(
   { ssr: false },
 );
 
+const CalendarSubscribeCard = dynamic(
+  () =>
+    import('@/components/profile/CalendarSubscribeCard').then((m) => ({
+      default: m.default,
+    })),
+  { ssr: false, loading: () => <SkeletonCard /> },
+);
+
 type SettingSection = {
   id: string;
   title: string;
@@ -251,6 +259,12 @@ export function SettingsTab({
           </div>
         </div>
       )}
+
+      {/* Calendar Subscription */}
+      <div className='w-full max-w-3xl space-y-3'>
+        <SectionTitle as='h2'>Calendar</SectionTitle>
+        <CalendarSubscribeCard />
+      </div>
 
       {/* Subscription */}
       <div className='w-full max-w-3xl space-y-3'>
