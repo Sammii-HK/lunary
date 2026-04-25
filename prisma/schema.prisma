@@ -1261,6 +1261,23 @@ model user_progress {
   @@index([skill_tree], map: "idx_user_progress_skill_tree")
 }
 
+/// Couples Mode v1 — pairs two Lunary users into a daily shared compatibility
+/// dashboard. `pairingCode` is set while one user is waiting for their partner
+/// to enter the 6-digit code; once the second user joins, `pairedAt` is filled
+/// and `pairingCode` is cleared (so the same code can be re-used in the future).
+model couple_pairings {
+  id          String    @id @default(cuid())
+  userAId     String
+  userBId     String
+  pairingCode String?   @unique
+  pairedAt    DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([userAId, userBId])
+  @@index([userAId])
+  @@index([userBId])
+}
+
 model relationship_profiles {
   id                  String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id             String
