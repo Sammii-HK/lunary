@@ -263,13 +263,12 @@ function buildMoonJourney(weekStart: string, weekEnd: string): MoonJourney {
 
   for (let cursor = start.getTime(); cursor <= end.getTime(); cursor += dayMs) {
     const day = new Date(cursor);
-    let snapshot: MoonPhaseSnapshot | null = null;
     try {
       const moonPhase = getAccurateMoonPhase(day);
       const positions = getRealPlanetaryPositions(day);
       const moonLongitude = positions.Moon?.longitude ?? 0;
       const sign = getZodiacSign(moonLongitude);
-      snapshot = {
+      const snapshot: MoonPhaseSnapshot = {
         date: isoDate(day),
         name: phaseAngleToName(moonPhase.phaseAngle),
         illumination: Math.round(moonPhase.illumination),

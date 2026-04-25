@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Bell, BellRing, Sunrise, Volume2 } from 'lucide-react';
+import { Bell, BellRing, Mail, Sunrise, Volume2 } from 'lucide-react';
 import { Heading } from '@/components/ui/Heading';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
  * Lets a user opt into the new "push notifications that don't suck" stream:
  *   - Daily personalised reading (off by default — opt-in)
  *   - Push when a major transit goes exact (on by default)
+ *   - Weekly Pages email digest (off by default — opt-in)
  *
  * Reads + writes through the existing /api/profile/personal-card route, which
  * stores everything under `user_profiles.personal_card` (JSONB). We namespace
@@ -21,11 +22,13 @@ import { cn } from '@/lib/utils';
 interface PushPreferences {
   dailyPersonalised: boolean;
   exactTransitAlerts: boolean;
+  weeklyDigest: boolean;
 }
 
 const DEFAULT_PREFS: PushPreferences = {
   dailyPersonalised: false,
   exactTransitAlerts: true,
+  weeklyDigest: false,
 };
 
 interface PushPreferencesCardProps {
@@ -65,6 +68,7 @@ export function PushPreferencesCard({ className }: PushPreferencesCardProps) {
             stored.dailyPersonalised ?? DEFAULT_PREFS.dailyPersonalised,
           exactTransitAlerts:
             stored.exactTransitAlerts ?? DEFAULT_PREFS.exactTransitAlerts,
+          weeklyDigest: stored.weeklyDigest ?? DEFAULT_PREFS.weeklyDigest,
         });
       } catch (err) {
         if (cancelled) return;
@@ -186,6 +190,20 @@ export function PushPreferencesCard({ className }: PushPreferencesCardProps) {
             description='Only the big moments — eclipses, stations, exact aspects to your natal chart.'
             checked={prefs.exactTransitAlerts}
             onCheckedChange={handleToggle('exactTransitAlerts')}
+            disabled={saving}
+          />
+
+          <PreferenceRow
+            icon={
+              <Mail
+                className='h-5 w-5 text-lunary-secondary-300'
+                aria-hidden='true'
+              />
+            }
+            title='Weekly Pages email'
+            description='A Sunday evening Week Ahead digest with your top transits, moon journey and ritual.'
+            checked={prefs.weeklyDigest}
+            onCheckedChange={handleToggle('weeklyDigest')}
             disabled={saving}
           />
         </div>
