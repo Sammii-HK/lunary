@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { z } from 'zod';
 import { requireUser } from '@/lib/ai/auth';
 import { calculateSynastry } from '@/lib/astrology/synastry';
 import { hasFeatureAccess } from '../../../../../utils/pricing';
@@ -7,6 +8,15 @@ import { decrypt } from '@/lib/encryption';
 import type { BirthChartData } from '../../../../../utils/astrology/birthChart';
 
 export const dynamic = 'force-dynamic';
+
+const patchFriendSchema = z
+  .object({
+    nickname: z.string().trim().max(64).nullable().optional(),
+    relationshipType: z.string().trim().max(64).nullable().optional(),
+  })
+  .refine((v) => v.nickname !== undefined || v.relationshipType !== undefined, {
+    message: 'At least one of nickname or relationshipType is required',
+  });
 
 /**
  * GET /api/friends/[id]
@@ -196,6 +206,100 @@ export async function PUT(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('[Friends] Error updating friend:', error);
+    return NextResponse.json(
+      { error: 'Failed to update friend' },
+      { status: 500 },
+    );
+  }
+}
+
+/**
+ * PATCH /api/friends/[id]
+ * Body: { nickname?, relationshipType? }
+ * Partially update friend connection metadata. Only the connection
+ * owner (user_id) can patch.
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const user = await requireUser(request);
+    const { id } = await params;
+
+    let parsed;
+    try {
+      parsed = patchFriendSchema.parse(await request.json());
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return NextResponse.json(
+          { error: 'Invalid request body', issues: err.issues },
+          { status: 400 },
+        );
+      }
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+
+    const { nickname, relationshipType } = parsed;
+
+    // Verify ownership before updating
+    const existing = await sql`
+      SELECT id FROM friend_connections
+      WHERE id = ${id}::uuid AND user_id = ${user.id}
+      LIMIT 1
+    `;
+    if (existing.rows.length === 0) {
+      return NextResponse.json(
+        { error: 'Friend connection not found' },
+        { status: 404 },
+      );
+    }
+
+    // Use COALESCE-on-NULL pattern: if a field is undefined in the body,
+    // pass NULL to keep the existing value. If null is explicitly sent,
+    // we still want to clear it — handle that by using a sentinel.
+    const updateNickname = nickname !== undefined;
+    const updateRelType = relationshipType !== undefined;
+
+    if (updateNickname && updateRelType) {
+      await sql`
+        UPDATE friend_connections
+        SET nickname = ${nickname ?? null},
+            relationship_type = ${relationshipType ?? null},
+            updated_at = NOW()
+        WHERE id = ${id}::uuid AND user_id = ${user.id}
+      `;
+    } else if (updateNickname) {
+      await sql`
+        UPDATE friend_connections
+        SET nickname = ${nickname ?? null},
+            updated_at = NOW()
+        WHERE id = ${id}::uuid AND user_id = ${user.id}
+      `;
+    } else if (updateRelType) {
+      await sql`
+        UPDATE friend_connections
+        SET relationship_type = ${relationshipType ?? null},
+            updated_at = NOW()
+        WHERE id = ${id}::uuid AND user_id = ${user.id}
+      `;
+    }
+
+    const result = await sql`
+      SELECT id, friend_id, nickname, relationship_type, updated_at
+      FROM friend_connections
+      WHERE id = ${id}::uuid AND user_id = ${user.id}
+    `;
+    const row = result.rows[0];
+    return NextResponse.json({
+      id: row.id,
+      friendId: row.friend_id,
+      nickname: row.nickname,
+      relationshipType: row.relationship_type,
+      updatedAt: row.updated_at,
+    });
+  } catch (error) {
+    console.error('[Friends] Error patching friend:', error);
     return NextResponse.json(
       { error: 'Failed to update friend' },
       { status: 500 },
