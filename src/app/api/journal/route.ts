@@ -16,7 +16,7 @@ export interface JournalEntry {
   cardReferences: string[];
   moonPhase: string | null;
   transitHighlight: string | null;
-  source: 'manual' | 'chat' | 'astral-guide';
+  source: 'manual' | 'chat' | 'astral-guide' | 'tarot';
   sourceMessageId: string | null;
   createdAt: string;
   category?: JournalCategory;
@@ -138,6 +138,7 @@ export async function POST(request: NextRequest) {
       source = 'manual',
       sourceMessageId = null,
       category = null,
+      habitCapture = null,
     } = body;
 
     if (
@@ -171,6 +172,9 @@ export async function POST(request: NextRequest) {
       transitHighlight,
       source,
       sourceMessageId,
+      ...(habitCapture && typeof habitCapture === 'object'
+        ? { habitCapture }
+        : {}),
     };
 
     const result = await sql`

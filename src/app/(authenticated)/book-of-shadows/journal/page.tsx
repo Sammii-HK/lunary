@@ -20,6 +20,9 @@ import { JournalPattern } from '@/lib/journal/pattern-analyzer';
 import { RecurringThemesCard } from '@/components/RecurringThemesCard';
 import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 import { VoiceJournalInput } from '@/components/journal/VoiceJournalInput';
+import { HabitCaptureRow } from '@/components/cosmic-habits/HabitCaptureRow';
+import { CorrelationsCard } from '@/components/cosmic-habits/CorrelationsCard';
+import type { HabitCapture } from '@/lib/cosmic-habits/types';
 
 interface PatternCardProps {
   pattern: JournalPattern;
@@ -127,6 +130,7 @@ export default function JournalPage() {
   const [newReflection, setNewReflection] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inputMode, setInputMode] = useState<'text' | 'voice'>('text');
+  const [habitCapture, setHabitCapture] = useState<HabitCapture>({});
 
   const loadData = useCallback(async () => {
     try {
@@ -167,17 +171,26 @@ export default function JournalPage() {
 
     setIsSubmitting(true);
     try {
+      const hasHabitCapture =
+        habitCapture.sleepScore !== undefined ||
+        habitCapture.mood !== undefined ||
+        habitCapture.practiced !== undefined ||
+        (habitCapture.tags?.length ?? 0) > 0;
       const response = await fetch('/api/journal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ content: newReflection }),
+        body: JSON.stringify({
+          content: newReflection,
+          ...(hasHabitCapture ? { habitCapture } : {}),
+        }),
       });
 
       if (response.ok) {
         const data = await response.json();
         setEntries((prev) => [data.entry, ...prev]);
         setNewReflection('');
+        setHabitCapture({});
         setShowAddForm(false);
       }
     } catch (error) {
@@ -286,6 +299,7 @@ export default function JournalPage() {
                 autoFocus
               />
             )}
+            <HabitCaptureRow value={habitCapture} onChange={setHabitCapture} />
             <div className='flex gap-2'>
               <button
                 type='submit'
@@ -315,6 +329,8 @@ export default function JournalPage() {
             Add Reflection
           </button>
         )}
+
+        <CorrelationsCard />
 
         {patterns.length > 0 && (
           <RecurringThemesCard
