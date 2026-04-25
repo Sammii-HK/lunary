@@ -10,16 +10,23 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type FormEvent,
 } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import { Clock, Lock, Plus, Sparkles, Trash2, Wand2 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { BirthChart } from '@/components/BirthChart';
 import { SnapshotShareButton } from '@/components/charts/SnapshotShareButton';
+import {
+  CityPicker,
+  type CityPickerValue,
+} from '@/components/charts/CityPicker';
+import { Heading } from '@/components/ui/Heading';
 import type { BirthChartData } from '../../../../../utils/astrology/birthChart';
 
 const STORAGE_KEY = 'lunary:time-machine-events';
@@ -212,13 +219,16 @@ function placementsFromResponse(
 const TimeMachinePage = () => {
   const { user } = useUser();
   const sub = useSubscription();
+  const searchParams = useSearchParams();
   const canAccess = sub.hasAccess('personalized_transit_readings');
   const userLat = user?.location?.latitude;
   const userLon = user?.location?.longitude;
+  const userBirthLocation = (user?.location as any)?.birthLocation as
+    | string
+    | undefined;
   const [date, setDate] = useState<string>(todayIso);
   const [time, setTime] = useState<string>('12:00');
-  const [lat, setLat] = useState<string>('');
-  const [lon, setLon] = useState<string>('');
+  const [location, setLocation] = useState<CityPickerValue | null>(null);
   const [label, setLabel] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -229,12 +239,22 @@ const TimeMachinePage = () => {
     label: string;
   } | null>(null);
   const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
+  const autoSubmittedRef = useRef(false);
 
   // Hydrate location defaults + saved events from localStorage on mount
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (userLat != null) setLat(String(userLat));
-    if (userLon != null) setLon(String(userLon));
+    if (
+      !location &&
+      typeof userLat === 'number' &&
+      typeof userLon === 'number'
+    ) {
+      setLocation({
+        lat: userLat,
+        lon: userLon,
+        label: userBirthLocation || 'Your saved location',
+      });
+    }
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
@@ -256,7 +276,8 @@ const TimeMachinePage = () => {
     } catch {
       /* noop */
     }
-  }, [userLat, userLon]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userLat, userLon, userBirthLocation]);
 
   const persistEvents = useCallback((events: SavedEvent[]) => {
     setSavedEvents(events);
@@ -273,18 +294,29 @@ const TimeMachinePage = () => {
       setError(null);
       try {
         const res = await fetch(
-          `/api/v1/astrology/planetary-positions?date=${encodeURIComponent(
+          `/api/astrology/planetary-positions?date=${encodeURIComponent(
             next.date,
           )}`,
-          { cache: 'no-store' },
+          { cache: 'no-store', credentials: 'include' },
         );
         if (!res.ok) {
-          throw new Error(`Could not load the sky for ${next.date}`);
+          let reason = res.statusText || 'request failed';
+          try {
+            const errBody = (await res.json()) as { error?: string };
+            if (errBody?.error) reason = errBody.error;
+          } catch {
+            /* ignore non-JSON errors */
+          }
+          throw new Error(
+            `Couldn’t load the sky for ${next.date} — ${res.status} ${reason}`,
+          );
         }
         const json = (await res.json()) as PlanetaryPositionsResponse;
         const placements = placementsFromResponse(json);
         if (!placements.length) {
-          throw new Error('No planetary data returned for that date');
+          throw new Error(
+            `No planetary data returned for ${next.date}. Try a different date.`,
+          );
         }
         setChartPlacements(placements);
         setActiveEvent(next);
@@ -300,6 +332,29 @@ const TimeMachinePage = () => {
     },
     [],
   );
+
+  // Deep-link support: prefill (and optionally auto-submit) from `?date=` and
+  // `?label=`. Useful for emails, share cards, journal-entry CTAs, etc.
+  useEffect(() => {
+    if (autoSubmittedRef.current) return;
+    if (!searchParams) return;
+    const qpDate = searchParams.get('date');
+    const qpLabel = searchParams.get('label');
+    if (!qpDate && !qpLabel) return;
+
+    const isoLike = /^\d{4}-\d{2}-\d{2}$/.test(qpDate || '');
+    if (qpDate && isoLike) setDate(qpDate);
+    if (qpLabel) setLabel(qpLabel.slice(0, 60));
+
+    if (qpDate && isoLike) {
+      autoSubmittedRef.current = true;
+      void fetchChart({
+        date: qpDate,
+        time: '12:00',
+        label: (qpLabel || '').slice(0, 60).trim(),
+      });
+    }
+  }, [searchParams, fetchChart]);
 
   const handleSubmit = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {
@@ -368,10 +423,12 @@ const TimeMachinePage = () => {
     });
     if (activeEvent.time) params.set('time', activeEvent.time);
     if (activeEvent.label) params.set('event', activeEvent.label);
-    if (lat) params.set('lat', lat);
-    if (lon) params.set('lon', lon);
+    if (location) {
+      params.set('lat', String(location.lat));
+      params.set('lon', String(location.lon));
+    }
     return `/api/og/share/birth-chart?${params.toString()}`;
-  }, [activeEvent, lat, lon]);
+  }, [activeEvent, location]);
 
   const headline = activeEvent?.label
     ? `The sky on ${activeEvent.label}`
@@ -386,7 +443,9 @@ const TimeMachinePage = () => {
           <div className='rounded-2xl border border-stroke-subtle bg-surface-elevated/80 p-6 backdrop-blur'>
             <div className='flex items-center gap-2 text-content-primary'>
               <Lock className='h-5 w-5 text-lunary-accent' />
-              <h1 className='text-xl font-bold md:text-2xl'>Time Machine</h1>
+              <Heading as='h1' variant='h1'>
+                Time Machine
+              </Heading>
             </div>
             <p className='mt-3 text-sm text-content-secondary'>
               See the sky on any date in your life — first kiss, big move, the
@@ -411,10 +470,10 @@ const TimeMachinePage = () => {
         {/* Top header + share */}
         <div className='flex flex-wrap items-start justify-between gap-3'>
           <div>
-            <h1 className='flex items-center gap-2 text-xl font-bold text-content-primary md:text-2xl'>
+            <Heading as='h1' variant='h1' className='flex items-center gap-2'>
               <Clock className='h-5 w-5 text-lunary-accent' />
               Time Machine
-            </h1>
+            </Heading>
             <p className='mt-1 text-sm text-content-secondary'>
               Pick a date and a moment in your life. See the sky that day, and
               what was lighting up.
@@ -482,43 +541,16 @@ const TimeMachinePage = () => {
             />
           </label>
 
-          <details className='group'>
-            <summary className='cursor-pointer list-none text-[11px] font-semibold uppercase tracking-wider text-content-muted hover:text-content-secondary'>
-              Location (optional)
-              <span className='ml-1 opacity-50 group-open:hidden'>+</span>
-              <span className='ml-1 hidden opacity-50 group-open:inline'>
-                −
-              </span>
-            </summary>
-            <div className='mt-2 grid grid-cols-2 gap-3'>
-              <label className='flex flex-col gap-1 text-xs text-content-muted'>
-                <span className='font-semibold uppercase tracking-wider'>
-                  Latitude
-                </span>
-                <input
-                  type='text'
-                  inputMode='decimal'
-                  value={lat}
-                  onChange={(e) => setLat(e.target.value)}
-                  placeholder='51.4769'
-                  className='rounded-lg border border-stroke-subtle bg-layer-base/40 px-3 py-2 text-sm text-content-primary focus:border-lunary-primary focus:outline-none'
-                />
-              </label>
-              <label className='flex flex-col gap-1 text-xs text-content-muted'>
-                <span className='font-semibold uppercase tracking-wider'>
-                  Longitude
-                </span>
-                <input
-                  type='text'
-                  inputMode='decimal'
-                  value={lon}
-                  onChange={(e) => setLon(e.target.value)}
-                  placeholder='0.0005'
-                  className='rounded-lg border border-stroke-subtle bg-layer-base/40 px-3 py-2 text-sm text-content-primary focus:border-lunary-primary focus:outline-none'
-                />
-              </label>
-            </div>
-          </details>
+          <CityPicker
+            value={location}
+            onChange={setLocation}
+            label='Location (optional)'
+            placeholder='Search a city — e.g. London, New York, Tokyo'
+          />
+          <p className='-mt-1 text-[11px] text-content-muted'>
+            Used to colour the share card. Planet positions don’t change with
+            location, just the houses (coming soon).
+          </p>
 
           <div className='flex flex-wrap items-center justify-between gap-3 pt-1'>
             <p className='text-[11px] text-content-muted'>
@@ -566,10 +598,14 @@ const TimeMachinePage = () => {
 
               {/* Narrative panel */}
               <div className='rounded-2xl border border-stroke-subtle bg-surface-elevated/40 p-4'>
-                <h2 className='mb-2 flex items-center gap-2 text-sm font-semibold text-content-primary'>
+                <Heading
+                  as='h2'
+                  variant='h3'
+                  className='mb-2 flex items-center gap-2'
+                >
                   <Sparkles className='h-4 w-4 text-lunary-accent' />
                   What was lighting up
-                </h2>
+                </Heading>
                 {aspects.length === 0 ? (
                   <p className='text-xs text-content-muted'>
                     No tight major aspects on this day — the sky was relatively
@@ -613,9 +649,9 @@ const TimeMachinePage = () => {
         {/* Saved events */}
         <section className='flex flex-col gap-3'>
           <div className='flex items-center justify-between'>
-            <h2 className='text-sm font-semibold text-content-primary'>
+            <Heading as='h2' variant='h3' className='mb-0'>
               Your saved moments
-            </h2>
+            </Heading>
             <span className='text-[11px] text-content-muted'>
               Stored on this device
             </span>
