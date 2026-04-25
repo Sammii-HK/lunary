@@ -64,6 +64,19 @@ const TransitOfTheDay = dynamic(
   },
 );
 
+const NextHitCard = dynamic(
+  () =>
+    import('@/components/live-transits/NextHitCard').then((m) => ({
+      default: m.NextHitCard,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className='h-24 bg-surface-elevated/50 rounded-xl animate-pulse' />
+    ),
+  },
+);
+
 const DailyInsightCard = dynamic(
   () =>
     import('@/components/compact/DailyInsightCard').then((m) => ({
@@ -514,6 +527,7 @@ export default function AppDashboardClient() {
               onToggle={(expanded) => setSkyNowExpanded(expanded)}
             />
           </div>
+          <NextHitCard />
           <DailyInsightCard />
           <div className='flex flex-col gap-3'>
             <DailyCardPreview />
