@@ -718,6 +718,9 @@ export function TransitScrubber({
               <g
                 key={`natal-${p.name}`}
                 onClick={handleClick}
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') handleClick();
                 }}
@@ -844,6 +847,8 @@ export function TransitScrubber({
               <motion.g
                 key={`tr-${p.name}`}
                 animate={{ x: pos.x, y: pos.y }}
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 1.25 }}
                 transition={{
                   type: 'spring',
                   stiffness: 80,
@@ -851,6 +856,9 @@ export function TransitScrubber({
                   mass: 0.6,
                 }}
                 onClick={handleClick}
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') handleClick();
                 }}
