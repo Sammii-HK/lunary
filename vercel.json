@@ -66,6 +66,10 @@
       "schedule": "0 20 * * *"
     },
     {
+      "path": "/api/cron/friend-milestone-notifications",
+      "schedule": "0 14 * * *"
+    },
+    {
       "path": "/api/cron/fx-drift",
       "schedule": "0 9 1 * *"
     },

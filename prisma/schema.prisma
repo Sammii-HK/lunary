@@ -1091,12 +1091,17 @@ model user {
   emailVerified             Boolean   @default(false)
   image                     String?
   birthChartHouseSystem     String    @default("placidus")
+  /// Per-user opaque token used to authenticate the .ics calendar
+  /// subscription endpoint (calendar apps can't carry session cookies).
+  /// Issued on first subscribe. Rotatable.
+  calendarToken             String?   @unique @map("calendar_token")
   createdAt                 DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt                 DateTime  @default(now()) @db.Timestamptz(6)
   account                   account[]
   session                   session[]
 
   @@index([email], map: "idx_user_email")
+  @@index([calendarToken], map: "idx_user_calendar_token")
 }
 
 model user_attribution {

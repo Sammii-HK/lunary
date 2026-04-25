@@ -65,19 +65,20 @@ async function resolveUser(request: NextRequest): Promise<SafeUser | null> {
 }
 
 /**
- * Stub for token-based lookup. Returns null until `User.calendarToken` exists.
- *
- * TODO(orchestrator): once the column is added, replace the early return with:
- *   const result = await sql`SELECT id FROM "user" WHERE "calendarToken" = ${token} LIMIT 1`;
- *   return result.rows[0]?.id ?? null;
- *
- * Token must be opaque, high-entropy, per-user, and rotatable.
+ * Token-based lookup against `user.calendar_token`. The token is
+ * opaque + high-entropy + per-user + rotatable; calendar clients can't
+ * carry session cookies so this is the only auth path for external apps.
  */
 async function lookupUserIdByToken(token: string): Promise<string | null> {
   if (!token) return null;
-  // Reference the value to satisfy linters without leaking it into logs.
-  void token.length;
-  return null;
+  try {
+    const result = await sql`
+      SELECT id FROM "user" WHERE calendar_token = ${token} LIMIT 1
+    `;
+    return result.rows[0]?.id ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /**
