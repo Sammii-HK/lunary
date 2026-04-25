@@ -1,15 +1,17 @@
+import { CosmicSkeleton } from '@/components/states/CosmicSkeleton';
+
 export default function ProfileLoading() {
   return (
     <div className='flex flex-col items-center gap-6 p-4'>
-      <div className='animate-pulse space-y-6 w-full max-w-md'>
+      <div className='space-y-6 w-full max-w-md'>
         <div className='flex flex-col items-center gap-4'>
-          <div className='w-20 h-20 bg-surface-card rounded-full' />
-          <div className='h-6 bg-surface-card rounded w-32' />
-          <div className='h-4 bg-surface-card rounded w-48' />
+          <CosmicSkeleton variant='circle' width={80} />
+          <CosmicSkeleton variant='text' width={128} height={24} />
+          <CosmicSkeleton variant='text' width={192} height={16} />
         </div>
         <div className='space-y-4'>
           {[1, 2, 3].map((i) => (
-            <div key={i} className='h-16 bg-surface-card rounded-lg' />
+            <CosmicSkeleton key={i} height={64} radius={8} />
           ))}
         </div>
       </div>

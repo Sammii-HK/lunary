@@ -24,6 +24,7 @@ import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { CircleLeaderboard } from '@/components/CircleLeaderboard';
 import { CircleInviteCTA } from '@/components/CircleInviteCTA';
 import { FriendActivityFeed } from '@/components/friends/FriendActivityFeed';
+import { CosmicSpinner } from '@/components/states/CosmicSpinner';
 
 type Friend = {
   id: string;
@@ -290,7 +291,7 @@ export function CircleTab() {
   if (loading) {
     return (
       <div className='w-full max-w-3xl flex justify-center py-12'>
-        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-lunary-primary' />
+        <CosmicSpinner size='lg' />
       </div>
     );
   }
@@ -876,7 +877,7 @@ function SynastryPanel({
     <div className='border-t border-stroke-default/50 p-4'>
       {loading ? (
         <div className='flex items-center gap-3 text-sm text-content-muted'>
-          <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-lunary-primary' />
+          <CosmicSpinner size='sm' />
           Calculating cosmic compatibility...
         </div>
       ) : error ? (

@@ -26,6 +26,9 @@ import { HoroscopeSeasonReading } from '@/components/horoscope/HoroscopeSeasonRe
 import { HoroscopeRitualForDay } from '@/components/horoscope/HoroscopeRitualForDay';
 import { Heading } from '@/components/ui/Heading';
 import { TransitScrubber } from '@/components/charts/TransitScrubber';
+import AudioNarrator from '@/components/audio/AudioNarrator';
+import { AutoLinkText } from '@/components/glossary/AutoLinkText';
+import { CosmicSkeleton } from '@/components/states/CosmicSkeleton';
 
 const GuideNudge = dynamic(
   () =>
@@ -333,13 +336,13 @@ export function HoroscopeView({
   if (hasPaidAccess && isLoading) {
     return (
       <div className='h-full space-y-4 p-4 pb-16 md:pb-20 overflow-auto'>
-        <div className='pt-6'>
-          <div className='h-8 bg-surface-card rounded animate-pulse w-48 mb-2' />
-          <div className='h-4 bg-surface-card rounded animate-pulse w-64' />
+        <div className='pt-6 space-y-2'>
+          <CosmicSkeleton variant='text' width={192} height={32} />
+          <CosmicSkeleton variant='text' width={256} height={16} />
         </div>
         <div className='space-y-4'>
-          <div className='h-32 bg-surface-card/50 rounded-xl animate-pulse' />
-          <div className='h-24 bg-surface-card/50 rounded-xl animate-pulse' />
+          <CosmicSkeleton height={128} radius={12} />
+          <CosmicSkeleton height={96} radius={12} />
         </div>
       </div>
     );
@@ -399,12 +402,22 @@ export function HoroscopeView({
         {/* <p className='text-[11px] font-semibold tracking-[0.3em] uppercase text-content-muted'>
           Cosmic Highlight
         </p> */}
-        <Heading variant='h2' as='h2'>
-          {cosmicHighlight}
-        </Heading>
-        <p className='text-xs md:text-sm text-content-secondary leading-relaxed'>
+        <div className='flex items-start justify-between gap-3'>
+          <Heading variant='h2' as='h2'>
+            {cosmicHighlight}
+          </Heading>
+          <AudioNarrator
+            text={`${cosmicHighlight}. ${dailyGuidance}`}
+            title="Today's reading"
+            compactVariant='inline'
+          />
+        </div>
+        <AutoLinkText
+          as='p'
+          className='text-xs md:text-sm text-content-secondary leading-relaxed'
+        >
           {dailyGuidance}
-        </p>
+        </AutoLinkText>
 
         {personalizedTeaser && (
           <Link href='/pricing?nav=app' className='block space-y-2 group'>

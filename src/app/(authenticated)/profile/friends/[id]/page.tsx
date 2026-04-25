@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/Heading';
+import { CosmicSpinner } from '@/components/states/CosmicSpinner';
 import {
   zodiacSymbol,
   bodiesSymbols,
@@ -163,7 +164,7 @@ export default function FriendProfilePage() {
   if (loading) {
     return (
       <div className='flex flex-col items-center justify-center min-h-[400px] gap-4'>
-        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-lunary-primary' />
+        <CosmicSpinner size='lg' />
         <p className='text-content-muted'>Loading friend profile...</p>
       </div>
     );
@@ -1018,7 +1019,7 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
   if (loading) {
     return (
       <div className='flex flex-col items-center justify-center min-h-[200px] gap-4'>
-        <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-lunary-primary' />
+        <CosmicSpinner size='md' />
         <p className='text-sm text-content-muted'>
           Calculating cosmic timing...
         </p>
