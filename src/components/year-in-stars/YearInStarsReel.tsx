@@ -249,7 +249,13 @@ export function YearInStarsReel({
         </AnimatePresence>
       </div>
 
-      {/* Tap zones for prev/next (covered by drag handlers; clickable too) */}
+      {/*
+        Stories-style tap zones: left half = back, right half = forward.
+        Sit above the slide content (z-20) but below the close/pause/share
+        controls (z-30). `top-16` keeps them clear of the progress bars and
+        pause toggle so those still receive clicks. On the final slide we
+        narrow the right zone so it doesn't cover the share button.
+      */}
       <button
         type='button'
         aria-label='Previous slide'
@@ -257,7 +263,7 @@ export function YearInStarsReel({
           e.stopPropagation();
           goPrev();
         }}
-        className='absolute bottom-0 left-0 top-16 z-20 hidden w-1/3 cursor-w-resize md:block'
+        className='absolute bottom-0 left-0 top-16 z-20 w-1/2 cursor-w-resize bg-transparent'
       />
       <button
         type='button'
@@ -266,7 +272,12 @@ export function YearInStarsReel({
           e.stopPropagation();
           goNext();
         }}
-        className='absolute bottom-0 right-0 top-16 z-20 hidden w-1/3 cursor-e-resize md:block'
+        className={cn(
+          'absolute right-0 top-16 z-20 w-1/2 cursor-e-resize bg-transparent',
+          // On the final slide the share CTA sits at bottom-12; stop the tap
+          // zone above it so the button stays clickable.
+          isLast ? 'bottom-28' : 'bottom-0',
+        )}
       />
 
       {/* Side arrows for desktop */}

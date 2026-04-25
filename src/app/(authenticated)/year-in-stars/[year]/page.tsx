@@ -103,9 +103,16 @@ async function fetchJournalEntriesForYear(
       const moodTags = Array.isArray(tags)
         ? tags.filter((t): t is string => typeof t === 'string')
         : [];
+      // Journal entries store the body under `text` (see /api/journal route).
+      // Older entries may also have used `content`, so accept either.
+      const rawText =
+        typeof contentData?.text === 'string'
+          ? contentData.text
+          : typeof contentData?.content === 'string'
+            ? contentData.content
+            : '';
       return {
-        content:
-          typeof contentData?.content === 'string' ? contentData.content : '',
+        content: rawText,
         moodTags,
         moonPhase:
           typeof contentData?.moonPhase === 'string'
