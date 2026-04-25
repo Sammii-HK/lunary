@@ -181,13 +181,13 @@ export async function generateTarotSeasonSnapshot(
   period: number = 30,
 ): Promise<TarotSeasonSnapshot | null> {
   try {
-    // Fetch recent tarot readings (match archetype logic: last 30 days, exclude archived/daily)
+    // Fetch recent tarot readings for the requested period, excluding archived/daily pulls.
     const result = await sql`
       SELECT cards, created_at
       FROM tarot_readings
       WHERE user_id = ${userId}
         AND archived_at IS NULL
-        AND created_at >= NOW() - INTERVAL '30 days'
+        AND created_at >= NOW() - (${period} || ' days')::INTERVAL
         AND jsonb_array_length(cards) > 1
       ORDER BY created_at DESC
     `;
@@ -296,6 +296,8 @@ export async function generateTarotSeasonSnapshot(
       suitDistribution,
       frequentCards,
       period,
+      totalReadings: result.rows.length,
+      totalCardsDrawn: totalCards,
       timestamp: new Date().toISOString(),
     };
 

@@ -30,6 +30,9 @@ export async function transformBasicPatternsToAnalysis(basicPatterns: {
   }>;
   arcanaPatterns: Array<{ type: string; count: number; reading?: string }>;
   timeFrame: number;
+  totalReadings?: number;
+  totalCardsDrawn?: number;
+  dataSource?: 'observed' | 'generated_preview';
 }): Promise<PatternAnalysis> {
   // Debug: Log incoming data
   if (process.env.NODE_ENV === 'development') {
@@ -37,25 +40,6 @@ export async function transformBasicPatternsToAnalysis(basicPatterns: {
       suitPatterns: basicPatterns.suitPatterns,
       arcanaPatterns: basicPatterns.arcanaPatterns,
       frequentCards: basicPatterns.frequentCards,
-    });
-  }
-
-  // Calculate total cards drawn across all suits
-  // This represents the total number of card positions across all readings
-  const totalCardsDrawn = basicPatterns.suitPatterns.reduce(
-    (sum, suit) => sum + suit.count,
-    0,
-  );
-
-  // Estimate total readings based on total cards
-  // Assuming average 3 cards per reading (adjust based on your app's typical spread size)
-  const estimatedReadings =
-    totalCardsDrawn > 0 ? Math.ceil(totalCardsDrawn / 3) : 0;
-
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Pattern Adapter] Calculated:', {
-      totalCardsDrawn,
-      estimatedReadings,
     });
   }
 
@@ -71,8 +55,19 @@ export async function transformBasicPatternsToAnalysis(basicPatterns: {
       };
     });
 
-  // Fetch actual reading data with appearances
-  let readingsData: any[] = [];
+  // Fetch actual reading data with appearances. If this is unavailable, the
+  // incoming basic patterns are treated as a generated preview, not observed behaviour.
+  let readingsData: Array<{
+    name: string;
+    createdAt: string;
+    readingId?: string;
+    keywords?: string[];
+    information?: string;
+    moonPhase?: CardAppearance['moonPhase'];
+    aspects?: CardAppearance['aspects'];
+  }> = [];
+  let observedReadingCount = 0;
+  let observedCardCount = 0;
   try {
     const response = await fetch(
       `/api/patterns/user-readings?days=${basicPatterns.timeFrame}`,
@@ -80,9 +75,43 @@ export async function transformBasicPatternsToAnalysis(basicPatterns: {
     if (response.ok) {
       const data = await response.json();
       readingsData = data.readings || [];
+      observedReadingCount =
+        typeof data.readingCount === 'number' ? data.readingCount : 0;
+      observedCardCount =
+        typeof data.cardCount === 'number'
+          ? data.cardCount
+          : readingsData.length;
     }
   } catch (error) {
     console.error('[Pattern Adapter] Failed to fetch readings:', error);
+  }
+
+  const totalCardsDrawn =
+    basicPatterns.totalCardsDrawn ??
+    (observedCardCount > 0
+      ? observedCardCount
+      : basicPatterns.suitPatterns.reduce((sum, suit) => sum + suit.count, 0));
+
+  const uniqueReadingIds = new Set(
+    readingsData
+      .map((reading) => reading.readingId)
+      .filter((readingId): readingId is string => Boolean(readingId)),
+  );
+  const totalReadings =
+    basicPatterns.totalReadings ??
+    (observedReadingCount || uniqueReadingIds.size || 0);
+  const dataSource: PatternAnalysis['dataSource'] =
+    basicPatterns.dataSource ??
+    (totalReadings > 0 && readingsData.length > 0
+      ? 'observed'
+      : 'generated_preview');
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Pattern Adapter] Calculated:', {
+      totalCardsDrawn,
+      totalReadings,
+      dataSource,
+    });
   }
 
   // Transform frequent cards with appearances
@@ -93,6 +122,7 @@ export async function transformBasicPatternsToAnalysis(basicPatterns: {
         .filter((reading) => reading.name === card.name)
         .map((reading) => ({
           date: reading.createdAt,
+          readingId: reading.readingId,
           keywords: reading.keywords,
           information: reading.information,
           moonPhase: reading.moonPhase,
@@ -145,7 +175,9 @@ export async function transformBasicPatternsToAnalysis(basicPatterns: {
     frequentCards,
     suitPatterns,
     arcanaBalance,
-    totalReadings: estimatedReadings,
+    totalReadings,
+    totalCardsDrawn,
+    dataSource,
     dateRange: {
       start: startDate.toISOString(),
       end: endDate.toISOString(),

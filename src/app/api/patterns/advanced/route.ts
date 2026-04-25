@@ -6,12 +6,6 @@ import {
   normalizePlanType,
   FEATURE_ACCESS,
 } from '../../../../../utils/pricing';
-import { getTarotCard } from '../../../../../utils/tarot/tarot';
-import {
-  getDailySeedDateStrings,
-  getDateStringInTimeZone,
-} from '../../../../../utils/tarot/seed-date';
-import { getYearAnalysis } from '@/lib/tarot/year-analysis';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,21 +13,12 @@ export const dynamic = 'force-dynamic';
 // Analysis data is cached in database, but subscription checks must be fresh
 export const revalidate = 0;
 
-type SeededTarotCard = {
+type ObservedTarotCard = {
   name: string;
   keywords: string[];
+  readingId: string;
+  createdAt: string;
 };
-
-const buildSeededCardsForRange = (
-  now: Date,
-  timeZone: string,
-  days: number,
-  userName?: string,
-  userBirthday?: string,
-): SeededTarotCard[] =>
-  getDailySeedDateStrings(now, timeZone, days, false).map((dateStr) =>
-    getTarotCard(`daily-${dateStr}`, userName, userBirthday),
-  );
 
 interface AdvancedPatternAnalysis {
   yearOverYear: {
@@ -86,31 +71,143 @@ interface AdvancedPatternAnalysis {
   };
 }
 
+type ObservedYearAnalysis = AdvancedPatternAnalysis['yearOverYear']['thisYear'];
+
+function parseTarotCards(row: {
+  id: string;
+  cards: unknown;
+  created_at: string;
+}): ObservedTarotCard[] {
+  try {
+    const cardsData =
+      typeof row.cards === 'string' ? JSON.parse(row.cards) : row.cards;
+    if (!Array.isArray(cardsData)) return [];
+
+    return cardsData
+      .map((cardData: any) => cardData?.card ?? cardData)
+      .filter((card: any) => card?.name)
+      .map((card: any) => ({
+        name: String(card.name),
+        keywords: Array.isArray(card.keywords) ? card.keywords : [],
+        readingId: row.id,
+        createdAt: row.created_at,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+async function fetchObservedTarotCards(
+  userId: string,
+  startDate: Date,
+  endDate?: Date,
+): Promise<ObservedTarotCard[]> {
+  const params: Array<string> = [userId, startDate.toISOString()];
+  let endClause = '';
+  if (endDate) {
+    params.push(endDate.toISOString());
+    endClause = `AND created_at < $${params.length}::timestamptz`;
+  }
+
+  const result = await sql.query(
+    `
+      SELECT id, cards, created_at
+      FROM tarot_readings
+      WHERE user_id = $1
+        AND archived_at IS NULL
+        AND created_at >= $2::timestamptz
+        ${endClause}
+      ORDER BY created_at DESC
+    `,
+    params,
+  );
+
+  return result.rows.flatMap((row) =>
+    parseTarotCards({
+      id: row.id,
+      cards: row.cards,
+      created_at: row.created_at,
+    }),
+  );
+}
+
+function generateObservedCardRecap(cardName: string, count: number): string {
+  return `"${cardName}" appears ${count} ${count === 1 ? 'time' : 'times'} in saved readings for this period.`;
+}
+
+function analyseObservedCards(
+  cards: ObservedTarotCard[],
+): ObservedYearAnalysis {
+  const cardFrequency: Record<string, number> = {};
+  const keywordCounts: Record<string, number> = {};
+
+  cards.forEach((card) => {
+    cardFrequency[card.name] = (cardFrequency[card.name] || 0) + 1;
+    card.keywords.forEach((keyword) => {
+      keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+    });
+  });
+
+  const dominantThemes = Object.entries(keywordCounts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5)
+    .map(([keyword]) => keyword);
+
+  const frequentCards = Object.entries(cardFrequency)
+    .filter(([, count]) => count >= 2)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 10)
+    .map(([name, count]) => ({ name, count }));
+
+  const patternInsights =
+    cards.length > 0
+      ? frequentCards.length > 0
+        ? [
+            `"${frequentCards[0].name}" is the most repeated saved card in this period.`,
+          ]
+        : ['Saved readings exist, but no card repeats yet.']
+      : ['No saved readings recorded for this period.'];
+
+  const cardRecaps = frequentCards.slice(0, 5).map((card) => ({
+    cardName: card.name,
+    recap: generateObservedCardRecap(card.name, card.count),
+  }));
+
+  return {
+    dominantThemes,
+    frequentCards,
+    patternInsights,
+    cardRecaps: cardRecaps.length > 0 ? cardRecaps : null,
+    trends: null,
+  };
+}
+
 async function getYearOverYearComparison(
   userId: string,
-  timeZone: string,
-  userName?: string,
-  userBirthday?: string,
 ): Promise<AdvancedPatternAnalysis['yearOverYear']> {
   const now = new Date();
-  const thisYear = parseInt(
-    getDateStringInTimeZone(now, timeZone).slice(0, 4),
-    10,
-  );
+  const thisYear = now.getUTCFullYear();
   const lastYear = thisYear - 1;
 
   if (process.env.NODE_ENV === 'development') {
     console.log('[getYearOverYearComparison] Years:', { thisYear, lastYear });
   }
 
-  // Use cached analysis for both years
-  const [thisYearAnalysis, lastYearAnalysis] = await Promise.all([
-    getYearAnalysis(userId, thisYear, userName, userBirthday),
-    getYearAnalysis(userId, lastYear, userName, userBirthday),
+  const [thisYearCards, lastYearCards] = await Promise.all([
+    fetchObservedTarotCards(
+      userId,
+      new Date(Date.UTC(thisYear, 0, 1)),
+      new Date(Date.UTC(thisYear + 1, 0, 1)),
+    ),
+    fetchObservedTarotCards(
+      userId,
+      new Date(Date.UTC(lastYear, 0, 1)),
+      new Date(Date.UTC(thisYear, 0, 1)),
+    ),
   ]);
 
-  const thisYearData = thisYearAnalysis;
-  const lastYearData = lastYearAnalysis;
+  const thisYearData = analyseObservedCards(thisYearCards);
+  const lastYearData = analyseObservedCards(lastYearCards);
 
   if (process.env.NODE_ENV === 'development') {
     console.log('[getYearOverYearComparison] Analysis results:', {
@@ -158,13 +255,9 @@ async function getYearOverYearComparison(
     direction: 'up' | 'down' | 'stable';
   }> = [];
 
-  // Check if last year has data by checking if dominant themes or cards exist
-  if (
-    lastYearData.dominantThemes.length === 0 &&
-    lastYearData.frequentCards.length === 0
-  ) {
+  if (lastYearCards.length === 0) {
     insights.push(
-      "This is your first year of tarot readings. As you continue your journey, you'll be able to see how your themes evolve year over year.",
+      'No saved tarot readings were recorded for the comparison year yet.',
     );
   } else {
     // Calculate trends for frequent cards
@@ -230,21 +323,15 @@ async function getYearOverYearComparison(
     }
 
     // Calculate total card frequency change
-    const thisYearTotalCards = thisYearData.frequentCards.reduce(
-      (sum, card) => sum + card.count,
-      0,
-    );
-    const lastYearTotalCards = lastYearData.frequentCards.reduce(
-      (sum, card) => sum + card.count,
-      0,
-    );
+    const thisYearTotalCards = thisYearCards.length;
+    const lastYearTotalCards = lastYearCards.length;
 
     if (lastYearTotalCards > 0) {
       const totalCardChange =
         ((thisYearTotalCards - lastYearTotalCards) / lastYearTotalCards) * 100;
       if (Math.abs(totalCardChange) > 1) {
         trends.push({
-          metric: 'Total card frequency',
+          metric: 'Total saved cards',
           change: Math.round(totalCardChange * 10) / 10,
           direction:
             totalCardChange > 5
@@ -293,33 +380,27 @@ async function getYearOverYearComparison(
 }
 
 async function getEnhancedTarotPatterns(
+  userId: string,
   planType: string,
-  timeZone: string,
-  userName?: string,
-  userBirthday?: string,
   requestedDays?: number,
 ): Promise<AdvancedPatternAnalysis['enhancedTarot']> {
   const days =
     requestedDays || (planType === 'lunary_plus_ai_annual' ? 365 : 90);
   const now = new Date();
+  const startDate = new Date(now);
+  startDate.setDate(startDate.getDate() - days);
 
   if (process.env.NODE_ENV === 'development') {
     console.log(
-      `[getEnhancedTarotPatterns] Using ${days} seeded days (plan: ${planType})`,
+      `[getEnhancedTarotPatterns] Using ${days} days of saved readings (plan: ${planType})`,
     );
   }
 
-  const seededCards = buildSeededCardsForRange(
-    now,
-    timeZone,
-    days,
-    userName,
-    userBirthday,
-  );
+  const observedCards = await fetchObservedTarotCards(userId, startDate);
 
   if (process.env.NODE_ENV === 'development') {
     console.log(
-      `[getEnhancedTarotPatterns] Generated ${seededCards.length} daily cards`,
+      `[getEnhancedTarotPatterns] Found ${observedCards.length} saved cards`,
     );
   }
 
@@ -332,7 +413,7 @@ async function getEnhancedTarotPatterns(
     {};
   let totalCards = 0;
 
-  seededCards.forEach((card) => {
+  observedCards.forEach((card) => {
     totalCards++;
     const cardName = card.name;
     const suit = getCardSuit(cardName);
@@ -527,14 +608,6 @@ function getSuitElement(suit: string): string {
   return 'Spirit';
 }
 
-function getSuitColor(suit: string): string {
-  if (suit === 'Wands') return 'Red/Orange';
-  if (suit === 'Cups') return 'Blue';
-  if (suit === 'Swords') return 'Yellow/White';
-  if (suit === 'Pentacles') return 'Green/Brown';
-  return 'Purple/Gold';
-}
-
 function getNumberMeaning(number: string): string {
   const meanings: { [key: string]: string } = {
     Ace: 'New beginnings and potential',
@@ -555,7 +628,6 @@ export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request);
     const userPlanRaw = user.plan;
-    const timeZone = user.timezone || 'UTC';
 
     const { searchParams } = request.nextUrl;
     const daysParam = searchParams.get('days');
@@ -734,19 +806,8 @@ export async function GET(request: NextRequest) {
     }
 
     const [yearOverYear, enhancedTarot] = await Promise.all([
-      getYearOverYearComparison(
-        user.id,
-        timeZone,
-        user.displayName,
-        user.birthday,
-      ),
-      getEnhancedTarotPatterns(
-        planType,
-        timeZone,
-        user.displayName,
-        user.birthday,
-        requestedDays,
-      ),
+      getYearOverYearComparison(user.id),
+      getEnhancedTarotPatterns(user.id, planType, requestedDays),
     ]);
 
     const analysis: AdvancedPatternAnalysis = {

@@ -28,9 +28,6 @@ export function SuitDistributionChart({ data }: SuitDistributionChartProps) {
       const color = getSuitColorHSL(suit.suit as any);
       const recalculatedPercentage =
         totalSuitCards > 0 ? (suit.count / totalSuitCards) * 100 : 0;
-      console.log(
-        `[SuitDistributionChart] ${suit.suit} -> ${recalculatedPercentage.toFixed(1)}%`,
-      );
       return {
         name: suit.suit,
         value: recalculatedPercentage,
@@ -130,6 +127,9 @@ export function SuitDistributionChart({ data }: SuitDistributionChartProps) {
             </div>
           ))}
       </div>
+      <p className='text-center text-[10px] text-content-muted'>
+        Percentages use minor arcana only ({totalSuitCards} cards).
+      </p>
     </div>
   );
 }

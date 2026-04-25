@@ -53,6 +53,7 @@ export function TarotPatternsHub({
     'lunary_plus_ai',
     'lunary_plus_ai_annual',
   ].includes(userTier);
+  const isObserved = patterns.dataSource === 'observed';
 
   const timeFrameDays = Math.ceil(
     (new Date(patterns.dateRange.end).getTime() -
@@ -62,11 +63,22 @@ export function TarotPatternsHub({
 
   return (
     <div className='space-y-4'>
+      {!isObserved && (
+        <div className='rounded-xl border border-stroke-subtle bg-surface-card/30 px-4 py-3 text-xs text-content-muted'>
+          Preview based on generated daily cards. Saved readings will replace
+          this once you have recorded tarot activity.
+        </div>
+      )}
+
       {/* Dominant Themes - Enhanced RecurringThemesCard */}
       {patterns.dominantThemes.length > 0 && (
         <RecurringThemesCard
-          title='Dominant Themes'
-          subtitle={`Patterns from the last ${timeFrameDays} days`}
+          title={isObserved ? 'Dominant Themes' : 'Theme Preview'}
+          subtitle={
+            isObserved
+              ? `${patterns.totalReadings} readings across ${timeFrameDays} days`
+              : `${timeFrameDays}-day generated preview`
+          }
           items={patterns.dominantThemes}
           showTrendIndicators={showTrendIndicators}
         />
@@ -77,7 +89,11 @@ export function TarotPatternsHub({
         {/* Suit Distribution */}
         <PatternCard
           title='Suit Distribution'
-          subtitle='Element balance in your readings'
+          subtitle={
+            isObserved
+              ? `Minor arcana mix from ${patterns.totalCardsDrawn} cards`
+              : 'Minor arcana mix in this preview'
+          }
           color='primary'
           icon={<Sparkles className='w-4 h-4' />}
           locked={!hasBasicPatterns}
@@ -91,7 +107,11 @@ export function TarotPatternsHub({
         {/* Arcana Balance */}
         <PatternCard
           title='Arcana Balance'
-          subtitle='Major vs Minor arcana'
+          subtitle={
+            isObserved
+              ? 'Major vs Minor cards drawn'
+              : 'Major vs Minor preview cards'
+          }
           color='secondary'
           icon={<Moon className='w-4 h-4' />}
           locked={!hasBasicPatterns}
@@ -109,14 +129,20 @@ export function TarotPatternsHub({
         {hasAdvancedPatterns && (
           <PatternCard
             title='Reading Frequency'
-            subtitle='Your practice over time'
+            subtitle={
+              isObserved
+                ? `${patterns.totalReadings} recorded readings`
+                : 'Recorded readings only'
+            }
             color='accent'
             icon={<TrendingUp className='w-4 h-4' />}
             collapsible={true}
             defaultCollapsed={true}
           >
             <div className='flex items-center justify-center h-[250px] text-sm text-content-muted'>
-              Timeline visualization coming soon
+              {isObserved
+                ? 'Timeline visualization coming soon'
+                : 'No recorded reading timeline yet'}
             </div>
           </PatternCard>
         )}

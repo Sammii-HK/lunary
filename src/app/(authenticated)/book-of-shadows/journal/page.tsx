@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   BookOpen,
@@ -11,6 +12,7 @@ import {
   Star,
   Mic,
   Type,
+  Clock,
 } from 'lucide-react';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { JournalEntry } from '@/app/api/journal/route';
@@ -40,8 +42,27 @@ interface EntryCardProps {
   entry: JournalEntry;
 }
 
+function formatEntryDateForTimeMachine(value: string): string {
+  const date = new Date(value);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getEntryLabel(entry: JournalEntry): string {
+  if (entry.category === 'dream') return 'Dream journal entry';
+  if (entry.category === 'ritual') return 'Ritual journal entry';
+  return 'Journal reflection';
+}
+
 function EntryCard({ entry }: EntryCardProps) {
   const date = new Date(entry.createdAt);
+  const timeMachineDate = formatEntryDateForTimeMachine(entry.createdAt);
+  const timeMachineParams = new URLSearchParams({
+    date: timeMachineDate,
+    label: getEntryLabel(entry),
+  });
   const formattedDate = date.toLocaleDateString('en-GB', {
     month: 'short',
     day: 'numeric',
@@ -85,6 +106,13 @@ function EntryCard({ entry }: EntryCardProps) {
           ))}
         </div>
       )}
+      <Link
+        href={`/app/time-machine?${timeMachineParams.toString()}`}
+        className='mt-3 inline-flex items-center gap-1.5 rounded-full border border-stroke-subtle bg-surface-card/60 px-3 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:border-lunary-primary/50 hover:text-content-primary'
+      >
+        <Clock className='h-3.5 w-3.5 text-lunary-primary-400' />
+        See the sky that day
+      </Link>
     </div>
   );
 }

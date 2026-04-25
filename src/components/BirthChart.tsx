@@ -332,7 +332,7 @@ export const BirthChart = ({
   }, [allAspects, aspectFilter, showAsteroids]);
 
   const progressive = scale >= 1.3;
-  const allRenderableBodies = [
+  const progressiveBodies = [
     ...mainPlanets,
     ...angles,
     ...(showPoints && progressive
@@ -342,6 +342,14 @@ export const BirthChart = ({
         : []),
     ...(showAsteroids && progressive ? asteroids : []),
   ];
+  const selectedRenderableBody = selectedBody
+    ? chartData.find((p) => p.body === selectedBody)
+    : null;
+  const allRenderableBodies =
+    selectedRenderableBody &&
+    !progressiveBodies.some((p) => p.body === selectedRenderableBody.body)
+      ? [...progressiveBodies, selectedRenderableBody]
+      : progressiveBodies;
 
   const highlightedPlanet = selectedBody ?? hoveredBody;
   const selectedChartBody = selectedBody
@@ -359,7 +367,7 @@ export const BirthChart = ({
   const handleSvgMouseLeave = () => setCursor(null);
 
   const handleBodyTap = (body: string) => {
-    setSelectedBody((s) => (s === body ? null : body));
+    setSelectedBody(body);
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {
         (navigator as Navigator & { vibrate?: (p: number) => void }).vibrate?.(
@@ -856,7 +864,7 @@ export const BirthChart = ({
                           stiffness: 320,
                           damping: 22,
                         }}
-                        style={{ originX: x, originY: y }}
+                        style={{ originX: 0.5, originY: 0.5 }}
                       >
                         <MoonPhase
                           cx={x}
@@ -891,7 +899,7 @@ export const BirthChart = ({
                           stiffness: 320,
                           damping: 22,
                         }}
-                        style={{ originX: x, originY: y }}
+                        style={{ originX: 0.5, originY: 0.5 }}
                       >
                         {symbol}
                       </motion.text>
@@ -900,7 +908,7 @@ export const BirthChart = ({
                     <circle
                       cx={x}
                       cy={y}
-                      r='14'
+                      r='18'
                       fill='transparent'
                       pointerEvents='all'
                     />

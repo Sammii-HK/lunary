@@ -129,7 +129,8 @@ export function ArcanaBalanceRadial({
           </p>
           <p className='text-content-muted'>{interpretation.focus}</p>
           <p className='text-content-muted text-[10px] mt-2'>
-            Expected: ~28% Major, ~72% Minor
+            Denominator: {total} cards drawn. Expected deck mix: ~28% Major,
+            ~72% Minor.
           </p>
         </div>
       )}

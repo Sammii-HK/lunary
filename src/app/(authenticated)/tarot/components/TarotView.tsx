@@ -13,7 +13,6 @@ import {
   Download,
   Copy,
   Loader2,
-  Moon,
   ArrowRight,
 } from 'lucide-react';
 import { AdvancedPatterns } from '@/components/tarot/AdvancedPatterns';
@@ -21,7 +20,7 @@ import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { TarotCardModal } from '@/components/TarotCardModal';
 import { getTarotCardByName } from '@/utils/tarot/getCardByName';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
-import { conversionTracking, trackCtaImpression } from '@/lib/analytics';
+import { trackCtaImpression } from '@/lib/analytics';
 import { useModal } from '@/hooks/useModal';
 import {
   SubscriptionStatus,
@@ -390,19 +389,6 @@ export function TarotView({
     firstName,
   });
 
-  // Tracking effects
-  useEffect(() => {
-    if (personalizedReading && userId) {
-      conversionTracking.personalizedTarotViewed(userId, subscription.plan);
-    }
-  }, [personalizedReading, userId, subscription.plan]);
-
-  useEffect(() => {
-    if (hasPaidAccess && personalizedReading && userId) {
-      conversionTracking.tarotViewed(userId, subscription.plan);
-    }
-  }, [hasPaidAccess, personalizedReading, userId, subscription.plan]);
-
   // Helper to render preview based on A/B test variant
   const renderPreview = useCallback(
     (content: string) => {
@@ -622,9 +608,37 @@ export function TarotView({
   const weeklyCardName = weeklyCard?.name ?? '';
   const dailyCardKeywords = dailyCard?.keywords ?? [];
   const weeklyCardKeywords = weeklyCard?.keywords ?? [];
+  const patternSource = hasPaidAccess
+    ? personalizedReading?.trendAnalysis
+    : freeBasicPatterns;
+
+  const getCardRepeat = (cardName: string) => {
+    if (!cardName || !patternSource?.frequentCards) return null;
+
+    const match = patternSource.frequentCards.find(
+      (card: { name: string; count?: number }) => card.name === cardName,
+    );
+
+    if (!match?.count || match.count < 2) return null;
+
+    return {
+      count: match.count,
+      window: patternSource.timeFrame ?? timeFrame,
+    };
+  };
+
+  const dailyRepeat = getCardRepeat(dailyCardName);
+  const weeklyRepeat = getCardRepeat(weeklyCardName);
+
+  const dailyWhy = hasPaidAccess
+    ? "Drawn from today's date, your profile and your saved tarot pattern."
+    : "Drawn from today's shared tarot cycle.";
+  const weeklyWhy = hasPaidAccess
+    ? 'Anchored to this week, then checked against your recent card pattern.'
+    : "Anchored to this week's shared reading cycle.";
 
   const renderCardGlyph = (name: string, index: number) => {
-    const symbols = ['✦', '☾', '✧', '◇', '✶'];
+    const symbols = ['✦', '✧', '◇', '✶', '✴'];
     const symbol =
       symbols[
         Math.abs(
@@ -656,6 +670,8 @@ export function TarotView({
     children,
     isMuted = false,
     index,
+    why,
+    repeat,
   }: {
     label: string;
     cardName: string;
@@ -665,6 +681,8 @@ export function TarotView({
     children?: React.ReactNode;
     isMuted?: boolean;
     index: number;
+    why?: string;
+    repeat?: { count: number; window: number } | null;
   }) => {
     const primaryKeyword = keywords[2] || keywords[0];
     const supportingKeywords = keywords
@@ -706,6 +724,20 @@ export function TarotView({
                   </span>
                 )}
               </div>
+              {(why || repeat) && (
+                <div className='mt-3 flex flex-wrap gap-1.5'>
+                  {why && (
+                    <span className='inline-flex items-center rounded-full border border-white/10 bg-surface-base/35 px-2.5 py-1 text-[11px] text-content-muted'>
+                      Why this card? {why}
+                    </span>
+                  )}
+                  {repeat && (
+                    <span className='inline-flex items-center rounded-full border border-lunary-success-700/35 bg-lunary-success-950/20 px-2.5 py-1 text-[11px] text-lunary-success-200'>
+                      Seen before: {repeat.count} times in {repeat.window} days
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           {share && (
@@ -756,37 +788,71 @@ export function TarotView({
           </div>
 
           <div className='rounded-2xl border border-white/10 bg-surface-elevated/35 p-4 backdrop-blur'>
-            <div className='flex items-center gap-3'>
-              <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-lunary-primary-700/40 bg-layer-base/50 p-2'>
-                <Image
-                  src={cosmicContext.moonPhase.icon.src}
-                  alt={cosmicContext.moonPhase.icon.alt}
-                  width={32}
-                  height={32}
-                  className='h-8 w-8 object-contain'
-                />
+            <p className='mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-content-brand-accent/85'>
+              On the table
+            </p>
+            <div className='space-y-2.5'>
+              <div className='rounded-2xl border border-white/10 bg-surface-base/30 p-3'>
+                <p className='text-[11px] uppercase tracking-[0.18em] text-content-muted'>
+                  Daily card
+                </p>
+                <p className='mt-1 text-sm font-medium text-content-primary'>
+                  {dailyCardName}
+                </p>
+                {dailyRepeat && (
+                  <p className='mt-1 text-[11px] text-lunary-success-200'>
+                    Seen {dailyRepeat.count} times in {dailyRepeat.window} days
+                  </p>
+                )}
               </div>
-              <div className='min-w-0'>
-                <p className='text-xs uppercase tracking-[0.22em] text-content-muted'>
-                  Today&apos;s context
+              <div className='rounded-2xl border border-white/10 bg-surface-base/30 p-3'>
+                <p className='text-[11px] uppercase tracking-[0.18em] text-content-muted'>
+                  Weekly card
                 </p>
-                <p className='text-sm font-medium text-content-primary'>
-                  {cosmicContext.moonPhase.name}
+                <p className='mt-1 text-sm font-medium text-content-primary'>
+                  {weeklyCardName}
                 </p>
+                {weeklyRepeat && (
+                  <p className='mt-1 text-[11px] text-lunary-success-200'>
+                    Seen {weeklyRepeat.count} times in {weeklyRepeat.window}{' '}
+                    days
+                  </p>
+                )}
               </div>
             </div>
-            {moonKeywords.length > 0 && (
-              <div className='mt-3 flex flex-wrap gap-1.5'>
-                {moonKeywords.map((keyword) => (
-                  <span
-                    key={keyword}
-                    className='rounded-full border border-lunary-secondary-700/40 bg-layer-base/40 px-2 py-0.5 text-xs text-content-secondary'
-                  >
-                    {keyword}
-                  </span>
-                ))}
+            <div className='mt-3 rounded-2xl border border-lunary-secondary-700/30 bg-layer-base/35 p-3'>
+              <div className='flex items-center gap-3'>
+                <div className='flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-lunary-primary-700/40 bg-surface-base/40 p-2'>
+                  <Image
+                    src={cosmicContext.moonPhase.icon.src}
+                    alt={cosmicContext.moonPhase.icon.alt}
+                    width={30}
+                    height={30}
+                    className='h-7 w-7 object-contain'
+                  />
+                </div>
+                <div className='min-w-0'>
+                  <p className='text-[11px] uppercase tracking-[0.18em] text-content-muted'>
+                    Moon context
+                  </p>
+                  <p className='text-sm font-medium text-content-primary'>
+                    {cosmicContext.moonPhase.name}
+                  </p>
+                </div>
               </div>
-            )}
+              {moonKeywords.length > 0 && (
+                <div className='mt-3 flex flex-wrap gap-1.5'>
+                  {moonKeywords.map((keyword) => (
+                    <span
+                      key={keyword}
+                      className='rounded-full border border-lunary-secondary-700/40 bg-surface-base/35 px-2 py-0.5 text-xs text-content-secondary'
+                    >
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -880,6 +946,8 @@ export function TarotView({
                 keywords: dailyCardKeywords,
                 share: dailyShare,
                 index: 0,
+                why: dailyWhy,
+                repeat: dailyRepeat,
                 onOpen: () => {
                   const card = getTarotCardByName(
                     personalizedReading!.daily.name,
@@ -908,6 +976,8 @@ export function TarotView({
                 keywords: weeklyCardKeywords,
                 share: weeklyShare,
                 index: 1,
+                why: weeklyWhy,
+                repeat: weeklyRepeat,
                 onOpen: () => {
                   const card = getTarotCardByName(
                     personalizedReading!.weekly.name,
@@ -930,6 +1000,28 @@ export function TarotView({
                 ),
               })}
             </div>
+
+            {recurringThemeItems.length > 0 && (
+              <div className='mt-4 grid gap-2 rounded-2xl border border-stroke-subtle/50 bg-surface-base/35 p-3 sm:grid-cols-3'>
+                {recurringThemeItems.map(
+                  (item: { label: string; detail?: string }) => (
+                    <div key={item.label} className='min-w-0'>
+                      <p className='text-[11px] uppercase tracking-[0.18em] text-content-muted'>
+                        Pattern note
+                      </p>
+                      <p className='mt-1 truncate text-xs font-medium text-content-primary'>
+                        {item.label}
+                      </p>
+                      {item.detail && (
+                        <p className='mt-0.5 text-[11px] text-content-muted'>
+                          {item.detail}
+                        </p>
+                      )}
+                    </div>
+                  ),
+                )}
+              </div>
+            )}
 
             {/* Guidance action points - paid only */}
             <div className='mt-4 rounded-2xl border border-lunary-success-800/45 bg-gradient-to-r from-layer-deep/80 to-surface-elevated/40 p-4'>
@@ -976,6 +1068,8 @@ export function TarotView({
                 keywords: dailyCardKeywords,
                 share: dailyShare,
                 index: 0,
+                why: dailyWhy,
+                repeat: dailyRepeat,
                 onOpen: () => {
                   const card = getTarotCardByName(generalTarot!.daily.name);
                   if (card) setSelectedCard(card);
@@ -1009,6 +1103,8 @@ export function TarotView({
                   keywords: weeklyCardKeywords,
                   index: 1,
                   isMuted: true,
+                  why: weeklyWhy,
+                  repeat: weeklyRepeat,
                   children: (
                     <div className='rounded-2xl border border-stroke-subtle/50 bg-surface-base/30 p-3'>
                       <p className='text-xs leading-relaxed text-content-muted blur-[2px]'>
@@ -1169,7 +1265,13 @@ export function TarotView({
                   <div className='flex items-center justify-between p-4'>
                     <div className='flex items-center gap-3'>
                       <div className='p-2 rounded-lg bg-layer-base/30'>
-                        <Moon className='w-4 h-4 text-lunary-secondary-400' />
+                        <Image
+                          src={cosmicContext.moonPhase.icon.src}
+                          alt={cosmicContext.moonPhase.icon.alt}
+                          width={18}
+                          height={18}
+                          className='h-[18px] w-[18px] object-contain'
+                        />
                       </div>
                       <div>
                         <p className='text-sm font-medium text-content-primary'>
@@ -1208,7 +1310,13 @@ export function TarotView({
                 <div className='rounded-lg border border-lunary-accent-700 bg-layer-deep p-4'>
                   <div className='flex items-center gap-3 mb-3'>
                     <div className='w-10 h-10 rounded-lg bg-surface-card/60 border border-stroke-default flex items-center justify-center'>
-                      <span className='text-lg'>🌙</span>
+                      <Image
+                        src={cosmicContext.moonPhase.icon.src}
+                        alt={cosmicContext.moonPhase.icon.alt}
+                        width={22}
+                        height={22}
+                        className='h-5 w-5 object-contain'
+                      />
                     </div>
                     <div>
                       <h4 className='text-sm font-medium text-content-primary'>
@@ -1228,7 +1336,7 @@ export function TarotView({
                 <div className='rounded-lg border border-lunary-accent-700 bg-layer-deep p-4'>
                   <div className='flex items-center gap-3 mb-3'>
                     <div className='w-10 h-10 rounded-lg bg-surface-card/60 border border-stroke-default flex items-center justify-center'>
-                      <span className='text-lg'>💫</span>
+                      <Sparkles className='h-4 w-4 text-content-brand' />
                     </div>
                     <div>
                       <h4 className='text-sm font-medium text-content-primary'>

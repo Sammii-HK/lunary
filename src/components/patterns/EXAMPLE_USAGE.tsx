@@ -103,6 +103,8 @@ function ExampleStandalonePage() {
       minor: 40,
     },
     totalReadings: 52,
+    totalCardsDrawn: 52,
+    dataSource: 'observed',
     dateRange: {
       start: '2026-01-01T00:00:00Z',
       end: '2026-01-30T23:59:59Z',
@@ -151,6 +153,8 @@ function ExampleTierTesting() {
     ],
     arcanaBalance: { major: 10, minor: 40 },
     totalReadings: 50,
+    totalCardsDrawn: 50,
+    dataSource: 'observed',
     dateRange: {
       start: '2026-01-01T00:00:00Z',
       end: '2026-01-30T23:59:59Z',

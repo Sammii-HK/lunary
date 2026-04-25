@@ -75,6 +75,8 @@ export interface PatternAnalysis {
     minor: number;
   };
   totalReadings: number;
+  totalCardsDrawn: number;
+  dataSource: 'observed' | 'generated_preview';
   dateRange: {
     start: string;
     end: string;

@@ -47,6 +47,8 @@ export interface TarotSeasonSnapshot {
     count: number;
   }>;
   period: number; // days analyzed (7, 30, 90, etc.)
+  totalReadings: number;
+  totalCardsDrawn: number;
   timestamp: string;
 }
 

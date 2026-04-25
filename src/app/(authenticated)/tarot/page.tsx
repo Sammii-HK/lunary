@@ -5,8 +5,6 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { useSubscription } from '../../../hooks/useSubscription';
 import { hasFeatureAccess } from '../../../../utils/pricing';
 import { TarotView } from './components/TarotView';
-import { conversionTracking } from '@/lib/analytics';
-import { useEffect } from 'react';
 import { useABTestTracking } from '@/hooks/useABTestTracking';
 import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
 
@@ -15,13 +13,8 @@ export default function TarotReadings() {
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
 
-  // Track tarot page with A/B tests: cta-copy, tarot-truncation, weekly-lock, paywall-preview
-  useABTestTracking('tarot', 'page_viewed', [
-    'cta-copy-test',
-    'tarot-truncation-length',
-    'weekly-lock-style',
-    'paywall_preview_style_v1',
-  ]);
+  // Track one tarot page view. CTA/test-specific impressions are tracked separately.
+  useABTestTracking('tarot', 'page_viewed', []);
 
   // For unauthenticated users, force paid tarot access to false immediately
   // Don't wait for subscription to resolve
@@ -32,19 +25,6 @@ export default function TarotReadings() {
         subscription.plan,
         'personal_tarot',
       );
-
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const isPaidUser =
-      subscription.plan === 'monthly' || subscription.plan === 'yearly';
-
-    if (hasPersonalTarotAccess && isPaidUser) {
-      conversionTracking.personalizedTarotViewed(user.id, subscription.plan);
-    } else if (user.id) {
-      conversionTracking.tarotViewed(user.id, subscription.plan);
-    }
-  }, [hasPersonalTarotAccess, user?.id, subscription.plan]);
 
   // Simple sequential loading checks - prioritize unauthenticated users
   if (authStatus.loading) {
