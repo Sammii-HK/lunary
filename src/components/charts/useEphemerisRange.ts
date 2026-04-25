@@ -101,6 +101,28 @@ type UseRangeOpts = {
   stepDays?: number;
 };
 
+/**
+ * Try to spawn the ephemeris worker. Returns null if Worker is unavailable
+ * (SSR, very old browsers, or bundler failure).
+ */
+function spawnWorker(): Worker | null {
+  if (typeof window === 'undefined' || typeof Worker === 'undefined') {
+    return null;
+  }
+  try {
+    return new Worker(
+      new URL('@/lib/workers/ephemeris-worker.ts', import.meta.url),
+      { type: 'module' },
+    );
+  } catch (err) {
+    console.warn(
+      '[useEphemerisRange] Worker unavailable, falling back to main thread',
+      err,
+    );
+    return null;
+  }
+}
+
 export function useEphemerisRange({
   enabled = true,
   start,
@@ -118,10 +140,69 @@ export function useEphemerisRange({
     const stepMs = stepDays * 24 * 60 * 60 * 1000;
     const startMs = start.getTime();
     const endMs = end.getTime();
-    const points: number[] = [];
-    for (let t = startMs; t <= endMs; t += stepMs) points.push(t);
 
-    (async () => {
+    // Try worker first, fall back to inline computation.
+    const worker = spawnWorker();
+
+    if (worker) {
+      let workerSucceeded = false;
+      const onMessage = (event: MessageEvent) => {
+        if (!active || cancelled.current) return;
+        const msg = event.data;
+        if (!msg || typeof msg !== 'object') return;
+        if (msg.type === 'progress') {
+          setProgress(Math.min(1, Math.max(0, msg.progress ?? 0)));
+        } else if (msg.type === 'done') {
+          workerSucceeded = true;
+          setProgress(1);
+          setRange({
+            start: startMs,
+            end: endMs,
+            stepMs,
+            snapshots: msg.snapshots ?? [],
+          });
+          worker.terminate();
+        } else if (msg.type === 'error') {
+          console.warn(
+            '[useEphemerisRange] Worker error, falling back:',
+            msg.message,
+          );
+          worker.terminate();
+          if (!workerSucceeded) runInline();
+        }
+      };
+      const onError = (err: ErrorEvent) => {
+        console.warn(
+          '[useEphemerisRange] Worker errored, falling back:',
+          err.message,
+        );
+        worker.terminate();
+        if (!workerSucceeded) runInline();
+      };
+      worker.addEventListener('message', onMessage);
+      worker.addEventListener('error', onError);
+      worker.postMessage({
+        type: 'compute',
+        start: startMs,
+        end: endMs,
+        stepDays,
+      });
+
+      return () => {
+        active = false;
+        cancelled.current = true;
+        worker.removeEventListener('message', onMessage);
+        worker.removeEventListener('error', onError);
+        worker.terminate();
+      };
+    }
+
+    // Inline fallback (SSR-safe: useEffect only runs on client anyway).
+    runInline();
+
+    async function runInline() {
+      const points: number[] = [];
+      for (let t = startMs; t <= endMs; t += stepMs) points.push(t);
       const ae = await loadEngine();
       const snapshots: EphemerisSnapshot[] = [];
       let prev: Record<BodyName, number> | undefined;
@@ -131,14 +212,14 @@ export function useEphemerisRange({
         snapshots.push(snap);
         prev = snap.longitudes;
         if (i % 16 === 0) {
-          setProgress(i / points.length);
+          setProgress(i / Math.max(points.length, 1));
           await new Promise((r) => setTimeout(r, 0));
         }
       }
       if (!active || cancelled.current) return;
       setProgress(1);
       setRange({ start: startMs, end: endMs, stepMs, snapshots });
-    })();
+    }
 
     return () => {
       active = false;

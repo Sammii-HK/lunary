@@ -25,6 +25,8 @@ import {
   type BodyName,
   type EphemerisSnapshot,
 } from '@/components/charts/useEphemerisRange';
+import { ExactHitStrip } from '@/components/charts/ExactHitStrip';
+import { ProgressedRing } from '@/components/charts/ProgressedRing';
 
 const ELEMENT_COLORS = {
   Fire: '#ff6b6b',
@@ -95,12 +97,15 @@ const SPEEDS = [
 
 type Props = {
   birthChart: BirthChartData[];
+  /** Optional ISO birth date — enables the progressed-chart third ring. */
+  birthDate?: string;
   compact?: boolean;
   onOpenFull?: () => void;
 };
 
 export function TransitScrubber({
   birthChart,
+  birthDate,
   compact = false,
   onOpenFull,
 }: Props) {
@@ -211,10 +216,26 @@ export function TransitScrubber({
 
   type KeyDate = {
     time: number;
-    type: 'retrograde' | 'direct' | 'ingress' | 'exact';
+    type:
+      | 'retrograde'
+      | 'direct'
+      | 'ingress'
+      | 'exact'
+      | 'lunar-return'
+      | 'solar-return'
+      | 'jupiter-return'
+      | 'saturn-return';
     label: string;
     color: string;
+    /** Render as taller pip (returns are emphasised). */
+    tall?: boolean;
   };
+
+  const natalLookup = useMemo(() => {
+    const m: Partial<Record<BodyName, number>> = {};
+    for (const p of natalPlanets) m[p.name] = p.longitude;
+    return m;
+  }, [natalPlanets]);
 
   const keyDates = useMemo<KeyDate[]>(() => {
     if (!range) return [];
@@ -227,6 +248,10 @@ export function TransitScrubber({
       'Jupiter',
       'Saturn',
     ];
+    // Helper: signed angular delta in [-180, 180].
+    const signedDiff = (a: number, b: number) =>
+      ((((a - b) % 360) + 540) % 360) - 180;
+
     for (let i = 1; i < snaps.length; i++) {
       const a = snaps[i - 1];
       const b = snaps[i];
@@ -254,9 +279,56 @@ export function TransitScrubber({
           });
         }
       }
+
+      // Returns: detect when transit body crosses its natal longitude.
+      // Use a sign-change of the signed angular delta as the crossing event,
+      // ignoring tiny differences (so retrograde wobble doesn't double-count).
+      const RETURN_BODIES: {
+        name: BodyName;
+        type: KeyDate['type'];
+        color: string;
+      }[] = [
+        { name: 'Moon', type: 'lunar-return', color: '#94d1ff' },
+        { name: 'Sun', type: 'solar-return', color: '#ffe08a' },
+        { name: 'Jupiter', type: 'jupiter-return', color: '#7BFFB8' },
+        { name: 'Saturn', type: 'saturn-return', color: '#C77DFF' },
+      ];
+      for (const ret of RETURN_BODIES) {
+        const natalLon = natalLookup[ret.name];
+        if (natalLon == null) continue;
+        const da = signedDiff(a.longitudes[ret.name], natalLon);
+        const db = signedDiff(b.longitudes[ret.name], natalLon);
+        // Skip near-discontinuities at ±180 wrap (only catches a true 0-crossing).
+        if (Math.abs(da) > 90 || Math.abs(db) > 90) continue;
+        if (da === 0 || db === 0 || (da < 0 && db > 0) || (da > 0 && db < 0)) {
+          // Linear interp for nicer time.
+          const denom = db - da || 1;
+          const frac = -da / denom;
+          const t = a.time + (b.time - a.time) * Math.max(0, Math.min(1, frac));
+          // Dedupe if close to a previous entry of the same type.
+          const dup = out.find(
+            (k) => k.type === ret.type && Math.abs(k.time - t) < 86400000 * 3,
+          );
+          if (dup) continue;
+          out.push({
+            time: t,
+            type: ret.type,
+            label:
+              ret.type === 'lunar-return'
+                ? 'Lunar return'
+                : ret.type === 'solar-return'
+                  ? 'Solar return (birthday)'
+                  : ret.type === 'jupiter-return'
+                    ? 'Jupiter return'
+                    : 'Saturn return',
+            color: ret.color,
+            tall: true,
+          });
+        }
+      }
     }
-    return out.slice(0, 50);
-  }, [range]);
+    return out.slice(0, 80);
+  }, [range, natalLookup]);
 
   const transitMoonPhase = useMemo(() => {
     if (!snapshot) return null;
@@ -269,6 +341,13 @@ export function TransitScrubber({
   const [anchorTime, setAnchorTime] = useState<number | null>(null);
   const anchorSnapshot: EphemerisSnapshot | null =
     range && anchorTime ? sampleEphemeris(range, anchorTime) : null;
+
+  const [showProgressions, setShowProgressions] = useState(false);
+  const parsedBirthDate = useMemo(() => {
+    if (!birthDate) return null;
+    const d = new Date(birthDate);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }, [birthDate]);
 
   type Trail = { lon: number; t: number };
   const trailsRef = useRef<Record<BodyName, Trail[]>>({
@@ -630,6 +709,17 @@ export function TransitScrubber({
             );
           })}
 
+          {/* Progressed (secondary) ring — optional 3rd layer */}
+          {showProgressions && parsedBirthDate && range && (
+            <ProgressedRing
+              range={range}
+              birthDate={parsedBirthDate}
+              now={now}
+              polar={polar}
+              radius={88}
+            />
+          )}
+
           {/* Particle trails for moving planets (during play) */}
           {playing && (
             <g aria-hidden>
@@ -816,6 +906,7 @@ export function TransitScrubber({
                   (rangeEnd.getTime() - rangeStart.getTime())) *
                 100;
               if (left < 0 || left > 100) return null;
+              const tall = k.tall === true;
               return (
                 <button
                   key={`pip-${i}`}
@@ -823,8 +914,16 @@ export function TransitScrubber({
                     e.stopPropagation();
                     if (canScrub) setNow(k.time);
                   }}
-                  className='absolute -top-1 h-2 w-2 -translate-x-1/2 rounded-full border border-black/20 transition-transform hover:scale-150'
-                  style={{ left: `${left}%`, backgroundColor: k.color }}
+                  className={`absolute -translate-x-1/2 rounded-full border border-black/20 transition-transform hover:scale-150 ${
+                    tall
+                      ? '-top-1.5 h-3 w-2 ring-1 ring-white/15'
+                      : '-top-1 h-2 w-2'
+                  }`}
+                  style={{
+                    left: `${left}%`,
+                    backgroundColor: k.color,
+                    boxShadow: tall ? `0 0 6px ${k.color}aa` : undefined,
+                  }}
                   title={`${fmtDate(new Date(k.time))} — ${k.label}`}
                   aria-label={`Jump to ${k.label}`}
                   disabled={!canScrub}
@@ -844,9 +943,9 @@ export function TransitScrubber({
             />
           </div>
 
-          {/* Anchor controls */}
+          {/* Anchor + Progressions controls */}
           {canScrub && (
-            <div className='flex items-center justify-end gap-2 text-[11px]'>
+            <div className='flex flex-wrap items-center justify-end gap-2 text-[11px]'>
               {anchorTime != null ? (
                 <>
                   <span className='text-amber-200/90'>
@@ -866,6 +965,19 @@ export function TransitScrubber({
                   title='Anchor this date — see how planets have moved relative to it'
                 >
                   ✦ Anchor here
+                </button>
+              )}
+              {parsedBirthDate && (
+                <button
+                  onClick={() => setShowProgressions((s) => !s)}
+                  className={`rounded-full border px-2 py-0.5 transition-colors ${
+                    showProgressions
+                      ? 'border-[#FFB78A]/60 bg-[#FFB78A]/10 text-[#FFB78A]'
+                      : 'border-stroke-subtle text-content-muted hover:text-content-primary'
+                  }`}
+                  title='Show secondary progressions (1 day = 1 year)'
+                >
+                  {showProgressions ? '✦ Progressions on' : '+ Progressions'}
                 </button>
               )}
             </div>
@@ -952,6 +1064,14 @@ export function TransitScrubber({
               </a>
             </motion.div>
           )}
+
+          {/* Exact-hit strip — strength curves for top 5 active aspects */}
+          <ExactHitStrip
+            range={range}
+            now={now}
+            natalPlanets={natalPlanets}
+            windowDays={15}
+          />
 
           {/* Current aspects summary */}
           {liveAspects.length > 0 && (
