@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, type MouseEvent } from 'react';
 import { ChevronDown, Heart, Briefcase, Sparkles } from 'lucide-react';
+import AudioNarrator from '@/components/audio/AudioNarrator';
+import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 
 type FocusArea = {
   area: 'love' | 'work' | 'inner';
@@ -85,6 +87,15 @@ export function MoreForToday({ focusAreas }: { focusAreas: FocusArea[] }) {
         style={{ maxHeight: isOpen ? contentHeight : 0 }}
       >
         <div ref={contentRef} className='mt-3 space-y-2'>
+          {isOpen && focusAreas.length > 0 && (
+            <AudioNarrator
+              text={focusAreas
+                .map((f) => `${f.title}. ${f.guidance}`)
+                .join('\n\n')}
+              title='More for today'
+              compactVariant='inline'
+            />
+          )}
           {focusAreas.map((focus) => {
             const config = AREA_CONFIG[focus.area];
             const Icon = config.icon;
@@ -102,9 +113,12 @@ export function MoreForToday({ focusAreas }: { focusAreas: FocusArea[] }) {
                     {focus.title}
                   </span>
                 </div>
-                <p className='text-sm text-content-muted leading-relaxed'>
+                <AutoLinkText
+                  as='p'
+                  className='text-sm text-content-muted leading-relaxed'
+                >
                   {focus.guidance}
-                </p>
+                </AutoLinkText>
               </div>
             );
           })}

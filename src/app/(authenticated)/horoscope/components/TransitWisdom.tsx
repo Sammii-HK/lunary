@@ -14,6 +14,8 @@ import {
 import { useSubscription } from '@/hooks/useSubscription';
 import { TransitDurationBadge } from '@/components/TransitDurationBadge';
 import { Collapse } from '@/components/ui/Collapse';
+import AudioNarrator from '@/components/audio/AudioNarrator';
+import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 
 interface TransitWisdomProps {
   birthChart: BirthChartData[];
@@ -299,14 +301,17 @@ function TransitCard({
         {detail.degreeInfo}
       </p>
 
-      <p className='text-sm text-content-secondary leading-relaxed'>
+      <AutoLinkText
+        as='p'
+        className='text-sm text-content-secondary leading-relaxed'
+      >
         {detail.meaning}
-      </p>
+      </AutoLinkText>
 
       {detail.suggestion && (
         <p className='text-xs text-content-muted italic'>
           <span className='text-content-muted'>Try this:</span>{' '}
-          {detail.suggestion}
+          <AutoLinkText>{detail.suggestion}</AutoLinkText>
         </p>
       )}
 
@@ -370,16 +375,34 @@ export function TransitWisdom({
   if (details.length === 0) {
     return (
       <div className='text-center py-6'>
-        <p className='text-sm text-content-muted leading-relaxed max-w-sm mx-auto'>
+        <AutoLinkText
+          as='p'
+          className='text-sm text-content-muted leading-relaxed max-w-sm mx-auto'
+        >
           Nothing major is pulling at your energy today. This is a day to settle
           in and integrate recent shifts rather than push for change.
-        </p>
+        </AutoLinkText>
       </div>
     );
   }
 
+  const narratorText = details
+    .map((d) => {
+      const lines = [d.title, d.meaning];
+      if (d.suggestion) lines.push(`Try this: ${d.suggestion}`);
+      return lines.join(' ');
+    })
+    .join('\n\n');
+
   return (
     <div className='space-y-3'>
+      <div className='flex justify-end'>
+        <AudioNarrator
+          text={narratorText}
+          title='Transit wisdom'
+          compactVariant='inline'
+        />
+      </div>
       {details.map((detail) => (
         <TransitCard
           key={detail.id}

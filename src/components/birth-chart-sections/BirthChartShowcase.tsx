@@ -16,6 +16,8 @@ import {
   type ZodiacSystem,
 } from '@utils/astrology/zodiacSystems';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
+import AudioNarrator from '@/components/audio/AudioNarrator';
+import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 import { PersonalPlanetsSection } from './PersonalPlanetsSection';
 import { SocialPlanetsSection } from './SocialPlanetsSection';
 import { GenerationalPlanetsSection } from './GenerationalPlanetsSection';
@@ -138,8 +140,56 @@ export function BirthChartShowcase({
     [birthChart],
   );
 
+  // Build a concatenated narration of the showcase's core prose so users can
+  // listen to their chart highlights without expanding every section.
+  const narratorText = (() => {
+    const parts: string[] = [];
+    if (sun) {
+      parts.push(
+        `Sun in ${getDisplaySign(sun)}. Your core identity and life purpose. This is who you are at your essence.`,
+      );
+    }
+    if (moon) {
+      parts.push(
+        `Moon in ${getDisplaySign(moon)}. Your emotional nature and inner needs. This is how you feel and what you need to feel secure.`,
+      );
+    }
+    if (rising) {
+      parts.push(
+        `${getDisplaySign(rising)} rising. Your outer personality and how others see you. This is your mask and first impression.`,
+      );
+    }
+    parts.push(
+      `${dominantElement.name} dominant with ${dominantElement.count} planet${dominantElement.count !== 1 ? 's' : ''}. You express yourself through ${getElementMeaning(dominantElement.name)} energy.`,
+    );
+    parts.push(
+      `${dominantModality.name} mode. ${dominantModality.count} planet${dominantModality.count !== 1 ? 's' : ''} approach life through ${
+        dominantModality.name === 'Cardinal'
+          ? 'initiative and leadership'
+          : dominantModality.name === 'Fixed'
+            ? 'stability and persistence'
+            : 'adaptability and change'
+      }.`,
+    );
+    if (chartRulerData && rising) {
+      parts.push(
+        `${chartRulerData.chartRulerName} rules your chart. As the ruler of your ${getDisplaySign(rising)} Ascendant, ${chartRulerData.chartRulerName} is the most important planet in your chart.`,
+      );
+    }
+    return parts.join('\n\n');
+  })();
+
   return (
     <div className='flex flex-col gap-3'>
+      {/* Listen to your chart */}
+      <div className='flex justify-end'>
+        <AudioNarrator
+          text={narratorText}
+          title='Birth chart highlights'
+          compactVariant='inline'
+        />
+      </div>
+
       {/* Big Three - Sun, Moon, Rising */}
       {(sun || moon || rising) && (
         <div>
@@ -160,10 +210,13 @@ export function BirthChartShowcase({
                         Sun in {getDisplaySign(sun)}
                       </span>
                     </div>
-                    <p className='text-xs text-content-secondary'>
+                    <AutoLinkText
+                      as='p'
+                      className='text-xs text-content-secondary'
+                    >
                       Your core identity and life purpose. This is who you are
                       at your essence.
-                    </p>
+                    </AutoLinkText>
                   </div>
                 )}
                 {moon && (
@@ -176,10 +229,13 @@ export function BirthChartShowcase({
                         Moon in {getDisplaySign(moon)}
                       </span>
                     </div>
-                    <p className='text-xs text-content-secondary'>
+                    <AutoLinkText
+                      as='p'
+                      className='text-xs text-content-secondary'
+                    >
                       Your emotional nature and inner needs. This is how you
                       feel and what you need to feel secure.
-                    </p>
+                    </AutoLinkText>
                   </div>
                 )}
                 {rising && (
@@ -201,10 +257,13 @@ export function BirthChartShowcase({
                         }
                       </span>
                     </div>
-                    <p className='text-xs text-content-secondary'>
+                    <AutoLinkText
+                      as='p'
+                      className='text-xs text-content-secondary'
+                    >
                       Your outer personality and how others see you. This is
                       your mask and first impression.
-                    </p>
+                    </AutoLinkText>
                   </div>
                 )}
               </div>
@@ -232,12 +291,12 @@ export function BirthChartShowcase({
                     {dominantElement.name} Dominant
                   </span>
                 </div>
-                <p className='text-xs text-content-secondary'>
+                <AutoLinkText as='p' className='text-xs text-content-secondary'>
                   {dominantElement.count} planet
                   {dominantElement.count !== 1 ? 's' : ''} in{' '}
                   {dominantElement.name} signs. You express yourself through{' '}
                   {getElementMeaning(dominantElement.name)} energy.
-                </p>
+                </AutoLinkText>
               </div>
 
               {/* Dominant Modality */}
@@ -250,7 +309,7 @@ export function BirthChartShowcase({
                     {dominantModality.name} Mode
                   </span>
                 </div>
-                <p className='text-xs text-content-secondary'>
+                <AutoLinkText as='p' className='text-xs text-content-secondary'>
                   {dominantModality.count} planet
                   {dominantModality.count !== 1 ? 's' : ''} in{' '}
                   {dominantModality.name} signs. You approach life through{' '}
@@ -260,7 +319,7 @@ export function BirthChartShowcase({
                       ? 'stability and persistence'
                       : 'adaptability and change'}
                   .
-                </p>
+                </AutoLinkText>
               </div>
 
               {/* Most Aspected Planet */}
@@ -277,10 +336,10 @@ export function BirthChartShowcase({
                     {mostAspectedPlanet} Focal Point
                   </span>
                 </div>
-                <p className='text-xs text-content-secondary'>
+                <AutoLinkText as='p' className='text-xs text-content-secondary'>
                   Your most aspected planet. This is a major driving force in
                   your chart, connecting multiple energies and themes.
-                </p>
+                </AutoLinkText>
               </div>
             </div>
           </div>
@@ -309,12 +368,15 @@ export function BirthChartShowcase({
                     {chartRulerData.chartRulerName} rules your chart
                   </span>
                 </div>
-                <p className='text-sm text-content-secondary mb-3'>
+                <AutoLinkText
+                  as='p'
+                  className='text-sm text-content-secondary mb-3'
+                >
                   As the ruler of your {getDisplaySign(rising)} Ascendant,{' '}
                   {chartRulerData.chartRulerName} is the most important planet
                   in your chart. Its placement shows how you express your
                   Ascendant&apos;s energy and where you direct your life force.
-                </p>
+                </AutoLinkText>
               </div>
 
               <div className='bg-surface-elevated rounded-lg p-3 mb-3'>

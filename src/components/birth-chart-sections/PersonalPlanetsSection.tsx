@@ -3,6 +3,7 @@
 import { BirthChartData } from '../../../utils/astrology/birthChart';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { bodiesSymbols } from '../../../utils/zodiac/zodiac';
+import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 
 interface PersonalPlanetsSectionProps {
   birthChartData: BirthChartData[];
@@ -99,9 +100,12 @@ export function PersonalPlanetsSection({
                   )}
                   {dignityStatus && getDignityBadge(dignityStatus)}
                 </h5>
-                <p className='text-xs text-content-secondary mt-1'>
+                <AutoLinkText
+                  as='p'
+                  className='text-xs text-content-secondary mt-1'
+                >
                   {interpretation}
-                </p>
+                </AutoLinkText>
               </div>
             );
           })}

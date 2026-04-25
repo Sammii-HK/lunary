@@ -16,6 +16,8 @@ import {
 } from '../../../utils/astrology/synastry';
 import type { BirthChartData } from '../../../utils/astrology/birthChart';
 import type { SynastryAspectLine } from './SynastryChart';
+import AudioNarrator from '@/components/audio/AudioNarrator';
+import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 
 const SIGN_ELEMENTS: Record<string, 'Fire' | 'Earth' | 'Air' | 'Water'> = {
   Aries: 'Fire',
@@ -257,6 +259,35 @@ export function CompatibilityBreakdown({
 
   const score = synastry.compatibilityScore;
 
+  // Concatenate all narrative prose for the audio narrator at the top.
+  const narratorText = useMemo(() => {
+    const parts: string[] = [
+      `Cosmic match: ${score} percent.`,
+      synastry.summary,
+    ];
+    if (highlights.length > 0) {
+      parts.push('Highlights:');
+      for (const a of highlights) {
+        parts.push(
+          `${a.personA.planet} ${a.aspect} ${a.personB.planet}. ${a.description}`,
+        );
+      }
+    }
+    if (growthEdges.length > 0) {
+      parts.push('Growth edges:');
+      for (const a of growthEdges) {
+        parts.push(
+          `${a.personA.planet} ${a.aspect} ${a.personB.planet}. ${a.description}`,
+        );
+      }
+    }
+    if (synastry.strengths.length > 0) {
+      parts.push('What you bring out in each other:');
+      parts.push(...synastry.strengths);
+    }
+    return parts.join('\n\n');
+  }, [score, synastry.summary, synastry.strengths, highlights, growthEdges]);
+
   return (
     <div className='space-y-5' data-testid='compatibility-breakdown'>
       {/* Overall score */}
@@ -286,9 +317,20 @@ export function CompatibilityBreakdown({
               Cosmic Match
             </span>
           </div>
-          <p className='mt-3 sm:mt-0 text-sm text-content-secondary flex-1'>
+          <AutoLinkText
+            as='p'
+            className='mt-3 sm:mt-0 text-sm text-content-secondary flex-1'
+          >
             {synastry.summary}
-          </p>
+          </AutoLinkText>
+        </div>
+
+        <div className='mt-4 flex justify-end'>
+          <AudioNarrator
+            text={narratorText}
+            title='Compatibility breakdown'
+            compactVariant='inline'
+          />
         </div>
 
         {/* Bar */}
@@ -389,9 +431,12 @@ export function CompatibilityBreakdown({
                       {a.orb.toFixed(1)}°
                     </span>
                   </div>
-                  <p className='text-xs text-content-secondary mt-0.5'>
+                  <AutoLinkText
+                    as='p'
+                    className='text-xs text-content-secondary mt-0.5'
+                  >
                     {a.description}
-                  </p>
+                  </AutoLinkText>
                 </div>
               </motion.li>
             ))}
@@ -439,12 +484,18 @@ export function CompatibilityBreakdown({
                       {a.orb.toFixed(1)}°
                     </span>
                   </div>
-                  <p className='text-xs text-content-secondary mt-0.5'>
+                  <AutoLinkText
+                    as='p'
+                    className='text-xs text-content-secondary mt-0.5'
+                  >
                     {a.description}
-                  </p>
-                  <p className='text-xs text-amber-300/90 mt-1 italic'>
+                  </AutoLinkText>
+                  <AutoLinkText
+                    as='p'
+                    className='text-xs text-amber-300/90 mt-1 italic'
+                  >
                     {reframe(a.aspect)}
-                  </p>
+                  </AutoLinkText>
                 </div>
               </motion.li>
             ))}
@@ -462,7 +513,7 @@ export function CompatibilityBreakdown({
             {synastry.strengths.map((s, i) => (
               <li key={`s-${i}`} className='flex items-start gap-2'>
                 <span className='mt-1 inline-block w-1.5 h-1.5 rounded-full bg-lunary-primary flex-shrink-0' />
-                <span>{s}</span>
+                <AutoLinkText>{s}</AutoLinkText>
               </li>
             ))}
           </ul>
