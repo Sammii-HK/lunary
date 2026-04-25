@@ -23,6 +23,10 @@ import type { Aspect } from '@/hooks/useAspects';
 import { PlanetBottomSheet } from '@/components/charts/PlanetBottomSheet';
 import { CosmicBackdrop } from '@/components/charts/CosmicBackdrop';
 import { useChartGestures } from '@/components/charts/useChartGestures';
+import {
+  MoonPhase,
+  illuminationFromLongitudes,
+} from '@/components/charts/MoonPhase';
 
 const cx = classNames;
 
@@ -295,6 +299,16 @@ export const BirthChart = ({
   const angles = chartData.filter((p) => ANGLES.includes(p.body));
   const points = chartData.filter((p) => POINTS.includes(p.body));
   const asteroids = chartData.filter((p) => ASTEROIDS.includes(p.body));
+
+  const natalMoonPhase = useMemo(() => {
+    const sun = birthChart.find((p) => p.body === 'Sun');
+    const moon = birthChart.find((p) => p.body === 'Moon');
+    if (!sun || !moon) return null;
+    return illuminationFromLongitudes(
+      sun.eclipticLongitude,
+      moon.eclipticLongitude,
+    );
+  }, [birthChart]);
 
   const allAspects = useAspects(chartData);
 
@@ -854,31 +868,54 @@ export const BirthChart = ({
                         }}
                       />
                     )}
-                    <motion.text
-                      x={x}
-                      y={y}
-                      textAnchor='middle'
-                      dominantBaseline='central'
-                      className={cx(
-                        'planet-glyph',
-                        isAstroFont && 'font-astro',
-                      )}
-                      fontSize={
-                        isAngle || isPoint ? '12' : isAsteroid ? '11' : '14'
-                      }
-                      fill={glyphFill}
-                      whileHover={{ scale: 1.2 }}
-                      whileTap={{ scale: 0.92 }}
-                      animate={{ scale: isSelected ? 1.18 : 1 }}
-                      transition={{
-                        type: 'spring',
-                        stiffness: 320,
-                        damping: 22,
-                      }}
-                      style={{ originX: x, originY: y }}
-                    >
-                      {symbol}
-                    </motion.text>
+                    {body === 'Moon' && natalMoonPhase ? (
+                      <motion.g
+                        animate={{ scale: isSelected ? 1.18 : 1 }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 320,
+                          damping: 22,
+                        }}
+                        style={{ originX: x, originY: y }}
+                      >
+                        <MoonPhase
+                          cx={x}
+                          cy={y}
+                          r={6}
+                          phase={0}
+                          illumination={natalMoonPhase.illumination}
+                          waxing={natalMoonPhase.waxing}
+                          id={`natal-moon-${uid}`}
+                          glow={isSelected || isHovered}
+                        />
+                      </motion.g>
+                    ) : (
+                      <motion.text
+                        x={x}
+                        y={y}
+                        textAnchor='middle'
+                        dominantBaseline='central'
+                        className={cx(
+                          'planet-glyph',
+                          isAstroFont && 'font-astro',
+                        )}
+                        fontSize={
+                          isAngle || isPoint ? '12' : isAsteroid ? '11' : '14'
+                        }
+                        fill={glyphFill}
+                        whileHover={{ scale: 1.2 }}
+                        whileTap={{ scale: 0.92 }}
+                        animate={{ scale: isSelected ? 1.18 : 1 }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 320,
+                          damping: 22,
+                        }}
+                        style={{ originX: x, originY: y }}
+                      >
+                        {symbol}
+                      </motion.text>
+                    )}
                     {/* Invisible touch target */}
                     <circle
                       cx={x}

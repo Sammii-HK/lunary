@@ -15,6 +15,10 @@ import type { BirthChartData } from '../../../utils/astrology/birthChart';
 import { useSubscription } from '@/hooks/useSubscription';
 import { CosmicBackdrop } from '@/components/charts/CosmicBackdrop';
 import {
+  MoonPhase,
+  illuminationFromLongitudes,
+} from '@/components/charts/MoonPhase';
+import {
   TRANSIT_BODIES,
   useEphemerisRange,
   sampleEphemeris,
@@ -134,21 +138,30 @@ export function TransitScrubber({
 
   const rafRef = useRef<number | null>(null);
   const lastTs = useRef<number>(0);
+  const lastTickTs = useRef<number>(0);
   useEffect(() => {
     if (!playing) return;
     lastTs.current = performance.now();
+    lastTickTs.current = lastTs.current;
     const speed = SPEEDS[speedIdx].msPerSec;
+    // Throttle commits to ~16fps (62ms). The motion-spring layer interpolates
+    // smoothly between commits, so the visual stays buttery without re-running
+    // ephemeris sampling + aspect math on every animation frame.
+    const COMMIT_INTERVAL_MS = 62;
     const loop = (ts: number) => {
       const dt = ts - lastTs.current;
       lastTs.current = ts;
-      setNow((n) => {
-        const next = n + (dt / 1000) * speed;
-        if (next > rangeEnd.getTime()) {
-          setPlaying(false);
-          return rangeEnd.getTime();
-        }
-        return next;
-      });
+      if (ts - lastTickTs.current >= COMMIT_INTERVAL_MS) {
+        lastTickTs.current = ts;
+        setNow((n) => {
+          const next = n + (dt / 1000) * speed;
+          if (next > rangeEnd.getTime()) {
+            setPlaying(false);
+            return rangeEnd.getTime();
+          }
+          return next;
+        });
+      }
       rafRef.current = requestAnimationFrame(loop);
     };
     rafRef.current = requestAnimationFrame(loop);
@@ -195,6 +208,106 @@ export function TransitScrubber({
         })),
     [birthChart],
   );
+
+  type KeyDate = {
+    time: number;
+    type: 'retrograde' | 'direct' | 'ingress' | 'exact';
+    label: string;
+    color: string;
+  };
+
+  const keyDates = useMemo<KeyDate[]>(() => {
+    if (!range) return [];
+    const out: KeyDate[] = [];
+    const snaps = range.snapshots;
+    const SLOW_BODIES: BodyName[] = [
+      'Mercury',
+      'Venus',
+      'Mars',
+      'Jupiter',
+      'Saturn',
+    ];
+    for (let i = 1; i < snaps.length; i++) {
+      const a = snaps[i - 1];
+      const b = snaps[i];
+      for (const name of SLOW_BODIES) {
+        if (a.retrograde[name] !== b.retrograde[name]) {
+          out.push({
+            time: b.time,
+            type: b.retrograde[name] ? 'retrograde' : 'direct',
+            label: `${name} ${b.retrograde[name] ? 'retrograde' : 'direct'}`,
+            color: b.retrograde[name] ? '#f87171' : '#7BFFB8',
+          });
+        }
+        const aSign = Math.floor(
+          (((a.longitudes[name] % 360) + 360) % 360) / 30,
+        );
+        const bSign = Math.floor(
+          (((b.longitudes[name] % 360) + 360) % 360) / 30,
+        );
+        if (aSign !== bSign) {
+          out.push({
+            time: b.time,
+            type: 'ingress',
+            label: `${name} → ${signFromLongitude(b.longitudes[name])}`,
+            color: '#C77DFF',
+          });
+        }
+      }
+    }
+    return out.slice(0, 50);
+  }, [range]);
+
+  const transitMoonPhase = useMemo(() => {
+    if (!snapshot) return null;
+    return illuminationFromLongitudes(
+      snapshot.longitudes.Sun,
+      snapshot.longitudes.Moon,
+    );
+  }, [snapshot]);
+
+  const [anchorTime, setAnchorTime] = useState<number | null>(null);
+  const anchorSnapshot: EphemerisSnapshot | null =
+    range && anchorTime ? sampleEphemeris(range, anchorTime) : null;
+
+  type Trail = { lon: number; t: number };
+  const trailsRef = useRef<Record<BodyName, Trail[]>>({
+    Sun: [],
+    Moon: [],
+    Mercury: [],
+    Venus: [],
+    Mars: [],
+    Jupiter: [],
+    Saturn: [],
+    Uranus: [],
+    Neptune: [],
+    Pluto: [],
+  });
+  const [trailVersion, setTrailVersion] = useState(0);
+
+  useEffect(() => {
+    if (!playing || !snapshot) return;
+    const trails = trailsRef.current;
+    const MAX = 10;
+    for (const name of TRANSIT_BODIES) {
+      const lon = snapshot.longitudes[name];
+      const arr = trails[name];
+      const last = arr[arr.length - 1];
+      if (!last || Math.abs(lon - last.lon) > 0.05) {
+        arr.push({ lon, t: snapshot.time });
+        if (arr.length > MAX) arr.shift();
+      }
+    }
+    setTrailVersion((v) => v + 1);
+  }, [snapshot, playing]);
+
+  useEffect(() => {
+    if (!playing) {
+      const trails = trailsRef.current;
+      for (const name of TRANSIT_BODIES) trails[name] = [];
+      setTrailVersion((v) => v + 1);
+    }
+  }, [playing]);
 
   const transitPositions = useMemo(() => {
     if (!snapshot) return [];
@@ -327,12 +440,24 @@ export function TransitScrubber({
         >
           <defs>
             <radialGradient id='transit-sun' cx='50%' cy='50%' r='50%'>
-              <stop offset='0%' stopColor='#ffe08a' />
-              <stop offset='100%' stopColor='#ff7a45' />
-            </radialGradient>
-            <radialGradient id='transit-moon' cx='50%' cy='50%' r='50%'>
-              <stop offset='0%' stopColor='#e8ecff' />
-              <stop offset='100%' stopColor='#8b9cf9' />
+              <motion.stop
+                offset='0%'
+                animate={{ stopColor: ['#ffe9a8', '#ffd76a', '#ffe9a8'] }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              />
+              <motion.stop
+                offset='100%'
+                animate={{ stopColor: ['#ff7a45', '#ff5a2c', '#ff7a45'] }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              />
             </radialGradient>
           </defs>
 
@@ -505,15 +630,66 @@ export function TransitScrubber({
             );
           })}
 
+          {/* Particle trails for moving planets (during play) */}
+          {playing && (
+            <g aria-hidden>
+              {TRANSIT_BODIES.flatMap((name) => {
+                const trail = trailsRef.current[name];
+                if (!trail || trail.length < 2) return [];
+                const sign = signFromLongitude(trail[trail.length - 1].lon);
+                const color = ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
+                return trail.slice(0, -1).map((pt, i) => {
+                  const pos = polar(pt.lon, GLYPH_TRANSIT_R);
+                  const opacity = ((i + 1) / trail.length) * 0.45;
+                  const r = 1.2 + (i / trail.length) * 1.8;
+                  return (
+                    <circle
+                      key={`trail-${name}-${i}`}
+                      cx={pos.x}
+                      cy={pos.y}
+                      r={r}
+                      fill={color}
+                      opacity={opacity}
+                    />
+                  );
+                });
+              })}
+            </g>
+          )}
+
+          {/* Anchor (compare-from) ghost ring */}
+          {anchorSnapshot && (
+            <g aria-hidden style={{ opacity: 0.55 }}>
+              {TRANSIT_BODIES.map((name) => {
+                const lon = anchorSnapshot.longitudes[name];
+                const pos = polar(lon, GLYPH_TRANSIT_R + 12);
+                const sign = signFromLongitude(lon);
+                const color = ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
+                return (
+                  <g key={`anchor-${name}`}>
+                    <circle cx={pos.x} cy={pos.y} r={1.5} fill={color} />
+                    <text
+                      x={pos.x}
+                      y={pos.y - 6}
+                      textAnchor='middle'
+                      dominantBaseline='central'
+                      className='font-astro'
+                      fontSize='9'
+                      fill={color}
+                      opacity='0.7'
+                    >
+                      {symbolFor(name)}
+                    </text>
+                  </g>
+                );
+              })}
+            </g>
+          )}
+
           {/* Transit planet glyphs (outer ring, animated) */}
           {transitPositions.map((p) => {
             const pos = polar(p.longitude, GLYPH_TRANSIT_R);
-            const fill =
-              p.name === 'Sun'
-                ? 'url(#transit-sun)'
-                : p.name === 'Moon'
-                  ? 'url(#transit-moon)'
-                  : '#ffffff';
+            const fill = p.name === 'Sun' ? 'url(#transit-sun)' : '#ffffff';
             const sign = signFromLongitude(p.longitude);
             const elColor = ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
             return (
@@ -537,18 +713,33 @@ export function TransitScrubber({
                   style={{ filter: 'blur(4px)' }}
                 />
                 <circle cx={0} cy={0} r={2.5} fill={elColor} opacity='0.9' />
-                <text
-                  x={0}
-                  y={-11}
-                  textAnchor='middle'
-                  dominantBaseline='central'
-                  className='font-astro'
-                  fontSize='12'
-                  fill={fill}
-                  style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))' }}
-                >
-                  {symbolFor(p.name)}
-                </text>
+                {p.name === 'Moon' && transitMoonPhase ? (
+                  <g transform='translate(0, -11)'>
+                    <MoonPhase
+                      cx={0}
+                      cy={0}
+                      r={6}
+                      phase={0}
+                      illumination={transitMoonPhase.illumination}
+                      waxing={transitMoonPhase.waxing}
+                      id='transit-moon-phase'
+                      glow
+                    />
+                  </g>
+                ) : (
+                  <text
+                    x={0}
+                    y={-11}
+                    textAnchor='middle'
+                    dominantBaseline='central'
+                    className='font-astro'
+                    fontSize='12'
+                    fill={fill}
+                    style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))' }}
+                  >
+                    {symbolFor(p.name)}
+                  </text>
+                )}
                 {p.retrograde && (
                   <text
                     x={6}
@@ -608,6 +799,38 @@ export function TransitScrubber({
                 left: `${((today.getTime() - rangeStart.getTime()) / (rangeEnd.getTime() - rangeStart.getTime())) * 100}%`,
               }}
             />
+            {/* anchor marker */}
+            {anchorTime != null && (
+              <div
+                className='absolute top-0 bottom-0 w-px bg-amber-300/80'
+                style={{
+                  left: `${((anchorTime - rangeStart.getTime()) / (rangeEnd.getTime() - rangeStart.getTime())) * 100}%`,
+                }}
+                title='Anchor (compare-from) date'
+              />
+            )}
+            {/* key-date pips */}
+            {keyDates.map((k, i) => {
+              const left =
+                ((k.time - rangeStart.getTime()) /
+                  (rangeEnd.getTime() - rangeStart.getTime())) *
+                100;
+              if (left < 0 || left > 100) return null;
+              return (
+                <button
+                  key={`pip-${i}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (canScrub) setNow(k.time);
+                  }}
+                  className='absolute -top-1 h-2 w-2 -translate-x-1/2 rounded-full border border-black/20 transition-transform hover:scale-150'
+                  style={{ left: `${left}%`, backgroundColor: k.color }}
+                  title={`${fmtDate(new Date(k.time))} — ${k.label}`}
+                  aria-label={`Jump to ${k.label}`}
+                  disabled={!canScrub}
+                />
+              );
+            })}
             {/* thumb */}
             <motion.div
               className='absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-6 w-6 rounded-full border-2 border-lunary-primary bg-surface-elevated shadow-[0_0_12px_rgba(138,107,255,0.5)]'
@@ -620,6 +843,33 @@ export function TransitScrubber({
               }
             />
           </div>
+
+          {/* Anchor controls */}
+          {canScrub && (
+            <div className='flex items-center justify-end gap-2 text-[11px]'>
+              {anchorTime != null ? (
+                <>
+                  <span className='text-amber-200/90'>
+                    Comparing from {fmtDate(new Date(anchorTime))}
+                  </span>
+                  <button
+                    onClick={() => setAnchorTime(null)}
+                    className='rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-amber-100 hover:bg-amber-400/20'
+                  >
+                    Clear anchor
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setAnchorTime(now)}
+                  className='rounded-full border border-stroke-subtle px-2 py-0.5 text-content-muted hover:text-content-primary'
+                  title='Anchor this date — see how planets have moved relative to it'
+                >
+                  ✦ Anchor here
+                </button>
+              )}
+            </div>
+          )}
 
           <div className='flex items-center justify-between gap-2'>
             <div className='flex items-center gap-1.5'>
