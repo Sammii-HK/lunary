@@ -667,7 +667,7 @@ export function TransitScrubber({
               const t = polar(a.transitLon, GLYPH_TRANSIT_R - 6);
               const tight = a.orb < 1;
               return (
-                <motion.g key={a.key}>
+                <motion.g key={a.key} style={{ pointerEvents: 'none' }}>
                   {tight && (
                     <motion.line
                       x1={n.x}
@@ -684,7 +684,7 @@ export function TransitScrubber({
                         repeat: Infinity,
                         ease: 'easeInOut',
                       }}
-                      style={{ filter: 'blur(2px)' }}
+                      style={{ filter: 'blur(2px)', pointerEvents: 'none' }}
                     />
                   )}
                   <motion.line
@@ -699,6 +699,7 @@ export function TransitScrubber({
                     animate={{ opacity: tight ? 0.75 : 0.45 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.4 }}
+                    style={{ pointerEvents: 'none' }}
                   />
                 </motion.g>
               );
