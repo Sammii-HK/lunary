@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Sparkles, Lock } from 'lucide-react';
@@ -9,7 +10,6 @@ import { useUser } from '@/context/UserContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import {
-  GroupSkyChart,
   computeGroupAspects,
   type GroupParticipant,
   type ActiveAspect,
@@ -23,7 +23,30 @@ import {
   sampleEphemeris,
   type BodyName,
 } from '@/components/charts/useEphemerisRange';
+import { CosmicSkeleton } from '@/components/states/CosmicSkeleton';
 import type { BirthChartData } from '../../../../../utils/astrology/birthChart';
+
+// Heavy SVG chart — only mount once we actually have a participant to draw.
+const GroupSkyChart = dynamic(
+  () =>
+    import('@/components/charts/GroupSkyChart').then((m) => ({
+      default: m.GroupSkyChart,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className='w-full max-w-3xl mx-auto'>
+        <div className='relative w-full mx-auto aspect-square max-w-[440px] sm:max-w-[520px]'>
+          <CosmicSkeleton
+            variant='circle'
+            width='100%'
+            className='absolute inset-0'
+          />
+        </div>
+      </div>
+    ),
+  },
+);
 
 const PARTICIPANT_PALETTE = [
   '#7BFFB8', // user — soft mint
@@ -45,24 +68,12 @@ type FriendListEntry = {
   avatar?: string;
   relationshipType?: string;
   sunSign?: string;
-};
-
-type FriendDetail = {
-  id: string;
-  friendId: string;
-  name: string;
-  avatar?: string;
-  hasBirthChart: boolean;
+  hasBirthChart?: boolean;
   birthChart?: BirthChartData[];
 };
 
 type FriendsListResponse = {
   friends?: FriendListEntry[];
-  error?: string;
-  requiresUpgrade?: boolean;
-};
-
-type FriendDetailResponse = Partial<FriendDetail> & {
   error?: string;
   requiresUpgrade?: boolean;
 };
@@ -80,14 +91,16 @@ export default function GroupSkyPage() {
   const [friendsRequireUpgrade, setFriendsRequireUpgrade] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  // Fetch the friends list, then fetch each friend's detail to get their birthChart.
+  // Fetch all friends + their birthCharts in a single request.
+  // Previously this was N+1 (1 list + 1 detail per friend), and each detail
+  // call also ran a synastry calc + DB write — easily 4–8s on a fresh load.
   useEffect(() => {
     let cancelled = false;
     async function load() {
       setFriendsLoading(true);
       setFriendsError(null);
       try {
-        const listRes = await fetch('/api/friends', {
+        const listRes = await fetch('/api/friends?charts=1', {
           credentials: 'include',
         });
         const listData = (await listRes.json()) as FriendsListResponse;
@@ -97,34 +110,15 @@ export default function GroupSkyPage() {
           }
           throw new Error(listData.error || 'Failed to load friends');
         }
-        const list = listData.friends ?? [];
-
-        // Fetch each friend's detail in parallel for their birthChart.
-        const detailResults = await Promise.all(
-          list.map(async (entry) => {
-            try {
-              const res = await fetch(`/api/friends/${entry.id}`, {
-                credentials: 'include',
-              });
-              const data = (await res.json()) as FriendDetailResponse;
-              if (!res.ok || !data.hasBirthChart || !data.birthChart) {
-                return null;
-              }
-              return {
-                id: entry.id,
-                name: entry.name,
-                avatarUrl: entry.avatar,
-                birthChart: data.birthChart,
-              } as GroupFriend;
-            } catch {
-              return null;
-            }
-          }),
-        );
         if (cancelled) return;
-        const withCharts = detailResults.filter(
-          (f): f is GroupFriend => f !== null,
-        );
+        const withCharts: GroupFriend[] = (listData.friends ?? [])
+          .filter((entry) => entry.hasBirthChart && entry.birthChart)
+          .map((entry) => ({
+            id: entry.id,
+            name: entry.name,
+            avatarUrl: entry.avatar,
+            birthChart: entry.birthChart!,
+          }));
         setFriends(withCharts);
       } catch (err) {
         if (cancelled) return;
@@ -267,8 +261,20 @@ export default function GroupSkyPage() {
 
   if (userLoading) {
     return (
-      <div className='flex min-h-[60vh] items-center justify-center'>
-        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-lunary-primary' />
+      <div className='mx-auto w-full max-w-3xl px-4 py-6'>
+        <CosmicSkeleton width={160} height={14} className='mb-3' />
+        <CosmicSkeleton width='75%' height={28} className='mb-2' />
+        <CosmicSkeleton width='90%' height={14} className='mb-6' />
+        <div className='flex gap-3 mb-5'>
+          {[0, 1, 2, 3].map((i) => (
+            <CosmicSkeleton key={i} variant='circle' width={56} />
+          ))}
+        </div>
+        <CosmicSkeleton
+          variant='circle'
+          width='100%'
+          className='aspect-square max-w-[440px] mx-auto'
+        />
       </div>
     );
   }
@@ -363,8 +369,18 @@ export default function GroupSkyPage() {
       </div>
 
       {friendsLoading ? (
-        <div className='flex items-center justify-center py-12'>
-          <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-lunary-primary' />
+        <div className='space-y-4'>
+          <CosmicSkeleton
+            variant='circle'
+            width='100%'
+            className='aspect-square max-w-[440px] sm:max-w-[520px] mx-auto'
+            label='Loading group sky chart'
+          />
+          <div className='flex flex-wrap justify-center gap-2'>
+            {[0, 1, 2].map((i) => (
+              <CosmicSkeleton key={i} width={84} height={26} radius={999} />
+            ))}
+          </div>
         </div>
       ) : friendsError && friends.length === 0 ? (
         <div className='rounded-xl border border-stroke-subtle bg-surface-elevated/60 p-6 text-sm text-content-muted text-center'>

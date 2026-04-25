@@ -4,6 +4,7 @@ import { requireUser } from '@/lib/ai/auth';
 import { hasFeatureAccess } from '../../../../utils/pricing';
 import { decrypt } from '@/lib/encryption';
 import { FRIEND_LIMITS } from '../../../../utils/entitlements';
+import type { BirthChartData } from '../../../../utils/astrology/birthChart';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,10 +13,15 @@ export const dynamic = 'force-dynamic';
  * List all friends with their basic profile info
  * Free users: up to 5 friends with basic compatibility %
  * Paid users: unlimited friends with full synastry
+ *
+ * Pass `?charts=1` to also include each friend's `birthChart` in the response.
+ * Used by Group Sky to avoid N+1 fetches against `/api/friends/[id]` (which
+ * also runs synastry on every call).
  */
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request);
+    const includeCharts = request.nextUrl.searchParams.get('charts') === '1';
 
     // Check subscription access
     const subscriptionResult = await sql`
@@ -48,23 +54,42 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const result = await sql`
-      SELECT
-        fc.id,
-        fc.friend_id,
-        fc.nickname,
-        fc.relationship_type,
-        fc.synastry_score,
-        fc.created_at,
-        up.name as friend_name,
-        up.birthday as friend_birthday,
-        u.image as friend_avatar
-      FROM friend_connections fc
-      LEFT JOIN user_profiles up ON up.user_id = fc.friend_id
-      LEFT JOIN "user" u ON u.id = fc.friend_id
-      WHERE fc.user_id = ${user.id}
-      ORDER BY fc.created_at DESC
-    `;
+    const result = includeCharts
+      ? await sql`
+        SELECT
+          fc.id,
+          fc.friend_id,
+          fc.nickname,
+          fc.relationship_type,
+          fc.synastry_score,
+          fc.created_at,
+          up.name as friend_name,
+          up.birthday as friend_birthday,
+          up.birth_chart as friend_birth_chart,
+          u.image as friend_avatar
+        FROM friend_connections fc
+        LEFT JOIN user_profiles up ON up.user_id = fc.friend_id
+        LEFT JOIN "user" u ON u.id = fc.friend_id
+        WHERE fc.user_id = ${user.id}
+        ORDER BY fc.created_at DESC
+      `
+      : await sql`
+        SELECT
+          fc.id,
+          fc.friend_id,
+          fc.nickname,
+          fc.relationship_type,
+          fc.synastry_score,
+          fc.created_at,
+          up.name as friend_name,
+          up.birthday as friend_birthday,
+          u.image as friend_avatar
+        FROM friend_connections fc
+        LEFT JOIN user_profiles up ON up.user_id = fc.friend_id
+        LEFT JOIN "user" u ON u.id = fc.friend_id
+        WHERE fc.user_id = ${user.id}
+        ORDER BY fc.created_at DESC
+      `;
 
     // Mask birthdays for privacy (just show zodiac sign)
     const friends = result.rows.map((row) => {
@@ -83,7 +108,18 @@ export async function GET(request: NextRequest) {
       // Decrypt friend name (stored encrypted in user_profiles)
       const friendName = row.friend_name ? decrypt(row.friend_name) : null;
 
-      return {
+      const base: {
+        id: string;
+        friendId: string;
+        name: string;
+        avatar: string | null;
+        relationshipType: string | null;
+        sunSign: string | null;
+        synastryScore: number | null;
+        connectedAt: string;
+        hasBirthChart?: boolean;
+        birthChart?: BirthChartData[];
+      } = {
         id: row.id,
         friendId: row.friend_id,
         name: row.nickname || friendName || 'Friend',
@@ -93,6 +129,14 @@ export async function GET(request: NextRequest) {
         synastryScore: row.synastry_score,
         connectedAt: row.created_at,
       };
+
+      if (includeCharts) {
+        const chart = row.friend_birth_chart as BirthChartData[] | null;
+        base.hasBirthChart = Array.isArray(chart) && chart.length > 0;
+        if (base.hasBirthChart) base.birthChart = chart!;
+      }
+
+      return base;
     });
 
     return NextResponse.json({
