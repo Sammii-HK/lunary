@@ -266,8 +266,6 @@ export function SynastryChart({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ascLon]);
 
-  const selectedKey = selected ? `${selected.side}:${selected.planet}` : null;
-
   const isAspected = (side: 'user' | 'friend', planet: string) => {
     if (!selected) return false;
     return synastryAspects.some((a) => {
@@ -509,8 +507,8 @@ export function SynastryChart({
               const highlighted = aspectIsHighlighted(a);
               const lineOpacity = hasSelection
                 ? highlighted
-                  ? 0.9
-                  : 0.04
+                  ? 1
+                  : 0.15
                 : tight
                   ? 0.55
                   : 0.32;
@@ -554,7 +552,9 @@ export function SynastryChart({
                     d={d}
                     fill='none'
                     stroke={a.color}
-                    strokeWidth={highlighted ? 1.6 : tight ? 1.1 : 0.85}
+                    strokeWidth={
+                      highlighted ? 2 : tight ? 1.1 : hasSelection ? 0.6 : 0.85
+                    }
                     strokeLinecap='round'
                     initial={{ pathLength: 0, opacity: 0 }}
                     animate={{ pathLength: 1, opacity: lineOpacity }}
@@ -580,11 +580,13 @@ export function SynastryChart({
             const isSelected =
               selected?.side === 'user' && selected.planet === p.body;
             const aspected = isAspected('user', p.body);
+            // Dim when something else is selected and this planet isn't the
+            // selection, isn't on the same side as the selection (which means
+            // it's not directly aspected), and isn't aspected from across.
             const dimmed =
               selected != null &&
               !isSelected &&
-              !(selected.side === 'friend' && aspected) &&
-              !(selected.side === 'user');
+              !(selected.side === 'friend' && aspected);
             const sign = p.sign;
             const elColor = elementColor(sign);
             const fill =
@@ -600,7 +602,7 @@ export function SynastryChart({
                 data-syn-body
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{
-                  opacity: dimmed ? 0.25 : 1,
+                  opacity: dimmed ? 0.4 : 1,
                   scale: 1,
                 }}
                 transition={{
@@ -643,44 +645,51 @@ export function SynastryChart({
                     r={12}
                     fill={`url(#syn-user-glow-${uid})`}
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.7 }}
+                    animate={{ opacity: isSelected ? 0.9 : 0.55 }}
                   />
                 )}
                 {isSelected && (
-                  <motion.circle
-                    cx={pos.x}
-                    cy={pos.y}
-                    r={9}
-                    fill='none'
-                    stroke='#C77DFF'
-                    strokeWidth={0.8}
-                    animate={{ r: [7, 14, 7], opacity: [0.6, 0, 0.6] }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: 'easeOut',
-                    }}
-                  />
-                )}
-                {p.body === 'Moon' && userMoonPhase ? (
-                  <motion.g
-                    animate={{ scale: isSelected ? 1.18 : 1 }}
-                    transition={{ type: 'spring', stiffness: 320, damping: 22 }}
-                    style={{ originX: pos.x, originY: pos.y }}
-                  >
-                    <MoonPhase
+                  <>
+                    {/* Steady glow ring — clearly marks the spotlighted planet */}
+                    <circle
                       cx={pos.x}
                       cy={pos.y}
-                      r={6}
-                      phase={0}
-                      illumination={userMoonPhase.illumination}
-                      waxing={userMoonPhase.waxing}
-                      id={`syn-user-moon-${uid}`}
-                      glow={isSelected}
+                      r={9}
+                      fill='none'
+                      stroke='#C77DFF'
+                      strokeWidth={1.2}
+                      opacity={0.95}
                     />
-                  </motion.g>
+                    {/* Soft pulse outside the steady ring */}
+                    <motion.circle
+                      cx={pos.x}
+                      cy={pos.y}
+                      r={9}
+                      fill='none'
+                      stroke='#C77DFF'
+                      strokeWidth={0.6}
+                      animate={{ r: [9, 14, 9], opacity: [0.5, 0, 0.5] }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: 'easeOut',
+                      }}
+                    />
+                  </>
+                )}
+                {p.body === 'Moon' && userMoonPhase ? (
+                  <MoonPhase
+                    cx={pos.x}
+                    cy={pos.y}
+                    r={6}
+                    phase={0}
+                    illumination={userMoonPhase.illumination}
+                    waxing={userMoonPhase.waxing}
+                    id={`syn-user-moon-${uid}`}
+                    glow={isSelected}
+                  />
                 ) : (
-                  <motion.text
+                  <text
                     x={pos.x}
                     y={pos.y}
                     textAnchor='middle'
@@ -688,12 +697,12 @@ export function SynastryChart({
                     className='font-astro'
                     fontSize='12'
                     fill={fill}
-                    animate={{ scale: isSelected ? 1.2 : 1 }}
-                    transition={{ type: 'spring', stiffness: 320, damping: 22 }}
-                    style={{ originX: pos.x, originY: pos.y }}
+                    style={{
+                      fontWeight: isSelected ? 700 : 400,
+                    }}
                   >
                     {symbolFor(p.body)}
-                  </motion.text>
+                  </text>
                 )}
                 {p.retrograde && (
                   <text
@@ -727,8 +736,7 @@ export function SynastryChart({
             const dimmed =
               selected != null &&
               !isSelected &&
-              !(selected.side === 'user' && aspected) &&
-              !(selected.side === 'friend');
+              !(selected.side === 'user' && aspected);
             const sign = p.sign;
             const elColor = elementColor(sign);
             const fill =
@@ -744,7 +752,7 @@ export function SynastryChart({
                 data-syn-body
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{
-                  opacity: dimmed ? 0.25 : 1,
+                  opacity: dimmed ? 0.4 : 1,
                   scale: 1,
                 }}
                 transition={{
@@ -777,44 +785,49 @@ export function SynastryChart({
                     r={12}
                     fill={`url(#syn-friend-glow-${uid})`}
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.7 }}
+                    animate={{ opacity: isSelected ? 0.9 : 0.55 }}
                   />
                 )}
                 {isSelected && (
-                  <motion.circle
-                    cx={pos.x}
-                    cy={pos.y}
-                    r={9}
-                    fill='none'
-                    stroke='#ff6ec7'
-                    strokeWidth={0.8}
-                    animate={{ r: [7, 14, 7], opacity: [0.6, 0, 0.6] }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: 'easeOut',
-                    }}
-                  />
-                )}
-                {p.body === 'Moon' && friendMoonPhase ? (
-                  <motion.g
-                    animate={{ scale: isSelected ? 1.18 : 1 }}
-                    transition={{ type: 'spring', stiffness: 320, damping: 22 }}
-                    style={{ originX: pos.x, originY: pos.y }}
-                  >
-                    <MoonPhase
+                  <>
+                    <circle
                       cx={pos.x}
                       cy={pos.y}
-                      r={6}
-                      phase={0}
-                      illumination={friendMoonPhase.illumination}
-                      waxing={friendMoonPhase.waxing}
-                      id={`syn-friend-moon-${uid}`}
-                      glow={isSelected}
+                      r={9}
+                      fill='none'
+                      stroke='#ff6ec7'
+                      strokeWidth={1.2}
+                      opacity={0.95}
                     />
-                  </motion.g>
+                    <motion.circle
+                      cx={pos.x}
+                      cy={pos.y}
+                      r={9}
+                      fill='none'
+                      stroke='#ff6ec7'
+                      strokeWidth={0.6}
+                      animate={{ r: [9, 14, 9], opacity: [0.5, 0, 0.5] }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: 'easeOut',
+                      }}
+                    />
+                  </>
+                )}
+                {p.body === 'Moon' && friendMoonPhase ? (
+                  <MoonPhase
+                    cx={pos.x}
+                    cy={pos.y}
+                    r={6}
+                    phase={0}
+                    illumination={friendMoonPhase.illumination}
+                    waxing={friendMoonPhase.waxing}
+                    id={`syn-friend-moon-${uid}`}
+                    glow={isSelected}
+                  />
                 ) : (
-                  <motion.text
+                  <text
                     x={pos.x}
                     y={pos.y}
                     textAnchor='middle'
@@ -822,12 +835,12 @@ export function SynastryChart({
                     className='font-astro'
                     fontSize='12'
                     fill={fill}
-                    animate={{ scale: isSelected ? 1.2 : 1 }}
-                    transition={{ type: 'spring', stiffness: 320, damping: 22 }}
-                    style={{ originX: pos.x, originY: pos.y }}
+                    style={{
+                      fontWeight: isSelected ? 700 : 400,
+                    }}
                   >
                     {symbolFor(p.body)}
-                  </motion.text>
+                  </text>
                 )}
                 {p.retrograde && (
                   <text
@@ -852,20 +865,20 @@ export function SynastryChart({
           })}
         </motion.svg>
 
-        {!selected && (
-          <AnimatePresence>
-            <motion.p
-              key={selectedKey || 'empty'}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.55 }}
-              exit={{ opacity: 0 }}
-              transition={{ delay: 1.0, duration: 0.6 }}
-              className='pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-wider text-content-muted whitespace-nowrap'
-            >
-              tap a planet to spotlight its synastry
-            </motion.p>
-          </AnimatePresence>
-        )}
+        <AnimatePresence mode='wait'>
+          <motion.p
+            key={selected ? 'selected' : 'empty'}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.6 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className='pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-wider text-content-muted whitespace-nowrap'
+          >
+            {selected
+              ? `${selected.planet} highlighted · tap again to clear`
+              : 'tap a planet to highlight its connections'}
+          </motion.p>
+        </AnimatePresence>
       </div>
 
       {/* Aspect legend */}
