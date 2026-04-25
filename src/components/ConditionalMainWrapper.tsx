@@ -196,13 +196,9 @@ export function ConditionalMainWrapper({
     <main
       ref={mainRef}
       style={{
-        paddingTop:
-          'calc(var(--global-nav-offset, 0px) + env(safe-area-inset-top, 0px))',
-        paddingBottom: showAppNav
-          ? 'calc(64px + env(safe-area-inset-bottom, 0px))'
-          : undefined,
-        scrollPaddingTop:
-          'calc(var(--global-nav-offset, 0px) + env(safe-area-inset-top, 0px))',
+        paddingTop: 'var(--global-nav-offset, 0px)',
+        paddingBottom: showAppNav ? '56px' : undefined,
+        scrollPaddingTop: 'var(--global-nav-offset, 0px)',
         minHeight: '100dvh',
       }}
       className={cn('flex h-dvh w-full flex-col overflow-y-auto')}

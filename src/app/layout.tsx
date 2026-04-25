@@ -220,12 +220,7 @@ export default function RootLayout({
                       <AppOpenedTracker />
                       <Suspense
                         fallback={
-                          <main
-                            className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'
-                            style={{
-                              paddingTop: 'env(safe-area-inset-top, 0px)',
-                            }}
-                          >
+                          <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
                             {children}
                           </main>
                         }
