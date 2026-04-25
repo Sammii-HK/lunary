@@ -1095,6 +1095,9 @@ model user {
   /// subscription endpoint (calendar apps can't carry session cookies).
   /// Issued on first subscribe. Rotatable.
   calendarToken             String?   @unique @map("calendar_token")
+  /// Public Linktree-style handle for /me/{handle} cosmic identity profile.
+  /// Lowercase a-z, 0-9, hyphen — 3-30 chars. Optional + unique.
+  publicHandle              String?   @unique @map("public_handle")
   createdAt                 DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt                 DateTime  @default(now()) @db.Timestamptz(6)
   account                   account[]
@@ -1102,6 +1105,7 @@ model user {
 
   @@index([email], map: "idx_user_email")
   @@index([calendarToken], map: "idx_user_calendar_token")
+  @@index([publicHandle], map: "idx_user_public_handle")
 }
 
 model user_attribution {
