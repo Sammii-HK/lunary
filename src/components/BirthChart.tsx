@@ -169,7 +169,7 @@ export const BirthChart = ({
   const uid = useId().replace(/:/g, '');
   const wrapRef = useRef<HTMLDivElement>(null);
 
-  const { scale, tx, ty, handlers, reset } = useChartGestures();
+  const { scale, tx, ty, handlers, reset, suppressTap } = useChartGestures();
 
   const ascendant = birthChart.find((p) => p.body === 'Ascendant');
   const tropicalAscendantAngle = ascendant ? ascendant.eclipticLongitude : 0;
@@ -472,7 +472,13 @@ export const BirthChart = ({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           onClick={(e) => {
-            if ((e.target as Element).closest('[data-body-node]')) return;
+            if (suppressTap()) return;
+            if (
+              e.target instanceof Element &&
+              e.target.closest('[data-body-node]')
+            ) {
+              return;
+            }
             setSelectedBody(null);
           }}
         >
@@ -523,14 +529,10 @@ export const BirthChart = ({
 
           <motion.g
             animate={{
-              scale: selectedBody ? 1 : [0.998, 1.004, 0.998],
               translateX: tx / 3,
               translateY: ty / 3,
             }}
             transition={{
-              scale: selectedBody
-                ? { duration: 0.3 }
-                : { duration: 6, repeat: Infinity, ease: 'easeInOut' },
               translateX: { type: 'spring', stiffness: 200, damping: 30 },
               translateY: { type: 'spring', stiffness: 200, damping: 30 },
             }}
@@ -780,6 +782,7 @@ export const BirthChart = ({
                     onMouseLeave={() => setHoveredBody(null)}
                     onClick={(e) => {
                       e.stopPropagation();
+                      if (suppressTap()) return;
                       handleBodyTap(body);
                     }}
                     style={{ cursor: 'pointer' }}
@@ -817,41 +820,21 @@ export const BirthChart = ({
                         style={{ filter: 'blur(5px)' }}
                       />
                     )}
-                    {/* Selection pulse */}
+                    {/* Selection ring — static glow, no infinite pulse */}
                     {isSelected && (
-                      <>
-                        <motion.circle
-                          cx={x}
-                          cy={y}
-                          r={10}
-                          fill='none'
-                          stroke={baseColor}
-                          strokeWidth={0.8}
-                          animate={{
-                            r: [8, 16, 8],
-                            opacity: [0.6, 0, 0.6],
-                          }}
-                          transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            ease: 'easeOut',
-                          }}
-                        />
-                        {/* Burst on tap */}
-                        <motion.circle
-                          cx={x}
-                          cy={y}
-                          r={4}
-                          fill='none'
-                          stroke={baseColor}
-                          strokeWidth={1.2}
-                          initial={{ r: 4, opacity: 0.9 }}
-                          animate={{ r: 28, opacity: 0 }}
-                          transition={{ duration: 0.9, ease: 'easeOut' }}
-                        />
-                      </>
+                      <motion.circle
+                        cx={x}
+                        cy={y}
+                        r={9}
+                        fill='none'
+                        stroke={baseColor}
+                        strokeWidth={1}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.65 }}
+                        transition={{ duration: 0.25 }}
+                      />
                     )}
-                    {/* Aspected-planet pulse */}
+                    {/* Aspected-planet ring — static, dimmer */}
                     {hasSelection && isAspected && !isSelected && (
                       <motion.circle
                         cx={x}
@@ -860,12 +843,9 @@ export const BirthChart = ({
                         fill='none'
                         stroke={baseColor}
                         strokeWidth={0.4}
-                        animate={{ opacity: [0.2, 0.7, 0.2] }}
-                        transition={{
-                          duration: 1.8,
-                          repeat: Infinity,
-                          ease: 'easeInOut',
-                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.45 }}
+                        transition={{ duration: 0.25 }}
                       />
                     )}
                     {body === 'Moon' && natalMoonPhase ? (
