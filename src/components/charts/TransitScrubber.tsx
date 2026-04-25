@@ -659,11 +659,12 @@ export function TransitScrubber({
             </text>
           ))}
 
-          {/* Aspect lines between transit & natal */}
+          {/* Aspect lines between transit & natal — endpoints pulled to
+              just inside each glyph so they read as connecting to the planet */}
           <AnimatePresence>
             {liveAspects.map((a) => {
-              const n = polar(a.natalLon, NATAL_R);
-              const t = polar(a.transitLon, TRANSIT_R);
+              const n = polar(a.natalLon, GLYPH_NATAL_R - 5);
+              const t = polar(a.transitLon, GLYPH_TRANSIT_R - 6);
               const tight = a.orb < 1;
               return (
                 <motion.g key={a.key}>
@@ -707,6 +708,8 @@ export function TransitScrubber({
           {/* Natal planet glyphs (inner ring) */}
           {natalPlanets.map((p) => {
             const pos = polar(p.longitude, GLYPH_NATAL_R);
+            const sign = signFromLongitude(p.longitude);
+            const elColor = ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
             const handleClick = () => {
               const bc = birthChart.find((b) => b.body === p.name);
               if (bc) setSelectedPlanet(bc);
@@ -747,6 +750,15 @@ export function TransitScrubber({
                 >
                   {symbolFor(p.name)}
                 </text>
+                {/* Element-coloured dot below the glyph */}
+                <circle
+                  cx={pos.x}
+                  cy={pos.y + 6}
+                  r={1.4}
+                  fill={elColor}
+                  opacity={0.85}
+                  pointerEvents='none'
+                />
               </g>
             );
           })}
@@ -863,6 +875,15 @@ export function TransitScrubber({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 0.18 }}
                   style={{ filter: 'blur(2.5px)' }}
+                />
+                {/* Element-coloured dot below the glyph */}
+                <circle
+                  cx={0}
+                  cy={8}
+                  r={1.6}
+                  fill={elColor}
+                  opacity={0.95}
+                  pointerEvents='none'
                 />
                 {p.name === 'Moon' && transitMoonPhase ? (
                   <MoonPhase

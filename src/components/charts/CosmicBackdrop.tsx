@@ -51,11 +51,6 @@ export function CosmicBackdrop({
           <stop offset='55%' stopColor='#15102d' stopOpacity='0.35' />
           <stop offset='100%' stopColor='#08060f' stopOpacity='0' />
         </radialGradient>
-        <radialGradient id='cosmic-drift' cx='30%' cy='70%' r='70%'>
-          <stop offset='0%' stopColor='#ff6ec7' stopOpacity='0.18' />
-          <stop offset='60%' stopColor='#5dade2' stopOpacity='0.08' />
-          <stop offset='100%' stopColor='transparent' stopOpacity='0' />
-        </radialGradient>
       </defs>
 
       <circle
@@ -64,19 +59,6 @@ export function CosmicBackdrop({
         r={Math.min(w, h) / 2 - 1}
         fill='url(#cosmic-sky)'
       />
-
-      <motion.g
-        animate={{ rotate: 360 }}
-        transition={{ duration: 120, repeat: Infinity, ease: 'linear' }}
-        style={{ originX: 0, originY: 0 }}
-      >
-        <circle
-          cx='0'
-          cy='0'
-          r={Math.min(w, h) / 2 - 1}
-          fill='url(#cosmic-drift)'
-        />
-      </motion.g>
 
       {stars.map((s) => (
         <motion.circle
