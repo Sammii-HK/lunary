@@ -1,10 +1,9 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
-import { Check, Map, MapPin, Telescope, X } from 'lucide-react';
+import { Check, MapPin, Telescope } from 'lucide-react';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { BirthChartPlacement, useUser } from '@/context/UserContext';
-import { ChartWheelSvg } from '@/app/birth-chart/chart-wheel-svg';
 import {
   ZODIAC_SIGNS,
   bodiesSymbols,
@@ -18,6 +17,11 @@ import { ShareSkyNow } from '@/components/share/ShareSkyNow';
 import { TransitDurationBadge } from '@/components/TransitDurationBadge';
 import { useLocation } from '@/hooks/useLocation';
 import { composePlacementNarrative } from '@/lib/copy/transit-copy';
+import {
+  calculateSunMoon,
+  formatTime,
+} from '../../../utils/astrology/ephemeris';
+import { locationToObserver } from '../../../utils/location';
 
 const getPlanetMeaning = (planet: string, sign: string): string => {
   const planetMeanings: Record<string, Record<string, string>> = {
@@ -351,30 +355,7 @@ const calculateWholeSignHouses = (ascendantLongitude: number): HouseCusp[] => {
   return houses;
 };
 
-const getHouseForLongitude = (
-  longitude: number,
-  houses: HouseCusp[],
-): number => {
-  for (let i = 0; i < 12; i += 1) {
-    const currentHouse = houses[i];
-    const nextHouse = houses[(i + 1) % 12];
-    const start = currentHouse.eclipticLongitude;
-    const end = nextHouse.eclipticLongitude;
-
-    if (end <= start) {
-      if (longitude >= start || longitude < end) {
-        return currentHouse.house;
-      }
-    } else if (longitude >= start && longitude < end) {
-      return currentHouse.house;
-    }
-  }
-  return 1;
-};
-
 type NatalHouseInfo = {
-  houses: HouseCusp[];
-  bodyLookup: Record<string, number>;
   signLookup: Record<string, number>;
 };
 
@@ -388,15 +369,6 @@ const buildNatalHouseInfo = (
   if (!ascendant) return null;
 
   const houses = calculateWholeSignHouses(ascendant.eclipticLongitude);
-  const bodyLookup: Record<string, number> = {};
-  birthChart.forEach((placement) => {
-    if (placement.body) {
-      bodyLookup[placement.body] =
-        placement.house ??
-        getHouseForLongitude(placement.eclipticLongitude, houses);
-    }
-  });
-
   const signLookup: Record<string, number> = {};
   houses.forEach((house) => {
     const signIndex = Math.floor(house.eclipticLongitude / 30) % 12;
@@ -407,8 +379,6 @@ const buildNatalHouseInfo = (
   });
 
   return {
-    houses,
-    bodyLookup,
     signLookup,
   };
 };
@@ -422,15 +392,16 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
   const { user } = useUser();
   const { currentAstrologicalChart } = usePlanetaryChart();
   const {
+    location,
     requestLocation,
     loading: locationLoading,
     error: locationError,
+    hasPermission: hasLocationPermission,
   } = useLocation();
   const [showLocationFeedback, setShowLocationFeedback] = useState(false);
   const [refreshState, setRefreshState] = useState<
     'idle' | 'success' | 'error'
   >('idle');
-  const [showChartModal, setShowChartModal] = useState(false);
   const handleRefreshLocation = async () => {
     setRefreshState('idle');
     try {
@@ -458,24 +429,24 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
     return planets.filter((p) => p.retrograde).length;
   }, [planets]);
 
-  const chartData = useMemo(() => {
-    return planets.map((planet) => ({
-      body: planet.body,
-      sign: planet.sign,
-      degree: planet.formattedDegree?.degree ?? 0,
-      minute: planet.formattedDegree?.minute ?? 0,
-      eclipticLongitude: planet.eclipticLongitude,
-      retrograde: planet.retrograde,
-    }));
-  }, [planets]);
-
   const natalHouseInfo = useMemo(
     () => buildNatalHouseInfo(user?.birthChart),
     [user?.birthChart],
   );
-  const natalHouseLookup = natalHouseInfo?.bodyLookup ?? {};
   const natalSignHouseLookup = natalHouseInfo?.signLookup ?? {};
-  const natalHouses = natalHouseInfo?.houses;
+  const localSkyTiming = useMemo(() => {
+    if (!hasLocationPermission || !location) return null;
+
+    try {
+      return calculateSunMoon(locationToObserver(location));
+    } catch {
+      return null;
+    }
+  }, [hasLocationPermission, location]);
+  const locationLabel =
+    hasLocationPermission && location
+      ? location.city || location.country || 'your location'
+      : null;
 
   if (planets.length === 0) {
     return (
@@ -512,11 +483,22 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
                   void handleRefreshLocation();
                 }
               }}
-              aria-label='Refresh location used for Sky Now'
-              title='Refresh my location'
-              className='p-0.5 rounded-full border border-transparent text-content-muted hover:text-content-secondary hover:border-stroke-default transition-colors relative'
+              aria-label={
+                hasLocationPermission
+                  ? 'Refresh local sky location'
+                  : 'Use my location for local sky times'
+              }
+              title={
+                hasLocationPermission
+                  ? 'Refresh local sky'
+                  : 'Use my location for local sky times'
+              }
+              className={`p-0.5 rounded-full border border-transparent hover:border-stroke-default transition-colors relative ${
+                hasLocationPermission
+                  ? 'text-content-muted hover:text-content-secondary'
+                  : 'text-content-muted/70 hover:text-content-muted'
+              }`}
             >
-              {/* TODO: add back in with rise and set times functionality */}
               {refreshState === 'success' ? (
                 <Check className='w-3 h-3 text-lunary-success' />
               ) : (
@@ -529,18 +511,6 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
                   Failed
                 </span>
               )}
-            </button>
-            <button
-              type='button'
-              onClick={(event) => {
-                event.stopPropagation();
-                setShowChartModal(true);
-              }}
-              className='p-0.5 rounded-full border border-transparent text-content-muted hover:text-content-secondary hover:border-stroke-default transition-colors'
-              aria-label='Open chart modal'
-              title='Open chart modal'
-            >
-              <Map className='w-3 h-3' />
             </button>
           </div>
         }
@@ -594,6 +564,37 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
 
   const expanded = (
     <div className='pt-3 space-y-4' data-testid='sky-now-expand'>
+      {localSkyTiming && (
+        <div className='rounded-lg border border-stroke-subtle/40 bg-surface-card/35 px-3 py-2'>
+          <div className='flex items-center justify-between gap-3'>
+            <div className='flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-content-muted'>
+              <MapPin className='w-3 h-3' />
+              <span>Local sky</span>
+            </div>
+            {locationLabel && (
+              <span className='truncate text-[11px] text-content-muted/80'>
+                {locationLabel}
+              </span>
+            )}
+          </div>
+          <div className='mt-2 grid grid-cols-1 gap-2 text-xs sm:grid-cols-2'>
+            <div className='rounded-md bg-surface-base/45 px-2 py-1.5'>
+              <span className='text-content-muted'>Sun</span>
+              <span className='ml-2 text-content-secondary'>
+                {formatTime(localSkyTiming.sunrise, location?.timezone)} rise /{' '}
+                {formatTime(localSkyTiming.sunset, location?.timezone)} set
+              </span>
+            </div>
+            <div className='rounded-md bg-surface-base/45 px-2 py-1.5'>
+              <span className='text-content-muted'>Moon</span>
+              <span className='ml-2 text-content-secondary'>
+                {formatTime(localSkyTiming.moonrise, location?.timezone)} rise /{' '}
+                {formatTime(localSkyTiming.moonset, location?.timezone)} set
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
       <div className='space-y-2'>
         {planets.map((planet) => {
           const normalizedSign = normalizeSignName(planet.sign);
@@ -672,42 +673,13 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
   );
 
   return (
-    <>
-      <ExpandableCard
-        preview={preview}
-        expanded={expanded}
-        autoExpandOnDesktop
-        isExpanded={isExpanded}
-        onToggle={onToggle}
-        data-testid='sky-now-widget'
-      />
-      {showChartModal && (
-        <div
-          className='fixed inset-0 z-50 flex items-center justify-center bg-surface-base/80'
-          role='presentation'
-          onClick={() => setShowChartModal(false)}
-        >
-          <div
-            className='relative w-[min(90vw,560px)] rounded-[32px] border border-stroke-subtle bg-surface-base p-6 shadow-2xl'
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type='button'
-              className='absolute right-4 top-4 text-content-muted hover:text-content-primary'
-              onClick={() => setShowChartModal(false)}
-            >
-              <X className='w-4 h-4' />
-            </button>
-            <div className='flex justify-center'>
-              <ChartWheelSvg
-                birthChart={chartData}
-                size={420}
-                houses={natalHouses as HouseCusp[] | null}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    <ExpandableCard
+      preview={preview}
+      expanded={expanded}
+      autoExpandOnDesktop
+      isExpanded={isExpanded}
+      onToggle={onToggle}
+      data-testid='sky-now-widget'
+    />
   );
 };

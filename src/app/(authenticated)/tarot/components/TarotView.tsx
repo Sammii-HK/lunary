@@ -14,6 +14,7 @@ import {
   Copy,
   Loader2,
   Moon,
+  ArrowRight,
 } from 'lucide-react';
 import { AdvancedPatterns } from '@/components/tarot/AdvancedPatterns';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
@@ -86,11 +87,15 @@ export function TarotView({
   const variantRaw = useFeatureFlagVariant('paywall_preview_style_v1');
   const variant = variantRaw || 'blur';
   const weeklyLockVariantRaw = useFeatureFlagVariant('weekly-lock-style');
-  const weeklyLockVariant = weeklyLockVariantRaw || 'blur';
+  const weeklyLockVariant =
+    typeof weeklyLockVariantRaw === 'string' ? weeklyLockVariantRaw : 'blur';
   const tarotTruncationVariantRaw = useFeatureFlagVariant(
     'tarot-truncation-length',
   );
-  const tarotTruncationVariant = tarotTruncationVariantRaw || 'medium';
+  const tarotTruncationVariant =
+    typeof tarotTruncationVariantRaw === 'string'
+      ? tarotTruncationVariantRaw
+      : 'medium';
   const ctaCopy = useCTACopy();
   const userId = user?.id;
   const tarotPlan = {
@@ -131,10 +136,8 @@ export function TarotView({
 
   useEffect(() => {
     if (hasPaidAccess) return;
-    if (
-      generalTarot?.guidance.dailyMessage.length <=
-      FREE_DAILY_TAROT_TRUNCATE_LENGTH
-    ) {
+    const dailyMsgLen = generalTarot?.guidance.dailyMessage?.length ?? 0;
+    if (dailyMsgLen <= FREE_DAILY_TAROT_TRUNCATE_LENGTH) {
       return;
     }
 
@@ -614,55 +617,238 @@ export function TarotView({
     : generalWeeklyShare;
 
   const cosmicContext = getCosmicContextForDate(new Date());
+  const moonKeywords = cosmicContext.moonPhase.keywords.slice(0, 3);
+  const dailyCardName = dailyCard?.name ?? '';
+  const weeklyCardName = weeklyCard?.name ?? '';
+  const dailyCardKeywords = dailyCard?.keywords ?? [];
+  const weeklyCardKeywords = weeklyCard?.keywords ?? [];
 
-  return (
-    <div className='h-full w-full space-y-6 p-4 overflow-y-auto overflow-x-hidden pb-32'>
-      {/* Header */}
-      <div>
-        <Heading variant='h1' as='h1'>
-          {hasPaidAccess && userName
-            ? `${userName}'s Tarot Readings`
-            : hasPaidAccess
-              ? 'Your Tarot Readings'
-              : "Today's Tarot Readings"}
-        </Heading>
-        <p className='text-xs md:text-sm text-content-muted'>
-          {hasPaidAccess
-            ? iosLabel(
-                'Personalized guidance based on your cosmic signature',
-                isNativeIOS,
-              )
-            : iosLabel(
-                'General cosmic guidance based on universal energies',
-                isNativeIOS,
-              )}
-        </p>
+  const renderCardGlyph = (name: string, index: number) => {
+    const symbols = ['✦', '☾', '✧', '◇', '✶'];
+    const symbol =
+      symbols[
+        Math.abs(
+          name.split('').reduce((total, char) => total + char.charCodeAt(0), 0),
+        ) % symbols.length
+      ];
+
+    return (
+      <div className='relative flex h-28 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[1.15rem] border border-white/15 bg-gradient-to-b from-lunary-primary-900/70 via-layer-deep/80 to-surface-base shadow-[0_18px_45px_rgba(0,0,0,0.28)] sm:h-32 sm:w-24'>
+        <div className='absolute inset-x-3 top-3 h-px bg-white/20' />
+        <div className='absolute -left-6 top-6 h-16 w-16 rounded-full bg-lunary-rose-500/15 blur-2xl' />
+        <div className='absolute -right-8 bottom-4 h-20 w-20 rounded-full bg-lunary-highlight-500/15 blur-2xl' />
+        <div className='relative flex h-14 w-14 items-center justify-center rounded-full border border-white/15 bg-surface-elevated/45 text-3xl text-content-brand-accent'>
+          {symbol}
+        </div>
+        <span className='absolute bottom-3 text-[10px] uppercase tracking-[0.3em] text-content-muted'>
+          {index === 0 ? 'Daily' : 'Weekly'}
+        </span>
       </div>
-      {/* Moon Phase
-      <div className='rounded-lg border border-lunary-secondary-800 bg-layer-deep/40 p-3'>
-        <div className='flex items-center gap-3'>
-          <img
-            src={cosmicContext.moonPhase.icon.src}
-            alt={cosmicContext.moonPhase.icon.alt}
-            className='w-10 h-10 flex-shrink-0'
-          />
-          <div className='flex-1 min-w-0'>
-            <p className='text-sm font-medium text-content-brand-secondary mb-1'>
-              {cosmicContext.moonPhase.name}
-            </p>
-            <div className='flex flex-wrap gap-1.5'>
-              {cosmicContext.moonPhase.keywords.map((keyword, idx) => (
-                <span
-                  key={idx}
-                  className='text-xs px-2 py-0.5 rounded-full bg-layer-base/50 text-lunary-secondary-400 border border-lunary-secondary-800'
-                >
-                  {keyword}
-                </span>
-              ))}
+    );
+  };
+
+  const renderPremiumTarotCard = ({
+    label,
+    cardName,
+    keywords,
+    share,
+    onOpen,
+    children,
+    isMuted = false,
+    index,
+  }: {
+    label: string;
+    cardName: string;
+    keywords: string[];
+    share?: typeof dailyShare;
+    onOpen?: () => void;
+    children?: React.ReactNode;
+    isMuted?: boolean;
+    index: number;
+  }) => {
+    const primaryKeyword = keywords[2] || keywords[0];
+    const supportingKeywords = keywords
+      .filter((_: string, keywordIndex: number) => keywordIndex !== 2)
+      .slice(0, 2);
+
+    return (
+      <div
+        className={cn(
+          'relative overflow-hidden rounded-[1.5rem] border border-lunary-primary-700/30 bg-gradient-to-br from-surface-elevated/80 via-layer-deep/50 to-surface-base/80 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.18)]',
+          isMuted && 'min-h-[18rem]',
+        )}
+      >
+        <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(238,120,158,0.16),transparent_34%),radial-gradient(circle_at_90%_25%,rgba(132,88,216,0.18),transparent_36%)]' />
+        <div className='relative flex items-start justify-between gap-3'>
+          <div className='flex items-center gap-3'>
+            {renderCardGlyph(cardName, index)}
+            <div className='min-w-0'>
+              <p className='text-[11px] font-semibold uppercase tracking-[0.24em] text-content-brand-accent/85'>
+                {label}
+              </p>
+              <button
+                type='button'
+                onClick={onOpen}
+                disabled={!onOpen}
+                className='mt-2 text-left text-xl font-semibold leading-tight text-content-primary transition-colors hover:text-content-brand disabled:cursor-default disabled:hover:text-content-primary sm:text-2xl'
+              >
+                {cardName}
+              </button>
+              <div className='mt-3 flex flex-wrap items-center gap-2 text-xs'>
+                {primaryKeyword && (
+                  <span className='inline-flex items-center rounded-full border border-lunary-primary-600/35 bg-layer-base/55 px-2.5 py-1 font-medium text-content-brand-accent'>
+                    {primaryKeyword}
+                  </span>
+                )}
+                {supportingKeywords.length > 0 && (
+                  <span className='text-content-muted'>
+                    {supportingKeywords.join(' · ')}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
+          {share && (
+            <button
+              type='button'
+              onClick={() => handleCardShare(share)}
+              className='inline-flex shrink-0 items-center gap-1.5 rounded-full border border-stroke-subtle/60 bg-surface-elevated/60 px-3 py-1.5 text-xs font-medium text-content-brand transition-colors hover:bg-surface-elevated'
+            >
+              <Share2 className='h-3.5 w-3.5' />
+              <span className='hidden sm:inline'>Share</span>
+            </button>
+          )}
         </div>
-      </div> */}
+        {children && <div className='relative mt-4'>{children}</div>}
+      </div>
+    );
+  };
+
+  return (
+    <div className='h-full w-full space-y-6 overflow-y-auto overflow-x-hidden bg-[radial-gradient(circle_at_20%_0%,rgba(132,88,216,0.14),transparent_28%),radial-gradient(circle_at_85%_10%,rgba(238,120,158,0.10),transparent_30%)] p-4 pb-32'>
+      <div className='relative overflow-hidden rounded-[1.75rem] border border-lunary-primary-700/30 bg-gradient-to-br from-layer-deep/90 via-surface-base/85 to-lunary-secondary-950/40 p-5 shadow-[0_24px_90px_rgba(0,0,0,0.25)] sm:p-6'>
+        <div className='pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full border border-white/10 bg-lunary-primary-500/10 blur-xl' />
+        <div className='pointer-events-none absolute -bottom-24 left-8 h-48 w-48 rounded-full bg-lunary-rose-500/10 blur-3xl' />
+        <div className='relative grid gap-5 lg:grid-cols-[1.4fr,1fr] lg:items-end'>
+          <div>
+            <div className='mb-3 inline-flex items-center gap-2 rounded-full border border-lunary-primary-700/40 bg-layer-base/45 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.22em] text-content-brand-accent'>
+              <Sparkles className='h-3.5 w-3.5' />
+              Tarot room
+            </div>
+            <Heading variant='h1' as='h1'>
+              {hasPaidAccess && userName
+                ? `${firstName || userName}'s tarot reading`
+                : hasPaidAccess
+                  ? 'Your tarot reading'
+                  : "Today's tarot reading"}
+            </Heading>
+            <p className='mt-2 max-w-2xl text-sm leading-relaxed text-content-secondary'>
+              {hasPaidAccess
+                ? iosLabel(
+                    'Personalized card guidance woven with your cosmic signature and current sky.',
+                    isNativeIOS,
+                  )
+                : iosLabel(
+                    'A clear daily card with a preview of the deeper pattern work waiting inside Lunary+.',
+                    isNativeIOS,
+                  )}
+            </p>
+          </div>
+
+          <div className='rounded-2xl border border-white/10 bg-surface-elevated/35 p-4 backdrop-blur'>
+            <div className='flex items-center gap-3'>
+              <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-lunary-primary-700/40 bg-layer-base/50 p-2'>
+                <Image
+                  src={cosmicContext.moonPhase.icon.src}
+                  alt={cosmicContext.moonPhase.icon.alt}
+                  width={32}
+                  height={32}
+                  className='h-8 w-8 object-contain'
+                />
+              </div>
+              <div className='min-w-0'>
+                <p className='text-xs uppercase tracking-[0.22em] text-content-muted'>
+                  Today&apos;s context
+                </p>
+                <p className='text-sm font-medium text-content-primary'>
+                  {cosmicContext.moonPhase.name}
+                </p>
+              </div>
+            </div>
+            {moonKeywords.length > 0 && (
+              <div className='mt-3 flex flex-wrap gap-1.5'>
+                {moonKeywords.map((keyword) => (
+                  <span
+                    key={keyword}
+                    className='rounded-full border border-lunary-secondary-700/40 bg-layer-base/40 px-2 py-0.5 text-xs text-content-secondary'
+                  >
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className='grid gap-3 rounded-[1.35rem] border border-stroke-subtle/50 bg-surface-elevated/45 p-3 sm:grid-cols-3'>
+        <Link
+          href='/horoscope'
+          className='group flex items-center justify-between rounded-2xl border border-transparent bg-layer-base/25 px-3 py-2 transition-colors hover:border-lunary-primary-700/40 hover:bg-layer-base/40'
+        >
+          <span>
+            <span className='block text-xs font-medium text-content-primary'>
+              Read the sky
+            </span>
+            <span className='block text-[11px] text-content-muted'>
+              Match cards to today&apos;s astrology
+            </span>
+          </span>
+          <ArrowRight className='h-4 w-4 text-content-muted transition-transform group-hover:translate-x-0.5 group-hover:text-content-brand' />
+        </Link>
+        <button
+          type='button'
+          onClick={() => {
+            const spreadsSection = document.getElementById(
+              hasPaidAccess
+                ? 'tarot-spreads-section'
+                : 'tarot-spreads-section-free',
+            );
+            spreadsSection?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          className='group flex items-center justify-between rounded-2xl border border-transparent bg-layer-base/25 px-3 py-2 text-left transition-colors hover:border-lunary-primary-700/40 hover:bg-layer-base/40'
+        >
+          <span>
+            <span className='block text-xs font-medium text-content-primary'>
+              Pull a spread
+            </span>
+            <span className='block text-[11px] text-content-muted'>
+              Choose a shape for the question
+            </span>
+          </span>
+          <ArrowRight className='h-4 w-4 text-content-muted transition-transform group-hover:translate-x-0.5 group-hover:text-content-brand' />
+        </button>
+        <button
+          type='button'
+          onClick={() =>
+            document
+              .querySelector('[data-testid="pattern-analysis-section"]')
+              ?.scrollIntoView({ behavior: 'smooth' })
+          }
+          className='group flex items-center justify-between rounded-2xl border border-transparent bg-layer-base/25 px-3 py-2 text-left transition-colors hover:border-lunary-primary-700/40 hover:bg-layer-base/40'
+        >
+          <span>
+            <span className='block text-xs font-medium text-content-primary'>
+              Trace patterns
+            </span>
+            <span className='block text-[11px] text-content-muted'>
+              See what keeps repeating
+            </span>
+          </span>
+          <ArrowRight className='h-4 w-4 text-content-muted transition-transform group-hover:translate-x-0.5 group-hover:text-content-brand' />
+        </button>
+      </div>
+
       {/* CTA button to scroll to spreads */}
       {/* {authStatus.isAuthenticated && (
         <div className='flex gap-3'>
@@ -687,132 +873,79 @@ export function TarotView({
         {/* Daily & Weekly Cards section */}
         {hasPaidAccess ? (
           <HoroscopeSection title='Daily & Weekly Cards' color='purple'>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6'>
-              {/* Daily Card - Paid */}
-              <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/50 p-4'>
-                <div className='flex items-center justify-between mb-2'>
-                  <h3 className='text-xs md:text-sm font-medium text-content-muted'>
-                    Daily Card
-                  </h3>
-                  {personalizedDailyShare && (
-                    <button
-                      type='button'
-                      onClick={() => handleCardShare(personalizedDailyShare)}
-                      className='inline-flex items-center gap-1.5 text-xs font-medium text-content-brand hover:text-content-secondary transition-colors'
-                    >
-                      <Share2 className='w-4 h-4' />
-                      <span className='hidden sm:inline'>Share daily card</span>
-                    </button>
-                  )}
-                </div>
-                <p
-                  className='text-lg font-medium text-content-primary mb-1 cursor-pointer hover:text-content-brand transition-colors'
-                  onClick={() => {
-                    const card = getTarotCardByName(
-                      personalizedReading!.daily.name,
-                    );
-                    if (card) setSelectedCard(card);
-                  }}
-                >
-                  {personalizedReading!.daily.name}
-                </p>
-                <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm'>
-                  <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-layer-base/50 border border-lunary-primary-700/30 text-content-secondary font-medium'>
-                    {personalizedReading!.daily.keywords[2] ||
-                      personalizedReading!.daily.keywords[0]}
-                  </span>
-                  <span className='text-content-muted'>
-                    {personalizedReading!.daily.keywords
-                      .filter((_: string, idx: number) => idx !== 2 && idx < 2)
-                      .join(', ')}
-                  </span>
-                </div>
+            <div className='grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-5'>
+              {renderPremiumTarotCard({
+                label: 'Daily card',
+                cardName: dailyCardName,
+                keywords: dailyCardKeywords,
+                share: dailyShare,
+                index: 0,
+                onOpen: () => {
+                  const card = getTarotCardByName(
+                    personalizedReading!.daily.name,
+                  );
+                  if (card) setSelectedCard(card);
+                },
+                children: (
+                  <>
+                    {subscription.hasAccess('personal_tarot') && (
+                      <TarotTransitConnection
+                        cardName={personalizedReading!.daily.name}
+                        birthChart={user?.birthChart}
+                        userBirthday={userBirthday}
+                        currentTransits={currentAstrologicalChart}
+                        variant='inDepth'
+                        userBirthLocation={user?.location?.birthLocation}
+                      />
+                    )}
+                  </>
+                ),
+              })}
 
-                {/* Transit connection for daily card */}
-                {subscription.hasAccess('personal_tarot') && (
-                  <TarotTransitConnection
-                    cardName={personalizedReading!.daily.name}
-                    birthChart={user?.birthChart}
-                    userBirthday={userBirthday}
-                    currentTransits={currentAstrologicalChart}
-                    variant='inDepth'
-                    userBirthLocation={user?.location?.birthLocation}
-                  />
-                )}
-              </div>
-
-              {/* Weekly Card - Paid */}
-              <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/50 p-4'>
-                <div className='flex items-center justify-between mb-2'>
-                  <h3 className='text-xs md:text-sm font-medium text-content-muted'>
-                    Weekly Card
-                  </h3>
-                  {personalizedWeeklyShare && (
-                    <button
-                      type='button'
-                      onClick={() => handleCardShare(personalizedWeeklyShare)}
-                      className='inline-flex items-center gap-1.5 text-xs font-medium text-content-brand hover:text-content-secondary transition-colors'
-                    >
-                      <Share2 className='w-4 h-4' />
-                      <span className='hidden sm:inline'>
-                        Share weekly card
-                      </span>
-                    </button>
-                  )}
-                </div>
-                <p
-                  className='text-lg font-medium text-content-primary mb-1 cursor-pointer hover:text-content-brand transition-colors'
-                  onClick={() => {
-                    const card = getTarotCardByName(
-                      personalizedReading!.weekly.name,
-                    );
-                    if (card) setSelectedCard(card);
-                  }}
-                >
-                  {personalizedReading!.weekly.name}
-                </p>
-                <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm'>
-                  <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-layer-base/50 border border-lunary-primary-700/30 text-content-secondary font-medium'>
-                    {personalizedReading!.weekly.keywords[2] ||
-                      personalizedReading!.weekly.keywords[0]}
-                  </span>
-                  <span className='text-content-muted'>
-                    {personalizedReading!.weekly.keywords
-                      .filter((_: string, idx: number) => idx !== 2 && idx < 2)
-                      .join(', ')}
-                  </span>
-                </div>
-
-                {/* Transit connection for weekly card */}
-                {subscription.hasAccess('personal_tarot') && (
-                  <TarotTransitConnection
-                    cardName={personalizedReading!.weekly.name}
-                    birthChart={user?.birthChart}
-                    userBirthday={user?.birthday}
-                    currentTransits={currentAstrologicalChart || []}
-                    variant='inDepth'
-                    userBirthLocation={user?.location?.birthLocation}
-                  />
-                )}
-              </div>
+              {renderPremiumTarotCard({
+                label: 'Weekly card',
+                cardName: weeklyCardName,
+                keywords: weeklyCardKeywords,
+                share: weeklyShare,
+                index: 1,
+                onOpen: () => {
+                  const card = getTarotCardByName(
+                    personalizedReading!.weekly.name,
+                  );
+                  if (card) setSelectedCard(card);
+                },
+                children: (
+                  <>
+                    {subscription.hasAccess('personal_tarot') && (
+                      <TarotTransitConnection
+                        cardName={personalizedReading!.weekly.name}
+                        birthChart={user?.birthChart}
+                        userBirthday={user?.birthday}
+                        currentTransits={currentAstrologicalChart || []}
+                        variant='inDepth'
+                        userBirthLocation={user?.location?.birthLocation}
+                      />
+                    )}
+                  </>
+                ),
+              })}
             </div>
 
             {/* Guidance action points - paid only */}
-            <div className='mt-4'>
-              <div className='rounded-lg border border-lunary-success-800 bg-layer-deep p-4'>
+            <div className='mt-4 rounded-2xl border border-lunary-success-800/45 bg-gradient-to-r from-layer-deep/80 to-surface-elevated/40 p-4'>
+              <div className='flex items-start gap-3'>
+                <Sparkles className='mt-0.5 h-4 w-4 shrink-0 text-lunary-success-400' />
                 <ul className='space-y-2 text-xs text-content-secondary'>
                   {guidanceActionPoints.length > 0 ? (
                     guidanceActionPoints
                       .slice(-1)
                       .map((point: string, index: number) => (
-                        <li key={index} className='flex items-start gap-2'>
-                          <span>{point}</span>
-                        </li>
+                        <li key={index}>{point}</li>
                       ))
                   ) : (
                     <li className='text-xs text-content-muted'>
-                      Key insight drives your next move—save a spread to capture
-                      the message.
+                      Key insight drives your next move. Save a spread to
+                      capture the message.
                     </li>
                   )}
                 </ul>
@@ -820,111 +953,81 @@ export function TarotView({
             </div>
           </HoroscopeSection>
         ) : (
-          /* Free user: Daily & Weekly Cards with locked overlays */
-          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 space-y-4'>
-            <h2 className='text-base md:text-lg font-medium text-content-primary'>
-              Today&apos;s Cosmic Reading
-            </h2>
+          /* Free user: Daily & Weekly Cards with teaser overlays */
+          <div className='rounded-[1.5rem] border border-stroke-subtle/50 bg-gradient-to-br from-surface-elevated/60 to-layer-deep/30 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.12)] sm:p-5'>
+            <div className='mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between'>
+              <div>
+                <p className='text-[11px] font-semibold uppercase tracking-[0.22em] text-content-brand-accent'>
+                  Open reading
+                </p>
+                <h2 className='text-lg font-semibold text-content-primary'>
+                  Today&apos;s cosmic reading
+                </h2>
+              </div>
+              <p className='text-xs text-content-muted'>
+                Daily card visible. Weekly depth is previewed.
+              </p>
+            </div>
 
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6'>
-              {/* Daily Card - Free */}
-              <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/50 p-4'>
-                <div className='flex items-center justify-between mb-2'>
-                  <h3 className='text-xs md:text-sm font-medium text-content-muted'>
-                    Daily Card
-                  </h3>
-                  {generalDailyShare && (
+            <div className='grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-5'>
+              {renderPremiumTarotCard({
+                label: 'Daily card',
+                cardName: dailyCardName,
+                keywords: dailyCardKeywords,
+                share: dailyShare,
+                index: 0,
+                onOpen: () => {
+                  const card = getTarotCardByName(generalTarot!.daily.name);
+                  if (card) setSelectedCard(card);
+                },
+                children: (
+                  <div className='rounded-2xl border border-stroke-subtle/50 bg-surface-base/35 p-3'>
+                    <div className='mb-2 flex items-center gap-2'>
+                      <Sparkles className='h-3.5 w-3.5 text-content-brand' />
+                      <span className='text-xs font-medium text-content-secondary'>
+                        In your chart today
+                      </span>
+                    </div>
+                    {renderPreview(
+                      "Mars supports your path today. See how the sky connects to this card's message for you.",
+                    )}
                     <button
                       type='button'
-                      onClick={() => handleCardShare(generalDailyShare)}
-                      className='inline-flex items-center gap-1.5 text-xs font-medium text-content-brand hover:text-content-secondary transition-colors'
+                      onClick={() => router.push('/pricing?nav=app')}
+                      className='mt-2 text-xs font-medium text-content-brand transition-colors hover:text-content-secondary'
                     >
-                      <Share2 className='w-4 h-4' />
-                      <span className='hidden sm:inline'>Share daily card</span>
+                      See the personalised layer
                     </button>
-                  )}
-                </div>
-                <p
-                  className='text-base md:text-lg font-medium text-content-primary mb-1 cursor-pointer hover:text-content-brand transition-colors'
-                  onClick={() => {
-                    const card = getTarotCardByName(generalTarot!.daily.name);
-                    if (card) setSelectedCard(card);
-                  }}
-                >
-                  {generalTarot!.daily.name}
-                </p>
-                <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm mb-3'>
-                  <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-layer-base/50 border border-lunary-primary-700/30 text-content-secondary font-medium'>
-                    {generalTarot!.daily.keywords[2] ||
-                      generalTarot!.daily.keywords[0]}
-                  </span>
-                  <span className='text-content-muted'>
-                    {generalTarot!.daily.keywords
-                      .filter((_, idx) => idx !== 2 && idx < 2)
-                      .join(', ')}
-                  </span>
-                </div>
-
-                {/* Locked preview of transit insights */}
-                <div className='mt-4 pt-4 border-t border-stroke-subtle'>
-                  <div className='flex items-center gap-2 mb-2'>
-                    <LockIcon className='w-3 h-3 text-content-brand' />
-                    <span className='text-xs font-medium text-content-secondary'>
-                      In Your Chart Today
-                    </span>
                   </div>
-                  {renderPreview(
-                    "Mars supports your path today. See how the sky connects to this card's message for you.",
-                  )}
-                  <button
-                    type='button'
-                    onClick={() => router.push('/pricing?nav=app')}
-                    className='mt-2 text-xs text-content-brand hover:text-content-secondary transition-colors font-medium'
-                  >
-                    Unlock personalized insights
-                  </button>
-                </div>
-              </div>
+                ),
+              })}
 
-              {/* Weekly Card - Free (locked overlay) */}
-              <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/50 p-4 relative overflow-hidden'>
-                <div className='blur-md opacity-30 select-none pointer-events-none'>
-                  <h3 className='text-xs md:text-sm font-medium text-content-muted mb-2'>
-                    Weekly Card
-                  </h3>
-                  <p className='text-lg font-medium text-content-primary mb-1'>
-                    {generalTarot!.weekly.name}
-                  </p>
-                  <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm mb-3'>
-                    <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-layer-base/50 border border-lunary-primary-700/30 text-content-secondary font-medium'>
-                      {generalTarot!.weekly.keywords[2] ||
-                        generalTarot!.weekly.keywords[0]}
-                    </span>
+              <div className='relative'>
+                {renderPremiumTarotCard({
+                  label: 'Weekly card preview',
+                  cardName: weeklyCardName,
+                  keywords: weeklyCardKeywords,
+                  index: 1,
+                  isMuted: true,
+                  children: (
+                    <div className='rounded-2xl border border-stroke-subtle/50 bg-surface-base/30 p-3'>
+                      <p className='text-xs leading-relaxed text-content-muted blur-[2px]'>
+                        {generalTarot!.guidance.weeklyMessage}
+                      </p>
+                    </div>
+                  ),
+                })}
+                <div className='absolute inset-0 flex flex-col items-center justify-center rounded-[1.5rem] bg-surface-base/55 p-4 text-center backdrop-blur-[2px]'>
+                  <div className='mb-3 flex h-11 w-11 items-center justify-center rounded-full border border-lunary-primary-700/50 bg-layer-base/70'>
+                    <LockIcon className='h-5 w-5 text-content-brand' />
                   </div>
-                </div>
-                <div className='absolute inset-0 flex flex-col items-center justify-center gap-3 p-4'>
-                  <LockIcon className='w-6 h-6 text-content-brand' />
-                  <h4 className='text-sm font-semibold text-content-primary text-center'>
-                    Weekly Card
+                  <h4 className='text-sm font-semibold text-content-primary'>
+                    Weekly tarot layer
                   </h4>
-                  <p className='text-xs text-content-muted text-center max-w-[200px]'>
-                    Deeper weekly guidance, written just for you
+                  <p className='mt-1 max-w-[220px] text-xs leading-relaxed text-content-muted'>
+                    Preview the card now. Lunary+ adds the personal weekly
+                    message and chart connection.
                   </p>
-                  <span
-                    role='button'
-                    tabIndex={0}
-                    onClick={() => router.push('/pricing?nav=app')}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        router.push('/pricing?nav=app');
-                      }
-                    }}
-                    className='inline-flex items-center gap-1 text-[10px] bg-layer-base/50 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-content-brand cursor-pointer hover:bg-layer-raised/50 transition-colors'
-                  >
-                    <Sparkles className='w-2.5 h-2.5' />
-                    Lunary+ Feature
-                  </span>
                   <button
                     type='button'
                     onClick={() => {
@@ -936,7 +1039,7 @@ export function TarotView({
                       });
                       router.push('/pricing?nav=app');
                     }}
-                    className='mt-1 inline-flex items-center gap-1.5 rounded-lg border border-lunary-primary-700 bg-surface-elevated/80 px-3 py-1.5 text-xs font-medium text-content-brand hover:bg-surface-elevated transition-colors'
+                    className='mt-3 inline-flex items-center gap-1.5 rounded-full border border-lunary-primary-700/60 bg-surface-elevated/85 px-3 py-1.5 text-xs font-medium text-content-brand transition-colors hover:bg-surface-elevated'
                   >
                     {ctaCopy.tarotWeekly}
                   </button>
@@ -945,12 +1048,12 @@ export function TarotView({
             </div>
 
             {/* Daily Message & Weekly Energy - Free */}
-            <div className='space-y-4 pt-4 border-t border-stroke-subtle/50'>
-              <div className='rounded-lg border border-lunary-primary-700 bg-surface-elevated/50 p-4'>
-                <h3 className='text-xs md:text-sm font-medium text-content-brand/90 mb-2'>
-                  Daily Message
+            <div className='mt-5 space-y-4 border-t border-stroke-subtle/50 pt-4'>
+              <div className='rounded-2xl border border-lunary-primary-700/45 bg-surface-elevated/45 p-4'>
+                <h3 className='mb-2 text-xs font-medium text-content-brand/90 md:text-sm'>
+                  Daily message
                 </h3>
-                <p className='text-xs md:text-sm text-content-secondary leading-relaxed'>
+                <p className='text-xs leading-relaxed text-content-secondary md:text-sm'>
                   {generalTarot!.guidance.dailyMessage.length >
                   FREE_DAILY_TAROT_TRUNCATE_LENGTH
                     ? generalTarot!.guidance.dailyMessage
@@ -971,36 +1074,29 @@ export function TarotView({
                       });
                       router.push('/pricing?nav=app');
                     }}
-                    className='mt-2 text-xs text-content-brand hover:text-content-secondary transition-colors font-medium'
+                    className='mt-2 text-xs font-medium text-content-brand transition-colors hover:text-content-secondary'
                   >
                     {ctaCopy.tarotDaily}
                   </button>
                 )}
               </div>
 
-              <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/50 p-4 relative overflow-hidden'>
-                <div className='flex items-center justify-between mb-2'>
-                  <h3 className='text-xs md:text-sm font-medium text-content-brand'>
-                    Weekly Energy
+              <div className='relative overflow-hidden rounded-2xl border border-stroke-subtle/50 bg-surface-elevated/45 p-4'>
+                <div className='mb-2 flex items-center justify-between'>
+                  <h3 className='text-xs font-medium text-content-brand md:text-sm'>
+                    Weekly energy
                   </h3>
-                  <span
-                    role='button'
-                    tabIndex={0}
+                  <button
+                    type='button'
                     onClick={() => router.push('/pricing?nav=app')}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        router.push('/pricing?nav=app');
-                      }
-                    }}
-                    className='inline-flex items-center gap-1 text-[10px] bg-layer-base/50 border border-lunary-primary-700/50 px-1.5 py-0.5 rounded text-content-brand cursor-pointer hover:bg-layer-raised/50 transition-colors'
+                    className='inline-flex items-center gap-1 rounded-full border border-lunary-primary-700/50 bg-layer-base/50 px-2 py-0.5 text-[10px] text-content-brand transition-colors hover:bg-layer-raised/50'
                   >
-                    <Sparkles className='w-2.5 h-2.5' />
+                    <Sparkles className='h-2.5 w-2.5' />
                     Lunary+
-                  </span>
+                  </button>
                 </div>
-                <div className='blur-sm opacity-40 select-none pointer-events-none'>
-                  <p className='text-xs md:text-sm text-content-secondary leading-relaxed'>
+                <div className='select-none blur-sm'>
+                  <p className='text-xs leading-relaxed text-content-secondary md:text-sm'>
                     {generalTarot!.guidance.weeklyMessage}
                   </p>
                 </div>
@@ -1015,7 +1111,7 @@ export function TarotView({
                     });
                     router.push('/pricing?nav=app');
                   }}
-                  className='mt-3 text-xs text-content-brand hover:text-content-secondary transition-colors font-medium'
+                  className='mt-3 text-xs font-medium text-content-brand transition-colors hover:text-content-secondary'
                 >
                   {ctaCopy.tarotWeekly}
                 </button>

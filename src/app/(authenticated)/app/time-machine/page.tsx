@@ -575,6 +575,16 @@ const TimeMachinePage = () => {
           )}
         </motion.form>
 
+        {/* Loading state — chart-shaped skeleton while computing */}
+        {submitting && chartPlacements.length === 0 && (
+          <div className='flex flex-col items-center gap-3 rounded-2xl border border-stroke-subtle bg-surface-elevated/40 p-6'>
+            <div className='aspect-square w-full max-w-sm animate-pulse rounded-full border border-stroke-subtle/60 bg-surface-muted/40' />
+            <p className='text-sm text-content-muted'>
+              Reading the sky for {formatDateLabel(date)}…
+            </p>
+          </div>
+        )}
+
         {/* Chart + narrative */}
         <AnimatePresence mode='wait'>
           {chartPlacements.length > 0 && activeEvent && (

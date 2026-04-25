@@ -8,6 +8,8 @@ import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { iosLabel } from '@/lib/ios-labels';
 import { Collapse } from '@/components/ui/Collapse';
+import AudioNarrator from '@/components/audio/AudioNarrator';
+import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 
 interface HoroscopeSeasonReadingProps {
   sunSign: string;
@@ -186,20 +188,31 @@ export function HoroscopeSeasonReading({
           </div>
 
           {/* Summary narrative */}
-          <p className='text-sm text-content-secondary leading-relaxed'>
+          <AutoLinkText
+            as='p'
+            className='text-sm text-content-secondary leading-relaxed'
+          >
             {seasonData.summary}
-          </p>
+          </AutoLinkText>
 
           {/* Paid: full narrative + focus areas */}
           {hasPaidAccess && seasonData.paragraphs.length > 0 && (
             <div className='space-y-3'>
+              <AudioNarrator
+                text={[seasonData.summary, ...seasonData.paragraphs].join(
+                  '\n\n',
+                )}
+                title={`${seasonData.seasonName} season reading`}
+                compactVariant='inline'
+              />
               {seasonData.paragraphs.map((paragraph, i) => (
-                <p
+                <AutoLinkText
                   key={i}
+                  as='p'
                   className='text-sm text-content-secondary leading-relaxed'
                 >
                   {paragraph}
-                </p>
+                </AutoLinkText>
               ))}
             </div>
           )}

@@ -8,6 +8,8 @@ import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { iosLabel } from '@/lib/ios-labels';
 import { Collapse } from '@/components/ui/Collapse';
+import AudioNarrator from '@/components/audio/AudioNarrator';
+import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 
 interface HoroscopeRitualForDayProps {
   sunSign: string;
@@ -234,28 +236,43 @@ export function HoroscopeRitualForDay({
 
       <Collapse isOpen={isExpanded}>
         <div className='px-4 pb-4 space-y-4'>
-          <p className='text-sm text-content-secondary leading-relaxed'>
+          <AutoLinkText
+            as='p'
+            className='text-sm text-content-secondary leading-relaxed'
+          >
             {ritual.oneLine}
-          </p>
+          </AutoLinkText>
 
           {hasPaidAccess ? (
             <div className='space-y-3'>
+              <AudioNarrator
+                text={[
+                  ritual.title,
+                  ritual.oneLine,
+                  `Intention: ${ritual.intention}`,
+                  `Best timing: ${ritual.timing}`,
+                  `Steps: ${ritual.steps.join(' ')}`,
+                  `Affirmation: ${ritual.affirmation}`,
+                ].join('\n\n')}
+                title={ritual.title}
+                compactVariant='inline'
+              />
               <div>
                 <p className='text-xs font-medium text-content-muted uppercase tracking-wide mb-1'>
                   Intention
                 </p>
-                <p className='text-sm text-content-secondary'>
+                <AutoLinkText as='p' className='text-sm text-content-secondary'>
                   {ritual.intention}
-                </p>
+                </AutoLinkText>
               </div>
 
               <div>
                 <p className='text-xs font-medium text-content-muted uppercase tracking-wide mb-1'>
                   Best Timing
                 </p>
-                <p className='text-sm text-content-secondary'>
+                <AutoLinkText as='p' className='text-sm text-content-secondary'>
                   {ritual.timing}
-                </p>
+                </AutoLinkText>
               </div>
 
               <div>

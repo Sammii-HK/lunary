@@ -57,7 +57,7 @@ export function PlanetBottomSheet({
         <>
           <motion.div
             key='backdrop'
-            className='fixed inset-0 z-[80] bg-black/50 backdrop-blur-sm'
+            className='fixed inset-0 z-[110] bg-transparent'
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -68,13 +68,13 @@ export function PlanetBottomSheet({
             role='dialog'
             aria-modal='true'
             aria-label={`${planet.body} details`}
-            className='fixed inset-x-0 bottom-0 z-[90] rounded-t-2xl border border-stroke-default bg-surface-elevated px-5 pb-8 pt-3 shadow-2xl md:inset-auto md:right-6 md:top-20 md:bottom-auto md:w-[360px] md:rounded-2xl'
+            className='fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom,0px))] z-[120] mx-auto max-h-[72dvh] max-w-2xl overflow-y-auto rounded-t-2xl border border-stroke-default bg-surface-elevated px-5 pb-8 pt-3 shadow-2xl'
             initial={{ y: '100%', opacity: 0.9 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0.9 }}
             transition={{ type: 'spring', stiffness: 380, damping: 36 }}
           >
-            <div className='mx-auto mb-3 h-1 w-10 rounded-full bg-stroke-default md:hidden' />
+            <div className='mx-auto mb-3 h-1 w-10 rounded-full bg-stroke-default' />
             <div className='flex items-start justify-between'>
               <div className='flex items-center gap-3'>
                 <span className='font-astro text-3xl text-lunary-primary'>
