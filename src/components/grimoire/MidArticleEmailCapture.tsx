@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Sparkles, ArrowRight } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { trackCtaImpression, trackCtaClick } from '@/lib/analytics';
+import { sunSignFromDate } from '@/lib/astrology/sun-sign-from-date';
 
 interface MidArticleEmailCaptureProps {
   topic?: string;
@@ -32,6 +33,7 @@ export function MidArticleEmailCapture({
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [email, setEmail] = useState('');
+  const [birthday, setBirthday] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -180,6 +182,8 @@ export function MidArticleEmailCapture({
     setLoading(true);
     setError('');
 
+    const userSunSign = birthday ? sunSignFromDate(birthday) : null;
+
     try {
       const res = await fetch('/api/newsletter/subscribers', {
         method: 'POST',
@@ -206,6 +210,8 @@ export function MidArticleEmailCapture({
                 ? 'horoscope_email_signup_upsell_v1'
                 : undefined,
               upsellVariant: isHoroscope ? upsellVariant : undefined,
+              birthday: birthday || undefined,
+              userSunSign: userSunSign || undefined,
             },
           },
         }),
@@ -350,6 +356,19 @@ export function MidArticleEmailCapture({
               required
               className='w-full rounded-lg border border-lunary-primary-500/30 bg-layer-deep/50 px-4 py-2.5 text-sm text-white placeholder:text-lunary-primary-500 focus:border-lunary-primary-400 focus:outline-none focus:ring-1 focus:ring-lunary-primary-400'
             />
+            <label className='flex flex-col gap-1 text-xs text-content-muted'>
+              Birth date{' '}
+              <span className='text-content-muted/60'>
+                (optional — unlocks personalised guidance for your sign)
+              </span>
+              <input
+                type='date'
+                value={birthday}
+                onChange={(e) => setBirthday(e.target.value)}
+                max={new Date().toISOString().slice(0, 10)}
+                className='w-full rounded-lg border border-lunary-primary-500/30 bg-layer-deep/50 px-4 py-2.5 text-sm text-white focus:border-lunary-primary-400 focus:outline-none focus:ring-1 focus:ring-lunary-primary-400'
+              />
+            </label>
             {error && <p className='text-xs text-red-400'>{error}</p>}
             <button
               type='submit'
