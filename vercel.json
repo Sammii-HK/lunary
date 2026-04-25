@@ -46,6 +46,10 @@
       "schedule": "30 7 * * *"
     },
     {
+      "path": "/api/cron/daily-personalised-push",
+      "schedule": "0 * * * *"
+    },
+    {
       "path": "/api/cron/daily-horoscope-email",
       "schedule": "45 6 * * *"
     },

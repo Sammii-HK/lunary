@@ -41,6 +41,13 @@ export default function DailyRecapPlayer({
 }: DailyRecapPlayerProps) {
   const [state, setState] = useState<FetchState>({ status: 'loading' });
 
+  // Detect the daily-push deep-link (`/app?from=daily-push&narrate=1`) once on
+  // mount so we can ask <AudioNarrator> to auto-play when the user tapped in
+  // from a push notification. Single-line URL parse, no router required.
+  const autoPlayFromPush =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('narrate') === '1';
+
   useEffect(() => {
     let cancelled = false;
     const controller = new AbortController();
@@ -125,6 +132,7 @@ export default function DailyRecapPlayer({
               text={state.script}
               title={title}
               compactVariant='pill'
+              autoPlay={autoPlayFromPush}
             />
           </div>
           {state.audience === 'plus' ? (

@@ -23,6 +23,12 @@ export interface AudioNarratorProps {
    * never auto-plays — users must click Listen.
    */
   defaultExpanded?: boolean;
+  /**
+   * Auto-play on mount (and force expanded). Used for the daily-push deep-link
+   * (`/app?from=daily-push&narrate=1`) so a tap on the notification leads
+   * straight into voiced playback without an extra Listen click.
+   */
+  autoPlay?: boolean;
   /** Variant for the compact button. */
   compactVariant?: 'pill' | 'inline';
 }
@@ -60,9 +66,10 @@ export default function AudioNarrator({
   voice,
   className,
   defaultExpanded = false,
+  autoPlay = false,
   compactVariant = 'pill',
 }: AudioNarratorProps) {
-  const [expanded, setExpanded] = useState(defaultExpanded);
+  const [expanded, setExpanded] = useState(defaultExpanded || autoPlay);
   const [isMobile, setIsMobile] = useState(false);
   const [storedSpeedReady, setStoredSpeedReady] = useState(false);
 
@@ -131,6 +138,19 @@ export default function AudioNarrator({
       stopRef.current();
     };
   }, []);
+
+  // Auto-play once on mount when the deep-link asks for it (`?narrate=1`).
+  // Browsers that block autoplay without a user gesture will quietly no-op;
+  // the user can still hit Play. Runs once — not on text changes.
+  const autoPlayedRef = useRef(false);
+  useEffect(() => {
+    if (!autoPlay || autoPlayedRef.current) return;
+    if (!text || !supported) return;
+    autoPlayedRef.current = true;
+    setExpanded(true);
+    play();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPlay, supported, text]);
 
   const handleListenClick = useCallback(() => {
     setExpanded(true);
