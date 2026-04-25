@@ -5,6 +5,7 @@ import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import Link from 'next/link';
 import { conversionTracking } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 
 interface CheckoutSession {
   id: string;
@@ -170,16 +171,7 @@ export default function SuccessPage() {
   };
 
   if (loading) {
-    return (
-      <div className='min-h-screen bg-surface-base text-content-primary flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-lunary-accent mx-auto mb-4'></div>
-          <p className='text-lg text-content-brand-accent'>
-            Confirming your subscription...
-          </p>
-        </div>
-      </div>
-    );
+    return <BrandedPageLoader message='Confirming your subscription…' />;
   }
 
   if (error) {
