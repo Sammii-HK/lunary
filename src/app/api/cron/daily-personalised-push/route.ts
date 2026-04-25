@@ -189,6 +189,7 @@ export async function GET(request: NextRequest) {
 
       try {
         const push = buildDailyPush({
+          userId: row.user_id,
           natalChart: natal,
           sunriseLocal: sunriseUtc,
         });
@@ -206,7 +207,7 @@ export async function GET(request: NextRequest) {
           actions: [
             {
               action: 'view',
-              title: 'Listen',
+              title: 'Open',
               icon: '/icons/icon-72x72.png',
             },
           ],

@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { Heading } from '@/components/ui/Heading';
 import { CouplePairingSetup } from '@/components/couples/CouplePairingSetup';
 import { CoupleForecastCard } from '@/components/couples/CoupleForecastCard';
+import { CompositeChartCard } from '@/components/couples/CompositeChartCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,7 +62,10 @@ export default async function CouplePage() {
       </div>
 
       {isPaired ? (
-        <CoupleForecastCard />
+        <div className='space-y-6'>
+          <CoupleForecastCard />
+          <CompositeChartCard />
+        </div>
       ) : (
         <CouplePairingSetup existingCode={pairing?.pairingCode ?? undefined} />
       )}

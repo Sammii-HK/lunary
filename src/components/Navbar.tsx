@@ -136,6 +136,10 @@ const isActive = (pathname: string | null, href: string) => {
       '/forecast',
       '/cosmic-report-generator',
       '/community',
+      '/app/timing',
+      '/app/couple',
+      '/app/group-sky',
+      '/app/time-machine',
     ];
     return explorePages.some(
       (page) => pathname === page || pathname.startsWith(`${page}/`),

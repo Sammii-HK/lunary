@@ -109,6 +109,15 @@ const COMMAND_ITEMS: SearchIndexItem[] = [
     keywords: ['time', 'machine', 'date', 'past', 'future', 'sky'],
   },
   {
+    id: 'command:timing-assistant',
+    kind: 'command',
+    title: 'Find good dates',
+    snippet:
+      'Get three astrologically ranked dates for a launch, ask or decision.',
+    href: '/app/timing',
+    keywords: ['timing', 'dates', 'launch', 'ask', 'decision', 'electional'],
+  },
+  {
     id: 'command:journal',
     kind: 'command',
     title: 'Write in journal',
@@ -125,6 +134,15 @@ const COMMAND_ITEMS: SearchIndexItem[] = [
     keywords: ['group', 'sky', 'friends', 'relationship', 'synastry'],
   },
   {
+    id: 'command:couples',
+    kind: 'command',
+    title: 'Open Couples Mode',
+    snippet:
+      'Pair charts, compare synastry and read the composite relationship chart.',
+    href: '/app/couple',
+    keywords: ['couple', 'couples', 'relationship', 'synastry', 'composite'],
+  },
+  {
     id: 'command:profile',
     kind: 'command',
     title: 'Edit profile and birth data',
@@ -139,8 +157,10 @@ const COMMAND_ICONS: Record<string, typeof Search> = {
   'command:transits': Sparkles,
   'command:tarot': MoonStar,
   'command:time-machine': CalendarDays,
+  'command:timing-assistant': CalendarDays,
   'command:journal': NotebookPen,
   'command:group-sky': UsersRound,
+  'command:couples': UsersRound,
   'command:profile': CircleUserRound,
 };
 

@@ -2,62 +2,32 @@
  * Daily personalised push — pure builder.
  *
  * Given a user's natal chart and the current sky, produce the title/body
- * for the morning push notification plus a deep-link that auto-plays the
- * AudioNarrator when the user taps in.
+ * for the morning push notification.
  *
  * No IO, no DB. The cron is responsible for fetching natal charts and
  * subscriptions, and for deciding when to fan this out per user.
  *
- * Title pattern:   "Today's sky · {one-line poetic hook}"
- * Body  pattern:   "{transit headline} — {1-line interpretation}"
+ * Title pattern:   "Your six-word horoscope"
+ * Body  pattern:   six words derived from the user's strongest transit
  *
- * The hook + interpretation come from `getTemplateBlurb` so we never
- * re-author copy here.
+ * The longer audio recap stays behind a dashboard button instead of taking
+ * over the dashboard or being forced from the notification.
  */
 
 import { findNextHit, type CurrentSky } from '@/lib/live-transits/find-next';
-import {
-  getTemplateBlurb,
-  type AspectType,
-  type BodyName,
-  type TransitEvent,
-} from '@/lib/transit-content/templates';
+import { buildSixWord, type SixWordAspect } from '@/lib/six-word/build';
 import type { BirthChartData } from '../../../utils/astrology/birthChart';
 
-const TEMPLATE_BODIES = new Set<BodyName>([
-  'Sun',
-  'Moon',
-  'Mercury',
-  'Venus',
-  'Mars',
-  'Jupiter',
-  'Saturn',
-  'Uranus',
-  'Neptune',
-  'Pluto',
-]);
-
-const TEMPLATE_ASPECTS = new Set<AspectType>([
+const SIX_WORD_ASPECTS = new Set<SixWordAspect>([
   'Conjunction',
-  'Opposition',
-  'Trine',
-  'Square',
   'Sextile',
+  'Square',
+  'Trine',
+  'Opposition',
 ]);
-
-const ASPECT_VERB: Record<AspectType, string> = {
-  Conjunction: 'meets',
-  Opposition: 'opposes',
-  Trine: 'flows with',
-  Square: 'squares',
-  Sextile: 'sparks',
-};
-
-const FALLBACK_TITLE_HOOK = 'A quiet sky asks for stillness';
-const FALLBACK_BODY =
-  'No major hit on your chart today — listen for the subtle shifts.';
 
 export interface DailyPushParams {
+  userId?: string;
   natalChart: BirthChartData[];
   /**
    * Optional snapshot of the current sky. If omitted, `findNextHit` will
@@ -74,59 +44,14 @@ export interface DailyPushParams {
 export interface DailyPush {
   title: string;
   body: string;
-  /** Tap target — opens the dashboard with the recap player set to auto-play. */
+  /** Tap target — opens the dashboard. */
   deepLink: string;
   /** Local hour-of-day (0-23) the user's sunrise lands on — used by the cron. */
   hourLocal: number;
 }
 
-function isTemplateBody(body: string | undefined): body is BodyName {
-  return !!body && TEMPLATE_BODIES.has(body as BodyName);
-}
-
-function isTemplateAspect(aspect: string | undefined): aspect is AspectType {
-  return !!aspect && TEMPLATE_ASPECTS.has(aspect as AspectType);
-}
-
-/**
- * Distil a longer template blurb into a short poetic hook for the title.
- * Strategy: take the first clause / sentence and strip trailing punctuation.
- */
-function deriveHook(blurb: string): string {
-  const cleaned = blurb.trim();
-  if (!cleaned) return FALLBACK_TITLE_HOOK;
-  // Prefer the first sentence; otherwise the first em-dash clause.
-  const firstSentence = cleaned.split(/(?<=[.!?])\s+/)[0] ?? cleaned;
-  const firstClause = firstSentence.split(' — ')[0] ?? firstSentence;
-  // Strip trailing punctuation for a cleaner title.
-  return firstClause.replace(/[.!?,;:]+$/g, '').trim();
-}
-
-function buildHeadline(
-  transitPlanet: string,
-  natalPlanet: string,
-  aspect: AspectType,
-): string {
-  const verb = ASPECT_VERB[aspect];
-  return `Transit ${transitPlanet} ${verb} your natal ${natalPlanet}`;
-}
-
-/**
- * Truncate a string at a sentence boundary if possible, otherwise hard-cap.
- * Keeps payload well under web-push's ~4KB limit and is mobile-friendly.
- */
-function clampForBody(text: string, max = 140): string {
-  const trimmed = text.trim();
-  if (trimmed.length <= max) return trimmed;
-  const sliced = trimmed.slice(0, max);
-  const lastBoundary = Math.max(
-    sliced.lastIndexOf('. '),
-    sliced.lastIndexOf('! '),
-    sliced.lastIndexOf('? '),
-  );
-  if (lastBoundary > 60) return sliced.slice(0, lastBoundary + 1);
-  const lastSpace = sliced.lastIndexOf(' ');
-  return (lastSpace > 60 ? sliced.slice(0, lastSpace) : sliced) + '…';
+function isSixWordAspect(aspect: string | undefined): aspect is SixWordAspect {
+  return !!aspect && SIX_WORD_ASPECTS.has(aspect as SixWordAspect);
 }
 
 export function buildDailyPush(params: DailyPushParams): DailyPush {
@@ -139,41 +64,28 @@ export function buildDailyPush(params: DailyPushParams): DailyPush {
     withinDays: 1,
   });
 
-  const deepLink = '/app?from=daily-push&narrate=1';
+  const deepLink = '/app?from=daily-push';
   const hourLocal = sunriseLocal ? sunriseLocal.getHours() : 7;
-
-  if (
-    !hit ||
-    !isTemplateBody(hit.transitPlanet) ||
-    !isTemplateBody(hit.natalPlanet) ||
-    !isTemplateAspect(hit.aspect)
-  ) {
-    return {
-      title: `Today's sky · ${FALLBACK_TITLE_HOOK}`,
-      body: FALLBACK_BODY,
-      deepLink,
-      hourLocal,
-    };
-  }
-
-  const event: TransitEvent = {
-    kind: 'aspect_to_natal',
-    transitPlanet: hit.transitPlanet,
-    aspect: hit.aspect,
-    natalPlanet: hit.natalPlanet,
-  };
-
-  const blurb = getTemplateBlurb(event) ?? FALLBACK_BODY;
-  const hook = deriveHook(blurb);
-  const headline = buildHeadline(
-    hit.transitPlanet,
-    hit.natalPlanet,
-    hit.aspect,
-  );
+  const dateUTC = new Date().toISOString().slice(0, 10);
+  const topTransit =
+    hit && isSixWordAspect(hit.aspect)
+      ? {
+          transitPlanet: hit.transitPlanet,
+          natalPlanet: hit.natalPlanet,
+          aspect: hit.aspect,
+        }
+      : undefined;
+  const sixWord = buildSixWord({
+    userId: params.userId ?? 'anonymous',
+    dateUTC,
+    natalChart,
+    currentSky,
+    topTransit,
+  });
 
   return {
-    title: clampForBody(`Today's sky · ${hook}`, 90),
-    body: clampForBody(`${headline} — ${blurb}`, 160),
+    title: 'Your six-word horoscope',
+    body: sixWord.line,
     deepLink,
     hourLocal,
   };

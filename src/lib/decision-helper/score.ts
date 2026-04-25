@@ -74,7 +74,7 @@ interface CategoryProfile {
   noAction: string;
 }
 
-const CATEGORY_PROFILES: Record<
+export const CATEGORY_PROFILES: Record<
   Exclude<Category, 'general'>,
   CategoryProfile
 > = {

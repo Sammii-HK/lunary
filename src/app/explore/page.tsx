@@ -109,6 +109,22 @@ const cosmicTools: ExploreItem[] = [
     icon: Clock,
   },
   {
+    href: '/app/timing',
+    label: 'Timing Assistant',
+    description: 'Find three strong dates for your next move',
+    icon: Calendar,
+    highlighted: true,
+    badge: 'New',
+  },
+  {
+    href: '/app/couple',
+    label: 'Couples Mode',
+    description: 'Pair charts, synastry and composite relationship weather',
+    icon: Users,
+    highlighted: true,
+    badge: 'New',
+  },
+  {
     href: '/app/group-sky',
     label: 'Group Sky',
     description: 'See the sky through your circle',

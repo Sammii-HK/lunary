@@ -227,11 +227,11 @@ const WeeklyChallengeCard = dynamic(
   },
 );
 
-const DailyRecapPlayer = dynamic(
-  () => import('@/components/daily-recap/DailyRecapPlayer'),
+const DailyRecapLauncher = dynamic(
+  () => import('@/components/daily-recap/DailyRecapLauncher'),
   {
     loading: () => (
-      <div className='h-24 bg-surface-elevated/50 rounded-xl animate-pulse' />
+      <div className='h-20 bg-surface-elevated/50 rounded-xl animate-pulse' />
     ),
     ssr: false,
   },
@@ -518,7 +518,21 @@ export default function AppDashboardClient() {
 
         {showHoroscope && <PersonalizedHoroscopePreview />}
 
-        {authState.isAuthenticated && <DailyRecapPlayer />}
+        {authState.isAuthenticated && <DailyRecapLauncher />}
+
+        {authState.isAuthenticated && (
+          <Link
+            href='/guide'
+            className='block rounded-xl border border-stroke-subtle bg-surface-elevated/45 px-4 py-3 transition-colors hover:border-stroke-default'
+          >
+            <span className='block text-sm font-medium text-content-primary'>
+              Ask the Astral Guide
+            </span>
+            <span className='mt-1 block text-xs text-content-muted'>
+              Talk through today with your chart, tarot context and current sky.
+            </span>
+          </Link>
+        )}
 
         <div
           id='dashboard-main-grid'
