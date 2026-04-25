@@ -686,22 +686,16 @@ export function TransitScrubber({
             const pos = polar(p.longitude, GLYPH_NATAL_R);
             return (
               <g key={`natal-${p.name}`}>
-                <circle
-                  cx={pos.x}
-                  cy={pos.y}
-                  r={1.5}
-                  fill='#a1a1aa'
-                  opacity='0.7'
-                />
                 <text
                   x={pos.x}
-                  y={pos.y - 7}
+                  y={pos.y}
                   textAnchor='middle'
                   dominantBaseline='central'
                   className='font-astro'
-                  fontSize='9'
+                  fontSize='10'
                   fill='#a1a1aa'
-                  opacity='0.75'
+                  opacity='0.85'
+                  style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.7))' }}
                 >
                   {symbolFor(p.name)}
                 </text>
@@ -796,44 +790,41 @@ export function TransitScrubber({
                 <motion.circle
                   cx={0}
                   cy={0}
-                  r={10}
+                  r={5}
                   fill={elColor}
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 0.25 }}
-                  style={{ filter: 'blur(4px)' }}
+                  animate={{ opacity: 0.18 }}
+                  style={{ filter: 'blur(2.5px)' }}
                 />
-                <circle cx={0} cy={0} r={2.5} fill={elColor} opacity='0.9' />
                 {p.name === 'Moon' && transitMoonPhase ? (
-                  <g transform='translate(0, -11)'>
-                    <MoonPhase
-                      cx={0}
-                      cy={0}
-                      r={6}
-                      phase={0}
-                      illumination={transitMoonPhase.illumination}
-                      waxing={transitMoonPhase.waxing}
-                      id='transit-moon-phase'
-                      glow
-                    />
-                  </g>
+                  <MoonPhase
+                    cx={0}
+                    cy={0}
+                    r={6}
+                    phase={0}
+                    illumination={transitMoonPhase.illumination}
+                    waxing={transitMoonPhase.waxing}
+                    id='transit-moon-phase'
+                    glow
+                  />
                 ) : (
                   <text
                     x={0}
-                    y={-11}
+                    y={0}
                     textAnchor='middle'
                     dominantBaseline='central'
                     className='font-astro'
                     fontSize='12'
                     fill={fill}
-                    style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))' }}
+                    style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.7))' }}
                   >
                     {symbolFor(p.name)}
                   </text>
                 )}
                 {p.retrograde && (
                   <text
-                    x={6}
-                    y={-1}
+                    x={8}
+                    y={5}
                     fontSize='6'
                     fill='#f87171'
                     textAnchor='middle'
@@ -932,9 +923,9 @@ export function TransitScrubber({
             })}
             {/* thumb */}
             <motion.div
-              className='absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-6 w-6 rounded-full border-2 border-lunary-primary bg-surface-elevated shadow-[0_0_12px_rgba(138,107,255,0.5)]'
+              className='absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-3.5 w-3.5 rounded-full border border-lunary-primary bg-lunary-primary/30 shadow-[0_0_8px_rgba(138,107,255,0.6)]'
               style={{ left: `${trackFrac * 100}%` }}
-              animate={{ scale: playing ? [1, 1.12, 1] : 1 }}
+              animate={{ scale: playing ? [1, 1.18, 1] : 1 }}
               transition={
                 playing
                   ? { duration: 0.6, repeat: Infinity }
@@ -945,41 +936,48 @@ export function TransitScrubber({
 
           {/* Anchor + Progressions controls */}
           {canScrub && (
-            <div className='flex flex-wrap items-center justify-end gap-2 text-[11px]'>
-              {anchorTime != null ? (
-                <>
-                  <span className='text-amber-200/90'>
-                    Comparing from {fmtDate(new Date(anchorTime))}
-                  </span>
+            <div className='flex flex-col gap-1'>
+              <div className='flex flex-wrap items-center justify-end gap-2 text-[11px]'>
+                {anchorTime != null ? (
+                  <>
+                    <span className='text-amber-200/90'>
+                      Comparing from {fmtDate(new Date(anchorTime))}
+                    </span>
+                    <button
+                      onClick={() => setAnchorTime(null)}
+                      className='rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-amber-100 hover:bg-amber-400/20'
+                    >
+                      Clear anchor
+                    </button>
+                  </>
+                ) : (
                   <button
-                    onClick={() => setAnchorTime(null)}
-                    className='rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-amber-100 hover:bg-amber-400/20'
+                    onClick={() => setAnchorTime(now)}
+                    className='rounded-full border border-stroke-subtle px-2 py-0.5 text-content-muted hover:text-content-primary'
+                    title='Freeze this moment as a reference. As you scrub, ghost planets show you where the sky was anchored.'
                   >
-                    Clear anchor
+                    ✦ Anchor this moment
                   </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => setAnchorTime(now)}
-                  className='rounded-full border border-stroke-subtle px-2 py-0.5 text-content-muted hover:text-content-primary'
-                  title='Anchor this date — see how planets have moved relative to it'
-                >
-                  ✦ Anchor here
-                </button>
-              )}
-              {parsedBirthDate && (
-                <button
-                  onClick={() => setShowProgressions((s) => !s)}
-                  className={`rounded-full border px-2 py-0.5 transition-colors ${
-                    showProgressions
-                      ? 'border-[#FFB78A]/60 bg-[#FFB78A]/10 text-[#FFB78A]'
-                      : 'border-stroke-subtle text-content-muted hover:text-content-primary'
-                  }`}
-                  title='Show secondary progressions (1 day = 1 year)'
-                >
-                  {showProgressions ? '✦ Progressions on' : '+ Progressions'}
-                </button>
-              )}
+                )}
+                {parsedBirthDate && (
+                  <button
+                    onClick={() => setShowProgressions((s) => !s)}
+                    className={`rounded-full border px-2 py-0.5 transition-colors ${
+                      showProgressions
+                        ? 'border-[#FFB78A]/60 bg-[#FFB78A]/10 text-[#FFB78A]'
+                        : 'border-stroke-subtle text-content-muted hover:text-content-primary'
+                    }`}
+                    title='Show secondary progressions (1 day = 1 year)'
+                  >
+                    {showProgressions ? '✦ Progressions on' : '+ Progressions'}
+                  </button>
+                )}
+              </div>
+              <p className='self-end text-right text-[10px] text-content-muted/70'>
+                {anchorTime != null
+                  ? 'Faded ghost planets show where the sky was at your anchor point.'
+                  : 'Anchor freezes a moment so you can see how the sky has changed since.'}
+              </p>
             </div>
           )}
 
