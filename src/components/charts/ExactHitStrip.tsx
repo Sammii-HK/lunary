@@ -142,6 +142,21 @@ export function ExactHitStrip({
 
   const nowX = xFor(now);
 
+  // Pre-compute peak positions for HTML label overlay.
+  const peakLabels = activePairs.map((pair, idx) => {
+    let peakIdx = 0;
+    let peakOrb = samples.points[0].orbs[idx];
+    for (let i = 1; i < samples.points.length; i++) {
+      if (samples.points[i].orbs[idx] < peakOrb) {
+        peakOrb = samples.points[i].orbs[idx];
+        peakIdx = i;
+      }
+    }
+    const peakX = xFor(samples.points[peakIdx].t);
+    const peakY = yFor(peakOrb, pair.orbAllowed);
+    return { pair, peakX, peakY };
+  });
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
@@ -158,139 +173,159 @@ export function ExactHitStrip({
         </span>
       </div>
 
-      <svg
-        viewBox={`0 0 ${VB_W} ${VB_H}`}
-        className='block w-full'
-        preserveAspectRatio='none'
-        role='img'
-        aria-label='Aspect strength curves over the next month'
-      >
-        {/* Top tightness line (0° orb) */}
-        <line
-          x1={PAD_X}
-          y1={PAD_TOP}
-          x2={VB_W - PAD_X}
-          y2={PAD_TOP}
-          stroke='#52525b'
-          strokeWidth={0.4}
-          strokeDasharray='2 3'
-          opacity={0.6}
-        />
-        {/* Bottom (max orb) line */}
-        <line
-          x1={PAD_X}
-          y1={PAD_TOP + innerH}
-          x2={VB_W - PAD_X}
-          y2={PAD_TOP + innerH}
-          stroke='#52525b'
-          strokeWidth={0.4}
-          opacity={0.4}
-        />
+      <div className='relative'>
+        <svg
+          viewBox={`0 0 ${VB_W} ${VB_H}`}
+          className='block w-full'
+          preserveAspectRatio='none'
+          role='img'
+          aria-label='Aspect strength curves over the next month'
+        >
+          {/* Top tightness line (0° orb) */}
+          <line
+            x1={PAD_X}
+            y1={PAD_TOP}
+            x2={VB_W - PAD_X}
+            y2={PAD_TOP}
+            stroke='#52525b'
+            strokeWidth={0.4}
+            strokeDasharray='2 3'
+            opacity={0.6}
+          />
+          {/* Bottom (max orb) line */}
+          <line
+            x1={PAD_X}
+            y1={PAD_TOP + innerH}
+            x2={VB_W - PAD_X}
+            y2={PAD_TOP + innerH}
+            stroke='#52525b'
+            strokeWidth={0.4}
+            opacity={0.4}
+          />
 
-        {/* Curves: one path per active pair */}
-        {activePairs.map((pair, idx) => {
-          const pts = samples.points.map((pt) => {
-            const orb = pt.orbs[idx];
-            return { x: xFor(pt.t), y: yFor(orb, pair.orbAllowed) };
-          });
-          if (pts.length === 0) return null;
-          // Build smooth path with quadratic curves.
-          let d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
-          for (let i = 1; i < pts.length; i++) {
-            const prev = pts[i - 1];
-            const curr = pts[i];
-            const midX = (prev.x + curr.x) / 2;
-            const midY = (prev.y + curr.y) / 2;
-            d += ` Q ${prev.x.toFixed(2)} ${prev.y.toFixed(2)} ${midX.toFixed(2)} ${midY.toFixed(2)}`;
-          }
-          d += ` T ${pts[pts.length - 1].x.toFixed(2)} ${pts[pts.length - 1].y.toFixed(2)}`;
-
-          // Find peak (lowest orb).
-          let peakIdx = 0;
-          let peakOrb = samples.points[0].orbs[idx];
-          for (let i = 1; i < samples.points.length; i++) {
-            if (samples.points[i].orbs[idx] < peakOrb) {
-              peakOrb = samples.points[i].orbs[idx];
-              peakIdx = i;
+          {/* Curves: one path per active pair */}
+          {activePairs.map((pair, idx) => {
+            const pts = samples.points.map((pt) => {
+              const orb = pt.orbs[idx];
+              return { x: xFor(pt.t), y: yFor(orb, pair.orbAllowed) };
+            });
+            if (pts.length === 0) return null;
+            // Build smooth path with quadratic curves.
+            let d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
+            for (let i = 1; i < pts.length; i++) {
+              const prev = pts[i - 1];
+              const curr = pts[i];
+              const midX = (prev.x + curr.x) / 2;
+              const midY = (prev.y + curr.y) / 2;
+              d += ` Q ${prev.x.toFixed(2)} ${prev.y.toFixed(2)} ${midX.toFixed(2)} ${midY.toFixed(2)}`;
             }
-          }
-          const peakPt = pts[peakIdx];
+            d += ` T ${pts[pts.length - 1].x.toFixed(2)} ${pts[pts.length - 1].y.toFixed(2)}`;
 
-          const peakDate = new Date(
-            samples.points[peakIdx].t,
-          ).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-          return (
-            <g key={pair.key}>
-              <title>
-                {`${pair.transit} ${pair.aspectName} ${pair.natal} — exact ${peakDate} (peak orb ${peakOrb.toFixed(1)}°)`}
-              </title>
-              <motion.path
-                d={d}
-                fill='none'
-                stroke={pair.color}
-                strokeWidth={2}
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                opacity={0.9}
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 0.6, delay: idx * 0.06 }}
-              />
-              {/* Peak marker */}
-              <circle
-                cx={peakPt.x}
-                cy={peakPt.y}
-                r={4}
-                fill={pair.color}
-                opacity={0.95}
-              />
-              <circle
-                cx={peakPt.x}
-                cy={peakPt.y}
-                r={9}
-                fill={pair.color}
-                opacity={0.18}
-              />
-              {/* Label near the peak */}
-              <text
-                x={peakPt.x}
-                y={Math.max(peakPt.y - 9, PAD_TOP + 2)}
-                textAnchor='middle'
-                fontSize='13'
-                fill={pair.color}
-                opacity={0.98}
+            // Find peak (lowest orb) for marker placement.
+            let peakIdx = 0;
+            let peakOrb = samples.points[0].orbs[idx];
+            for (let i = 1; i < samples.points.length; i++) {
+              if (samples.points[i].orbs[idx] < peakOrb) {
+                peakOrb = samples.points[i].orbs[idx];
+                peakIdx = i;
+              }
+            }
+            const peakPt = pts[peakIdx];
+
+            const peakDate = new Date(
+              samples.points[peakIdx].t,
+            ).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            return (
+              <g key={pair.key}>
+                <title>
+                  {`${pair.transit} ${pair.aspectName} ${pair.natal} — exact ${peakDate} (peak orb ${peakOrb.toFixed(1)}°)`}
+                </title>
+                <motion.path
+                  d={d}
+                  fill='none'
+                  stroke={pair.color}
+                  strokeWidth={2}
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  opacity={0.9}
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.6, delay: idx * 0.06 }}
+                />
+                {/* Peak marker */}
+                <circle
+                  cx={peakPt.x}
+                  cy={peakPt.y}
+                  r={4}
+                  fill={pair.color}
+                  opacity={0.95}
+                />
+                <circle
+                  cx={peakPt.x}
+                  cy={peakPt.y}
+                  r={9}
+                  fill={pair.color}
+                  opacity={0.18}
+                />
+              </g>
+            );
+          })}
+
+          {/* "now" hairline */}
+          <line
+            x1={nowX}
+            y1={PAD_TOP - 4}
+            x2={nowX}
+            y2={PAD_TOP + innerH + 4}
+            stroke='#ffffff'
+            strokeWidth={0.6}
+            opacity={0.55}
+          />
+        </svg>
+
+        {/* HTML overlay — labels rendered at native pixel size,
+          immune to the SVG's non-uniform scaling. */}
+        <div className='pointer-events-none absolute inset-0'>
+          {peakLabels.map(({ pair, peakX, peakY }) => {
+            // Anchor the label slightly above the peak marker.
+            const leftPct = (peakX / VB_W) * 100;
+            const topPct = (Math.max(peakY - 6, PAD_TOP) / VB_H) * 100;
+            return (
+              <span
+                key={`label-${pair.key}`}
+                className='absolute whitespace-nowrap text-[12px] font-semibold leading-none sm:text-[14px]'
                 style={{
-                  fontFamily:
-                    'var(--font-astro, system-ui), system-ui, sans-serif',
+                  left: `${leftPct}%`,
+                  top: `${topPct}%`,
+                  transform: 'translate(-50%, -100%)',
+                  color: pair.color,
+                  textShadow:
+                    '0 1px 2px rgba(0,0,0,0.85), 0 0 6px rgba(0,0,0,0.6)',
                 }}
               >
-                {symbolFor(pair.transit)} {pair.glyph} {symbolFor(pair.natal)}
-              </text>
-            </g>
-          );
-        })}
-
-        {/* "now" hairline */}
-        <line
-          x1={nowX}
-          y1={PAD_TOP - 4}
-          x2={nowX}
-          y2={PAD_TOP + innerH + 4}
-          stroke='#ffffff'
-          strokeWidth={0.6}
-          opacity={0.55}
-        />
-        <text
-          x={nowX}
-          y={VB_H - 6}
-          textAnchor='middle'
-          fontSize='11'
-          fill='#e4e4e7'
-          opacity={0.7}
-        >
-          now
-        </text>
-      </svg>
+                <span className='font-astro' aria-hidden>
+                  {symbolFor(pair.transit)}
+                </span>{' '}
+                <span aria-hidden>{pair.glyph}</span>{' '}
+                <span className='font-astro' aria-hidden>
+                  {symbolFor(pair.natal)}
+                </span>
+              </span>
+            );
+          })}
+          {/* "now" label */}
+          <span
+            className='absolute -translate-x-1/2 text-[11px] font-medium text-content-secondary sm:text-[12px]'
+            style={{
+              left: `${(nowX / VB_W) * 100}%`,
+              bottom: '2px',
+              textShadow: '0 1px 2px rgba(0,0,0,0.7)',
+            }}
+          >
+            now
+          </span>
+        </div>
+      </div>
 
       {/* Active aspects legend — readable list of what the curves represent */}
       <ul className='mt-2 flex flex-wrap gap-1.5 text-[11px]'>
