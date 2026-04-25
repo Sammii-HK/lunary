@@ -2036,3 +2036,20 @@ enum tour_status {
   COMPLETED
   DISMISSED
 }
+
+model TransitContentCache {
+  id         String   @id @default(cuid())
+  eventType  String   @map("event_type") // 'planet_in_sign' | 'aspect_to_natal' | 'retrograde' | 'ingress' | 'eclipse' | 'lunation'
+  eventKey   String   @map("event_key") // canonical identifier, e.g. 'Saturn_Pisces' or 'Mars_Square_Venus'
+  audience   String   // 'free' (template) | 'plus' (AI-generated)
+  content    String   @db.Text
+  source     String   // 'template' | 'gpt-4o' | 'gpt-4o-mini' etc.
+  validFrom  DateTime @map("valid_from") @db.Timestamptz(6)
+  validUntil DateTime @map("valid_until") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([eventType, eventKey, audience], map: "transit_content_cache_event_audience_key")
+  @@index([eventType, eventKey], map: "idx_transit_content_cache_event")
+  @@index([validUntil], map: "idx_transit_content_cache_valid_until")
+  @@map("transit_content_cache")
+}
