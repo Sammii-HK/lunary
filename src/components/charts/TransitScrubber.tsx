@@ -27,6 +27,7 @@ import {
 } from '@/components/charts/useEphemerisRange';
 import { ExactHitStrip } from '@/components/charts/ExactHitStrip';
 import { ProgressedRing } from '@/components/charts/ProgressedRing';
+import { PlanetBottomSheet } from '@/components/charts/PlanetBottomSheet';
 
 const ELEMENT_COLORS = {
   Fire: '#ff6b6b',
@@ -343,6 +344,28 @@ export function TransitScrubber({
     range && anchorTime ? sampleEphemeris(range, anchorTime) : null;
 
   const [showProgressions, setShowProgressions] = useState(false);
+  const [selectedPlanet, setSelectedPlanet] = useState<BirthChartData | null>(
+    null,
+  );
+
+  const transitToBirthChartData = (
+    name: string,
+    longitude: number,
+    retrograde: boolean,
+  ): BirthChartData => {
+    const sign = signFromLongitude(longitude);
+    const within = ((longitude % 30) + 30) % 30;
+    const degree = Math.floor(within);
+    const minute = Math.floor((within - degree) * 60);
+    return {
+      body: name,
+      sign,
+      degree,
+      minute,
+      eclipticLongitude: longitude,
+      retrograde,
+    } as BirthChartData;
+  };
   const parsedBirthDate = useMemo(() => {
     if (!birthDate) return null;
     const d = new Date(birthDate);
@@ -684,8 +707,30 @@ export function TransitScrubber({
           {/* Natal planet glyphs (inner ring) */}
           {natalPlanets.map((p) => {
             const pos = polar(p.longitude, GLYPH_NATAL_R);
+            const handleClick = () => {
+              const bc = birthChart.find((b) => b.body === p.name);
+              if (bc) setSelectedPlanet(bc);
+            };
             return (
-              <g key={`natal-${p.name}`}>
+              <g
+                key={`natal-${p.name}`}
+                onClick={handleClick}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') handleClick();
+                }}
+                tabIndex={0}
+                role='button'
+                aria-label={`${p.name} natal — open details`}
+                style={{ cursor: 'pointer', outline: 'none' }}
+              >
+                {/* Larger invisible hit target */}
+                <circle
+                  cx={pos.x}
+                  cy={pos.y}
+                  r={11}
+                  fill='transparent'
+                  pointerEvents='all'
+                />
                 <text
                   x={pos.x}
                   y={pos.y}
@@ -695,7 +740,10 @@ export function TransitScrubber({
                   fontSize='10'
                   fill='#a1a1aa'
                   opacity='0.85'
-                  style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.7))' }}
+                  style={{
+                    filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.7))',
+                    pointerEvents: 'none',
+                  }}
                 >
                   {symbolFor(p.name)}
                 </text>
@@ -776,6 +824,10 @@ export function TransitScrubber({
             const fill = p.name === 'Sun' ? 'url(#transit-sun)' : '#ffffff';
             const sign = signFromLongitude(p.longitude);
             const elColor = ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
+            const handleClick = () =>
+              setSelectedPlanet(
+                transitToBirthChartData(p.name, p.longitude, !!p.retrograde),
+              );
             return (
               <motion.g
                 key={`tr-${p.name}`}
@@ -786,7 +838,23 @@ export function TransitScrubber({
                   damping: 18,
                   mass: 0.6,
                 }}
+                onClick={handleClick}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') handleClick();
+                }}
+                tabIndex={0}
+                role='button'
+                aria-label={`${p.name} transit — open details`}
+                style={{ cursor: 'pointer', outline: 'none' }}
               >
+                {/* Larger invisible hit target */}
+                <circle
+                  cx={0}
+                  cy={0}
+                  r={14}
+                  fill='transparent'
+                  pointerEvents='all'
+                />
                 <motion.circle
                   cx={0}
                   cy={0}
@@ -1127,6 +1195,11 @@ export function TransitScrubber({
           See the full transit view →
         </button>
       )}
+
+      <PlanetBottomSheet
+        planet={selectedPlanet}
+        onClose={() => setSelectedPlanet(null)}
+      />
     </div>
   );
 }

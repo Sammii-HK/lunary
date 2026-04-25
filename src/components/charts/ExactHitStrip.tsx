@@ -125,10 +125,10 @@ export function ExactHitStrip({
   }
 
   const VB_W = 600;
-  const VB_H = 80;
-  const PAD_X = 8;
-  const PAD_TOP = 14;
-  const PAD_BOTTOM = 18;
+  const VB_H = 130;
+  const PAD_X = 12;
+  const PAD_TOP = 18;
+  const PAD_BOTTOM = 26;
   const innerW = VB_W - PAD_X * 2;
   const innerH = VB_H - PAD_TOP - PAD_BOTTOM;
   const totalSpan = samples.endT - samples.startT;
@@ -149,12 +149,12 @@ export function ExactHitStrip({
       transition={{ duration: 0.35 }}
       className='mt-3 rounded-xl border border-stroke-subtle/70 bg-surface-elevated/30 p-2.5'
     >
-      <div className='mb-1.5 flex items-center justify-between'>
-        <h4 className='text-[10px] font-semibold uppercase tracking-wider text-content-muted'>
+      <div className='mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1'>
+        <h4 className='text-xs font-semibold uppercase tracking-wider text-content-muted'>
           Exact-hit strip · ±{windowDays}d
         </h4>
-        <span className='text-[10px] text-content-muted'>
-          peak = exact aspect
+        <span className='text-[11px] text-content-muted/80'>
+          curves dip toward the top when an aspect is exact
         </span>
       </div>
 
@@ -216,16 +216,22 @@ export function ExactHitStrip({
           }
           const peakPt = pts[peakIdx];
 
+          const peakDate = new Date(
+            samples.points[peakIdx].t,
+          ).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
           return (
             <g key={pair.key}>
+              <title>
+                {`${pair.transit} ${pair.aspectName} ${pair.natal} — exact ${peakDate} (peak orb ${peakOrb.toFixed(1)}°)`}
+              </title>
               <motion.path
                 d={d}
                 fill='none'
                 stroke={pair.color}
-                strokeWidth={1.4}
+                strokeWidth={2}
                 strokeLinecap='round'
                 strokeLinejoin='round'
-                opacity={0.85}
+                opacity={0.9}
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
                 transition={{ duration: 0.6, delay: idx * 0.06 }}
@@ -234,25 +240,25 @@ export function ExactHitStrip({
               <circle
                 cx={peakPt.x}
                 cy={peakPt.y}
-                r={2.4}
+                r={4}
                 fill={pair.color}
                 opacity={0.95}
               />
               <circle
                 cx={peakPt.x}
                 cy={peakPt.y}
-                r={5}
+                r={9}
                 fill={pair.color}
                 opacity={0.18}
               />
               {/* Label near the peak */}
               <text
                 x={peakPt.x}
-                y={Math.max(peakPt.y - 5, PAD_TOP - 3)}
+                y={Math.max(peakPt.y - 9, PAD_TOP + 2)}
                 textAnchor='middle'
-                fontSize='8'
+                fontSize='13'
                 fill={pair.color}
-                opacity={0.95}
+                opacity={0.98}
                 style={{
                   fontFamily:
                     'var(--font-astro, system-ui), system-ui, sans-serif',
@@ -276,15 +282,47 @@ export function ExactHitStrip({
         />
         <text
           x={nowX}
-          y={VB_H - 4}
+          y={VB_H - 6}
           textAnchor='middle'
-          fontSize='7'
+          fontSize='11'
           fill='#e4e4e7'
-          opacity={0.65}
+          opacity={0.7}
         >
           now
         </text>
       </svg>
+
+      {/* Active aspects legend — readable list of what the curves represent */}
+      <ul className='mt-2 flex flex-wrap gap-1.5 text-[11px]'>
+        {activePairs
+          .slice()
+          .sort((a, b) => a.currentOrb - b.currentOrb)
+          .map((pair) => (
+            <li
+              key={`legend-${pair.key}`}
+              className='inline-flex items-center gap-1.5 rounded-full border bg-surface-elevated/40 px-2 py-0.5 text-content-secondary'
+              style={{
+                borderColor: `${pair.color}66`,
+              }}
+              title={`${pair.transit} transiting your natal ${pair.natal} — ${pair.aspectName} (orb ${pair.currentOrb.toFixed(1)}°)`}
+            >
+              <span
+                className='font-astro'
+                style={{ color: pair.color }}
+                aria-hidden
+              >
+                {symbolFor(pair.transit)}
+              </span>
+              <span style={{ color: pair.color }} aria-hidden>
+                {pair.glyph}
+              </span>
+              <span className='font-astro opacity-80' aria-hidden>
+                {symbolFor(pair.natal)}
+              </span>
+              <span className='opacity-70'>{pair.currentOrb.toFixed(1)}°</span>
+            </li>
+          ))}
+      </ul>
     </motion.div>
   );
 }
