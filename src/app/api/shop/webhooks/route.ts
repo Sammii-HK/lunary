@@ -111,7 +111,22 @@ async function savePurchaseRow(p: PurchaseRow) {
 }
 
 export async function POST(request: NextRequest) {
-  const stripe = getStripe();
+  let stripe: Stripe;
+  let webhookSecret: string;
+  try {
+    stripe = getStripe();
+    webhookSecret = getWebhookSecret();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Server misconfigured';
+    console.error('❌ Shop webhook env misconfiguration:', message);
+    return NextResponse.json(
+      {
+        error: 'Shop webhook is not configured',
+        detail: message,
+      },
+      { status: 500 },
+    );
+  }
 
   const body = await request.text();
   const sig = (await headers()).get('stripe-signature');
@@ -126,7 +141,7 @@ export async function POST(request: NextRequest) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig, getWebhookSecret());
+    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err) {
     console.error('❌ Invalid webhook signature', err);
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });

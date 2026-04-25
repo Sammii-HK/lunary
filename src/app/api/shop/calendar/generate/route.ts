@@ -53,15 +53,12 @@ export async function POST(request: NextRequest) {
     // Check for blob token - Vercel Blob requires BLOB_READ_WRITE_TOKEN
     // It should be automatically available in Vercel, but we check for clarity
     const blobToken =
-      process.env.BLOB_READ_WRITE_TOKEN ||
-      process.env.VERCEL_BLOB_TOKEN ||
-      process.env.BLOB_TOKEN;
+      process.env.BLOB_READ_WRITE_TOKEN || process.env.VERCEL_BLOB_TOKEN;
 
     if (!blobToken) {
       console.error('❌ Blob token not found. Available env vars:', {
         hasBlobReadWriteToken: !!process.env.BLOB_READ_WRITE_TOKEN,
         hasVercelBlobToken: !!process.env.VERCEL_BLOB_TOKEN,
-        hasBlobToken: !!process.env.BLOB_TOKEN,
         nodeEnv: process.env.NODE_ENV,
         vercelEnv: process.env.VERCEL_ENV,
       });
