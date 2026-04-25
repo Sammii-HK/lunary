@@ -14,7 +14,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'motion/react';
-import { BookOpen, NotebookPen, Search, Sparkles, X } from 'lucide-react';
+import {
+  BookOpen,
+  CalendarDays,
+  CircleUserRound,
+  Command,
+  MoonStar,
+  NotebookPen,
+  Search,
+  Sparkles,
+  UsersRound,
+  X,
+} from 'lucide-react';
 
 import { Heading } from '@/components/ui/Heading';
 import { cn } from '@/lib/utils';
@@ -25,6 +36,7 @@ import {
   type SearchIndexItem,
   type SearchKind,
   type RawJournalEntry,
+  type RawTarotReading,
   type RawTransit,
 } from '@/lib/search/index-builder';
 
@@ -36,6 +48,11 @@ const KIND_META: Record<
   SearchKind,
   { label: string; Icon: typeof Search; tint: string }
 > = {
+  command: {
+    label: 'Action',
+    Icon: Command,
+    tint: 'text-lunary-primary',
+  },
   journal: {
     label: 'Journal',
     Icon: NotebookPen,
@@ -46,11 +63,85 @@ const KIND_META: Record<
     Icon: BookOpen,
     tint: 'text-lunary-primary-300',
   },
+  tarot: {
+    label: 'Tarot',
+    Icon: MoonStar,
+    tint: 'text-lunary-secondary',
+  },
   transit: {
     label: 'Transit',
     Icon: Sparkles,
     tint: 'text-lunary-accent',
   },
+};
+
+const COMMAND_ITEMS: SearchIndexItem[] = [
+  {
+    id: 'command:birth-chart',
+    kind: 'command',
+    title: 'Open birth chart',
+    snippet: 'Read your natal chart, placements and next important dates.',
+    href: '/app/birth-chart',
+    keywords: ['birth', 'chart', 'natal', 'placements', 'wheel'],
+  },
+  {
+    id: 'command:transits',
+    kind: 'command',
+    title: "Read today's transits",
+    snippet: 'See what is active in your chart right now.',
+    href: '/horoscope',
+    keywords: ['transits', 'horoscope', 'today', 'sky', 'current'],
+  },
+  {
+    id: 'command:tarot',
+    kind: 'command',
+    title: 'Open tarot room',
+    snippet: 'Daily card, weekly card, spreads and pattern intelligence.',
+    href: '/tarot',
+    keywords: ['tarot', 'card', 'spread', 'daily', 'weekly'],
+  },
+  {
+    id: 'command:time-machine',
+    kind: 'command',
+    title: 'Open Time Machine',
+    snippet: 'Jump to a date and see the sky around that moment.',
+    href: '/app/time-machine',
+    keywords: ['time', 'machine', 'date', 'past', 'future', 'sky'],
+  },
+  {
+    id: 'command:journal',
+    kind: 'command',
+    title: 'Write in journal',
+    snippet: 'Capture a reflection, dream or ritual note.',
+    href: '/book-of-shadows/journal',
+    keywords: ['journal', 'write', 'reflection', 'dream', 'ritual'],
+  },
+  {
+    id: 'command:group-sky',
+    kind: 'command',
+    title: 'Open Group Sky',
+    snippet: 'Compare charts and relationship timing.',
+    href: '/app/group-sky',
+    keywords: ['group', 'sky', 'friends', 'relationship', 'synastry'],
+  },
+  {
+    id: 'command:profile',
+    kind: 'command',
+    title: 'Edit profile and birth data',
+    snippet: 'Update birth time, location and personal settings.',
+    href: '/profile',
+    keywords: ['profile', 'birth', 'data', 'location', 'settings'],
+  },
+];
+
+const COMMAND_ICONS: Record<string, typeof Search> = {
+  'command:birth-chart': CircleUserRound,
+  'command:transits': Sparkles,
+  'command:tarot': MoonStar,
+  'command:time-machine': CalendarDays,
+  'command:journal': NotebookPen,
+  'command:group-sky': UsersRound,
+  'command:profile': CircleUserRound,
 };
 
 export function SmartSearch({ onClose }: SmartSearchProps) {
@@ -81,10 +172,13 @@ export function SmartSearch({ onClose }: SmartSearchProps) {
     async function load() {
       setLoading(true);
       try {
-        const [journalRes, transitRes] = await Promise.allSettled([
+        const [journalRes, tarotRes, transitRes] = await Promise.allSettled([
           fetch('/api/journal?limit=50', { credentials: 'include' }).then(
             (r) => (r.ok ? r.json() : null),
           ),
+          fetch('/api/tarot/readings?limit=20', {
+            credentials: 'include',
+          }).then((r) => (r.ok ? r.json() : null)),
           fetch('/api/v1/astrology/transits', {
             credentials: 'include',
           }).then((r) => (r.ok ? r.json() : null)),
@@ -101,10 +195,17 @@ export function SmartSearch({ onClose }: SmartSearchProps) {
               transitRes.value.transits ??
               [])
             : [];
+        const tarotReadings: RawTarotReading[] =
+          tarotRes.status === 'fulfilled' && tarotRes.value
+            ? (tarotRes.value.readings ?? []).filter(
+                (reading: RawTarotReading) => (reading.cards?.length ?? 0) > 1,
+              )
+            : [];
 
         const next = buildSearchIndex({
           journal,
           glossary: GLOSSARY_LIST,
+          tarotReadings,
           transits,
         });
         if (!cancelled) setItems(next);
@@ -120,11 +221,9 @@ export function SmartSearch({ onClose }: SmartSearchProps) {
 
   const results = useMemo(() => {
     if (!query.trim()) {
-      // No query -> show a curated peek (top glossary terms) so the empty
-      // state feels alive.
-      return items.filter((i) => i.kind === 'glossary').slice(0, 8);
+      return COMMAND_ITEMS;
     }
-    return searchIndex(items, query, 24);
+    return searchIndex([...COMMAND_ITEMS, ...items], query, 24);
   }, [items, query]);
 
   // Reset highlight when results change.
@@ -195,7 +294,7 @@ export function SmartSearch({ onClose }: SmartSearchProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={onInputKeyDown}
-              placeholder={'Search journal, glossary, transits\u2026'}
+              placeholder={'Search or run a command\u2026'}
               className='flex-1 bg-transparent text-base text-content-primary placeholder:text-content-primary/40 focus:outline-none'
               aria-label='Search'
             />
@@ -218,7 +317,7 @@ export function SmartSearch({ onClose }: SmartSearchProps) {
               <div className='px-4 py-8 text-center text-sm text-content-primary/50'>
                 {query.trim()
                   ? `No matches for "${query.trim()}"`
-                  : 'Type to search journal, glossary, transits.'}
+                  : 'Type to search, or pick a quick action.'}
               </div>
             ) : (
               <ul role='listbox' className='space-y-1'>
@@ -229,13 +328,16 @@ export function SmartSearch({ onClose }: SmartSearchProps) {
                       variant='h4'
                       className='!mb-0 text-content-primary/40'
                     >
-                      Glossary picks
+                      Quick actions
                     </Heading>
                   </li>
                 ) : null}
                 {results.map((item, idx) => {
                   const meta = KIND_META[item.kind];
-                  const Icon = meta.Icon;
+                  const Icon =
+                    item.kind === 'command'
+                      ? (COMMAND_ICONS[item.id] ?? meta.Icon)
+                      : meta.Icon;
                   const active = idx === activeIndex;
                   return (
                     <li key={item.id}>

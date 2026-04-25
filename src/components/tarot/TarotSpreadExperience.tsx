@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
+import Link from 'next/link';
 import {
+  BookOpen,
+  CalendarDays,
+  CheckCircle2,
   Loader2,
   Lock as LockIcon,
   Sparkles,
@@ -186,6 +190,9 @@ export function TarotSpreadExperience({
     useState<number>(0);
   const [isSavingNotes, setIsSavingNotes] = useState<boolean>(false);
   const [lastSavedNotes, setLastSavedNotes] = useState<string>('');
+  const [journalSaveState, setJournalSaveState] = useState<
+    'idle' | 'saving' | 'saved' | 'error'
+  >('idle');
   const [error, setError] = useState<string | null>(null);
 
   const selectedSpread = selectedSpreadSlug
@@ -355,6 +362,7 @@ export function TarotSpreadExperience({
     if (!currentReading) return;
     setNotesDraft(currentReading.notes || '');
     setLastSavedNotes(currentReading.notes || '');
+    setJournalSaveState('idle');
     setExpandedTransitCardIndex(0); // Reset to first card when reading changes
   }, [currentReading]);
 
@@ -500,6 +508,59 @@ export function TarotSpreadExperience({
       );
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleSaveReflectionToJournal = async () => {
+    if (!currentReading || !userId || journalSaveState === 'saving') return;
+
+    const cardLines = currentReading.cards
+      .map(
+        (card) =>
+          `- ${card.positionLabel}: ${card.card.name} — ${card.insight}`,
+      )
+      .join('\n');
+    const promptLines = currentReading.journalingPrompts
+      .slice(0, 3)
+      .map((prompt) => `- ${prompt}`)
+      .join('\n');
+    const notes = notesDraft.trim();
+    const content = [
+      `Tarot reflection: ${currentReading.spreadName}`,
+      '',
+      currentReading.summary,
+      '',
+      'Cards:',
+      cardLines,
+      promptLines ? '\nPrompts:\n' + promptLines : '',
+      notes ? '\nMy notes:\n' + notes : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    setJournalSaveState('saving');
+    try {
+      const response = await fetch('/api/journal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          content,
+          category: 'journal',
+          source: 'tarot',
+          moodTags: ['tarot', 'reflection'],
+          cardReferences: currentReading.cards.map((card) => card.card.name),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save reflection');
+      }
+
+      setJournalSaveState('saved');
+    } catch (err) {
+      console.error('[TarotSpreadExperience] Failed to save journal:', err);
+      setJournalSaveState('error');
     }
   };
 
@@ -793,6 +854,20 @@ export function TarotSpreadExperience({
                     </h3>
                   </div>
                   <div className='flex items-center gap-2'>
+                    {currentReading?.createdAt && (
+                      <Link
+                        href={`/app/time-machine?${new URLSearchParams({
+                          date: new Date(currentReading.createdAt)
+                            .toISOString()
+                            .slice(0, 10),
+                          label: currentReading.spreadName,
+                        }).toString()}`}
+                        className='inline-flex items-center gap-2 rounded-md border border-stroke-subtle bg-surface-elevated/40 px-3 py-1 text-xs font-medium text-content-secondary transition-colors hover:border-lunary-primary/40 hover:text-content-primary'
+                      >
+                        <CalendarDays className='h-4 w-4' />
+                        Sky that day
+                      </Link>
+                    )}
                     {onShareReading && currentReading && (
                       <button
                         type='button'
@@ -944,6 +1019,31 @@ export function TarotSpreadExperience({
                   placeholder='Capture rituals, emotions, and how the message landed today.'
                   className='w-full rounded-lg border border-stroke-subtle/60 bg-surface-base/70 p-3 text-sm text-content-primary placeholder:text-content-muted focus:border-lunary-primary-600 focus:outline-none focus:ring-1 focus:ring-lunary-primary-600'
                 />
+                <div className='flex flex-wrap items-center justify-between gap-2 rounded-lg border border-stroke-subtle/45 bg-surface-elevated/35 px-3 py-2'>
+                  <p className='text-xs text-content-muted'>
+                    Save this spread into your journal so it can feed long-term
+                    patterns.
+                  </p>
+                  <button
+                    type='button'
+                    onClick={handleSaveReflectionToJournal}
+                    disabled={journalSaveState === 'saving'}
+                    className='inline-flex items-center gap-1.5 rounded-full border border-lunary-primary/35 bg-lunary-primary/10 px-3 py-1.5 text-xs font-medium text-content-brand transition-colors hover:bg-lunary-primary/20 disabled:opacity-60'
+                  >
+                    {journalSaveState === 'saving' ? (
+                      <Loader2 className='h-3.5 w-3.5 animate-spin' />
+                    ) : journalSaveState === 'saved' ? (
+                      <CheckCircle2 className='h-3.5 w-3.5' />
+                    ) : (
+                      <BookOpen className='h-3.5 w-3.5' />
+                    )}
+                    {journalSaveState === 'saved'
+                      ? 'Saved to journal'
+                      : journalSaveState === 'error'
+                        ? 'Try again'
+                        : 'Save to journal'}
+                  </button>
+                </div>
               </div>
             </div>
           )}

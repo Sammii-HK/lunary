@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const user = await requireUser(request);
 
     const result = await sql`
-      SELECT id, name, relationship_type, birthday, birth_time, birth_location, notes, created_at
+      SELECT id, name, relationship_type, birthday, birth_time, birth_location, birth_chart, notes, created_at
       FROM relationship_profiles
       WHERE user_id = ${user.id}
       ORDER BY created_at DESC

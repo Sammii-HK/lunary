@@ -14,6 +14,7 @@ import { BirthChart } from '@/components/BirthChart';
 import { BirthChartShowcase } from '@/components/birth-chart-sections/BirthChartShowcase';
 import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 import { ChartModeToggle } from '@/components/ChartModeToggle';
+import { NextImportantDatesStrip } from '@/components/charts/NextImportantDatesStrip';
 import { Sparkles, Moon, Star, Home } from 'lucide-react';
 import { ensureDescendantInChart } from '@/utils/astrology/birth-chart-analysis';
 import {
@@ -563,6 +564,10 @@ const BirthChartPage = () => {
             }
             freeTierSwitchesRemaining={switchesRemaining}
           />
+
+          {displayChartWithHouses && chartMode === 'natal' && (
+            <NextImportantDatesStrip birthChart={displayChartWithHouses} />
+          )}
 
           <div data-testid='chart-visualization'>
             {displayChartWithHouses && (

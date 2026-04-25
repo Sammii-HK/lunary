@@ -13,7 +13,12 @@ import type { GlossaryTerm } from '@/lib/glossary/terms';
 // Public types
 // ---------------------------------------------------------------------------
 
-export type SearchKind = 'journal' | 'glossary' | 'transit';
+export type SearchKind =
+  | 'command'
+  | 'journal'
+  | 'glossary'
+  | 'tarot'
+  | 'transit';
 
 export interface SearchIndexItem {
   id: string;
@@ -34,6 +39,7 @@ export interface RawJournalEntry {
   content?: string;
   createdAt?: string;
   category?: string | null;
+  source?: string | null;
   moodTags?: string[];
 }
 
@@ -46,9 +52,26 @@ export interface RawTransit {
   significance?: string;
 }
 
+export interface RawTarotReading {
+  id: number | string;
+  spreadName?: string;
+  summary?: string;
+  notes?: string | null;
+  createdAt?: string;
+  cards?: Array<{
+    card?: {
+      name?: string;
+      keywords?: string[];
+    };
+    positionLabel?: string;
+    insight?: string;
+  }>;
+}
+
 export interface BuildIndexInput {
   journal?: RawJournalEntry[];
   glossary?: GlossaryTerm[];
+  tarotReadings?: RawTarotReading[];
   transits?: RawTransit[];
 }
 
@@ -89,11 +112,12 @@ export function buildSearchIndex(input: BuildIndexInput): SearchIndexItem[] {
       kind: 'journal',
       title: title || 'Journal entry',
       snippet: makeSnippet(content),
-      href: `/journal#entry-${entry.id}`,
+      href: `/book-of-shadows/journal#entry-${entry.id}`,
       keywords: [
         ...tokenize(content),
         ...(entry.moodTags ?? []).map((t) => t.toLowerCase()),
         entry.category ?? '',
+        entry.source ?? '',
       ].filter(Boolean),
     });
   }
@@ -112,6 +136,50 @@ export function buildSearchIndex(input: BuildIndexInput): SearchIndexItem[] {
         term.category,
         ...tokenize(term.short),
       ],
+    });
+  }
+
+  for (const reading of input.tarotReadings ?? []) {
+    if (!reading) continue;
+    const cards = reading.cards ?? [];
+    const cardNames = cards
+      .map((entry) => entry.card?.name)
+      .filter((name): name is string => Boolean(name));
+    const cardKeywords = cards.flatMap((entry) => entry.card?.keywords ?? []);
+    const insights = cards
+      .map((entry) => entry.insight)
+      .filter((insight): insight is string => Boolean(insight));
+    const title = reading.spreadName || 'Tarot spread';
+    const dateLabel = reading.createdAt
+      ? new Date(reading.createdAt).toLocaleDateString()
+      : '';
+    const snippet = makeSnippet(
+      [
+        dateLabel,
+        reading.summary,
+        cardNames.length ? `Cards: ${cardNames.join(', ')}` : '',
+        reading.notes || '',
+      ]
+        .filter(Boolean)
+        .join(' — '),
+    );
+
+    out.push({
+      id: `tarot:${reading.id}`,
+      kind: 'tarot',
+      title,
+      snippet,
+      href: '/tarot#spreads',
+      keywords: [
+        'tarot',
+        'spread',
+        title.toLowerCase(),
+        ...cardNames.map((name) => name.toLowerCase()),
+        ...cardKeywords.map((keyword) => keyword.toLowerCase()),
+        ...tokenize(reading.summary ?? ''),
+        ...tokenize(reading.notes ?? ''),
+        ...insights.flatMap(tokenize),
+      ].filter(Boolean),
     });
   }
 

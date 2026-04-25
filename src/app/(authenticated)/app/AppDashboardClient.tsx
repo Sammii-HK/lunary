@@ -22,6 +22,7 @@ import { TourTrigger } from '@/components/feature-tour/tour-trigger';
 import { useMilestones } from '@/hooks/useMilestones';
 import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 import { ReferralOnboardingModal } from '@/components/referrals/ReferralOnboardingModal';
+import { MoonPhaseIcon } from '@/components/MoonPhaseIcon';
 
 const DateWidget = dynamic(
   () =>
@@ -268,9 +269,11 @@ export default function AppDashboardClient() {
   const [moonExpanded, setMoonExpanded] = useState<boolean>(false);
   const [skyNowExpanded, setSkyNowExpanded] = useState<boolean>(false);
   const [showEveningRitual, setShowEveningRitual] = useState(false);
+  const [showExploreMore, setShowExploreMore] = useState(false);
   const isEvening = new Date().getHours() >= 18;
   const { uncelebrated: uncelebratedMilestone, celebrate: celebrateMilestone } =
     useMilestones();
+  const showDashboardExtras = isDemoMode || showExploreMore;
 
   // Defer heavy components for faster initial render
   const [showHoroscope, setShowHoroscope] = useState(false);
@@ -495,7 +498,13 @@ export default function AppDashboardClient() {
             onClick={() => setShowEveningRitual(true)}
             className='w-full ritual-card-gradient border border-stroke-subtle rounded-xl p-3 flex items-center gap-3 hover:border-stroke-default transition-colors'
           >
-            <span className='text-lg'>🌙</span>
+            <span className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-lunary-secondary-700/35 bg-surface-card/45'>
+              <MoonPhaseIcon
+                phase='waningCrescent'
+                size={22}
+                className='h-[22px] w-[22px] object-contain'
+              />
+            </span>
             <div className='text-left flex-1'>
               <p className='text-sm text-content-primary font-medium'>
                 Evening Ritual
@@ -536,18 +545,46 @@ export default function AppDashboardClient() {
             </div>
           </div>
 
-          <div
-            className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'} ${isDemoMode ? '' : 'md:col-span-2'}`}
-          >
-            <CrystalPreview />
-            <DailyRunePreview />
-          </div>
-
-          {authState.isAuthenticated && <WeeklyChallengeCard />}
-
           <div className={isDemoMode ? '' : 'md:col-span-2'}>
-            <ConditionalWheel />
+            <button
+              type='button'
+              onClick={() => setShowExploreMore((open) => !open)}
+              className='w-full rounded-xl border border-stroke-subtle bg-surface-elevated/45 px-4 py-3 text-left transition-colors hover:border-stroke-default'
+              aria-expanded={showDashboardExtras}
+            >
+              <span className='flex items-center justify-between gap-3'>
+                <span>
+                  <span className='block text-sm font-medium text-content-primary'>
+                    Explore rituals and tools
+                  </span>
+                  <span className='block text-xs text-content-muted'>
+                    Crystals, runes, challenges and the full wheel stay tucked
+                    away until you want them.
+                  </span>
+                </span>
+                <span className='text-sm text-content-brand'>
+                  {showDashboardExtras ? 'Hide' : 'Open'}
+                </span>
+              </span>
+            </button>
           </div>
+
+          {showDashboardExtras && (
+            <>
+              <div
+                className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'} ${isDemoMode ? '' : 'md:col-span-2'}`}
+              >
+                <CrystalPreview />
+                <DailyRunePreview />
+              </div>
+
+              {authState.isAuthenticated && <WeeklyChallengeCard />}
+
+              <div className={isDemoMode ? '' : 'md:col-span-2'}>
+                <ConditionalWheel />
+              </div>
+            </>
+          )}
         </div>
         {authState.isAuthenticated &&
           (() => {

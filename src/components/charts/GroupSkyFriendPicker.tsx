@@ -8,6 +8,8 @@ export type GroupFriend = {
   id: string;
   name: string;
   avatarUrl?: string;
+  source?: 'friend' | 'profile';
+  relationshipType?: string | null;
   birthDate?: string;
   birthTime?: string;
   birthLocation?: string;
@@ -48,6 +50,7 @@ function AvatarChip({
   isSelected,
   isLockedIn,
   isDisabled,
+  badge,
   onClick,
 }: {
   name: string;
@@ -56,6 +59,7 @@ function AvatarChip({
   isSelected: boolean;
   isLockedIn?: boolean;
   isDisabled?: boolean;
+  badge?: string;
   onClick: () => void;
 }) {
   return (
@@ -105,6 +109,11 @@ function AvatarChip({
       <span className='text-[11px] font-medium text-content-primary max-w-[72px] truncate'>
         {name}
       </span>
+      {badge && (
+        <span className='-mt-1 rounded-full border border-white/10 px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-content-muted'>
+          {badge}
+        </span>
+      )}
 
       <motion.span
         initial={false}
@@ -179,6 +188,7 @@ export function GroupSkyFriendPicker({
               color={color}
               isSelected={isSelected}
               isDisabled={disabled}
+              badge={friend.source === 'profile' ? 'Private' : undefined}
               onClick={() => onToggle(friend.id)}
             />
           );

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { Sparkles, Lock } from 'lucide-react';
+import { CalendarDays, Lock, MessageCircle, Sparkles } from 'lucide-react';
 import { Heading } from '@/components/ui/Heading';
 import { useUser } from '@/context/UserContext';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -78,6 +78,31 @@ type FriendsListResponse = {
   requiresUpgrade?: boolean;
 };
 
+type RelationshipProfileEntry = {
+  id: string;
+  name: string;
+  relationship_type?: string | null;
+  birth_chart?: BirthChartData[] | null;
+};
+
+type RelationshipProfilesResponse = {
+  profiles?: RelationshipProfileEntry[];
+};
+
+type TimingWindow = {
+  date: string;
+  endDate?: string;
+  dateFormatted: string;
+  quality: 'great' | 'good' | 'neutral' | 'challenging';
+  reason: string;
+};
+
+type TimingResponse = {
+  timingWindows?: TimingWindow[];
+  requiresProForTiming?: boolean;
+  error?: string;
+};
+
 export default function GroupSkyPage() {
   const { user, loading: userLoading } = useUser();
   const sub = useSubscription();
@@ -90,36 +115,66 @@ export default function GroupSkyPage() {
   const [friendsError, setFriendsError] = useState<string | null>(null);
   const [friendsRequireUpgrade, setFriendsRequireUpgrade] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [timing, setTiming] = useState<TimingResponse | null>(null);
+  const [timingLoading, setTimingLoading] = useState(false);
 
-  // Fetch all friends + their birthCharts in a single request.
-  // Previously this was N+1 (1 list + 1 detail per friend), and each detail
-  // call also ran a synastry calc + DB write — easily 4–8s on a fresh load.
+  // Fetch friends and private relationship profiles together so Group Sky can
+  // read real people without forcing social invites.
   useEffect(() => {
     let cancelled = false;
     async function load() {
       setFriendsLoading(true);
       setFriendsError(null);
       try {
-        const listRes = await fetch('/api/friends?charts=1', {
-          credentials: 'include',
-        });
-        const listData = (await listRes.json()) as FriendsListResponse;
-        if (!listRes.ok) {
-          if (listData.requiresUpgrade) {
-            setFriendsRequireUpgrade(true);
+        const [friendsResult, profilesResult] = await Promise.allSettled([
+          fetch('/api/friends?charts=1', { credentials: 'include' }),
+          fetch('/api/relationships', { credentials: 'include' }),
+        ]);
+
+        const next: GroupFriend[] = [];
+
+        if (friendsResult.status === 'fulfilled') {
+          const listRes = friendsResult.value;
+          const listData = (await listRes.json()) as FriendsListResponse;
+          if (listRes.ok) {
+            const withCharts: GroupFriend[] = (listData.friends ?? [])
+              .filter((entry) => entry.hasBirthChart && entry.birthChart)
+              .map((entry) => ({
+                id: entry.id,
+                name: entry.name,
+                avatarUrl: entry.avatar,
+                source: 'friend',
+                birthChart: entry.birthChart!,
+              }));
+            next.push(...withCharts);
+            setFriendsRequireUpgrade(false);
+          } else {
+            if (listData.requiresUpgrade) {
+              setFriendsRequireUpgrade(true);
+            }
+            if (!listData.requiresUpgrade) {
+              throw new Error(listData.error || 'Failed to load friends');
+            }
           }
-          throw new Error(listData.error || 'Failed to load friends');
         }
+
+        if (profilesResult.status === 'fulfilled' && profilesResult.value.ok) {
+          const profilesData =
+            (await profilesResult.value.json()) as RelationshipProfilesResponse;
+          const privateProfiles: GroupFriend[] = (profilesData.profiles ?? [])
+            .filter((profile) => profile.birth_chart?.length)
+            .map((profile) => ({
+              id: `profile:${profile.id}`,
+              name: profile.name,
+              source: 'profile',
+              relationshipType: profile.relationship_type ?? null,
+              birthChart: profile.birth_chart!,
+            }));
+          next.push(...privateProfiles);
+        }
+
         if (cancelled) return;
-        const withCharts: GroupFriend[] = (listData.friends ?? [])
-          .filter((entry) => entry.hasBirthChart && entry.birthChart)
-          .map((entry) => ({
-            id: entry.id,
-            name: entry.name,
-            avatarUrl: entry.avatar,
-            birthChart: entry.birthChart!,
-          }));
-        setFriends(withCharts);
+        setFriends(next);
       } catch (err) {
         if (cancelled) return;
         setFriendsError(
@@ -172,8 +227,10 @@ export default function GroupSkyPage() {
     return map;
   }, [friends]);
 
-  const userBirthChart =
-    (user?.birthChart as BirthChartData[] | undefined) ?? [];
+  const userBirthChart = useMemo(
+    () => (user?.birthChart as BirthChartData[] | undefined) ?? [],
+    [user?.birthChart],
+  );
   const userHasChart = userBirthChart.length > 0;
   const userColor = PARTICIPANT_PALETTE[0];
   const userName = user?.name?.split(' ')[0] || 'You';
@@ -189,6 +246,55 @@ export default function GroupSkyPage() {
       return next;
     });
   };
+
+  const primarySelectedId = useMemo(() => [...selected][0] ?? null, [selected]);
+  const primaryFriend = useMemo(
+    () => friends.find((friend) => friend.id === primarySelectedId) ?? null,
+    [friends, primarySelectedId],
+  );
+
+  useEffect(() => {
+    if (
+      !primarySelectedId ||
+      !hasGroupAccess ||
+      primarySelectedId.startsWith('profile:')
+    ) {
+      setTiming(null);
+      setTimingLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    async function loadTiming() {
+      setTimingLoading(true);
+      try {
+        const response = await fetch(
+          `/api/friends/${primarySelectedId}/timing`,
+          {
+            credentials: 'include',
+          },
+        );
+        const data = (await response.json()) as TimingResponse;
+        if (!cancelled) setTiming(data);
+      } catch (error) {
+        if (!cancelled) {
+          setTiming({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Could not load relationship timing',
+          });
+        }
+      } finally {
+        if (!cancelled) setTimingLoading(false);
+      }
+    }
+
+    loadTiming();
+    return () => {
+      cancelled = true;
+    };
+  }, [primarySelectedId, hasGroupAccess]);
 
   const participants = useMemo<GroupParticipant[]>(() => {
     const list: GroupParticipant[] = [];
@@ -367,6 +473,79 @@ export default function GroupSkyPage() {
           onToggle={handleToggle}
         />
       </div>
+
+      {primaryFriend && primaryFriend.source !== 'profile' && (
+        <div className='mb-5 rounded-2xl border border-stroke-subtle bg-surface-elevated/45 p-4'>
+          <div className='mb-3 flex items-start justify-between gap-3'>
+            <div>
+              <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-content-muted'>
+                Relationship timing
+              </p>
+              <h2 className='mt-1 text-sm font-semibold text-content-primary'>
+                Best day to message {primaryFriend.name.split(' ')[0]}
+              </h2>
+            </div>
+            <MessageCircle className='h-4 w-4 text-lunary-primary' />
+          </div>
+
+          {timingLoading ? (
+            <p className='text-xs text-content-muted'>
+              Checking the next connection window...
+            </p>
+          ) : timing?.requiresProForTiming ? (
+            <div className='flex flex-wrap items-center justify-between gap-3'>
+              <p className='text-xs text-content-secondary'>
+                Lunary Pro unlocks best days to reconnect, shared events and
+                timing reasons.
+              </p>
+              <SmartTrialButton
+                size='sm'
+                feature='personalized_transit_readings'
+              />
+            </div>
+          ) : timing?.timingWindows && timing.timingWindows.length > 0 ? (
+            (() => {
+              const best =
+                timing.timingWindows.find((window) =>
+                  ['great', 'good'].includes(window.quality),
+                ) ?? timing.timingWindows[0];
+              const params = new URLSearchParams({
+                date: best.date,
+                label: `Message ${primaryFriend.name}`,
+              });
+
+              return (
+                <Link
+                  href={`/app/time-machine?${params.toString()}`}
+                  className='group flex items-start gap-3 rounded-xl border border-white/10 bg-surface-base/35 p-3 transition-colors hover:border-lunary-primary/45 hover:bg-surface-base/55'
+                >
+                  <span className='mt-0.5 flex h-9 w-9 items-center justify-center rounded-full border border-lunary-primary/35 bg-lunary-primary/10 text-lunary-primary'>
+                    <CalendarDays className='h-4 w-4' />
+                  </span>
+                  <span className='min-w-0 flex-1'>
+                    <span className='flex flex-wrap items-center gap-2'>
+                      <span className='text-sm font-semibold text-content-primary'>
+                        {best.dateFormatted}
+                      </span>
+                      <span className='rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wide text-content-muted'>
+                        {best.quality}
+                      </span>
+                    </span>
+                    <span className='mt-1 block text-xs leading-relaxed text-content-secondary'>
+                      {best.reason}
+                    </span>
+                  </span>
+                </Link>
+              );
+            })()
+          ) : (
+            <p className='text-xs text-content-muted'>
+              No obvious green-light window in the next month. Keep this one
+              gentle, or check again tomorrow.
+            </p>
+          )}
+        </div>
+      )}
 
       {friendsLoading ? (
         <div className='space-y-4'>
