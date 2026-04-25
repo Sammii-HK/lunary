@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -27,6 +27,12 @@ import { ShareSynastry } from '@/components/share/ShareSynastry';
 import { getSynastryArchetype } from '@/utils/astrology/synastry-archetype';
 import { useUser } from '@/context/UserContext';
 import { BirthChart } from '@/components/BirthChart';
+import {
+  SynastryChart,
+  computeSynastryAspects,
+  type SynastryAspectLine,
+} from '@/components/charts/SynastryChart';
+import { CompatibilityBreakdown } from '@/components/charts/CompatibilityBreakdown';
 import { SendGiftModal } from '@/components/gifts/SendGiftModal';
 import type { BirthChartData } from '../../../../../../utils/astrology/birthChart';
 
@@ -327,7 +333,15 @@ export default function FriendProfilePage() {
             onViewSynastry={() => setActiveTab('synastry')}
           />
         )}
-        {activeTab === 'synastry' && <SynastryTab synastry={friend.synastry} />}
+        {activeTab === 'synastry' && (
+          <SynastryTab
+            synastry={friend.synastry}
+            userChart={user?.birthChart as BirthChartData[] | undefined}
+            friendChart={friend.birthChart}
+            userName={user?.name?.split(' ')[0]}
+            friendName={friend.name}
+          />
+        )}
         {activeTab === 'chart' && (
           <ChartTab birthChart={friend.birthChart} name={friend.name} />
         )}
@@ -456,8 +470,27 @@ function OverviewTab({
   );
 }
 
-function SynastryTab({ synastry }: { synastry?: SynastryData }) {
+function SynastryTab({
+  synastry,
+  userChart,
+  friendChart,
+  userName,
+  friendName,
+}: {
+  synastry?: SynastryData;
+  userChart?: BirthChartData[];
+  friendChart?: BirthChartData[];
+  userName?: string;
+  friendName?: string;
+}) {
   const [showAllAspects, setShowAllAspects] = useState(false);
+
+  // Compute the synastry aspects once for both the chart and breakdown so
+  // the visual + numbers stay perfectly in sync.
+  const interChartAspects: SynastryAspectLine[] = useMemo(() => {
+    if (!userChart || !friendChart) return [];
+    return computeSynastryAspects(userChart, friendChart);
+  }, [userChart, friendChart]);
 
   if (!synastry) {
     return (
@@ -481,6 +514,30 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
 
   return (
     <div className='space-y-6' data-testid='synastry-tab-content'>
+      {/* New: synastry bi-wheel hero */}
+      {userChart && friendChart && (
+        <div className='rounded-2xl border border-stroke-subtle bg-surface-elevated/70 p-4 md:p-5 backdrop-blur'>
+          <SynastryChart
+            userChart={userChart}
+            friendChart={friendChart}
+            userName={userName}
+            friendName={friendName}
+            aspects={interChartAspects}
+          />
+        </div>
+      )}
+
+      {/* New: rich breakdown grounded in utils/astrology/synastry.ts */}
+      {userChart && friendChart && (
+        <CompatibilityBreakdown
+          userChart={userChart}
+          friendChart={friendChart}
+          aspects={interChartAspects}
+          userName={userName}
+          friendName={friendName}
+        />
+      )}
+
       {/* Score */}
       <div
         className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
