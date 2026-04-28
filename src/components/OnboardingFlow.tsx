@@ -1,6 +1,13 @@
 'use client';
 
-import { ReactNode, useState, useEffect, useCallback, useRef } from 'react';
+import {
+  ReactNode,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -25,6 +32,7 @@ import {
 } from '@/lib/onboarding/prefill';
 import { parseCoordinates } from '../../utils/location';
 import { Button } from './ui/button';
+import { getSunSignFromBirthday } from '../utils/astrology/sun-sign-from-date';
 
 interface OnboardingFlowProps {
   overridePlanId?:
@@ -83,6 +91,10 @@ export function OnboardingFlow({
   const [showSkipWarning, setShowSkipWarning] = useState(false);
   const [showBirthChartConfirmation, setShowBirthChartConfirmation] =
     useState(false);
+  const [calculatingChart, setCalculatingChart] = useState(false);
+  const [calculatingHoroscope, setCalculatingHoroscope] = useState<
+    string | null
+  >(null);
   const [prefillLoaded, setPrefillLoaded] = useState(false);
   const [autoSavePrefill, setAutoSavePrefill] = useState(false);
   const [expandedHighlights, setExpandedHighlights] = useState<string | null>(
@@ -472,7 +484,13 @@ export function OnboardingFlow({
     return () => {
       cancelled = true;
     };
-  }, [authState.isAuthenticated, user?.id, user?.birthday, previewMode]);
+  }, [
+    authState.isAuthenticated,
+    user?.id,
+    user?.birthday,
+    user?.birthChart?.length,
+    previewMode,
+  ]);
 
   useEffect(() => {
     const needsBirthDetails = !user?.birthday || !user?.birthChart?.length;
@@ -534,6 +552,13 @@ export function OnboardingFlow({
 
   // Pre-fill birthday from user data (collected at signup)
   const hasBirthdayFromSignup = !!user?.birthday && !previewMode;
+
+  // Deterministic Sun sign from the (already collected) signup birthday.
+  // Used by the welcome-step "Big 3" hook before we have birth time/city.
+  const prefilledSunSign = useMemo(
+    () => getSunSignFromBirthday(birthday || user?.birthday || null),
+    [birthday, user?.birthday],
+  );
 
   useEffect(() => {
     if (!showOnboarding || prefillLoaded || previewMode) {
@@ -682,6 +707,11 @@ export function OnboardingFlow({
             }
           : undefined;
 
+      // Kick off the celebratory "calculating your chart..." view immediately.
+      // We require a minimum 3s display so users actually see the moment.
+      const calculatingStartedAt = Date.now();
+      setCalculatingChart(true);
+
       // Save to Postgres
       await fetch('/api/profile', {
         method: 'PUT',
@@ -695,32 +725,47 @@ export function OnboardingFlow({
         conversionTracking.birthDataSubmitted(user.id);
       }
 
-      // Generate birth chart server-side (reliable geocoding + timezone)
-      try {
-        const generateResponse = await fetch(
-          '/api/profile/birth-chart/generate',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-              birthDate: birthday,
-              birthTime: birthTime || undefined,
-              birthLocation: birthLocation || undefined,
-              fallbackTimezone:
-                Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
-            }),
-          },
-        );
+      // Generate birth chart server-side (reliable geocoding + timezone) and
+      // fetch a one-line horoscope tease in parallel for the loading view.
+      const generatePromise = fetch('/api/profile/birth-chart/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          birthDate: birthday,
+          birthTime: birthTime || undefined,
+          birthLocation: birthLocation || undefined,
+          fallbackTimezone:
+            Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+        }),
+      })
+        .then((generateResponse) => {
+          if (generateResponse.ok) {
+            DailyCache.clear();
+            if (user?.id) ClientCache.clearAll(user.id);
+            console.log('Birth chart generated and saved server-side');
+          }
+        })
+        .catch((chartError) => {
+          console.error('Failed to generate birth chart:', chartError);
+        });
 
-        if (generateResponse.ok) {
-          DailyCache.clear();
-          if (user?.id) ClientCache.clearAll(user.id);
-          console.log('Birth chart generated and saved server-side');
-        }
-      } catch (chartError) {
-        console.error('Failed to generate birth chart:', chartError);
-      }
+      // Pull a one-line tease for the loading screen. Best-effort: if it
+      // fails or 401s we fall back to a static line in the UI.
+      fetch('/api/horoscope/daily', { credentials: 'include' })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (!data) return;
+          const teaser =
+            data.cosmicHighlight || data.headline || data.overview || null;
+          if (typeof teaser === 'string' && teaser.length > 0) {
+            // Trim to a single line at most.
+            setCalculatingHoroscope(teaser.split('\n')[0].trim().slice(0, 180));
+          }
+        })
+        .catch(() => {
+          /* silent fallback */
+        });
 
       // Sync birthday to push subscription for server-side notifications
       try {
@@ -742,17 +787,34 @@ export function OnboardingFlow({
         );
       }
 
+      // Wait for chart generate to resolve, but enforce a 3s floor so the
+      // celebratory loading moment is actually seen.
+      await generatePromise;
+      const elapsed = Date.now() - calculatingStartedAt;
+      const minMs = 3000;
+      if (elapsed < minMs) {
+        await new Promise((resolve) => setTimeout(resolve, minMs - elapsed));
+      }
+
       // Refresh user data in context, busting browser cache
       await refetch(true);
       setShowBirthChartConfirmation(true);
 
+      // Track the birthday step as completed, then drop the celebratory
+      // loading view and reveal the "Where would you like to go?" picker
+      // (the 'complete' step). The picker links call handleComplete(),
+      // which marks onboarding done and navigates to the chosen route.
+      await trackStepCompletion('birthday', false);
+      setCalculatingChart(false);
       setCurrentStep('complete');
     } catch (error) {
       console.error('Failed to save birthday:', error);
       setSaveError('Failed to save birthday. Please try again.');
+      setCalculatingChart(false);
     } finally {
       setSaving(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     authState.user?.email,
     authState.user?.name,
@@ -782,10 +844,7 @@ export function OnboardingFlow({
     }
   }, [currentStep]);
 
-  const trackStepCompletion = async (
-    step: string,
-    skipped: boolean = false,
-  ) => {
+  async function trackStepCompletion(step: string, skipped: boolean = false) {
     try {
       if (previewMode) {
         return;
@@ -805,7 +864,7 @@ export function OnboardingFlow({
     } catch (error) {
       console.error('[Onboarding] Failed to track completion:', error);
     }
-  };
+  }
 
   const handleSkip = () => {
     setSkipOrigin('modal');
@@ -860,17 +919,52 @@ export function OnboardingFlow({
     setShowSkipWarning(true);
   };
 
-  const handleComplete = async () => {
+  async function handleComplete(redirectPath: string = '/app') {
     await trackStepCompletion(currentStep, false);
     resolveOnboarding();
-    if (!previewMode) {
-      // User already has subscription, send them to personalized content
-      router.push('/app');
+    if (!previewMode && redirectPath) {
+      router.push(redirectPath);
     }
-  };
+  }
 
   if (!showOnboarding) {
     return null;
+  }
+
+  if (calculatingChart) {
+    return (
+      <div className='fixed inset-0 z-[60] flex flex-col items-center justify-center bg-surface-base/95 backdrop-blur-md p-6 text-center'>
+        <div className='animate-pulse' aria-hidden='true'>
+          <FullMoonLargeIcon />
+        </div>
+        <Sparkles
+          className='w-5 h-5 mt-4 text-content-brand-accent animate-spin'
+          style={{ animationDuration: '4s' }}
+          aria-hidden='true'
+        />
+        <h2
+          className='mt-6 text-lg font-semibold text-content-primary md:text-xl'
+          aria-live='polite'
+        >
+          Calculating your chart...
+        </h2>
+        {prefilledSunSign && (
+          <p className='mt-2 text-sm text-content-secondary'>
+            {birthTime
+              ? `Aligning your Big 3: Sun in ${prefilledSunSign}, plus your Moon and Rising.`
+              : `Sun in ${prefilledSunSign}.`}
+          </p>
+        )}
+        {calculatingHoroscope && (
+          <p className='mt-6 max-w-sm text-sm italic text-content-muted'>
+            &quot;{calculatingHoroscope}&quot;
+          </p>
+        )}
+        <p className='mt-8 text-xs text-content-muted'>
+          Tuning the cosmos to you...
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -963,13 +1057,27 @@ export function OnboardingFlow({
               <div className='inline-flex items-center justify-center w-16 h-16 mb-2'>
                 <FullMoonLargeIcon />
               </div>
-              <h2 className='text-base font-semibold text-content-primary mb-2 md:text-lg'>
-                Welcome to Lunary
-              </h2>
-              <p className='text-sm text-content-secondary'>
-                We&apos;ll build your birth chart and tailor your daily guidance
-                in just a moment.
-              </p>
+              {prefilledSunSign ? (
+                <>
+                  <h2 className='text-base font-semibold text-content-primary mb-2 md:text-lg'>
+                    You&apos;re a {prefilledSunSign}. Want to see your Moon and
+                    Rising?
+                  </h2>
+                  <p className='text-sm text-content-secondary'>
+                    Add your birth time and city to unlock your full Big 3.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h2 className='text-base font-semibold text-content-primary mb-2 md:text-lg'>
+                    Welcome to Lunary
+                  </h2>
+                  <p className='text-sm text-content-secondary'>
+                    We&apos;ll build your birth chart and tailor your daily
+                    guidance in just a moment.
+                  </p>
+                </>
+              )}
             </div>
 
             <div className='space-y-4'>
@@ -978,8 +1086,8 @@ export function OnboardingFlow({
                   <h3 className='text-sm font-semibold text-content-primary flex items-center gap-2'>
                     <Sparkles className='w-4 h-4 text-content-brand-accent' />
                     {isSubscribedOrTrial
-                      ? `You’ve got ${activePlan.name}`
-                      : 'What’s waiting for you'}
+                      ? `You've got ${activePlan.name}`
+                      : "What's waiting for you"}
                   </h3>
                   {isSubscribedOrTrial && (
                     <span className='text-[10px] uppercase tracking-wide text-content-brand-accent/80'>
@@ -989,8 +1097,8 @@ export function OnboardingFlow({
                 </div>
                 <p className='text-xs text-content-secondary mb-3'>
                   {isSubscribedOrTrial
-                    ? 'Thanks for joining. Here’s everything now available in your plan.'
-                    : 'Here’s what you can explore right away with a free account.'}
+                    ? "Thanks for joining. Here's everything now available in your plan."
+                    : "Here's what you can explore right away with a free account."}
                 </p>
                 <div className='space-y-3 text-xs text-content-secondary'>
                   {planHighlights.map((section) => {
@@ -1048,7 +1156,7 @@ export function OnboardingFlow({
                 variant='lunary-soft'
                 className='w-full'
               >
-                Get Started
+                {prefilledSunSign ? 'Show me my Big 3' : 'Get Started'}
               </Button>
               <Button
                 onClick={handleSkip}
@@ -1272,43 +1380,66 @@ export function OnboardingFlow({
 
             <div className='grid gap-3 text-left sm:grid-cols-2'>
               <Link
+                href='/app/birth-chart'
+                onClick={(event) => {
+                  event.preventDefault();
+                  void handleComplete('/app/birth-chart');
+                }}
+                className='rounded-lg border border-lunary-primary-600/70 bg-lunary-primary-950/30 px-4 py-3 text-sm text-content-primary shadow-[0_0_0_1px_rgba(167,139,250,0.18)] transition hover:border-lunary-primary-500'
+              >
+                <span className='flex items-center justify-between gap-2'>
+                  <span>Birth chart</span>
+                  <span className='rounded-full border border-lunary-primary-500/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-content-brand-accent'>
+                    Just made
+                  </span>
+                </span>
+              </Link>
+              <Link
                 href='/app'
-                onClick={handleComplete}
+                onClick={(event) => {
+                  event.preventDefault();
+                  void handleComplete('/app');
+                }}
                 className='rounded-lg border border-stroke-subtle bg-surface-elevated/60 px-4 py-3 text-sm text-content-primary transition hover:border-lunary-primary-700'
               >
                 Daily overview
               </Link>
               <Link
                 href='/tarot'
-                onClick={handleComplete}
+                onClick={(event) => {
+                  event.preventDefault();
+                  void handleComplete('/tarot');
+                }}
                 className='rounded-lg border border-stroke-subtle bg-surface-elevated/60 px-4 py-3 text-sm text-content-primary transition hover:border-lunary-primary-700'
               >
                 Tarot
               </Link>
               <Link
                 href='/horoscope'
-                onClick={handleComplete}
+                onClick={(event) => {
+                  event.preventDefault();
+                  void handleComplete('/horoscope');
+                }}
                 className='rounded-lg border border-stroke-subtle bg-surface-elevated/60 px-4 py-3 text-sm text-content-primary transition hover:border-lunary-primary-700'
               >
                 Horoscope
               </Link>
               <Link
                 href='/profile'
-                onClick={handleComplete}
+                onClick={(event) => {
+                  event.preventDefault();
+                  void handleComplete('/profile');
+                }}
                 className='rounded-lg border border-stroke-subtle bg-surface-elevated/60 px-4 py-3 text-sm text-content-primary transition hover:border-lunary-primary-700'
               >
                 Profile
               </Link>
               <Link
-                href='/app/birth-chart'
-                onClick={handleComplete}
-                className='rounded-lg border border-stroke-subtle bg-surface-elevated/60 px-4 py-3 text-sm text-content-primary transition hover:border-lunary-primary-700'
-              >
-                Birth chart
-              </Link>
-              <Link
                 href='/grimoire'
-                onClick={handleComplete}
+                onClick={(event) => {
+                  event.preventDefault();
+                  void handleComplete('/grimoire');
+                }}
                 className='rounded-lg border border-stroke-subtle bg-surface-elevated/60 px-4 py-3 text-sm text-content-primary transition hover:border-lunary-primary-700'
               >
                 Grimoire

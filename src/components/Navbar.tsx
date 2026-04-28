@@ -157,14 +157,14 @@ type NavLinkProps = {
   dataNav?: string;
 };
 
-const NavLink = ({
+function NavLink({
   href,
   icon: Icon,
   label,
   activePath,
   showBadge,
   dataNav,
-}: NavLinkProps) => {
+}: NavLinkProps) {
   const active = isActive(activePath, href);
 
   const handleClick = () => {
@@ -193,4 +193,4 @@ const NavLink = ({
       <span className='text-[10px] tracking-wide'>{label}</span>
     </Link>
   );
-};
+}

@@ -147,7 +147,7 @@ export default function SuccessPage() {
     }
   }, [sessionId]);
 
-  const fetchSession = async (sessionId: string) => {
+  async function fetchSession(sessionId: string) {
     try {
       const response = await fetch(`/api/stripe/session/${sessionId}`);
       if (!response.ok) {
@@ -160,7 +160,7 @@ export default function SuccessPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString('en-US', {
