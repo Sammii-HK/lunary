@@ -1,11 +1,11 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowRight, Clock } from 'lucide-react';
 import {
   getUpcomingTransits,
   TransitEvent,
@@ -41,6 +41,17 @@ const getPlanetSymbol = (planet: string): string => {
   return bodiesSymbols[key] || planet.charAt(0);
 };
 
+type NextHitResponse = {
+  success: boolean;
+  hit: {
+    transitPlanet: string;
+    natalPlanet: string;
+    aspect: string;
+    exactDate: string;
+    blurb: string | null;
+  } | null;
+};
+
 /** Compact relative time for badge display (future-only, tomorrow+) */
 const formatRelativeTime = (date: dayjs.Dayjs): string => {
   const now = dayjs();
@@ -53,6 +64,22 @@ const formatRelativeTime = (date: dayjs.Dayjs): string => {
   return date.format('MMM D');
 };
 
+const formatExactCountdown = (date: dayjs.Dayjs): string => {
+  const now = dayjs();
+  const minutes = date.diff(now, 'minute');
+  if (minutes <= 0) return 'exact now';
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes - days * 1440) / 60);
+  if (days > 0) return hours > 0 ? `${days}d ${hours}h` : `${days}d`;
+  if (hours > 0) return `${hours}h`;
+  return `${Math.max(1, minutes)}m`;
+};
+
+const formatPeakLabel = (date: dayjs.Dayjs): string => {
+  const countdown = formatExactCountdown(date);
+  return countdown === 'exact now' ? 'Peaks now' : `Peaks in ${countdown}`;
+};
+
 export const TransitOfTheDay = () => {
   const { user } = useUser();
   const authStatus = useAuthStatus();
@@ -60,6 +87,30 @@ export const TransitOfTheDay = () => {
   const subscription = useSubscription();
   const variant = useFeatureFlagVariant('paywall_preview_style_v1');
   const ctaCopy = useCTACopy();
+  const [nextHit, setNextHit] = useState<NextHitResponse['hit']>(null);
+
+  useEffect(() => {
+    if (!authStatus.isAuthenticated) {
+      setNextHit(null);
+      return;
+    }
+
+    let cancelled = false;
+    fetch('/api/live-transits/next-hit', { credentials: 'include' })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: NextHitResponse | null) => {
+        if (!cancelled && data?.success) {
+          setNextHit(data.hit);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setNextHit(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authStatus.isAuthenticated]);
 
   // For unauthenticated users, force paid access to false immediately
   // Don't wait for subscription to resolve
@@ -260,6 +311,19 @@ export const TransitOfTheDay = () => {
     );
   };
 
+  const nextHitLine = nextHit ? (
+    <div className='mt-2 flex items-start gap-1.5 rounded-md border border-stroke-subtle/50 bg-surface-card/40 px-2 py-1.5 text-[11px] leading-snug text-content-muted'>
+      <Clock className='mt-0.5 h-3 w-3 shrink-0 text-content-brand-secondary' />
+      <span>
+        {formatPeakLabel(dayjs(nextHit.exactDate))}:{' '}
+        <span className='text-content-secondary'>
+          {nextHit.transitPlanet} {nextHit.aspect.toLowerCase()} natal{' '}
+          {nextHit.natalPlanet}
+        </span>
+      </span>
+    </div>
+  ) : null;
+
   // Show general transit for unauthenticated users or users without chart access
   if (!authStatus.isAuthenticated || !hasPersonalizedAccess) {
     if (!generalTransit) {
@@ -309,6 +373,7 @@ export const TransitOfTheDay = () => {
             <p className='text-xs text-content-primary mb-2'>
               {generalTransit.description.split('.')[0]}.
             </p>
+            {nextHitLine}
 
             {/* A/B test: Show preview of PERSONALIZED content (what they're missing) */}
             <div className='relative'>
@@ -389,6 +454,7 @@ export const TransitOfTheDay = () => {
               <p className='text-xs text-content-muted line-clamp-2'>
                 {generalTransit.description}
               </p>
+              {nextHitLine}
             </div>
             <ArrowRight className='w-4 h-4 text-content-muted group-hover:text-content-brand-secondary transition-colors flex-shrink-0 mt-1' />
           </div>
@@ -432,6 +498,7 @@ export const TransitOfTheDay = () => {
           <p className='text-xs text-content-muted line-clamp-2'>
             {transit.actionableGuidance}
           </p>
+          {nextHitLine}
         </div>
         <ArrowRight className='w-4 h-4 text-content-muted group-hover:text-content-brand-secondary transition-colors flex-shrink-0 mt-1' />
       </div>

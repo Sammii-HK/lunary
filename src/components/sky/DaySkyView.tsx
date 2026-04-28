@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * DaySkyView — client renderer for `/sky/[date]`.
+ * DaySkyView, client renderer for `/sky/[date]`.
  *
  * Receives transit-only placement data (no natal chart) for a single
  * historical date and renders:
@@ -20,7 +20,8 @@ import { ArrowRight, Sparkles } from 'lucide-react';
 import { BirthChart } from '@/components/BirthChart';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/Heading';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import {
   MoonPhase,
   illuminationFromLongitudes,
@@ -152,7 +153,7 @@ function buildPoeticInterpretation(
       planet: 'Moon',
       sign: moon.sign as ZodiacSign,
     });
-    if (blurb) fragments.push(`${moonLabel.toLowerCase()} — ${blurb}`);
+    if (blurb) fragments.push(`${moonLabel.toLowerCase()}, ${blurb}`);
   }
 
   if (topAspects.length > 0) {
@@ -202,12 +203,12 @@ function formatLongDate(iso: string): string {
 interface DaySkyViewProps {
   /** ISO YYYY-MM-DD that we resolved to (always a real date). */
   date: string;
-  /** Transit-only placements — Sun, Moon, planets. */
+  /** Transit-only placements, Sun, Moon, planets. */
   placements: BirthChartData[];
   /** Optional: human label for the slug, e.g. "The day you were born". */
   contextLabel?: string;
   /**
-   * Optional flag — when this came from a named slug we add a small badge
+   * Optional flag, when this came from a named slug we add a small badge
    * above the heading to give the share extra hook.
    */
   fromNamedSlug?: boolean;
@@ -284,8 +285,8 @@ export function DaySkyView({
           {longDate}
         </Heading>
         <p className='max-w-2xl text-sm text-content-muted sm:text-base'>
-          A snapshot of where the planets stood — and what the sky was
-          whispering that day.
+          A snapshot of where the planets stood, and what the sky was whispering
+          that day.
         </p>
       </header>
 
@@ -343,7 +344,7 @@ export function DaySkyView({
             </Heading>
             {topAspects.length === 0 ? (
               <p className='mt-2 text-sm text-content-muted'>
-                A quiet day — no major aspects in tight orb.
+                A quiet day, no major aspects in tight orb.
               </p>
             ) : (
               <ul className='mt-3 flex flex-col gap-2'>
@@ -381,11 +382,12 @@ export function DaySkyView({
           <Heading as='h2' variant='h2'>
             What the sky was saying
           </Heading>
-          <AudioNarrator
+          {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+          {/* <AudioNarrator
             text={interpretation}
             title={`The sky on ${longDate}`}
             compactVariant='pill'
-          />
+          /> */}
         </div>
         <p className='text-base leading-relaxed text-content-secondary sm:text-lg'>
           {interpretation}
@@ -399,7 +401,7 @@ export function DaySkyView({
         </Heading>
         <p className='max-w-xl text-sm text-content-muted'>
           Open the time machine to see your own birthday, your wedding, your
-          first day of a new chapter — any day at all.
+          first day of a new chapter, any day at all.
         </p>
         <Button asChild variant='lunary-solid' size='lg'>
           <Link href={ctaHref}>

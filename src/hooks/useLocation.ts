@@ -21,6 +21,15 @@ export const useLocation = () => {
   const { user, refetch } = useUser();
   const normalizeLocation = useCallback((input?: LocationData | null) => {
     const fallback = getDefaultLocation();
+    const hasInputCoordinates =
+      typeof input?.latitude === 'number' &&
+      Number.isFinite(input.latitude) &&
+      typeof input?.longitude === 'number' &&
+      Number.isFinite(input.longitude);
+    const browserTimezone =
+      typeof Intl !== 'undefined'
+        ? Intl.DateTimeFormat().resolvedOptions().timeZone
+        : undefined;
     const latitude =
       typeof input?.latitude === 'number' && Number.isFinite(input.latitude)
         ? input.latitude
@@ -32,9 +41,12 @@ export const useLocation = () => {
     return {
       latitude,
       longitude,
-      city: input?.city ?? fallback.city,
-      country: input?.country ?? fallback.country,
-      timezone: input?.timezone ?? fallback.timezone,
+      city: input?.city ?? (hasInputCoordinates ? undefined : fallback.city),
+      country:
+        input?.country ?? (hasInputCoordinates ? undefined : fallback.country),
+      timezone:
+        input?.timezone ??
+        (hasInputCoordinates ? browserTimezone : fallback.timezone),
       accuracy: input?.accuracy,
     };
   }, []);

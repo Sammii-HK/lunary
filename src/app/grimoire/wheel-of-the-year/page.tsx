@@ -468,60 +468,60 @@ export default function WheelOfTheYearPage() {
       </section>
 
       {/* CTA */}
-      <section className='bg-gradient-to-r from-layer-base/30 to-amber-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
-        <h2 className='text-2xl font-light text-content-primary mb-4'>
+      <section className='mb-12 rounded-xl border border-[#ead7b8] bg-gradient-to-br from-[#fff8ed] via-[#f7efff] to-[#eefcff] p-8 text-center shadow-sm'>
+        <h2 className='mb-4 text-2xl font-light text-[#4b2a78]'>
           Explore Individual Sabbats
         </h2>
-        <p className='text-content-muted mb-6 max-w-xl mx-auto'>
+        <p className='mx-auto mb-6 max-w-xl text-[#6b5878]'>
           Dive deeper into each Sabbat with detailed guides, rituals, recipes,
           and correspondences.
         </p>
         <div className='flex flex-wrap gap-3 justify-center'>
           <Link
             href='/grimoire/wheel-of-the-year/samhain'
-            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
+            className='rounded-lg border border-[#e7d7fb] bg-white/75 px-4 py-2 text-sm text-[#5c3a87] transition-colors hover:bg-white'
           >
             Samhain
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year/yule'
-            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
+            className='rounded-lg border border-[#e7d7fb] bg-white/75 px-4 py-2 text-sm text-[#5c3a87] transition-colors hover:bg-white'
           >
             Yule
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year/imbolc'
-            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
+            className='rounded-lg border border-[#e7d7fb] bg-white/75 px-4 py-2 text-sm text-[#5c3a87] transition-colors hover:bg-white'
           >
             Imbolc
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year/ostara'
-            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
+            className='rounded-lg border border-[#e7d7fb] bg-white/75 px-4 py-2 text-sm text-[#5c3a87] transition-colors hover:bg-white'
           >
             Ostara
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year/beltane'
-            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
+            className='rounded-lg border border-[#e7d7fb] bg-white/75 px-4 py-2 text-sm text-[#5c3a87] transition-colors hover:bg-white'
           >
             Beltane
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year/litha'
-            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
+            className='rounded-lg border border-[#e7d7fb] bg-white/75 px-4 py-2 text-sm text-[#5c3a87] transition-colors hover:bg-white'
           >
             Litha
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year/lammas'
-            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
+            className='rounded-lg border border-[#e7d7fb] bg-white/75 px-4 py-2 text-sm text-[#5c3a87] transition-colors hover:bg-white'
           >
             Lammas
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year/mabon'
-            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
+            className='rounded-lg border border-[#e7d7fb] bg-white/75 px-4 py-2 text-sm text-[#5c3a87] transition-colors hover:bg-white'
           >
             Mabon
           </Link>

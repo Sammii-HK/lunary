@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
-import { Check, MapPin, Telescope } from 'lucide-react';
+import { Check, Telescope } from 'lucide-react';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { BirthChartPlacement, useUser } from '@/context/UserContext';
 import {
@@ -438,7 +438,11 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
     if (!hasLocationPermission || !location) return null;
 
     try {
-      return calculateSunMoon(locationToObserver(location));
+      return calculateSunMoon(
+        locationToObserver(location),
+        new Date(),
+        location.timezone,
+      );
     } catch {
       return null;
     }
@@ -466,52 +470,8 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
         }
         badgeVariant={retrogradeCount > 0 ? 'danger' : 'default'}
         action={
-          <div className='flex items-center gap-2'>
-            <div onClick={(e) => e.stopPropagation()}>
-              <ShareSkyNow compact />
-            </div>
-            <button
-              type='button'
-              onClick={async (event) => {
-                event.stopPropagation();
-                await handleRefreshLocation();
-              }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  void handleRefreshLocation();
-                }
-              }}
-              aria-label={
-                hasLocationPermission
-                  ? 'Refresh local sky location'
-                  : 'Use my location for local sky times'
-              }
-              title={
-                hasLocationPermission
-                  ? 'Refresh local sky'
-                  : 'Use my location for local sky times'
-              }
-              className={`p-0.5 rounded-full border border-transparent hover:border-stroke-default transition-colors relative ${
-                hasLocationPermission
-                  ? 'text-content-muted hover:text-content-secondary'
-                  : 'text-content-muted/70 hover:text-content-muted'
-              }`}
-            >
-              {refreshState === 'success' ? (
-                <Check className='w-3 h-3 text-lunary-success' />
-              ) : (
-                <MapPin
-                  className={`w-3 h-3 ${locationLoading ? 'animate-pulse' : ''}`}
-                />
-              )}
-              {showLocationFeedback && locationError && (
-                <span className='absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] text-content-secondary'>
-                  Failed
-                </span>
-              )}
-            </button>
+          <div onClick={(e) => e.stopPropagation()}>
+            <ShareSkyNow compact />
           </div>
         }
       />
@@ -564,11 +524,10 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
 
   const expanded = (
     <div className='pt-3 space-y-4' data-testid='sky-now-expand'>
-      {localSkyTiming && (
+      {localSkyTiming ? (
         <div className='rounded-lg border border-stroke-subtle/40 bg-surface-card/35 px-3 py-2'>
           <div className='flex items-center justify-between gap-3'>
             <div className='flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-content-muted'>
-              <MapPin className='w-3 h-3' />
               <span>Local sky</span>
             </div>
             {locationLabel && (
@@ -593,6 +552,35 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
               </span>
             </div>
           </div>
+        </div>
+      ) : (
+        <div className='rounded-lg border border-stroke-subtle/35 bg-surface-card/25 px-3 py-2'>
+          <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
+            <div>
+              <p className='text-xs font-medium text-content-secondary'>
+                Add local rise and set times
+              </p>
+              <p className='text-[11px] text-content-muted'>
+                Uses your location only for Sun and Moon timing.
+              </p>
+            </div>
+            <button
+              type='button'
+              onClick={handleRefreshLocation}
+              disabled={locationLoading}
+              className='inline-flex items-center justify-center gap-1.5 rounded-full border border-stroke-subtle/60 bg-surface-elevated/55 px-3 py-1.5 text-xs text-content-secondary transition-colors hover:border-lunary-primary/45 hover:text-content-primary disabled:opacity-60'
+            >
+              {refreshState === 'success' ? (
+                <Check className='h-3.5 w-3.5 text-lunary-success' />
+              ) : null}
+              {refreshState === 'success' ? 'Added' : 'Use location'}
+            </button>
+          </div>
+          {showLocationFeedback && locationError && (
+            <p className='mt-2 text-[11px] text-lunary-error-300'>
+              Location failed. Check browser permission and try again.
+            </p>
+          )}
         </div>
       )}
       <div className='space-y-2'>

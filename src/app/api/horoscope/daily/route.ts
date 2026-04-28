@@ -72,6 +72,46 @@ interface CachedHoroscope {
   birthChartVersion?: number;
 }
 
+function sanitiseUnavailableChartCopy(text: string | undefined): string {
+  if (!text) return '';
+  if (hasUnavailableChartCopy(text)) {
+    return "Today's wider sky is still moving with you. Notice what feels ready to begin, then choose the smallest next step.";
+  }
+  return text;
+}
+
+function hasUnavailableChartCopy(text: string | undefined): boolean {
+  if (!text) return false;
+  return /birth chart data is not available|birth chart isn't available|birth chart is not available|while your birth chart isn't available|while your birth chart is not available/i.test(
+    text,
+  );
+}
+
+function hasUsableBirthChart(chart: unknown): boolean {
+  return Array.isArray(chart) && chart.length > 0;
+}
+
+function cachedMentionsMissingChart(data: CachedHoroscope | null): boolean {
+  if (!data) return false;
+  return [
+    data.headline,
+    data.overview,
+    data.dailyGuidance,
+    data.personalInsight,
+    data.cosmicHighlight,
+  ].some(hasUnavailableChartCopy);
+}
+
+function sanitiseHoroscopeCopy<T extends CachedHoroscope>(data: T): T {
+  return {
+    ...data,
+    headline: sanitiseUnavailableChartCopy(data.headline),
+    overview: sanitiseUnavailableChartCopy(data.overview),
+    dailyGuidance: sanitiseUnavailableChartCopy(data.dailyGuidance),
+    personalInsight: sanitiseUnavailableChartCopy(data.personalInsight),
+  };
+}
+
 // Get cached horoscope from database
 async function getCachedHoroscope(
   userId: string,
@@ -197,7 +237,7 @@ export async function GET(request: NextRequest) {
             today,
           );
 
-          const horoscopeData = {
+          const horoscopeData = sanitiseHoroscopeCopy({
             userId: 'demo-fallback',
             date: today.toISOString().split('T')[0],
             sunSign: horoscope.sunSign,
@@ -212,7 +252,7 @@ export async function GET(request: NextRequest) {
             cosmicHighlight: horoscope.cosmicHighlight,
             dailyAffirmation: horoscope.dailyAffirmation,
             generatedAt: new Date().toISOString(),
-          };
+          });
 
           const response = NextResponse.json(
             {
@@ -266,14 +306,19 @@ export async function GET(request: NextRequest) {
     // Fetch profile to check birth chart version before serving from cache
     const profile = cached ? await getUserProfile(userId) : null;
     const currentChartVersion = profile?.birthChartVersion ?? null;
+    const profileHasBirthChart = hasUsableBirthChart(profile?.birthChart);
     const cacheIsStale =
-      currentChartVersion !== null &&
-      cached?.birthChartVersion !== undefined &&
-      cached.birthChartVersion !== currentChartVersion;
+      (currentChartVersion !== null &&
+        cached?.birthChartVersion !== undefined &&
+        cached.birthChartVersion !== currentChartVersion) ||
+      (profileHasBirthChart &&
+        (cached?.birthChartVersion === undefined ||
+          cachedMentionsMissingChart(cached)));
     if (cached && isCacheComplete && !cacheIsStale) {
+      const safeCached = sanitiseHoroscopeCopy(cached);
       const response = NextResponse.json(
         {
-          ...cached,
+          ...safeCached,
           cached: true,
         },
         {
@@ -324,7 +369,7 @@ export async function GET(request: NextRequest) {
       today,
     );
 
-    const horoscopeData: CachedHoroscope = {
+    const horoscopeData: CachedHoroscope = sanitiseHoroscopeCopy({
       userId,
       date: dateStr,
       sunSign: horoscope.sunSign,
@@ -340,7 +385,7 @@ export async function GET(request: NextRequest) {
       dailyAffirmation: horoscope.dailyAffirmation,
       generatedAt: new Date().toISOString(),
       birthChartVersion,
-    };
+    });
 
     // Save to cache (fire and forget)
     saveHoroscope(userId, dateStr, horoscopeData).catch((err) =>
@@ -394,7 +439,7 @@ export async function POST(request: NextRequest) {
       today,
     );
 
-    const horoscopeData: CachedHoroscope = {
+    const horoscopeData: CachedHoroscope = sanitiseHoroscopeCopy({
       userId,
       date: dateStr,
       sunSign: horoscope.sunSign,
@@ -410,7 +455,7 @@ export async function POST(request: NextRequest) {
       dailyAffirmation: horoscope.dailyAffirmation,
       generatedAt: new Date().toISOString(),
       birthChartVersion,
-    };
+    });
 
     // Save to cache
     await saveHoroscope(userId, dateStr, horoscopeData);

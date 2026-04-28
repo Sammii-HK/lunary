@@ -1,29 +1,31 @@
 'use client';
 
 /**
- * Live Transit Awareness card.
+ * Next transit card.
  *
- * "The next transit that hits your chart hardest, when it'll be exact, what
- * it means, and a 1-tap voice interpretation."
+ * "The next transit that hits your chart hardest, when it'll be exact, and
+ * what it means."
  *
  * Free users see the headline (planet glyphs, aspect, countdown, one-line
- * blurb). Paid users also get the audio narrator + extended interpretation.
+ * blurb). Paid users also get the extended interpretation.
  *
  * Data source: GET /api/live-transits/next-hit (App Router).
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore dynamic import below.
+// import dynamic from 'next/dynamic';
 import { Sparkles, Clock, Lock, Stars } from 'lucide-react';
 
 import { Heading } from '@/components/ui/Heading';
 import { cn } from '@/lib/utils';
 import { getPlanetSymbol, getAspectSymbol } from '@/constants/symbols';
 
-const AudioNarrator = dynamic(
-  () => import('@/components/audio/AudioNarrator'),
-  { ssr: false },
-);
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// const AudioNarrator = dynamic(
+//   () => import('@/components/audio/AudioNarrator'),
+//   { ssr: false },
+// );
 
 interface NextHitResponse {
   success: boolean;
@@ -89,8 +91,8 @@ function NarrationText({
   const when = countdown.replace(/^Exact /, '');
   return (
     <>
-      Live transit. {transitPlanet} {aspect.toLowerCase()} your natal{' '}
-      {natalPlanet} — {when}. {sentence}
+      Next transit. {transitPlanet} {aspect.toLowerCase()} your natal{' '}
+      {natalPlanet}, {when}. {sentence}
     </>
   );
 }
@@ -119,7 +121,7 @@ export function NextHitCard() {
     };
   }, []);
 
-  // Tick the countdown every minute. Cheap — one component per dashboard.
+  // Tick the countdown every minute. Cheap, one component per dashboard.
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 60_000);
     return () => window.clearInterval(id);
@@ -148,7 +150,7 @@ export function NextHitCard() {
   if (!data || !data.success) return null;
 
   // Quiet-sky / no-chart fallbacks. Card stays on the dashboard so the slot
-  // doesn't pop in/out — but the copy reflects what's missing.
+  // doesn't pop in/out, but the copy reflects what's missing.
   if (!data.hit) {
     const reason = data.reason ?? 'quiet_sky';
     const headline =
@@ -163,7 +165,7 @@ export function NextHitCard() {
       <div className='rounded-xl border border-lunary-primary-800/30 bg-gradient-to-br from-layer-base/40 to-lunary-accent-900/10 p-4'>
         <div className='flex items-center gap-2 text-content-muted text-xs uppercase tracking-wide mb-2'>
           <Stars className='h-3.5 w-3.5' />
-          <span>Live transit awareness</span>
+          <span>Next transit</span>
         </div>
         <Heading as='h3' variant='h3'>
           {headline}
@@ -197,7 +199,7 @@ export function NextHitCard() {
       <div className='flex items-center justify-between gap-2 mb-2'>
         <div className='flex items-center gap-2 text-content-muted text-xs uppercase tracking-wide'>
           <Sparkles className='h-3.5 w-3.5' />
-          <span>Live transit awareness</span>
+          <span>Next transit</span>
         </div>
         <div className='flex items-center gap-1.5 text-xs text-content-secondary'>
           <Clock className='h-3.5 w-3.5' />
@@ -240,25 +242,25 @@ export function NextHitCard() {
       </p>
 
       <div className='flex items-center justify-between gap-2 text-xs text-content-muted'>
-        <span>Exact: {exactDate ? formatExactWhen(exactDate) : '—'}</span>
-        {isPaid ? (
+        <span>Exact: {exactDate ? formatExactWhen(exactDate) : 'Pending'}</span>
+        {/*
+          AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+          Original paid-tier branch rendered:
           <AudioNarrator
-            text={
-              // AudioNarrator wants a string — flatten the JSX-equivalent.
-              `Live transit. ${hit.transitPlanet} ${hit.aspect.toLowerCase()} your natal ${hit.natalPlanet} — ${countdown.replace(/^Exact /, '')}. ${hit.blurb ?? ''}`
-            }
+            text={`Next transit. ${hit.transitPlanet} ${hit.aspect.toLowerCase()} your natal ${hit.natalPlanet}, ${countdown.replace(/^Exact /, '')}. ${hit.blurb ?? ''}`}
             title='Listen to your transit'
             compactVariant='inline'
           />
-        ) : (
+        */}
+        {isPaid ? null : (
           <span className='inline-flex items-center gap-1.5 text-content-muted'>
             <Lock className='h-3.5 w-3.5' />
-            <span>Voice + deeper read on Plus</span>
+            <span>Deeper read on Plus</span>
           </span>
         )}
       </div>
 
-      {/* Hidden — kept for screen readers / future markup parity */}
+      {/* Hidden, kept for screen readers / future markup parity */}
       <span className='sr-only'>
         <NarrationText
           transitPlanet={hit.transitPlanet}
