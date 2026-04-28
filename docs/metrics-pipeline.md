@@ -183,6 +183,10 @@ All require `Authorization: Bearer <LUNARY_ADMIN_KEY>`.
 **To reload the MCP after a code change:**
 Restart Claude Code, or use `/mcp` to check connection status.
 
+Set `LUNARY_MCP_DEBUG=1` only while diagnosing MCP config or request failures.
+Normal MCP runs stay quiet and return structured tool errors without printing
+auth details or response bodies to stderr.
+
 ---
 
 ## BIP post pipeline
