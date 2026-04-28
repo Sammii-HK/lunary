@@ -39,6 +39,13 @@ const TRANSIT_PLANETS = [
 
 type TransitPlanet = (typeof TRANSIT_PLANETS)[number];
 
+export type AspectName =
+  | 'Conjunction'
+  | 'Sextile'
+  | 'Square'
+  | 'Trine'
+  | 'Opposition';
+
 const ASPECTS: { name: AspectName; angle: number }[] = [
   { name: 'Conjunction', angle: 0 },
   { name: 'Sextile', angle: 60 },
@@ -46,13 +53,6 @@ const ASPECTS: { name: AspectName; angle: number }[] = [
   { name: 'Trine', angle: 120 },
   { name: 'Opposition', angle: 180 },
 ];
-
-export type AspectName =
-  | 'Conjunction'
-  | 'Sextile'
-  | 'Square'
-  | 'Trine'
-  | 'Opposition';
 
 const ELEMENT_COLORS: Record<string, string> = {
   Fire: '#ff6b6b',

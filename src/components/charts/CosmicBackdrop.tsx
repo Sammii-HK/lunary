@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { useMemo } from 'react';
+import { useId, useMemo } from 'react';
 
 type Props = {
   viewBox?: string;
@@ -25,6 +25,7 @@ export function CosmicBackdrop({
   starCount = 42,
   seed = 7,
 }: Props) {
+  const gradientId = `cosmic-sky-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const [, , w, h] = viewBox.split(' ').map(Number);
   const stars = useMemo(() => {
     const rng = mulberry32(seed);
@@ -46,10 +47,20 @@ export function CosmicBackdrop({
   return (
     <g className='cosmic-backdrop' pointerEvents='none' aria-hidden>
       <defs>
-        <radialGradient id='cosmic-sky' cx='50%' cy='45%' r='65%'>
-          <stop offset='0%' stopColor='#2e1a5e' stopOpacity='0.55' />
-          <stop offset='55%' stopColor='#15102d' stopOpacity='0.35' />
-          <stop offset='100%' stopColor='#08060f' stopOpacity='0' />
+        <style>
+          {`
+            .cosmic-sky-center { stop-color: rgb(var(--chart-backdrop-center)); stop-opacity: 0.58; }
+            .cosmic-sky-mid { stop-color: rgb(var(--chart-backdrop-mid)); stop-opacity: 0.32; }
+            .cosmic-sky-edge { stop-color: rgb(var(--chart-backdrop-edge)); stop-opacity: 0; }
+            .cosmic-star { fill: rgb(var(--chart-star)); }
+            [data-theme='dark'] .cosmic-sky-center { stop-opacity: 0.52; }
+            [data-theme='dark'] .cosmic-sky-mid { stop-opacity: 0.34; }
+          `}
+        </style>
+        <radialGradient id={gradientId} cx='50%' cy='45%' r='65%'>
+          <stop offset='0%' className='cosmic-sky-center' />
+          <stop offset='55%' className='cosmic-sky-mid' />
+          <stop offset='100%' className='cosmic-sky-edge' />
         </radialGradient>
       </defs>
 
@@ -57,7 +68,7 @@ export function CosmicBackdrop({
         cx='0'
         cy='0'
         r={Math.min(w, h) / 2 - 1}
-        fill='url(#cosmic-sky)'
+        fill={`url(#${gradientId})`}
       />
 
       {stars.map((s) => (
@@ -66,7 +77,7 @@ export function CosmicBackdrop({
           cx={s.cx}
           cy={s.cy}
           r={s.r}
-          fill='#fff8e7'
+          className='cosmic-star'
           initial={{ opacity: s.baseOpacity * 0.4 }}
           animate={{
             opacity: [s.baseOpacity * 0.4, s.baseOpacity, s.baseOpacity * 0.4],

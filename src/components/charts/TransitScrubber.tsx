@@ -28,14 +28,14 @@ import {
 import { ExactHitStrip } from '@/components/charts/ExactHitStrip';
 import { ProgressedRing } from '@/components/charts/ProgressedRing';
 import { PlanetBottomSheet } from '@/components/charts/PlanetBottomSheet';
+import {
+  CHART_ASPECT_COLORS,
+  CHART_COLORS,
+  CHART_ELEMENT_COLORS,
+  CHART_GLYPH_SHADOW,
+} from '@/components/charts/chartTheme';
 
-const ELEMENT_COLORS = {
-  Fire: '#ff6b6b',
-  Earth: '#6b8e4e',
-  Air: '#5dade2',
-  Water: '#9b59b6',
-} as const;
-const SIGN_ELEMENTS: Record<string, keyof typeof ELEMENT_COLORS> = {
+const SIGN_ELEMENTS: Record<string, keyof typeof CHART_ELEMENT_COLORS> = {
   Aries: 'Fire',
   Taurus: 'Earth',
   Gemini: 'Air',
@@ -68,11 +68,21 @@ const signFromLongitude = (lon: number) => {
 };
 
 const ASPECTS = [
-  { name: 'Conjunction', angle: 0, orb: 6, color: '#C77DFF' },
-  { name: 'Opposition', angle: 180, orb: 6, color: '#ffd6a3' },
-  { name: 'Trine', angle: 120, orb: 5, color: '#7BFFB8' },
-  { name: 'Square', angle: 90, orb: 5, color: '#f87171' },
-  { name: 'Sextile', angle: 60, orb: 3, color: '#94d1ff' },
+  {
+    name: 'Conjunction',
+    angle: 0,
+    orb: 6,
+    color: CHART_ASPECT_COLORS.Conjunction,
+  },
+  {
+    name: 'Opposition',
+    angle: 180,
+    orb: 6,
+    color: CHART_ASPECT_COLORS.Opposition,
+  },
+  { name: 'Trine', angle: 120, orb: 5, color: CHART_ASPECT_COLORS.Trine },
+  { name: 'Square', angle: 90, orb: 5, color: CHART_ASPECT_COLORS.Square },
+  { name: 'Sextile', angle: 60, orb: 3, color: CHART_ASPECT_COLORS.Sextile },
 ] as const;
 
 function symbolFor(body: string) {
@@ -262,7 +272,9 @@ export function TransitScrubber({
             time: b.time,
             type: b.retrograde[name] ? 'retrograde' : 'direct',
             label: `${name} ${b.retrograde[name] ? 'retrograde' : 'direct'}`,
-            color: b.retrograde[name] ? '#f87171' : '#7BFFB8',
+            color: b.retrograde[name]
+              ? CHART_COLORS.retrograde
+              : CHART_ASPECT_COLORS.Trine,
           });
         }
         const aSign = Math.floor(
@@ -276,7 +288,7 @@ export function TransitScrubber({
             time: b.time,
             type: 'ingress',
             label: `${name} → ${signFromLongitude(b.longitudes[name])}`,
-            color: '#C77DFF',
+            color: CHART_ASPECT_COLORS.Conjunction,
           });
         }
       }
@@ -289,10 +301,22 @@ export function TransitScrubber({
         type: KeyDate['type'];
         color: string;
       }[] = [
-        { name: 'Moon', type: 'lunar-return', color: '#94d1ff' },
-        { name: 'Sun', type: 'solar-return', color: '#ffe08a' },
-        { name: 'Jupiter', type: 'jupiter-return', color: '#7BFFB8' },
-        { name: 'Saturn', type: 'saturn-return', color: '#C77DFF' },
+        {
+          name: 'Moon',
+          type: 'lunar-return',
+          color: CHART_ASPECT_COLORS.Sextile,
+        },
+        { name: 'Sun', type: 'solar-return', color: CHART_COLORS.sunA },
+        {
+          name: 'Jupiter',
+          type: 'jupiter-return',
+          color: CHART_ASPECT_COLORS.Trine,
+        },
+        {
+          name: 'Saturn',
+          type: 'saturn-return',
+          color: CHART_ASPECT_COLORS.Conjunction,
+        },
       ];
       for (const ret of RETURN_BODIES) {
         const natalLon = natalLookup[ret.name];
@@ -522,7 +546,7 @@ export function TransitScrubber({
             </p>
           </div>
           {!canScrub && (
-            <span className='inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 text-[11px] font-medium text-amber-200'>
+            <span className='inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-800 dark:text-amber-200'>
               <Lock className='h-3 w-3' />
               Plus unlocks time travel
             </span>
@@ -544,7 +568,13 @@ export function TransitScrubber({
             <radialGradient id='transit-sun' cx='50%' cy='50%' r='50%'>
               <motion.stop
                 offset='0%'
-                animate={{ stopColor: ['#ffe9a8', '#ffd76a', '#ffe9a8'] }}
+                animate={{
+                  stopColor: [
+                    CHART_COLORS.sunA,
+                    CHART_COLORS.sunA,
+                    CHART_COLORS.sunA,
+                  ],
+                }}
                 transition={{
                   duration: 6,
                   repeat: Infinity,
@@ -553,7 +583,13 @@ export function TransitScrubber({
               />
               <motion.stop
                 offset='100%'
-                animate={{ stopColor: ['#ff7a45', '#ff5a2c', '#ff7a45'] }}
+                animate={{
+                  stopColor: [
+                    CHART_COLORS.sunB,
+                    CHART_COLORS.sunB,
+                    CHART_COLORS.sunB,
+                  ],
+                }}
                 transition={{
                   duration: 6,
                   repeat: Infinity,
@@ -563,6 +599,14 @@ export function TransitScrubber({
             </radialGradient>
           </defs>
 
+          <circle
+            cx='0'
+            cy='0'
+            r='132'
+            fill={CHART_COLORS.surface}
+            opacity='0.84'
+          />
+
           <CosmicBackdrop seed={42} />
 
           {/* Ring boundaries */}
@@ -571,27 +615,27 @@ export function TransitScrubber({
             cy='0'
             r='130'
             fill='none'
-            stroke='#52525b'
-            strokeWidth='0.5'
-            opacity='0.5'
+            stroke={CHART_COLORS.stroke}
+            strokeWidth='0.8'
+            opacity='0.68'
           />
           <circle
             cx='0'
             cy='0'
             r='92'
             fill='none'
-            stroke='#52525b'
-            strokeWidth='0.5'
-            opacity='0.4'
+            stroke={CHART_COLORS.stroke}
+            strokeWidth='0.65'
+            opacity='0.58'
           />
           <circle
             cx='0'
             cy='0'
             r='58'
             fill='none'
-            stroke='#52525b'
-            strokeWidth='0.5'
-            opacity='0.3'
+            stroke={CHART_COLORS.strokeSubtle}
+            strokeWidth='0.65'
+            opacity='0.48'
           />
 
           {/* Zodiac sector tints */}
@@ -604,7 +648,7 @@ export function TransitScrubber({
             const rOuter = 130,
               rInner = 92;
             const el = SIGN_ELEMENTS[sign];
-            const color = ELEMENT_COLORS[el];
+            const color = CHART_ELEMENT_COLORS[el];
             const x1 = Math.cos(a1) * rOuter,
               y1 = Math.sin(a1) * rOuter;
             const x2 = Math.cos(a2) * rOuter,
@@ -618,7 +662,7 @@ export function TransitScrubber({
                 key={`sector-${i}`}
                 d={`M ${x1} ${y1} A ${rOuter} ${rOuter} 0 ${sweep} 1 ${x2} ${y2} L ${x3} ${y3} A ${rInner} ${rInner} 0 ${sweep} 0 ${x4} ${y4} Z`}
                 fill={color}
-                opacity='0.08'
+                opacity='0.055'
               />
             );
           })}
@@ -635,9 +679,9 @@ export function TransitScrubber({
                 y1={p1.y}
                 x2={p2.x}
                 y2={p2.y}
-                stroke='#52525b'
-                strokeWidth='0.4'
-                opacity='0.4'
+                stroke={CHART_COLORS.stroke}
+                strokeWidth='0.45'
+                opacity='0.5'
               />
             );
           })}
@@ -652,7 +696,10 @@ export function TransitScrubber({
               dominantBaseline='central'
               className='font-astro'
               fontSize='10'
-              fill={ELEMENT_COLORS[SIGN_ELEMENTS[sign]]}
+              fill={CHART_ELEMENT_COLORS[SIGN_ELEMENTS[sign]]}
+              stroke={CHART_COLORS.surface}
+              strokeWidth='0.45'
+              paintOrder='stroke fill'
               opacity='0.95'
             >
               {zodiacSymbol[sign.toLowerCase() as keyof typeof zodiacSymbol]}
@@ -678,7 +725,7 @@ export function TransitScrubber({
                       strokeWidth={3}
                       strokeLinecap='round'
                       initial={{ opacity: 0 }}
-                      animate={{ opacity: [0.1, 0.28, 0.1] }}
+                      animate={{ opacity: [0.06, 0.16, 0.06] }}
                       transition={{
                         duration: 2.4,
                         repeat: Infinity,
@@ -693,10 +740,10 @@ export function TransitScrubber({
                     x2={t.x}
                     y2={t.y}
                     stroke={a.color}
-                    strokeWidth={tight ? 1.1 : 0.75}
+                    strokeWidth={tight ? 0.95 : 0.65}
                     strokeLinecap='round'
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: tight ? 0.75 : 0.45 }}
+                    animate={{ opacity: tight ? 0.58 : 0.32 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.4 }}
                     style={{ pointerEvents: 'none' }}
@@ -710,7 +757,7 @@ export function TransitScrubber({
           {natalPlanets.map((p) => {
             const pos = polar(p.longitude, GLYPH_NATAL_R);
             const sign = signFromLongitude(p.longitude);
-            const elColor = ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
+            const elColor = CHART_ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
             const handleClick = () => {
               const bc = birthChart.find((b) => b.body === p.name);
               if (bc) setSelectedPlanet(bc);
@@ -745,10 +792,13 @@ export function TransitScrubber({
                   dominantBaseline='central'
                   className='font-astro'
                   fontSize='10'
-                  fill='#a1a1aa'
+                  fill={CHART_COLORS.textMuted}
+                  stroke={CHART_COLORS.surface}
+                  strokeWidth='0.55'
+                  paintOrder='stroke fill'
                   opacity='0.85'
                   style={{
-                    filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.7))',
+                    filter: CHART_GLYPH_SHADOW,
                     pointerEvents: 'none',
                   }}
                 >
@@ -785,7 +835,7 @@ export function TransitScrubber({
                 const trail = trailsRef.current[name];
                 if (!trail || trail.length < 2) return [];
                 const sign = signFromLongitude(trail[trail.length - 1].lon);
-                const color = ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
+                const color = CHART_ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
                 return trail.slice(0, -1).map((pt, i) => {
                   const pos = polar(pt.lon, GLYPH_TRANSIT_R);
                   const opacity = ((i + 1) / trail.length) * 0.45;
@@ -812,7 +862,7 @@ export function TransitScrubber({
                 const lon = anchorSnapshot.longitudes[name];
                 const pos = polar(lon, GLYPH_TRANSIT_R + 12);
                 const sign = signFromLongitude(lon);
-                const color = ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
+                const color = CHART_ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
                 return (
                   <g key={`anchor-${name}`}>
                     <circle cx={pos.x} cy={pos.y} r={1.5} fill={color} />
@@ -837,9 +887,10 @@ export function TransitScrubber({
           {/* Transit planet glyphs (outer ring, animated) */}
           {transitPositions.map((p) => {
             const pos = polar(p.longitude, GLYPH_TRANSIT_R);
-            const fill = p.name === 'Sun' ? 'url(#transit-sun)' : '#ffffff';
+            const fill =
+              p.name === 'Sun' ? 'url(#transit-sun)' : CHART_COLORS.text;
             const sign = signFromLongitude(p.longitude);
-            const elColor = ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
+            const elColor = CHART_ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
             const handleClick = () =>
               setSelectedPlanet(
                 transitToBirthChartData(p.name, p.longitude, !!p.retrograde),
@@ -914,7 +965,10 @@ export function TransitScrubber({
                     className='font-astro'
                     fontSize='12'
                     fill={fill}
-                    style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.7))' }}
+                    stroke={CHART_COLORS.surface}
+                    strokeWidth='0.7'
+                    paintOrder='stroke fill'
+                    style={{ filter: CHART_GLYPH_SHADOW }}
                   >
                     {symbolFor(p.name)}
                   </text>
@@ -924,7 +978,7 @@ export function TransitScrubber({
                     x={8}
                     y={5}
                     fontSize='6'
-                    fill='#f87171'
+                    fill={CHART_COLORS.retrograde}
                     textAnchor='middle'
                   >
                     ℞
@@ -1003,9 +1057,9 @@ export function TransitScrubber({
                     e.stopPropagation();
                     if (canScrub) setNow(k.time);
                   }}
-                  className={`absolute -translate-x-1/2 rounded-full border border-black/20 transition-transform hover:scale-150 ${
+                  className={`absolute -translate-x-1/2 rounded-full border border-stroke-subtle shadow-sm transition-transform hover:scale-150 ${
                     tall
-                      ? '-top-1.5 h-3 w-2 ring-1 ring-white/15'
+                      ? '-top-1.5 h-3 w-2 ring-1 ring-lunary-primary/20'
                       : '-top-1 h-2 w-2'
                   }`}
                   style={{
@@ -1021,7 +1075,7 @@ export function TransitScrubber({
             })}
             {/* thumb */}
             <motion.div
-              className='absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-3.5 w-3.5 rounded-full border border-lunary-primary bg-lunary-primary/30 shadow-[0_0_8px_rgba(138,107,255,0.6)]'
+              className='absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-surface-card bg-lunary-primary shadow-[0_0_8px_rgba(138,107,255,0.55)]'
               style={{ left: `${trackFrac * 100}%` }}
               animate={{ scale: playing ? [1, 1.18, 1] : 1 }}
               transition={
@@ -1038,12 +1092,12 @@ export function TransitScrubber({
               <div className='flex flex-wrap items-center justify-end gap-2 text-[11px]'>
                 {anchorTime != null ? (
                   <>
-                    <span className='text-amber-200/90'>
+                    <span className='text-amber-800 dark:text-amber-200/90'>
                       Comparing from {fmtDate(new Date(anchorTime))}
                     </span>
                     <button
                       onClick={() => setAnchorTime(null)}
-                      className='rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-amber-100 hover:bg-amber-400/20'
+                      className='rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-amber-800 hover:bg-amber-500/20 dark:text-amber-100'
                     >
                       Clear anchor
                     </button>
@@ -1147,14 +1201,14 @@ export function TransitScrubber({
             <motion.div
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              className='rounded-lg border border-amber-400/30 bg-amber-400/5 px-3 py-2 text-xs text-amber-100/90'
+              className='rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-800 dark:text-amber-100/90'
             >
               <span className='font-medium'>Free view shows today.</span> Plus
               lets you scrub the whole year, press play to watch transits
               unfold, and jump to exact-hit days.{' '}
               <a
                 href='/pricing'
-                className='underline underline-offset-2 hover:text-amber-50'
+                className='underline underline-offset-2 hover:text-amber-950 dark:hover:text-amber-50'
               >
                 Upgrade →
               </a>

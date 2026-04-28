@@ -36,10 +36,15 @@ type HouseSystem =
   | 'koch'
   | 'porphyry'
   | 'alcabitius';
+type ChartDensityMode = 'guided' | 'pro' | 'custom';
 
 // Rate-limit house system switches for free users (3 per day)
 const FREE_TIER_DAILY_LIMIT = 3;
 const SWITCH_LOG_KEY = 'chart-house-switches';
+const CHART_DENSITY_KEY = 'chart-density-mode';
+const CHART_ASPECTS_KEY = 'chart-show-aspects';
+const CHART_ASTEROIDS_KEY = 'chart-show-asteroids';
+const CHART_POINTS_KEY = 'chart-show-points';
 
 function getFreeTierSwitchesRemaining(): number {
   try {
@@ -75,15 +80,16 @@ const BirthChartPage = () => {
   const [aspectFilter, setAspectFilter] = useState<
     'all' | 'harmonious' | 'challenging'
   >('all');
-  const [showAsteroids, setShowAsteroids] = useState(true);
-  const [showPoints, setShowPoints] = useState(true);
+  const [showAsteroids, setShowAsteroids] = useState(false);
+  const [showPoints, setShowPoints] = useState(false);
   const [clockwise, setClockwise] = useState(false);
   const [showSymbols, setShowSymbols] = useState(true);
+  const [chartDensityMode, setChartDensityMode] =
+    useState<ChartDensityMode>('guided');
   const [houseSystem, setHouseSystem] = useState<HouseSystem>('whole-sign');
   const [zodiacSystem, setZodiacSystem] = useState<ZodiacSystem>('tropical');
   const [houses, setHouses] = useState<HouseCusp[] | null>(null);
   const [loadingHouses, setLoadingHouses] = useState(false);
-  const [showHouseSystemPicker, setShowHouseSystemPicker] = useState(false);
   const [switchesRemaining, setSwitchesRemaining] = useState(
     FREE_TIER_DAILY_LIMIT,
   );
@@ -142,6 +148,20 @@ const BirthChartPage = () => {
     subscription.plan,
   );
 
+  const applyChartDensityMode = (mode: Exclude<ChartDensityMode, 'custom'>) => {
+    setChartDensityMode(mode);
+    if (mode === 'guided') {
+      setShowAspects(false);
+      setShowAsteroids(false);
+      setShowPoints(false);
+      return;
+    }
+    setShowAspects(true);
+    setShowAsteroids(true);
+    setShowPoints(true);
+    setAspectFilter('all');
+  };
+
   useEffect(() => {
     setHasMounted(true);
     // Load preferences from localStorage and user profile
@@ -153,6 +173,26 @@ const BirthChartPage = () => {
     const savedClockwise = localStorage.getItem('chart-clockwise');
     if (savedClockwise !== null) {
       setClockwise(savedClockwise === 'true');
+    }
+
+    const savedShowAspects = localStorage.getItem(CHART_ASPECTS_KEY);
+    const savedShowAsteroids = localStorage.getItem(CHART_ASTEROIDS_KEY);
+    const savedShowPoints = localStorage.getItem(CHART_POINTS_KEY);
+    if (savedShowAspects !== null) {
+      setShowAspects(savedShowAspects === 'true');
+    }
+    if (savedShowAsteroids !== null) {
+      setShowAsteroids(savedShowAsteroids === 'true');
+    }
+    if (savedShowPoints !== null) {
+      setShowPoints(savedShowPoints === 'true');
+    }
+
+    const savedDensityMode = localStorage.getItem(CHART_DENSITY_KEY);
+    if (savedDensityMode === 'guided' || savedDensityMode === 'pro') {
+      applyChartDensityMode(savedDensityMode);
+    } else if (savedDensityMode === 'custom') {
+      setChartDensityMode('custom');
     }
 
     // Load house system from user profile or localStorage
@@ -172,10 +212,10 @@ const BirthChartPage = () => {
       const savedHouseSystem = localStorage.getItem('chart-house-system');
       if (savedHouseSystem && validSystems.includes(savedHouseSystem)) {
         setHouseSystem(savedHouseSystem as HouseSystem);
-      } else {
-        // First time viewing chart — no house system chosen yet
-        setShowHouseSystemPicker(true);
       }
+      // Otherwise: silently default to whole-sign (already the initial
+      // state). House system can be changed later in the Chart settings
+      // sheet (Settings2 icon in ChartControls).
     }
 
     // Load free-tier switch count
@@ -197,6 +237,15 @@ const BirthChartPage = () => {
       localStorage.setItem('chart-clockwise', String(clockwise));
     }
   }, [clockwise, hasMounted]);
+
+  useEffect(() => {
+    if (hasMounted) {
+      localStorage.setItem(CHART_DENSITY_KEY, chartDensityMode);
+      localStorage.setItem(CHART_ASPECTS_KEY, String(showAspects));
+      localStorage.setItem(CHART_ASTEROIDS_KEY, String(showAsteroids));
+      localStorage.setItem(CHART_POINTS_KEY, String(showPoints));
+    }
+  }, [chartDensityMode, hasMounted, showAspects, showAsteroids, showPoints]);
 
   // Save showSymbols to localStorage
   useEffect(() => {
@@ -297,6 +346,21 @@ const BirthChartPage = () => {
       conversionTracking.birthChartViewed(user.id, subscription.plan);
     }
   }, [hasChartAccess, user?.hasBirthChart, user?.id, subscription.plan]);
+
+  // Mark dashboard-engaged after the user has spent >5s on this page.
+  // Used by the contextual web-push prompt on the dashboard.
+  useEffect(() => {
+    if (!hasMounted) return;
+    if (typeof window === 'undefined') return;
+    const timer = window.setTimeout(() => {
+      try {
+        localStorage.setItem('dashboard-engaged', String(Date.now()));
+      } catch {
+        /* ignore storage errors */
+      }
+    }, 5000);
+    return () => window.clearTimeout(timer);
+  }, [hasMounted]);
 
   const shouldShowLoading = loading || !hasMounted;
 
@@ -413,122 +477,8 @@ const BirthChartPage = () => {
 
   return (
     <div className='h-full overflow-auto' data-testid='birth-chart-page'>
-      {/* First-time house system picker */}
-      {showHouseSystemPicker && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
-          <div className='bg-surface-elevated border border-stroke-subtle rounded-2xl p-6 max-w-md w-full space-y-4'>
-            <h2 className='text-lg font-semibold text-content-primary text-center'>
-              Choose your house system
-            </h2>
-            <p className='text-sm text-content-secondary text-center'>
-              This determines how the 12 houses are divided in your chart. Most
-              Western astrologers use Placidus or Whole Sign. You can always
-              change this later.
-            </p>
-            <div className='grid grid-cols-1 gap-2'>
-              {[
-                {
-                  id: 'placidus' as HouseSystem,
-                  name: 'Placidus',
-                  desc: 'Most popular in Western astrology. Unequal houses based on time.',
-                },
-                {
-                  id: 'whole-sign' as HouseSystem,
-                  name: 'Whole Sign',
-                  desc: 'Each sign = one house. Simple and traditional.',
-                },
-                {
-                  id: 'koch' as HouseSystem,
-                  name: 'Koch',
-                  desc: 'Similar to Placidus with different math. Popular in Europe.',
-                },
-                {
-                  id: 'porphyry' as HouseSystem,
-                  name: 'Porphyry',
-                  desc: 'Quadrant trisection. Works at all latitudes.',
-                },
-                {
-                  id: 'alcabitius' as HouseSystem,
-                  name: 'Alcabitius',
-                  desc: 'Medieval system using diurnal arcs.',
-                },
-              ].map(({ id, name, desc }) => (
-                <button
-                  key={id}
-                  onClick={() => {
-                    setHouseSystem(id);
-                    setShowHouseSystemPicker(false);
-                  }}
-                  className='flex flex-col items-start p-3 rounded-lg border border-stroke-subtle hover:border-lunary-primary-500 hover:bg-lunary-primary-900/20 transition-colors text-left'
-                >
-                  <span className='font-medium text-content-primary text-sm'>
-                    {name}
-                  </span>
-                  <span className='text-xs text-content-muted'>{desc}</span>
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={() => setShowHouseSystemPicker(false)}
-              className='w-full text-xs text-content-muted hover:text-content-secondary transition-colors pt-2'
-            >
-              Skip for now (defaults to Whole Sign)
-            </button>
-          </div>
-        </div>
-      )}
-
       <div className='flex w-full flex-col gap-4 max-w-2xl sm:max-w-3xl md:max-w-4xl mx-auto p-4 mb-16'>
-        {/* Internal Links for SEO */}
-        <nav className='p-4 bg-surface-elevated/50 rounded-lg border border-stroke-subtle'>
-          <p className='text-sm text-content-muted mb-3'>
-            Learn more about your cosmic blueprint:
-          </p>
-          <div className='flex flex-wrap gap-3'>
-            <Link
-              href='/grimoire/birth-chart'
-              className='text-xs px-3 py-1.5 bg-layer-base/30 text-content-brand border border-lunary-primary-700/50 rounded-full hover:bg-layer-base/50 transition-colors'
-            >
-              Birth Chart Guide
-            </Link>
-            <Link
-              href='/grimoire/astronomy/planets'
-              className='text-xs px-3 py-1.5 bg-layer-base/30 text-content-brand-accent border border-lunary-accent-700/50 rounded-full hover:bg-layer-base/50 transition-colors'
-            >
-              Planet Meanings
-            </Link>
-            <Link
-              href='/grimoire/houses'
-              className='text-xs px-3 py-1.5 bg-layer-base/30 text-content-brand-secondary border border-lunary-secondary-700/50 rounded-full hover:bg-layer-base/50 transition-colors'
-            >
-              The 12 Houses
-            </Link>
-            <Link
-              href='/grimoire/zodiac'
-              className='text-xs px-3 py-1.5 bg-layer-base/30 text-lunary-rose-300 border border-lunary-rose-700/50 rounded-full hover:bg-layer-base/50 transition-colors'
-            >
-              Zodiac Signs
-            </Link>
-            {birthChartData && (
-              <div className='flex flex-col items-center gap-3'>
-                <ShareBirthChart
-                  birthChart={birthChartData}
-                  userName={userName}
-                  userBirthday={userBirthday}
-                  houseSystem={houseSystem}
-                />
-              </div>
-            )}
-          </div>
-        </nav>
-
         <div className='flex flex-col items-center gap-3'>
-          <ChartModeToggle
-            mode={chartMode}
-            onModeChange={setChartMode}
-            currentAge={currentAge}
-          />
-
           {chartMode === 'progressed' && progressionLoading && (
             <div className='text-center text-sm text-content-muted'>
               Loading progressed chart...
@@ -536,14 +486,25 @@ const BirthChartPage = () => {
           )}
 
           <ChartControls
+            chartDensityMode={chartDensityMode}
+            onChartDensityModeChange={applyChartDensityMode}
             showAspects={showAspects}
-            onToggleAspects={() => setShowAspects(!showAspects)}
+            onToggleAspects={() => {
+              setChartDensityMode('custom');
+              setShowAspects(!showAspects);
+            }}
             aspectFilter={aspectFilter}
             onAspectFilterChange={setAspectFilter}
             showAsteroids={showAsteroids}
-            onToggleAsteroids={() => setShowAsteroids(!showAsteroids)}
+            onToggleAsteroids={() => {
+              setChartDensityMode('custom');
+              setShowAsteroids(!showAsteroids);
+            }}
             showPoints={showPoints}
-            onTogglePoints={() => setShowPoints(!showPoints)}
+            onTogglePoints={() => {
+              setChartDensityMode('custom');
+              setShowPoints(!showPoints);
+            }}
             clockwise={clockwise}
             onToggleClockwise={() => setClockwise(!clockwise)}
             houseSystem={houseSystem}
@@ -563,11 +524,14 @@ const BirthChartPage = () => {
               !['active', 'trial', 'trialing'].includes(subscription.status)
             }
             freeTierSwitchesRemaining={switchesRemaining}
+            sheetTopSlot={
+              <ChartModeToggle
+                mode={chartMode}
+                onModeChange={setChartMode}
+                currentAge={currentAge}
+              />
+            }
           />
-
-          {displayChartWithHouses && chartMode === 'natal' && (
-            <NextImportantDatesStrip birthChart={displayChartWithHouses} />
-          )}
 
           <div data-testid='chart-visualization'>
             {displayChartWithHouses && (
@@ -588,17 +552,51 @@ const BirthChartPage = () => {
               />
             )}
           </div>
+
+          {displayChartWithHouses && chartMode === 'natal' && (
+            <NextImportantDatesStrip birthChart={displayChartWithHouses} />
+          )}
         </div>
 
+        {/* Share + grimoire links: moved below the wheel so the chart loads first on mobile */}
         {birthChartData && (
-          <div className='flex flex-col items-center gap-3'>
-            <ShareBirthChart
-              birthChart={birthChartData}
-              userName={userName}
-              userBirthday={userBirthday}
-              houseSystem={houseSystem}
-            />
-          </div>
+          <nav className='p-4 bg-surface-elevated/50 rounded-lg border border-stroke-subtle'>
+            <p className='text-sm text-content-muted mb-3'>
+              Share your chart, or learn more about your cosmic blueprint:
+            </p>
+            <div className='flex flex-wrap items-center gap-3'>
+              <ShareBirthChart
+                birthChart={birthChartData}
+                userName={userName}
+                userBirthday={userBirthday}
+                houseSystem={houseSystem}
+              />
+              <Link
+                href='/grimoire/birth-chart'
+                className='text-xs px-3 py-1.5 bg-layer-base/30 text-content-brand border border-lunary-primary-700/50 rounded-full hover:bg-layer-base/50 transition-colors'
+              >
+                Birth Chart Guide
+              </Link>
+              <Link
+                href='/grimoire/astronomy/planets'
+                className='text-xs px-3 py-1.5 bg-layer-base/30 text-content-brand-accent border border-lunary-accent-700/50 rounded-full hover:bg-layer-base/50 transition-colors'
+              >
+                Planet Meanings
+              </Link>
+              <Link
+                href='/grimoire/houses'
+                className='text-xs px-3 py-1.5 bg-layer-base/30 text-content-brand-secondary border border-lunary-secondary-700/50 rounded-full hover:bg-layer-base/50 transition-colors'
+              >
+                The 12 Houses
+              </Link>
+              <Link
+                href='/grimoire/zodiac'
+                className='text-xs px-3 py-1.5 bg-layer-base/30 text-lunary-rose-300 border border-lunary-rose-700/50 rounded-full hover:bg-layer-base/50 transition-colors'
+              >
+                Zodiac Signs
+              </Link>
+            </div>
+          </nav>
         )}
 
         {/* Planetary Interpretations */}

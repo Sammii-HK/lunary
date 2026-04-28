@@ -56,6 +56,16 @@ const SIGN_RULER: Record<string, string> = {
 // Shared types
 // ---------------------------------------------------------------------------
 
+export type LunationPhase =
+  | 'new'
+  | 'waxing crescent'
+  | 'first quarter'
+  | 'waxing gibbous'
+  | 'full'
+  | 'waning gibbous'
+  | 'last quarter'
+  | 'waning crescent';
+
 export interface SaturnReturnResult {
   progressPct: number;
   nextExactDate: string;
@@ -85,16 +95,6 @@ export interface LunationResult {
   daysSinceNew: number;
   daysUntilFull: number;
 }
-
-export type LunationPhase =
-  | 'new'
-  | 'waxing crescent'
-  | 'first quarter'
-  | 'waxing gibbous'
-  | 'full'
-  | 'waning gibbous'
-  | 'last quarter'
-  | 'waning crescent';
 
 export interface SolarReturnResult {
   daysUntilNextBirthday: number;

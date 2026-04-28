@@ -10,7 +10,8 @@ import {
   Flame,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { Heading } from '@/components/ui/Heading';
 import { NotableDaysOverview } from '@/components/notable-days/NotableDaysOverview';
 import { cn } from '@/lib/utils';
@@ -54,7 +55,7 @@ function formatLong(iso: string): string {
 
 function buildWalkthrough(day: NotableDay): string {
   if (day.topAspects.length === 0) {
-    return `${formatLong(day.date)} reads as quiet — no tight aspects to your natal chart.`;
+    return `${formatLong(day.date)} reads as quiet, no tight aspects to your natal chart.`;
   }
   const lines: string[] = [];
   lines.push(
@@ -75,15 +76,16 @@ function buildWalkthrough(day: NotableDay): string {
   return lines.join(' ');
 }
 
-function buildNarration(top5: NotableDay[]): string {
-  if (top5.length === 0) {
-    return 'Your next ninety days look steady. No standout transits are landing on your natal chart in this window.';
-  }
-  const intro =
-    'Here are your most pivotal days in the next ninety. Each one is scored by how directly the transits hit your own chart — most days are quiet, a few burn bright.';
-  const lines = top5.map((d, i) => `Day ${i + 1}: ${buildWalkthrough(d)}`);
-  return [intro, ...lines].join(' ');
-}
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// function buildNarration(top5: NotableDay[]): string {
+//   if (top5.length === 0) {
+//     return 'Your next ninety days look steady. No standout transits are landing on your natal chart in this window.';
+//   }
+//   const intro =
+//     'Here are your most pivotal days in the next ninety. Each one is scored by how directly the transits hit your own chart, most days are quiet, a few burn bright.';
+//   const lines = top5.map((d, i) => `Day ${i + 1}: ${buildWalkthrough(d)}`);
+//   return [intro, ...lines].join(' ');
+// }
 
 export default function NotableDaysPage() {
   const [days, setDays] = useState<NotableDay[]>([]);
@@ -114,7 +116,8 @@ export default function NotableDaysPage() {
     };
   }, []);
 
-  const narrationText = buildNarration(top5);
+  // AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+  // const narrationText = buildNarration(top5);
 
   return (
     <main className='mx-auto w-full max-w-3xl px-4 py-6 md:py-10'>
@@ -124,15 +127,16 @@ export default function NotableDaysPage() {
             Notable Days
           </Heading>
           <p className='mt-2 text-sm text-content-secondary md:max-w-xl'>
-            Your most pivotal days in the next three months — scored by which
+            Your most pivotal days in the next three months, scored by which
             transits land on your natal chart, and sorted by life area.
           </p>
         </div>
-        <AudioNarrator
+        {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+        {/* <AudioNarrator
           text={narrationText}
           title='Notable days walkthrough'
           className='shrink-0'
-        />
+        /> */}
       </header>
 
       <NotableDaysOverview
@@ -146,7 +150,7 @@ export default function NotableDaysPage() {
         </Heading>
         {loading && top5.length === 0 ? (
           <p className='text-sm text-content-secondary'>
-            Reading your chart against the next ninety days…
+            Reading your chart against the next ninety days...
           </p>
         ) : error ? (
           <p className='text-sm text-content-secondary'>{error}</p>

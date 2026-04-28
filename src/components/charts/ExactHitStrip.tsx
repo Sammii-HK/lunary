@@ -18,6 +18,11 @@ const ASPECTS = [
   { name: 'Sextile', angle: 60, orb: 3, color: '#94d1ff', glyph: '✶' },
 ] as const;
 
+const CHART_STROKE = 'rgb(var(--stroke-default, 113 113 122))';
+const CHART_TEXT = 'rgb(var(--content-primary, 24 24 27))';
+const CHART_SURFACE_SHADOW =
+  '0 1px 1px rgb(var(--surface-base, 255 255 255)), 0 0 6px rgb(var(--surface-base, 255 255 255))';
+
 type NatalPlanet = {
   name: BodyName;
   longitude: number;
@@ -187,7 +192,7 @@ export function ExactHitStrip({
             y1={PAD_TOP}
             x2={VB_W - PAD_X}
             y2={PAD_TOP}
-            stroke='#52525b'
+            stroke={CHART_STROKE}
             strokeWidth={0.4}
             strokeDasharray='2 3'
             opacity={0.6}
@@ -198,7 +203,7 @@ export function ExactHitStrip({
             y1={PAD_TOP + innerH}
             x2={VB_W - PAD_X}
             y2={PAD_TOP + innerH}
-            stroke='#52525b'
+            stroke={CHART_STROKE}
             strokeWidth={0.4}
             opacity={0.4}
           />
@@ -277,7 +282,7 @@ export function ExactHitStrip({
             y1={PAD_TOP - 4}
             x2={nowX}
             y2={PAD_TOP + innerH + 4}
-            stroke='#ffffff'
+            stroke={CHART_TEXT}
             strokeWidth={0.6}
             opacity={0.55}
           />
@@ -299,8 +304,7 @@ export function ExactHitStrip({
                   top: `${topPct}%`,
                   transform: 'translate(-50%, -100%)',
                   color: pair.color,
-                  textShadow:
-                    '0 1px 2px rgba(0,0,0,0.85), 0 0 6px rgba(0,0,0,0.6)',
+                  textShadow: CHART_SURFACE_SHADOW,
                 }}
               >
                 <span className='font-astro' aria-hidden>
@@ -319,7 +323,7 @@ export function ExactHitStrip({
             style={{
               left: `${(nowX / VB_W) * 100}%`,
               bottom: '2px',
-              textShadow: '0 1px 2px rgba(0,0,0,0.7)',
+              textShadow: CHART_SURFACE_SHADOW,
             }}
           >
             now

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import type {
   BirthChartData,
   HouseCusp,
@@ -16,13 +16,15 @@ import {
   type ZodiacSystem,
 } from '@utils/astrology/zodiacSystems';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 import { PersonalPlanetsSection } from './PersonalPlanetsSection';
 import { SocialPlanetsSection } from './SocialPlanetsSection';
 import { GenerationalPlanetsSection } from './GenerationalPlanetsSection';
 import { AsteroidsSection } from './AsteroidsSection';
 import { SensitivePointsSection } from './SensitivePointsSection';
+import { SectionGuide } from './SectionGuide';
 import {
   calculateWholeSigHouses,
   getPlanetaryInterpretation,
@@ -54,11 +56,15 @@ export function BirthChartShowcase({
   zodiacSystem = 'tropical',
   houses: explicitHouses,
 }: BirthChartShowcaseProps) {
-  const getDisplaySign = (planet: BirthChartData | undefined) => {
-    if (!planet) return '';
-    if (!Number.isFinite(planet.eclipticLongitude)) return planet.sign;
-    return getSignForZodiacSystem(planet.eclipticLongitude, zodiacSystem).sign;
-  };
+  const getDisplaySign = useCallback(
+    (planet: BirthChartData | undefined) => {
+      if (!planet) return '';
+      if (!Number.isFinite(planet.eclipticLongitude)) return planet.sign;
+      return getSignForZodiacSystem(planet.eclipticLongitude, zodiacSystem)
+        .sign;
+    },
+    [zodiacSystem],
+  );
 
   // Wrapper function to bind zodiacSystem to getPlanetaryInterpretation
   const getPlanetaryInterpretationWithSystem = (planet: BirthChartData) =>
@@ -122,7 +128,7 @@ export function BirthChartShowcase({
       housePlacement,
       rulerAspects,
     };
-  }, [birthChart, rising, houses, zodiacSystem]);
+  }, [birthChart, rising, houses, getDisplaySign]);
 
   const chartAnalysis = useMemo(
     () => getChartAnalysis(birthChart),
@@ -140,54 +146,59 @@ export function BirthChartShowcase({
     [birthChart],
   );
 
+  // AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
   // Build a concatenated narration of the showcase's core prose so users can
   // listen to their chart highlights without expanding every section.
-  const narratorText = (() => {
-    const parts: string[] = [];
-    if (sun) {
-      parts.push(
-        `Sun in ${getDisplaySign(sun)}. Your core identity and life purpose. This is who you are at your essence.`,
-      );
-    }
-    if (moon) {
-      parts.push(
-        `Moon in ${getDisplaySign(moon)}. Your emotional nature and inner needs. This is how you feel and what you need to feel secure.`,
-      );
-    }
-    if (rising) {
-      parts.push(
-        `${getDisplaySign(rising)} rising. Your outer personality and how others see you. This is your mask and first impression.`,
-      );
-    }
-    parts.push(
-      `${dominantElement.name} dominant with ${dominantElement.count} planet${dominantElement.count !== 1 ? 's' : ''}. You express yourself through ${getElementMeaning(dominantElement.name)} energy.`,
-    );
-    parts.push(
-      `${dominantModality.name} mode. ${dominantModality.count} planet${dominantModality.count !== 1 ? 's' : ''} approach life through ${
-        dominantModality.name === 'Cardinal'
-          ? 'initiative and leadership'
-          : dominantModality.name === 'Fixed'
-            ? 'stability and persistence'
-            : 'adaptability and change'
-      }.`,
-    );
-    if (chartRulerData && rising) {
-      parts.push(
-        `${chartRulerData.chartRulerName} rules your chart. As the ruler of your ${getDisplaySign(rising)} Ascendant, ${chartRulerData.chartRulerName} is the most important planet in your chart.`,
-      );
-    }
-    return parts.join('\n\n');
-  })();
+  // const narratorText = (() => {
+  //   const parts: string[] = [];
+  //   if (sun) {
+  //     parts.push(
+  //       `Sun in ${getDisplaySign(sun)}. Your core identity and life purpose. This is who you are at your essence.`,
+  //     );
+  //   }
+  //   if (moon) {
+  //     parts.push(
+  //       `Moon in ${getDisplaySign(moon)}. Your emotional nature and inner needs. This is how you feel and what you need to feel secure.`,
+  //     );
+  //   }
+  //   if (rising) {
+  //     parts.push(
+  //       `${getDisplaySign(rising)} rising. Your outer personality and how others see you. This is your mask and first impression.`,
+  //     );
+  //   }
+  //   parts.push(
+  //     `${dominantElement.name} dominant with ${dominantElement.count} planet${dominantElement.count !== 1 ? 's' : ''}. You express yourself through ${getElementMeaning(dominantElement.name)} energy.`,
+  //   );
+  //   parts.push(
+  //     `${dominantModality.name} mode. ${dominantModality.count} planet${dominantModality.count !== 1 ? 's' : ''} approach life through ${
+  //       dominantModality.name === 'Cardinal'
+  //         ? 'initiative and leadership'
+  //         : dominantModality.name === 'Fixed'
+  //           ? 'stability and persistence'
+  //           : 'adaptability and change'
+  //     }.`,
+  //   );
+  //   if (chartRulerData && rising) {
+  //     parts.push(
+  //       `${chartRulerData.chartRulerName} rules your chart. As the ruler of your ${getDisplaySign(rising)} Ascendant, ${chartRulerData.chartRulerName} is the most important planet in your chart.`,
+  //     );
+  //   }
+  //   return parts.join('\n\n');
+  // })();
 
   return (
     <div className='flex flex-col gap-3'>
-      {/* Listen to your chart */}
-      <div className='flex justify-end'>
-        <AudioNarrator
+      {/* Reading path single-line + audio narrator */}
+      <div className='flex items-center justify-between gap-3 px-1'>
+        <p className='text-xs text-content-muted'>
+          Start with the open sections, then expand pro layers for detail.
+        </p>
+        {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+        {/* <AudioNarrator
           text={narratorText}
           title='Birth chart highlights'
           compactVariant='inline'
-        />
+        /> */}
       </div>
 
       {/* Big Three - Sun, Moon, Rising */}
@@ -199,6 +210,10 @@ export function BirthChartShowcase({
             persistState={true}
           >
             <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+              <SectionGuide label='Start here' variant='start'>
+                Your Big Three are the fastest way into the chart: identity,
+                inner needs, and first impression.
+              </SectionGuide>
               <div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
                 {sun && (
                   <div className='bg-surface-elevated rounded p-3'>
@@ -280,6 +295,10 @@ export function BirthChartShowcase({
           persistState={true}
         >
           <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+            <SectionGuide label='Quick read' variant='start'>
+              This is the chart at a glance: dominant tone, approach, and the
+              planet with the most connections.
+            </SectionGuide>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
               {/* Dominant Element */}
               <div className='bg-surface-elevated rounded-lg p-3'>
@@ -355,6 +374,10 @@ export function BirthChartShowcase({
             persistState={true}
           >
             <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+              <SectionGuide label='Core thread' variant='start'>
+                Your chart ruler links the rising sign to the rest of the chart.
+                It shows where the chart keeps returning.
+              </SectionGuide>
               <div className='mb-3'>
                 <div className='flex items-center gap-2 mb-2'>
                   <span className='font-astro text-xl'>
@@ -482,6 +505,10 @@ export function BirthChartShowcase({
               persistState={true}
             >
               <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+                <SectionGuide label='Next layer' variant='next'>
+                  Houses place the chart into life areas. Open this when you
+                  want to see where each theme tends to show up.
+                </SectionGuide>
                 <div className='grid grid-cols-2 gap-2'>
                   {houses.map(({ house, sign, planets }) => {
                     const houseInfo = houseThemes[house];
@@ -597,11 +624,15 @@ export function BirthChartShowcase({
       {chartAnalysis.length > 0 && (
         <div>
           <CollapsibleSection
-            title='Chart Analysis'
+            title='Pro layer: Chart Analysis'
             defaultCollapsed={true}
             persistState={true}
           >
             <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+              <SectionGuide label='Pro layer' variant='pro'>
+                Pattern notes connect multiple chart factors together. Use these
+                after the individual placements feel familiar.
+              </SectionGuide>
               <div className='space-y-3'>
                 {chartAnalysis.map((analysis, index) => (
                   <div key={index} className='bg-surface-elevated rounded p-3'>
@@ -622,11 +653,15 @@ export function BirthChartShowcase({
       {/* Elemental & Modal Balance */}
       <div>
         <CollapsibleSection
-          title='Elemental & Modal Balance'
+          title='Pro layer: Elemental & Modal Balance'
           defaultCollapsed={true}
           persistState={true}
         >
           <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+            <SectionGuide label='Pro layer' variant='pro'>
+              This section counts repeated elemental and modal patterns. It is
+              useful for spotting emphasis, not for replacing the placements.
+            </SectionGuide>
             <div className='grid grid-cols-2 gap-3'>
               {/* Elements */}
               <div>
@@ -768,11 +803,15 @@ export function BirthChartShowcase({
       {aspects.length > 0 && (
         <div data-testid='aspects-list'>
           <CollapsibleSection
-            title='Major Aspects'
+            title='Pro layer: Major Aspects'
             defaultCollapsed={true}
             persistState={true}
           >
             <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+              <SectionGuide label='Pro layer' variant='pro'>
+                Aspects describe conversations between planets. Tight repeated
+                themes matter more than reading every line at once.
+              </SectionGuide>
               <div className='space-y-2'>
                 {aspects.map((aspect, index) => (
                   <div
@@ -797,11 +836,15 @@ export function BirthChartShowcase({
       {patterns.length > 0 && (
         <div>
           <CollapsibleSection
-            title='Chart Patterns'
+            title='Pro layer: Chart Patterns'
             defaultCollapsed={true}
             persistState={true}
           >
             <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+              <SectionGuide label='Pro layer' variant='pro'>
+                Patterns are whole-chart shapes. They are best read as
+                supporting structure once the main placements are clear.
+              </SectionGuide>
               <div className='space-y-2'>
                 {patterns.map((pattern, index) => (
                   <div key={index} className='bg-surface-elevated rounded p-3'>
@@ -826,11 +869,15 @@ export function BirthChartShowcase({
       {stelliums.length > 0 && (
         <div>
           <CollapsibleSection
-            title='Stelliums & Concentrations'
+            title='Pro layer: Stelliums & Concentrations'
             defaultCollapsed={true}
             persistState={true}
           >
             <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+              <SectionGuide label='Pro layer' variant='pro'>
+                Stelliums show concentrated emphasis. Read them as areas where
+                several chart threads gather in the same sign or house.
+              </SectionGuide>
               <div className='space-y-2'>
                 {stelliums.map((stellium, index) => {
                   const firstPlanetInStellium = birthChart.find(
@@ -869,11 +916,15 @@ export function BirthChartShowcase({
       {dignities.length > 0 && (
         <div>
           <CollapsibleSection
-            title='Planetary Strength'
+            title='Pro layer: Planetary Strength'
             defaultCollapsed={true}
             persistState={true}
           >
             <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+              <SectionGuide label='Pro layer' variant='pro'>
+                Dignities are traditional strength markers. They add technique,
+                but they should not be read as good or bad by themselves.
+              </SectionGuide>
               <div className='space-y-3'>
                 {dignities.map((dignity, index) => {
                   const dignityStyles = {

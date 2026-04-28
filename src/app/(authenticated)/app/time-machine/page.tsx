@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Time Machine — pick a date and a life-event label and see what the sky
+ * Time Machine, pick a date and a life-event label and see what the sky
  * looked like that day. Renders the resulting chart with `<BirthChart>` and
  * a small narrative panel of the most striking aspects.
  */
@@ -17,7 +17,17 @@ import {
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { Clock, Lock, Plus, Sparkles, Trash2, Wand2 } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Lock,
+  MapPin,
+  Plus,
+  Sparkles,
+  Trash2,
+  Wand2,
+} from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { BirthChart } from '@/components/BirthChart';
@@ -120,35 +130,35 @@ const ASPECT_DEFS = [
     name: 'Conjunction',
     angle: 0,
     orb: 6,
-    blurb: 'fused — same energy, amplified',
+    blurb: 'fused, same energy, amplified',
     color: '#C77DFF',
   },
   {
     name: 'Opposition',
     angle: 180,
     orb: 6,
-    blurb: 'tension — two forces pulling apart',
+    blurb: 'tension, two forces pulling apart',
     color: '#ffd6a3',
   },
   {
     name: 'Trine',
     angle: 120,
     orb: 5,
-    blurb: 'flow — easy, supportive current',
+    blurb: 'flow, easy, supportive current',
     color: '#7BFFB8',
   },
   {
     name: 'Square',
     angle: 90,
     orb: 5,
-    blurb: 'friction — pressure that demands action',
+    blurb: 'friction, pressure that demands action',
     color: '#f87171',
   },
   {
     name: 'Sextile',
     angle: 60,
     orb: 3,
-    blurb: 'opportunity — gentle invitation',
+    blurb: 'opportunity, gentle invitation',
     color: '#94d1ff',
   },
 ] as const;
@@ -239,6 +249,7 @@ const TimeMachinePage = () => {
     label: string;
   } | null>(null);
   const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
+  const [locationOpen, setLocationOpen] = useState(false);
   const autoSubmittedRef = useRef(false);
 
   // Hydrate location defaults + saved events from localStorage on mount
@@ -288,82 +299,8 @@ const TimeMachinePage = () => {
     }
   }, []);
 
-  const fetchChart = useCallback(
-    async (next: { date: string; time: string; label: string }) => {
-      setSubmitting(true);
-      setError(null);
-      try {
-        const res = await fetch(
-          `/api/astrology/planetary-positions?date=${encodeURIComponent(
-            next.date,
-          )}`,
-          { cache: 'no-store', credentials: 'include' },
-        );
-        if (!res.ok) {
-          let reason = res.statusText || 'request failed';
-          try {
-            const errBody = (await res.json()) as { error?: string };
-            if (errBody?.error) reason = errBody.error;
-          } catch {
-            /* ignore non-JSON errors */
-          }
-          throw new Error(
-            `Couldn’t load the sky for ${next.date} — ${res.status} ${reason}`,
-          );
-        }
-        const json = (await res.json()) as PlanetaryPositionsResponse;
-        const placements = placementsFromResponse(json);
-        if (!placements.length) {
-          throw new Error(
-            `No planetary data returned for ${next.date}. Try a different date.`,
-          );
-        }
-        setChartPlacements(placements);
-        setActiveEvent(next);
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'Something went wrong. Try again.',
-        );
-      } finally {
-        setSubmitting(false);
-      }
-    },
-    [],
-  );
-
-  // Deep-link support: prefill (and optionally auto-submit) from `?date=` and
-  // `?label=`. Useful for emails, share cards, journal-entry CTAs, etc.
-  useEffect(() => {
-    if (autoSubmittedRef.current) return;
-    if (!searchParams) return;
-    const qpDate = searchParams.get('date');
-    const qpLabel = searchParams.get('label');
-    if (!qpDate && !qpLabel) return;
-
-    const isoLike = /^\d{4}-\d{2}-\d{2}$/.test(qpDate || '');
-    if (qpDate && isoLike) setDate(qpDate);
-    if (qpLabel) setLabel(qpLabel.slice(0, 60));
-
-    if (qpDate && isoLike) {
-      autoSubmittedRef.current = true;
-      void fetchChart({
-        date: qpDate,
-        time: '12:00',
-        label: (qpLabel || '').slice(0, 60).trim(),
-      });
-    }
-  }, [searchParams, fetchChart]);
-
-  const handleSubmit = useCallback(
-    async (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      const trimmed = label.trim();
-      if (!date) return;
-      const next = { date, time: time || '12:00', label: trimmed };
-      await fetchChart(next);
-      // Save into local list (deduped by date+label)
+  const upsertSavedEvent = useCallback(
+    (next: { date: string; time: string; label: string }) => {
       setSavedEvents((prev) => {
         const filtered = prev.filter(
           (entry) => !(entry.date === next.date && entry.label === next.label),
@@ -386,7 +323,92 @@ const TimeMachinePage = () => {
         return merged;
       });
     },
-    [date, fetchChart, label, time],
+    [],
+  );
+
+  const fetchChart = useCallback(
+    async (next: { date: string; time: string; label: string }) => {
+      setSubmitting(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `/api/astrology/planetary-positions?date=${encodeURIComponent(
+            next.date,
+          )}`,
+          { cache: 'no-store', credentials: 'include' },
+        );
+        if (!res.ok) {
+          let reason = res.statusText || 'request failed';
+          try {
+            const errBody = (await res.json()) as { error?: string };
+            if (errBody?.error) reason = errBody.error;
+          } catch {
+            /* ignore non-JSON errors */
+          }
+          throw new Error(
+            `Couldn't load the sky for ${next.date}, ${res.status} ${reason}`,
+          );
+        }
+        const json = (await res.json()) as PlanetaryPositionsResponse;
+        const placements = placementsFromResponse(json);
+        if (!placements.length) {
+          throw new Error(
+            `No planetary data returned for ${next.date}. Try a different date.`,
+          );
+        }
+        setChartPlacements(placements);
+        setActiveEvent(next);
+        return true;
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Something went wrong. Try again.',
+        );
+        return false;
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [],
+  );
+
+  // Deep-link support: prefill (and optionally auto-submit) from `?date=` and
+  // `?label=`. Useful for emails, share cards, journal-entry CTAs, etc.
+  useEffect(() => {
+    if (autoSubmittedRef.current) return;
+    if (!searchParams) return;
+    const qpDate = searchParams.get('date');
+    const qpLabel = searchParams.get('label');
+    if (!qpDate && !qpLabel) return;
+
+    const isoLike = /^\d{4}-\d{2}-\d{2}$/.test(qpDate || '');
+    if (qpDate && isoLike) setDate(qpDate);
+    if (qpLabel) setLabel(qpLabel.slice(0, 60));
+
+    if (qpDate && isoLike) {
+      autoSubmittedRef.current = true;
+      const next = {
+        date: qpDate,
+        time: '12:00',
+        label: (qpLabel || '').slice(0, 60).trim(),
+      };
+      void fetchChart(next).then((ok) => {
+        if (ok) upsertSavedEvent(next);
+      });
+    }
+  }, [searchParams, fetchChart, upsertSavedEvent]);
+
+  const handleSubmit = useCallback(
+    async (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const trimmed = label.trim();
+      if (!date) return;
+      const next = { date, time: time || '12:00', label: trimmed };
+      const ok = await fetchChart(next);
+      if (ok) upsertSavedEvent(next);
+    },
+    [date, fetchChart, label, time, upsertSavedEvent],
   );
 
   const reopenEvent = useCallback(
@@ -448,7 +470,7 @@ const TimeMachinePage = () => {
               </Heading>
             </div>
             <p className='mt-3 text-sm text-content-secondary'>
-              See the sky on any date in your life — first kiss, big move, the
+              See the sky on any date in your life, first kiss, big move, the
               day everything shifted. Time Machine is part of Lunary Plus.
             </p>
             <Link
@@ -541,20 +563,43 @@ const TimeMachinePage = () => {
             />
           </label>
 
-          <CityPicker
-            value={location}
-            onChange={setLocation}
-            label='Location (optional)'
-            placeholder='Search a city — e.g. London, New York, Tokyo'
-          />
-          <p className='-mt-1 text-[11px] text-content-muted'>
-            Used to colour the share card. Planet positions don’t change with
-            location, just the houses (coming soon).
-          </p>
+          <div className='flex flex-col gap-2'>
+            <button
+              type='button'
+              onClick={() => setLocationOpen((v) => !v)}
+              className='inline-flex w-fit items-center gap-1.5 rounded-full border border-stroke-subtle bg-layer-base/30 px-3 py-1 text-[11px] font-medium text-content-muted transition-colors hover:border-lunary-primary/40 hover:text-content-secondary'
+              aria-expanded={locationOpen}
+              aria-controls='time-machine-location'
+            >
+              {locationOpen ? (
+                <ChevronUp className='h-3 w-3' />
+              ) : (
+                <ChevronDown className='h-3 w-3' />
+              )}
+              <MapPin className='h-3 w-3' />
+              {location?.label
+                ? `Location · ${location.label}`
+                : 'Add location (optional)'}
+            </button>
+            {locationOpen && (
+              <div id='time-machine-location' className='flex flex-col gap-1'>
+                <CityPicker
+                  value={location}
+                  onChange={setLocation}
+                  label='Location (optional)'
+                  placeholder='Search a city, e.g. London, New York, Tokyo'
+                />
+                <p className='text-[11px] text-content-muted'>
+                  Used to colour the share card. Planet positions don't change
+                  with location, just the houses (coming soon).
+                </p>
+              </div>
+            )}
+          </div>
 
           <div className='flex flex-wrap items-center justify-between gap-3 pt-1'>
             <p className='text-[11px] text-content-muted'>
-              We&apos;ll show the planetary positions for that day — your event
+              We&apos;ll show the planetary positions for that day, your event
               label is just for you.
             </p>
             <motion.button
@@ -564,7 +609,7 @@ const TimeMachinePage = () => {
               className='inline-flex items-center gap-2 rounded-full bg-lunary-primary px-4 py-2 text-sm font-semibold text-white shadow-[0_0_12px_rgba(138,107,255,0.45)] transition-opacity disabled:opacity-50'
             >
               <Wand2 className='h-4 w-4' />
-              {submitting ? 'Reading the sky…' : 'Show me'}
+              {submitting ? 'Reading the sky...' : 'Show me'}
             </motion.button>
           </div>
 
@@ -575,12 +620,12 @@ const TimeMachinePage = () => {
           )}
         </motion.form>
 
-        {/* Loading state — chart-shaped skeleton while computing */}
+        {/* Loading state, chart-shaped skeleton while computing */}
         {submitting && chartPlacements.length === 0 && (
           <div className='flex flex-col items-center gap-3 rounded-2xl border border-stroke-subtle bg-surface-elevated/40 p-6'>
             <div className='aspect-square w-full max-w-sm animate-pulse rounded-full border border-stroke-subtle/60 bg-surface-muted/40' />
             <p className='text-sm text-content-muted'>
-              Reading the sky for {formatDateLabel(date)}…
+              Reading the sky for {formatDateLabel(date)}...
             </p>
           </div>
         )}
@@ -618,7 +663,7 @@ const TimeMachinePage = () => {
                 </Heading>
                 {aspects.length === 0 ? (
                   <p className='text-xs text-content-muted'>
-                    No tight major aspects on this day — the sky was relatively
+                    No tight major aspects on this day, the sky was relatively
                     quiet.
                   </p>
                 ) : (

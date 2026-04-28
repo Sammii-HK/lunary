@@ -27,20 +27,17 @@ import {
   MoonPhase,
   illuminationFromLongitudes,
 } from '@/components/charts/MoonPhase';
+import {
+  CHART_COLORS,
+  CHART_ELEMENT_COLORS,
+} from '@/components/charts/chartTheme';
 
 const cx = classNames;
 
 /** Round to 6 decimal places to prevent SSR/client hydration mismatch from float precision drift. */
 const r6 = (n: number) => Math.round(n * 1e6) / 1e6;
 
-const ELEMENT_COLORS = {
-  Fire: '#ff6b6b',
-  Earth: '#6b8e4e',
-  Air: '#5dade2',
-  Water: '#9b59b6',
-} as const;
-
-const SIGN_ELEMENTS: Record<string, keyof typeof ELEMENT_COLORS> = {
+const SIGN_ELEMENTS: Record<string, keyof typeof CHART_ELEMENT_COLORS> = {
   Aries: 'Fire',
   Taurus: 'Earth',
   Gemini: 'Air',
@@ -57,7 +54,7 @@ const SIGN_ELEMENTS: Record<string, keyof typeof ELEMENT_COLORS> = {
 
 function getSignElementColor(sign: string): string {
   const element = SIGN_ELEMENTS[sign];
-  return element ? ELEMENT_COLORS[element] : '#71717a';
+  return element ? CHART_ELEMENT_COLORS[element] : CHART_COLORS.textMuted;
 }
 
 const MAIN_PLANETS = [
@@ -407,7 +404,7 @@ export const BirthChart = ({
           <div className='flex items-center gap-2'>
             <div
               className='w-3 h-3 rounded-full'
-              style={{ backgroundColor: ELEMENT_COLORS.Fire }}
+              style={{ backgroundColor: CHART_ELEMENT_COLORS.Fire }}
             />
             <span className='text-content-secondary'>
               Fire (Aries, Leo, Sag)
@@ -416,7 +413,7 @@ export const BirthChart = ({
           <div className='flex items-center gap-2'>
             <div
               className='w-3 h-3 rounded-full'
-              style={{ backgroundColor: ELEMENT_COLORS.Earth }}
+              style={{ backgroundColor: CHART_ELEMENT_COLORS.Earth }}
             />
             <span className='text-content-secondary'>
               Earth (Tau, Vir, Cap)
@@ -425,32 +422,48 @@ export const BirthChart = ({
           <div className='flex items-center gap-2'>
             <div
               className='w-3 h-3 rounded-full'
-              style={{ backgroundColor: ELEMENT_COLORS.Air }}
+              style={{ backgroundColor: CHART_ELEMENT_COLORS.Air }}
             />
             <span className='text-content-secondary'>Air (Gem, Lib, Aqu)</span>
           </div>
           <div className='flex items-center gap-2'>
             <div
               className='w-3 h-3 rounded-full'
-              style={{ backgroundColor: ELEMENT_COLORS.Water }}
+              style={{ backgroundColor: CHART_ELEMENT_COLORS.Water }}
             />
             <span className='text-content-secondary'>
               Water (Can, Sco, Pis)
             </span>
           </div>
           <div className='flex items-center gap-2'>
-            <div className='w-3 h-3 rounded-full bg-[#C77DFF]' />
+            <div
+              className='w-3 h-3 rounded-full'
+              style={{ backgroundColor: CHART_COLORS.selected }}
+            />
             <span className='text-content-secondary'>Angles (AC, MC, DC)</span>
           </div>
+          {showAsteroids && (
+            <div className='flex items-center gap-2'>
+              <div
+                className='w-3 h-3 rounded-full'
+                style={{ backgroundColor: CHART_COLORS.sunA }}
+              />
+              <span className='text-content-secondary'>Asteroids</span>
+            </div>
+          )}
           <div className='flex items-center gap-2'>
-            <div className='w-3 h-3 rounded-full bg-[#FCD34D]' />
-            <span className='text-content-secondary'>Asteroids</span>
-          </div>
-          <div className='flex items-center gap-2'>
-            <div className='w-3 h-3 rounded-full bg-[#f87171]' />
+            <div
+              className='w-3 h-3 rounded-full'
+              style={{ backgroundColor: CHART_COLORS.retrograde }}
+            />
             <span className='text-content-secondary'>Retrograde</span>
           </div>
         </div>
+        {(showAsteroids || showPoints) && scale < 1.3 && (
+          <p className='mt-2 text-[11px] text-content-muted'>
+            Pinch in to reveal the deeper chart layer.
+          </p>
+        )}
       </div>
 
       <div
@@ -492,9 +505,21 @@ export const BirthChart = ({
         >
           <defs>
             <radialGradient id={`cursorGlow-${uid}`} cx='50%' cy='50%' r='50%'>
-              <stop offset='0%' stopColor='#ffffff' stopOpacity='0.25' />
-              <stop offset='60%' stopColor='#ffffff' stopOpacity='0.05' />
-              <stop offset='100%' stopColor='#ffffff' stopOpacity='0' />
+              <stop
+                offset='0%'
+                stopColor={CHART_COLORS.surfaceSoft}
+                stopOpacity='0.25'
+              />
+              <stop
+                offset='60%'
+                stopColor={CHART_COLORS.surfaceSoft}
+                stopOpacity='0.05'
+              />
+              <stop
+                offset='100%'
+                stopColor={CHART_COLORS.surfaceSoft}
+                stopOpacity='0'
+              />
             </radialGradient>
             <linearGradient
               id={`sun-${uid}`}
@@ -503,8 +528,8 @@ export const BirthChart = ({
               x2='100%'
               y2='100%'
             >
-              <stop offset='0%' stopColor='#ffe08a' />
-              <stop offset='100%' stopColor='#ff7a45' />
+              <stop offset='0%' stopColor={CHART_COLORS.sunA} />
+              <stop offset='100%' stopColor={CHART_COLORS.sunB} />
             </linearGradient>
             <linearGradient
               id={`moon-${uid}`}
@@ -513,8 +538,8 @@ export const BirthChart = ({
               x2='100%'
               y2='100%'
             >
-              <stop offset='0%' stopColor='#e8ecff' />
-              <stop offset='100%' stopColor='#8b9cf9' />
+              <stop offset='0%' stopColor={CHART_COLORS.moonA} />
+              <stop offset='100%' stopColor={CHART_COLORS.moonB} />
             </linearGradient>
             <filter
               id={`soft-${uid}`}
@@ -532,6 +557,13 @@ export const BirthChart = ({
           </defs>
 
           <g>
+            <circle
+              cx='0'
+              cy='0'
+              r='122'
+              fill={CHART_COLORS.surface}
+              opacity='0.84'
+            />
             <CosmicBackdrop seed={7} />
           </g>
 
@@ -556,27 +588,27 @@ export const BirthChart = ({
                 cy='0'
                 r='120'
                 fill='none'
-                stroke='#3f3f46'
-                strokeWidth='0.8'
-                opacity='0.7'
+                stroke={CHART_COLORS.stroke}
+                strokeWidth='0.9'
+                opacity='0.74'
               />
               <circle
                 cx='0'
                 cy='0'
                 r='85'
                 fill='none'
-                stroke='#3f3f46'
-                strokeWidth='0.8'
-                opacity='0.5'
+                stroke={CHART_COLORS.stroke}
+                strokeWidth='0.7'
+                opacity='0.6'
               />
               <circle
                 cx='0'
                 cy='0'
                 r='50'
                 fill='none'
-                stroke='#27272a'
+                stroke={CHART_COLORS.strokeSubtle}
                 strokeWidth='0.6'
-                opacity='0.5'
+                opacity='0.52'
               />
 
               {/* Element-tinted zodiac sector fills */}
@@ -601,7 +633,7 @@ export const BirthChart = ({
                     key={`sector-${i}`}
                     d={`M ${x1} ${y1} A ${rOuter} ${rOuter} 0 ${sweep} ${yf === 1 ? 1 : 0} ${x2} ${y2} L ${x3} ${y3} A ${rInner} ${rInner} 0 ${sweep} ${yf === 1 ? 0 : 1} ${x4} ${y4} Z`}
                     fill={color}
-                    opacity='0.08'
+                    opacity='0.055'
                   />
                 );
               })}
@@ -612,7 +644,7 @@ export const BirthChart = ({
                   aspects={aspects}
                   visible={showAspects}
                   highlightedPlanet={highlightedPlanet}
-                  opacity={0.32}
+                  opacity={0.28}
                   onAspectClick={setSelectedAspect}
                   innerRadius={60}
                 />
@@ -633,9 +665,11 @@ export const BirthChart = ({
                     y1={y1}
                     x2={x2}
                     y2={y2}
-                    stroke={isAngular ? '#7B7BE8' : '#52525b'}
-                    strokeWidth={isAngular ? 1.5 : 0.5}
-                    opacity={isAngular ? 0.8 : 0.4}
+                    stroke={
+                      isAngular ? CHART_COLORS.angular : CHART_COLORS.stroke
+                    }
+                    strokeWidth={isAngular ? 1.25 : 0.5}
+                    opacity={isAngular ? 0.68 : 0.44}
                   />
                 );
               })}
@@ -659,7 +693,7 @@ export const BirthChart = ({
                     y={y}
                     textAnchor='middle'
                     dominantBaseline='central'
-                    className='fill-zinc-500'
+                    fill={CHART_COLORS.textMuted}
                     fontSize='8'
                   >
                     {house.house}
@@ -690,9 +724,9 @@ export const BirthChart = ({
                     y1={y1}
                     x2={x2}
                     y2={y2}
-                    stroke='#52525b'
+                    stroke={CHART_COLORS.stroke}
                     strokeWidth='0.5'
-                    opacity='0.5'
+                    opacity='0.56'
                   />
                 );
               })}
@@ -708,6 +742,9 @@ export const BirthChart = ({
                   className='font-astro'
                   fontSize='12'
                   fill={getSignElementColor(sign)}
+                  stroke={CHART_COLORS.surface}
+                  strokeWidth='0.45'
+                  paintOrder='stroke fill'
                   opacity='0.95'
                 >
                   {
@@ -748,24 +785,24 @@ export const BirthChart = ({
                 const displaySign = sign;
                 const elementColor =
                   isPlanet && displaySign && SIGN_ELEMENTS[displaySign]
-                    ? ELEMENT_COLORS[SIGN_ELEMENTS[displaySign]]
+                    ? CHART_ELEMENT_COLORS[SIGN_ELEMENTS[displaySign]]
                     : undefined;
                 const baseColor = retrograde
-                  ? '#f87171'
+                  ? CHART_COLORS.retrograde
                   : isAngle
-                    ? '#C77DFF'
+                    ? CHART_COLORS.selected
                     : isPoint
-                      ? '#7B7BE8'
+                      ? CHART_COLORS.angular
                       : isAsteroid
-                        ? '#FCD34D'
-                        : elementColor || '#ffffff';
+                        ? CHART_COLORS.sunA
+                        : elementColor || CHART_COLORS.text;
                 const glyphFill =
                   body === 'Sun'
                     ? `url(#sun-${uid})`
                     : body === 'Moon'
                       ? `url(#moon-${uid})`
                       : isHovered || isSelected
-                        ? '#ffffff'
+                        ? CHART_COLORS.text
                         : baseColor;
 
                 const symbol = getSymbolForBody(body);
@@ -828,7 +865,7 @@ export const BirthChart = ({
                         style={{ filter: 'blur(5px)' }}
                       />
                     )}
-                    {/* Selection ring — static glow, no infinite pulse */}
+                    {/* Selection ring, static glow, no infinite pulse */}
                     {isSelected && (
                       <motion.circle
                         cx={x}
@@ -842,7 +879,7 @@ export const BirthChart = ({
                         transition={{ duration: 0.25 }}
                       />
                     )}
-                    {/* Aspected-planet ring — static, dimmer */}
+                    {/* Aspected-planet ring, static, dimmer */}
                     {hasSelection && isAspected && !isSelected && (
                       <motion.circle
                         cx={x}
@@ -891,6 +928,9 @@ export const BirthChart = ({
                           isAngle || isPoint ? '12' : isAsteroid ? '11' : '14'
                         }
                         fill={glyphFill}
+                        stroke={CHART_COLORS.surface}
+                        strokeWidth='0.55'
+                        paintOrder='stroke fill'
                         whileHover={{ scale: 1.2 }}
                         whileTap={{ scale: 0.92 }}
                         animate={{ scale: isSelected ? 1.18 : 1 }}

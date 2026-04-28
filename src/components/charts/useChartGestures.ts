@@ -91,6 +91,11 @@ export function useChartGestures(opts: { enabled?: boolean } = {}) {
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (!enabled) return;
+      try {
+        e.currentTarget.setPointerCapture?.(e.pointerId);
+      } catch {
+        // Some SVG/browser combinations reject capture during fast gestures.
+      }
       pointers.current.set(e.pointerId, {
         id: e.pointerId,
         x: e.clientX,
@@ -155,7 +160,7 @@ export function useChartGestures(opts: { enabled?: boolean } = {}) {
           return;
         }
         pinchStart.current.active = true;
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         const nextScale = clamp(pinchStart.current!.scale * ratio);
         const nextPan = clampPan(
           pinchStart.current.tx + midX - pinchStart.current.midX,
@@ -178,7 +183,7 @@ export function useChartGestures(opts: { enabled?: boolean } = {}) {
           return;
         }
         panStart.current.active = true;
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         updateState((s) => ({
           scale: s.scale,
           ...clampPan(
@@ -196,6 +201,11 @@ export function useChartGestures(opts: { enabled?: boolean } = {}) {
     const hadGesture = Boolean(
       pinchStart.current?.active || panStart.current?.active,
     );
+    try {
+      e.currentTarget.releasePointerCapture?.(e.pointerId);
+    } catch {
+      // Ignore release failures for pointers the browser already dropped.
+    }
     pointers.current.delete(e.pointerId);
 
     if (hadGesture) suppressTapUntil.current = Date.now() + TAP_SUPPRESS_MS;
@@ -218,7 +228,7 @@ export function useChartGestures(opts: { enabled?: boolean } = {}) {
     (e: React.WheelEvent) => {
       if (!enabled) return;
       if (!e.ctrlKey && !e.metaKey && Math.abs(e.deltaY) < 2) return;
-      e.preventDefault();
+      if (e.cancelable) e.preventDefault();
       const direction = e.deltaY > 0 ? -1 : 1;
       updateState((s) => {
         const nextScale = clamp(s.scale + direction * SCALE_STEP);
