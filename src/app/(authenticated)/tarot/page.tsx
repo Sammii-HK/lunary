@@ -7,6 +7,8 @@ import { hasFeatureAccess } from '../../../../utils/pricing';
 import { TarotView } from './components/TarotView';
 import { useABTestTracking } from '@/hooks/useABTestTracking';
 import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
+import { conversionTracking } from '@/lib/analytics';
+import { useEffect } from 'react';
 
 export default function TarotReadings() {
   const { user, loading } = useUser();
@@ -25,6 +27,28 @@ export default function TarotReadings() {
         subscription.plan,
         'personal_tarot',
       );
+
+  useEffect(() => {
+    if (authStatus.loading || loading || subscription.loading) return;
+    if (!user?.id) return;
+
+    const isPaidUser =
+      subscription.plan === 'monthly' || subscription.plan === 'yearly';
+
+    if (hasPersonalTarotAccess && isPaidUser) {
+      conversionTracking.personalizedTarotViewed(user.id, subscription.plan);
+      return;
+    }
+
+    conversionTracking.tarotViewed(user.id, subscription.plan);
+  }, [
+    authStatus.loading,
+    hasPersonalTarotAccess,
+    loading,
+    subscription.loading,
+    subscription.plan,
+    user?.id,
+  ]);
 
   // Simple sequential loading checks - prioritize unauthenticated users
   if (authStatus.loading) {

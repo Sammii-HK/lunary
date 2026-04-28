@@ -57,7 +57,8 @@ export function TarotCardModal({
       title={card.name}
       subtitle={isMajorArcana ? 'Major Arcana' : 'Minor Arcana'}
       accentColor='text-lunary-primary'
-      className='md:w-[480px]'
+      desktopPresentation='bottom'
+      className='md:w-[560px]'
     >
       <TarotCard
         name={card.name}

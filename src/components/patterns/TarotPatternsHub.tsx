@@ -1,6 +1,6 @@
 'use client';
 
-import { Sparkles, Moon, TrendingUp } from 'lucide-react';
+import { Sparkles, Moon } from 'lucide-react';
 import { PatternCard } from './PatternCard';
 import { RecurringThemesCard } from '../RecurringThemesCard';
 import { FrequentCardsSection } from './FrequentCardsSection';
@@ -32,11 +32,6 @@ export function TarotPatternsHub({
   onUpgradeClick,
 }: TarotPatternsHubProps) {
   // Feature access checks
-  const hasAdvancedPatterns = hasFeatureAccess(
-    subscriptionStatus,
-    userTier,
-    'tarot_patterns_advanced',
-  );
   const hasDrillDown = hasFeatureAccess(
     subscriptionStatus,
     userTier,
@@ -85,7 +80,7 @@ export function TarotPatternsHub({
       )}
 
       {/* Visualization Grid */}
-      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
+      <div className='grid gap-4 md:grid-cols-2'>
         {/* Suit Distribution */}
         <PatternCard
           title='Suit Distribution'
@@ -124,28 +119,6 @@ export function TarotPatternsHub({
             minorCount={patterns.arcanaBalance.minor}
           />
         </PatternCard>
-
-        {/* Placeholder for Timeline (Pro Monthly+) */}
-        {hasAdvancedPatterns && (
-          <PatternCard
-            title='Reading Frequency'
-            subtitle={
-              isObserved
-                ? `${patterns.totalReadings} recorded readings`
-                : 'Recorded readings only'
-            }
-            color='accent'
-            icon={<TrendingUp className='w-4 h-4' />}
-            collapsible={true}
-            defaultCollapsed={true}
-          >
-            <div className='flex items-center justify-center h-[250px] text-sm text-content-muted'>
-              {isObserved
-                ? 'Timeline visualization coming soon'
-                : 'No recorded reading timeline yet'}
-            </div>
-          </PatternCard>
-        )}
       </div>
 
       {/* Frequent Cards with Drill-Down */}

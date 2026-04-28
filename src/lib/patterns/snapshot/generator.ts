@@ -154,6 +154,7 @@ export async function generateLifeThemesSnapshot(
         id: theme.id,
         name: theme.name,
         score: theme.score,
+        confidence: theme.confidence,
         shortSummary: theme.shortSummary,
         sources: {
           journalEntries: journalEntries.length,

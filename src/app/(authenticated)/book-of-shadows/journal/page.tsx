@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import {
   BookOpen,
   Plus,
-  Sparkles,
   ArrowLeft,
   Moon,
   Star,
@@ -17,29 +16,15 @@ import {
 import { useAuthStatus } from '@/components/AuthStatus';
 import { JournalEntry } from '@/app/api/journal/route';
 import { JournalPattern } from '@/lib/journal/pattern-analyzer';
+import { Heading } from '@/components/ui/Heading';
 import { RecurringThemesCard } from '@/components/RecurringThemesCard';
 import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 import { VoiceJournalInput } from '@/components/journal/VoiceJournalInput';
+import { AnniversaryMoment } from '@/components/journal/AnniversaryMoment';
+import type { AnniversaryRecord } from '@/lib/journal/anniversary-finder';
 import { HabitCaptureRow } from '@/components/cosmic-habits/HabitCaptureRow';
 import { CorrelationsCard } from '@/components/cosmic-habits/CorrelationsCard';
 import type { HabitCapture } from '@/lib/cosmic-habits/types';
-
-interface PatternCardProps {
-  pattern: JournalPattern;
-}
-
-function PatternCard({ pattern }: PatternCardProps) {
-  return (
-    <div className='bg-gradient-to-br from-layer-base/30 to-indigo-900/30 border border-lunary-primary-700 rounded-lg p-4'>
-      <div className='flex items-center gap-2 mb-2'>
-        <Sparkles className='w-4 h-4 text-lunary-primary-400' />
-        <span className='text-sm font-medium text-content-brand'>Pattern</span>
-      </div>
-      <p className='text-content-primary font-medium mb-1'>{pattern.title}</p>
-      <p className='text-sm text-content-muted'>{pattern.description}</p>
-    </div>
-  );
-}
 
 interface EntryCardProps {
   entry: JournalEntry;
@@ -131,6 +116,9 @@ export default function JournalPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inputMode, setInputMode] = useState<'text' | 'voice'>('text');
   const [habitCapture, setHabitCapture] = useState<HabitCapture>({});
+  const [anniversary, setAnniversary] = useState<AnniversaryRecord | null>(
+    null,
+  );
 
   const loadData = useCallback(async () => {
     try {
@@ -164,6 +152,25 @@ export default function JournalPage() {
       setIsLoading(false);
     }
   }, [authLoading, user, loadData]);
+
+  // Lazy fetch the "this time last year" anniversary record. Pure side-data,
+  // failures are swallowed so the journal page never blocks on it.
+  useEffect(() => {
+    if (!user) return;
+    const today = new Date().toISOString().split('T')[0];
+    let cancelled = false;
+    fetch(`/api/journal/anniversaries?date=${today}`, {
+      credentials: 'include',
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.anniversary) setAnniversary(data.anniversary);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -234,23 +241,23 @@ export default function JournalPage() {
 
   return (
     <div className='min-h-screen bg-surface-base pb-24'>
-      <header className='sticky top-0 z-10 bg-surface-base/90 backdrop-blur-sm border-b border-stroke-subtle px-4 py-4'>
-        <div className='flex items-center gap-3'>
+      <header className='sticky top-0 z-10 bg-surface-base/90 backdrop-blur-sm border-b border-stroke-subtle px-4 py-2.5'>
+        <div className='flex items-center gap-2'>
           <button
             onClick={() => router.push('/book-of-shadows')}
-            className='p-2 -ml-2 hover:bg-surface-card rounded-lg transition-colors'
+            className='p-1.5 -ml-1.5 hover:bg-surface-card rounded-lg transition-colors'
+            aria-label='Back to Book of Shadows'
           >
-            <ArrowLeft className='w-5 h-5 text-content-muted' />
+            <ArrowLeft className='w-4 h-4 text-content-muted' />
           </button>
-          <div>
-            <h1 className='text-lg font-bold text-content-primary flex items-center gap-2'>
-              <BookOpen className='w-5 h-5 text-lunary-primary-400' />
-              Living Book of Shadows
-            </h1>
-            <p className='text-xs text-content-muted'>
-              Your reflections and patterns connected
-            </p>
-          </div>
+          <Heading
+            as='h1'
+            variant='h3'
+            className='mb-0 flex items-center gap-2'
+          >
+            <BookOpen className='w-4 h-4 text-lunary-primary-400' />
+            Living Book of Shadows
+          </Heading>
         </div>
       </header>
 
@@ -343,17 +350,6 @@ export default function JournalPage() {
           />
         )}
 
-        {patterns.length > 0 && (
-          <div className='space-y-3'>
-            <h2 className='text-sm font-medium text-content-muted uppercase tracking-wide'>
-              Patterns Detected
-            </h2>
-            {patterns.map((pattern, i) => (
-              <PatternCard key={i} pattern={pattern} />
-            ))}
-          </div>
-        )}
-
         <ReferralShareCTA
           compact
           message='Know someone who journals? They get 30 days of Pro free when they join Lunary.'
@@ -363,6 +359,14 @@ export default function JournalPage() {
           <h2 className='text-sm font-medium text-content-muted uppercase tracking-wide'>
             Recent Reflections
           </h2>
+          {anniversary && (
+            <AnniversaryMoment
+              date={anniversary.anniversaryDate}
+              journalSnippet={anniversary.journalSnippet ?? undefined}
+              transitsSnippet={anniversary.transitsSnippet ?? undefined}
+              yearsAgo={anniversary.yearsAgo}
+            />
+          )}
           {entries.length === 0 ? (
             <div className='text-center py-8'>
               <Moon className='w-10 h-10 text-content-muted mx-auto mb-3' />

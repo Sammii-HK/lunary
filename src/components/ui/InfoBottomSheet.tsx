@@ -25,6 +25,7 @@ type Props = {
    * to widen it for richer content.
    */
   className?: string;
+  desktopPresentation?: 'center' | 'bottom';
   children: ReactNode;
 };
 
@@ -46,6 +47,7 @@ export function InfoBottomSheet({
   accentColor = 'text-lunary-primary',
   leading,
   className,
+  desktopPresentation = 'center',
   children,
 }: Props) {
   useEffect(() => {
@@ -88,7 +90,9 @@ export function InfoBottomSheet({
             aria-label={title}
             className={cn(
               'fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-2xl border border-stroke-default bg-surface-elevated px-5 pb-8 pt-3 shadow-2xl',
-              'md:inset-auto md:left-1/2 md:top-1/2 md:max-h-[85vh] md:w-[420px] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-2xl md:px-6 md:pt-5',
+              desktopPresentation === 'bottom'
+                ? 'md:left-1/2 md:right-auto md:max-h-[88vh] md:w-[560px] md:-translate-x-1/2 md:rounded-t-3xl md:px-6 md:pt-5'
+                : 'md:inset-auto md:left-1/2 md:top-1/2 md:max-h-[85vh] md:w-[420px] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-2xl md:px-6 md:pt-5',
               'pb-[max(env(safe-area-inset-bottom,0px),2rem)]',
               className,
             )}

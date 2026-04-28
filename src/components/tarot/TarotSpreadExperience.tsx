@@ -38,25 +38,6 @@ export type SubscriptionStatus =
   | 'cancelled'
   | 'past_due';
 
-export interface TarotSpreadExperienceProps {
-  userId?: string;
-  userName?: string;
-  userBirthday?: string;
-  birthChart?: BirthChartPlacement[];
-  userBirthLocation?: string;
-  subscriptionPlan: {
-    plan: TarotPlan;
-    status: SubscriptionStatus;
-  };
-  onRequireUpgrade?: (requiredPlan: TarotPlan) => void;
-  onCardPreview?: (card: {
-    name: string;
-    keywords: string[];
-    information: string;
-  }) => void;
-  onShareReading?: (reading: SpreadReadingRecord) => void;
-}
-
 type SpreadReadingCard = {
   positionId: string;
   positionLabel: string;
@@ -87,6 +68,25 @@ export type SpreadReadingRecord = {
   updatedAt: string;
 };
 
+export interface TarotSpreadExperienceProps {
+  userId?: string;
+  userName?: string;
+  userBirthday?: string;
+  birthChart?: BirthChartPlacement[];
+  userBirthLocation?: string;
+  subscriptionPlan: {
+    plan: TarotPlan;
+    status: SubscriptionStatus;
+  };
+  onRequireUpgrade?: (requiredPlan: TarotPlan) => void;
+  onCardPreview?: (card: {
+    name: string;
+    keywords: string[];
+    information: string;
+  }) => void;
+  onShareReading?: (reading: SpreadReadingRecord) => void;
+}
+
 type UsageSnapshot = {
   plan: TarotPlan;
   status: SubscriptionStatus;
@@ -102,6 +102,27 @@ const PLAN_LABEL: Record<TarotPlan, string> = {
   monthly: 'Lunary+',
   yearly: 'Lunary+ Pro Annual',
 };
+
+const SUIT_ACCENTS: Record<string, string> = {
+  cups: 'from-sky-400/25 to-lunary-primary/15',
+  wands: 'from-amber-300/25 to-lunary-rose-500/15',
+  swords: 'from-zinc-200/25 to-lunary-accent/15',
+  pentacles: 'from-emerald-300/25 to-lunary-secondary/15',
+  major: 'from-lunary-primary/30 to-lunary-accent/15',
+};
+
+function getCardMark(card: SpreadReadingCard['card']) {
+  if (card.arcana === 'major') {
+    return card.name
+      .replace(/^The\s+/i, '')
+      .split(/\s+/)
+      .map((part) => part[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+  }
+  return (card.suit?.[0] || card.name[0] || '?').toUpperCase();
+}
 
 // Map TarotPlan to actual plan ID for UpgradePrompt
 function mapTarotPlanToPlanId(
@@ -516,8 +537,7 @@ export function TarotSpreadExperience({
 
     const cardLines = currentReading.cards
       .map(
-        (card) =>
-          `- ${card.positionLabel}: ${card.card.name} — ${card.insight}`,
+        (card) => `- ${card.positionLabel}: ${card.card.name}, ${card.insight}`,
       )
       .join('\n');
     const promptLines = currentReading.journalingPrompts
@@ -548,7 +568,8 @@ export function TarotSpreadExperience({
           content,
           category: 'journal',
           source: 'tarot',
-          moodTags: ['tarot', 'reflection'],
+          sourceMessageId: currentReading.id,
+          moodTags: ['tarot', 'reflection', currentReading.spreadSlug],
           cardReferences: currentReading.cards.map((card) => card.card.name),
         }),
       });
@@ -860,7 +881,7 @@ export function TarotSpreadExperience({
                           date: new Date(currentReading.createdAt)
                             .toISOString()
                             .slice(0, 10),
-                          label: currentReading.spreadName,
+                          label: `Tarot: ${currentReading.spreadName}`,
                         }).toString()}`}
                         className='inline-flex items-center gap-2 rounded-md border border-stroke-subtle bg-surface-elevated/40 px-3 py-1 text-xs font-medium text-content-secondary transition-colors hover:border-lunary-primary/40 hover:text-content-primary'
                       >
@@ -904,54 +925,72 @@ export function TarotSpreadExperience({
                 {currentReading?.cards?.map((card, cardIndex) => {
                   const isTransitExpanded =
                     expandedTransitCardIndex === cardIndex;
+                  const cardAccentKey =
+                    card.card.arcana === 'major'
+                      ? 'major'
+                      : card.card.suit?.toLowerCase() || 'major';
+                  const cardAccent =
+                    SUIT_ACCENTS[cardAccentKey] || SUIT_ACCENTS.major;
                   return (
                     <div
                       key={card.positionId}
                       data-testid={`spread-card-${cardIndex}`}
-                      className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/40 p-4'
+                      className='rounded-xl border border-stroke-subtle/50 bg-gradient-to-br from-surface-elevated/65 to-layer-base/35 p-3 shadow-[0_16px_55px_rgba(0,0,0,0.16)] sm:p-4'
                     >
                       {/* Card header - clickable to preview */}
                       <button
                         type='button'
                         onClick={() => handleCardPreview(card.card)}
-                        className='w-full flex flex-col items-start gap-2 text-left transition-colors hover:opacity-80'
+                        className='w-full flex items-start gap-3 text-left transition-colors hover:opacity-90'
                       >
-                        <div className='flex w-full items-center justify-between'>
-                          <div>
-                            <p className='text-xs uppercase tracking-wide text-content-muted'>
-                              {card.positionLabel}
-                            </p>
-                            <p className='text-xs text-content-muted'>
-                              {card.positionPrompt}
-                            </p>
-                          </div>
-                          <span className='text-[10px] uppercase tracking-[0.2em] text-content-muted'>
-                            {card.card.arcana === 'major' ? 'Major' : 'Minor'}
-                          </span>
+                        <div
+                          className={clsx(
+                            'flex h-16 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-gradient-to-br text-sm font-semibold tracking-[0.18em] text-content-primary shadow-inner shadow-black/25 sm:h-20 sm:w-14 sm:rounded-xl',
+                            cardAccent,
+                          )}
+                        >
+                          {getCardMark(card.card)}
                         </div>
-                        <p className='text-base sm:text-lg font-semibold text-content-primary'>
-                          {card.card.name}
-                        </p>
-                        <p className='text-sm text-content-secondary leading-relaxed'>
-                          "{card.insight}"
-                        </p>
-                        <div className='flex flex-wrap gap-1'>
-                          {card.card.keywords.slice(0, 4).map((keyword) => (
-                            <span
-                              key={`${card.positionId}-${keyword}`}
-                              className='text-xs px-2 py-0.5 rounded text-content-primary bg-surface-elevated border border-stroke-subtle'
-                            >
-                              {keyword}
+                        <div className='flex min-w-0 flex-1 flex-col items-start gap-2'>
+                          <div className='flex w-full items-start justify-between gap-3'>
+                            <div>
+                              <p className='text-xs uppercase tracking-wide text-content-muted'>
+                                {card.positionLabel}
+                              </p>
+                              <p className='text-xs text-content-muted'>
+                                {card.positionPrompt}
+                              </p>
+                            </div>
+                            <span className='rounded-full border border-stroke-subtle/60 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-content-muted'>
+                              {card.card.arcana === 'major'
+                                ? 'Major'
+                                : card.card.suit || 'Minor'}
                             </span>
-                          ))}
+                          </div>
+                          <p className='text-base sm:text-lg font-semibold text-content-primary'>
+                            {card.card.name}
+                          </p>
+                          <p className='text-sm text-content-secondary leading-relaxed'>
+                            "{card.insight}"
+                          </p>
+                          <div className='flex flex-wrap gap-1'>
+                            {card.card.keywords.slice(0, 4).map((keyword) => (
+                              <span
+                                key={`${card.positionId}-${keyword}`}
+                                className='text-xs px-2 py-0.5 rounded text-content-primary bg-surface-elevated border border-stroke-subtle'
+                              >
+                                {keyword}
+                              </span>
+                            ))}
+                          </div>
+                          <p className='text-xs text-content-brand'>
+                            Tap to explore the full meaning
+                          </p>
                         </div>
-                        <p className='text-xs text-content-brand'>
-                          Tap to explore the full meaning
-                        </p>
                       </button>
 
                       {/* In Your Chart - collapsible per card transit insights */}
-                      <div className='mt-4'>
+                      <div className='mt-3 sm:mt-4'>
                         <button
                           type='button'
                           data-testid={`spread-transit-toggle-${cardIndex}`}
@@ -960,7 +999,7 @@ export function TarotSpreadExperience({
                               isTransitExpanded ? -1 : cardIndex,
                             )
                           }
-                          className='w-full flex items-center justify-between px-4 py-3 rounded-lg border border-lunary-primary-800/30 bg-layer-deep/20 hover:bg-layer-deep/30 transition-colors'
+                          className='w-full flex items-center justify-between px-3 py-2 rounded-lg border border-lunary-primary-800/30 bg-layer-deep/20 hover:bg-layer-deep/30 transition-colors sm:px-4 sm:py-3'
                         >
                           <span className='text-sm font-medium text-content-brand-accent'>
                             In Your Chart
@@ -1009,7 +1048,7 @@ export function TarotSpreadExperience({
                     Reflection Notes
                   </p>
                   <span className='text-xs text-content-muted'>
-                    {isSavingNotes ? 'Saving…' : 'Auto-saved'}
+                    {isSavingNotes ? 'Saving...' : 'Auto-saved'}
                   </span>
                 </div>
                 <textarea
@@ -1071,22 +1110,30 @@ export function TarotSpreadExperience({
                 <div
                   key={reading.id}
                   className={clsx(
-                    'group flex items-start justify-between gap-3 rounded-md border px-3 py-2',
+                    'group flex items-start justify-between gap-3 rounded-xl border px-3 py-3 transition-colors',
                     currentReading?.id === reading.id
-                      ? 'border-lunary-primary-600 bg-layer-deep'
-                      : 'border-stroke-subtle/40 bg-surface-elevated/40 hover:border-lunary-primary-700',
+                      ? 'border-lunary-primary-500 bg-gradient-to-br from-lunary-primary/15 to-layer-deep ring-1 ring-lunary-primary/25'
+                      : 'border-stroke-subtle/40 bg-gradient-to-br from-surface-elevated/45 to-layer-base/20 hover:border-lunary-primary-700',
                   )}
                 >
                   <button
                     onClick={() => setCurrentReading(reading)}
-                    className='flex-1 text-left'
+                    className='flex flex-1 items-start gap-3 text-left'
                   >
-                    <p className='text-sm font-medium text-content-primary'>
-                      {reading.spreadName}
-                    </p>
-                    <p className='text-xs text-content-muted'>
-                      {new Date(reading.createdAt).toLocaleDateString()}
-                    </p>
+                    <div className='flex h-10 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-layer-deep text-[10px] font-semibold tracking-[0.16em] text-content-brand-accent'>
+                      {reading.cards.length}
+                    </div>
+                    <div className='min-w-0 flex-1'>
+                      <p className='truncate text-sm font-medium text-content-primary'>
+                        {reading.spreadName}
+                      </p>
+                      <p className='text-xs text-content-muted'>
+                        {new Date(reading.createdAt).toLocaleDateString()}
+                      </p>
+                      <p className='mt-1 line-clamp-2 text-xs leading-relaxed text-content-secondary'>
+                        {reading.summary}
+                      </p>
+                    </div>
                   </button>
                   <button
                     onClick={() => handleArchive(reading.id)}
