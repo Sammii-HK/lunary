@@ -4,15 +4,16 @@
  * Magazine-style "Week Ahead" page view.
  *
  * Layout (top → bottom):
- *   1. Cover  — week range pill, headline, hero (MoonPhase or gradient).
- *   2. Top transits — three element-tinted cards keyed by aspect tone.
- *   3. Day strip  — seven day pills from notableDays.
- *   4. Ritual card — single recommendation with AudioNarrator.
- *   5. Summary    — poetic paragraph, glossary auto-linked.
- *   6. Share      — anchor that opens the OG image in a new tab.
+ *   1. Cover , week range pill, headline, hero (MoonPhase or gradient).
+ *   2. Top transits, three element-tinted cards keyed by aspect tone.
+ *   3. Day strip , seven day pills from notableDays.
+ *   4. Ritual card, single recommendation with AudioNarrator.
+ *   5. Summary   , poetic paragraph, glossary auto-linked.
+ *   6. Share     , anchor that opens the OG image in a new tab.
  */
 
-import { useMemo } from 'react';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore useMemo when restoring.
+// import { useMemo } from 'react';
 import {
   Calendar,
   Heart,
@@ -23,7 +24,8 @@ import {
   Waves,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { MoonPhase } from '@/components/charts/MoonPhase';
 import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 import { Heading } from '@/components/ui/Heading';
@@ -117,11 +119,12 @@ export function WeeklyPageView({
   const dominantWaxing = dominantPhase.trend === 'waxing';
   const dominantIllum = (dominantPhase.illumination ?? 50) / 100;
 
-  const ritualNarration = useMemo(
-    () =>
-      `${page.headline}. ${page.summary} ${page.ritual.title}: ${page.ritual.body}`,
-    [page.headline, page.summary, page.ritual.title, page.ritual.body],
-  );
+  // AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+  // const ritualNarration = useMemo(
+  //   () =>
+  //     `${page.headline}. ${page.summary} ${page.ritual.title}: ${page.ritual.body}`,
+  //   [page.headline, page.summary, page.ritual.title, page.ritual.body],
+  // );
 
   return (
     <main className='mx-auto w-full max-w-3xl px-4 py-6 md:py-10'>
@@ -148,7 +151,7 @@ export function WeeklyPageView({
             : page.headline}
         </Heading>
 
-        {/* Hero — moon phase swap-in */}
+        {/* Hero, moon phase swap-in */}
         <div className='mt-8 flex items-center justify-center'>
           <svg
             viewBox='0 0 240 240'
@@ -199,7 +202,7 @@ export function WeeklyPageView({
         </Heading>
         {page.topTransits.length === 0 ? (
           <p className='text-sm text-content-secondary'>
-            No tight personal transits this week — a steady stretch of sky.
+            No tight personal transits this week, a steady stretch of sky.
           </p>
         ) : (
           <div className='grid gap-3 md:grid-cols-3'>
@@ -291,11 +294,12 @@ export function WeeklyPageView({
                 {page.ritual.title}
               </Heading>
             </div>
-            <AudioNarrator
+            {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+            {/* <AudioNarrator
               text={ritualNarration}
               title='Listen to your week'
               className='shrink-0'
-            />
+            /> */}
           </div>
           <p className='mt-3 text-sm text-content-secondary'>
             {page.ritual.body}
@@ -324,7 +328,7 @@ export function WeeklyPageView({
                 >
                   <Sun className='mt-0.5 h-3 w-3 shrink-0' />
                   <span>
-                    {formatShortDay(v.date)} — {v.description}
+                    {formatShortDay(v.date)}, {v.description}
                   </span>
                 </li>
               ))}

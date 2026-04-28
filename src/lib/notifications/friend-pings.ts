@@ -26,6 +26,13 @@ export interface MilestonePing {
   copy: string;
 }
 
+export interface BirthChartLike {
+  // Tolerant shape: planet -> { eclipticLongitude, sign }
+  // Existing utils/astrology code treats birth_chart as `any[]` of bodies,
+  // we accept either an array of {body, eclipticLongitude} or a record.
+  [key: string]: unknown;
+}
+
 /**
  * The minimum we need from a friend to compute their milestones.
  *
@@ -42,13 +49,6 @@ export interface FriendForDetection {
   name: string;
   birthday?: string | null;
   birthChart?: BirthChartLike | null;
-}
-
-export interface BirthChartLike {
-  // Tolerant shape: planet -> { eclipticLongitude, sign }
-  // Existing utils/astrology code treats birth_chart as `any[]` of bodies,
-  // we accept either an array of {body, eclipticLongitude} or a record.
-  [key: string]: unknown;
 }
 
 export interface CurrentSky {

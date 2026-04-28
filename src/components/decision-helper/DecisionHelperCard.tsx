@@ -1,14 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore useMemo when restoring.
+import { useCallback, useEffect, useState } from 'react';
 import { CheckCircle2, Clock, XCircle, Sparkles, Loader2 } from 'lucide-react';
 
 import { Heading } from '@/components/ui/Heading';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { cn } from '@/lib/utils';
 
 // Inline the result shape so the client doesn't pull the score module
-// (it's safe — the type is plain data) and we don't ship server-only deps.
+// (it's safe, the type is plain data) and we don't ship server-only deps.
 type Verdict = 'yes' | 'wait' | 'no';
 
 interface DecisionResponse {
@@ -144,20 +146,21 @@ export default function DecisionHelperCard({ className }: Props) {
     setRecent(readRecent());
   }, []);
 
-  const narrationText = useMemo(() => {
-    if (!response?.verdict) return '';
-    const verdictWord =
-      response.verdict === 'yes'
-        ? 'Yes.'
-        : response.verdict === 'wait'
-          ? 'Wait.'
-          : 'No.';
-    const reasoning = response.reasoning ?? '';
-    const better = response.betterDay
-      ? ` Better day: ${formatBetterDayDate(response.betterDay.date)} — ${response.betterDay.why}`
-      : '';
-    return `${verdictWord} ${reasoning}${better}`.trim();
-  }, [response]);
+  // AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+  // const narrationText = useMemo(() => {
+  //   if (!response?.verdict) return '';
+  //   const verdictWord =
+  //     response.verdict === 'yes'
+  //       ? 'Yes.'
+  //       : response.verdict === 'wait'
+  //         ? 'Wait.'
+  //         : 'No.';
+  //   const reasoning = response.reasoning ?? '';
+  //   const better = response.betterDay
+  //     ? ` Better day: ${formatBetterDayDate(response.betterDay.date)}, ${response.betterDay.why}`
+  //     : '';
+  //   return `${verdictWord} ${reasoning}${better}`.trim();
+  // }, [response]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -231,7 +234,7 @@ export default function DecisionHelperCard({ className }: Props) {
       </div>
 
       <Heading as='h2' variant='h2'>
-        Ask the cosmos…
+        Ask the cosmos...
       </Heading>
 
       <form onSubmit={handleSubmit} className='flex flex-col gap-3'>
@@ -262,7 +265,7 @@ export default function DecisionHelperCard({ className }: Props) {
             ) : (
               <Sparkles className='h-4 w-4' aria-hidden='true' />
             )}
-            <span>{loading ? 'Reading…' : 'Read the sky'}</span>
+            <span>{loading ? 'Reading...' : 'Read the sky'}</span>
           </button>
         </div>
       </form>
@@ -304,20 +307,21 @@ export default function DecisionHelperCard({ className }: Props) {
               <span className='text-content-primary'>
                 {formatBetterDayDate(response.betterDay.date)}
               </span>
-              <span className='text-content-muted'> — </span>
+              <span className='text-content-muted'>, </span>
               <span>{response.betterDay.why}</span>
             </div>
           ) : null}
 
-          {narrationText ? (
+          {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+          {/* {narrationText ? (
             <div className='pt-1'>
               <AudioNarrator
                 text={narrationText}
-                title='The cosmos says…'
+                title='The cosmos says...'
                 compactVariant='pill'
               />
             </div>
-          ) : null}
+          ) : null} */}
         </div>
       ) : null}
 

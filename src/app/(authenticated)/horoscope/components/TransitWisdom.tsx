@@ -14,7 +14,8 @@ import {
 import { useSubscription } from '@/hooks/useSubscription';
 import { TransitDurationBadge } from '@/components/TransitDurationBadge';
 import { Collapse } from '@/components/ui/Collapse';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 
 interface TransitWisdomProps {
@@ -386,23 +387,25 @@ export function TransitWisdom({
     );
   }
 
-  const narratorText = details
-    .map((d) => {
-      const lines = [d.title, d.meaning];
-      if (d.suggestion) lines.push(`Try this: ${d.suggestion}`);
-      return lines.join(' ');
-    })
-    .join('\n\n');
+  // AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+  // const narratorText = details
+  //   .map((d) => {
+  //     const lines = [d.title, d.meaning];
+  //     if (d.suggestion) lines.push(`Try this: ${d.suggestion}`);
+  //     return lines.join(' ');
+  //   })
+  //   .join('\n\n');
 
   return (
     <div className='space-y-3'>
-      <div className='flex justify-end'>
+      {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+      {/* <div className='flex justify-end'>
         <AudioNarrator
           text={narratorText}
           title='Transit wisdom'
           compactVariant='inline'
         />
-      </div>
+      </div> */}
       {details.map((detail) => (
         <TransitCard
           key={detail.id}

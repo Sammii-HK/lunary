@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Headphones, Pause, Play, Square, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAudioNarration } from '@/hooks/useAudioNarration';
+import { useSubscription } from '@/hooks/useSubscription';
 
 const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5] as const;
 const STORAGE_KEY = 'lunary:tts-speed';
@@ -20,7 +21,7 @@ export interface AudioNarratorProps {
   className?: string;
   /**
    * Force the player open by default. By default it starts collapsed and
-   * never auto-plays — users must click Listen.
+   * never auto-plays, users must click Listen.
    */
   defaultExpanded?: boolean;
   /**
@@ -57,7 +58,7 @@ function formatTime(seconds: number): string {
 
 /**
  * Compact, mobile-first audio narrator.
- * Mute by default — never auto-plays. Renders a "Listen" button that expands
+ * Mute by default, never auto-plays. Renders a "Listen" button that expands
  * into a full-controls bar when clicked.
  */
 export default function AudioNarrator({
@@ -73,6 +74,15 @@ export default function AudioNarrator({
   const [isMobile, setIsMobile] = useState(false);
   const [storedSpeedReady, setStoredSpeedReady] = useState(false);
 
+  // Premium gate: 'voice_narration' is paid-only. Free users keep the
+  // browser synthesis fallback (no extra cost) so the UX doesn't break,
+  // but the gate is in place for the imminent OpenAI/ElevenLabs swap.
+  // When paid TTS lands the hook will receive `forceBrowserSynth` and
+  // free users will continue to get the browser voice while paid users
+  // get the high-quality TTS path.
+  const { hasAccess, loading: subLoading } = useSubscription();
+  const hasVoiceNarration = !subLoading && hasAccess('voice_narration');
+
   const {
     state,
     duration,
@@ -83,7 +93,10 @@ export default function AudioNarrator({
     pause,
     stop,
     setRate,
-  } = useAudioNarration(text, { voice });
+  } = useAudioNarration(text, {
+    voice,
+    forceBrowserSynth: !hasVoiceNarration,
+  });
 
   // Hydrate persisted speed on mount.
   useEffect(() => {
@@ -141,7 +154,7 @@ export default function AudioNarrator({
 
   // Auto-play once on mount when the deep-link asks for it (`?narrate=1`).
   // Browsers that block autoplay without a user gesture will quietly no-op;
-  // the user can still hit Play. Runs once — not on text changes.
+  // the user can still hit Play. Runs once, not on text changes.
   const autoPlayedRef = useRef(false);
   useEffect(() => {
     if (!autoPlay || autoPlayedRef.current) return;
@@ -324,7 +337,7 @@ export default function AudioNarrator({
 
       {state === 'error' ? (
         <p className='text-xs text-lunary-error'>
-          We couldn’t play audio. Try again or check your browser settings.
+          We couldn't play audio. Try again or check your browser settings.
         </p>
       ) : null}
     </div>
@@ -347,7 +360,7 @@ export default function AudioNarrator({
 }
 
 // ----------------------------------------------------------------------------
-// Waveform animation — 6 bars, pure CSS, no extra deps.
+// Waveform animation, 6 bars, pure CSS, no extra deps.
 // ----------------------------------------------------------------------------
 function Waveform({ active }: { active: boolean }) {
   const bars = [0, 1, 2, 3, 4, 5];

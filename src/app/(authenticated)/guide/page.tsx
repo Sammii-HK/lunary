@@ -430,11 +430,26 @@ function BookOfShadowsContent() {
   const [isJournalMode, setIsJournalMode] = useState(false);
   const [isSubmittingJournal, setIsSubmittingJournal] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [dailyExpanded, setDailyExpanded] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return localStorage.getItem('daily-thread-collapsed') !== 'true';
+    if (typeof window === 'undefined') return false;
+    const saved = localStorage.getItem('daily-thread-collapsed');
+    if (saved === 'true') return false;
+    if (saved === 'false') return true;
+    // No saved preference: collapse by default on mobile, expand on >= sm
+    return window.innerWidth >= 640;
   });
   const [hasDailyModules, setHasDailyModules] = useState(false);
+
+  // Track mobile viewport so we can downscale chunky header pieces.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(max-width: 639px)');
+    const update = () => setIsMobileViewport(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   // Astral guide daily message limit is a hard paywall moment: surface an
   // UpgradePrompt modal (not just the inline error toast) so the upgrade
@@ -1033,7 +1048,7 @@ function BookOfShadowsContent() {
           <SkillProgressWidget
             skillTree='journal'
             className='mb-1.5 shrink-0'
-            scrolled={isScrolled}
+            scrolled={isScrolled || isMobileViewport}
           />
 
           <div className='flex items-center justify-between gap-2'>
@@ -1074,11 +1089,6 @@ function BookOfShadowsContent() {
             {usage ? (
               <span className='rounded-full border border-stroke-default/60 px-2.5 py-1'>
                 {usage.used}/{usage.limit}
-              </span>
-            ) : null}
-            {(dailyHighlight as { primaryEvent?: string })?.primaryEvent ? (
-              <span className='max-w-full truncate rounded-full border border-stroke-default/60 px-2.5 py-1'>
-                {(dailyHighlight as { primaryEvent?: string }).primaryEvent}
               </span>
             ) : null}
           </div>
@@ -1398,7 +1408,7 @@ function BookOfShadowsContent() {
               placeholder={
                 isJournalMode
                   ? 'Write a journal entry...'
-                  : "Write your heart's question…"
+                  : "Write your heart's question..."
               }
               className={`w-full min-h-[56px] resize-none rounded-2xl border bg-surface-elevated/70 pl-4 pr-24 py-3 text-[15px] text-content-primary placeholder:text-content-muted focus:outline-none focus:ring-2 md:min-h-8 md:rounded-xl md:py-2.5 md:text-sm ${
                 isJournalMode

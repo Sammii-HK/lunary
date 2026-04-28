@@ -8,7 +8,8 @@ import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { iosLabel } from '@/lib/ios-labels';
 import { Collapse } from '@/components/ui/Collapse';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 
 interface HoroscopeSeasonReadingProps {
@@ -82,7 +83,7 @@ function generateNarrative(
     );
   } else if (element === 'earth') {
     paragraphs.push(
-      `Your earth-sign energy craves tangible progress. The ${moonName} supports slow, deliberate steps. Trust that what you are building now will hold — patience is your superpower this season.`,
+      `Your earth-sign energy craves tangible progress. The ${moonName} supports slow, deliberate steps. Trust that what you are building now will hold, patience is your superpower this season.`,
     );
   } else if (element === 'air') {
     paragraphs.push(
@@ -90,7 +91,7 @@ function generateNarrative(
     );
   } else if (element === 'water') {
     paragraphs.push(
-      `Your water-sign energy runs deep right now. The ${moonName} amplifies intuition and emotional awareness. Honor what surfaces — feelings are information, and yours are especially reliable this season.`,
+      `Your water-sign energy runs deep right now. The ${moonName} amplifies intuition and emotional awareness. Honor what surfaces, feelings are information, and yours are especially reliable this season.`,
     );
   }
 
@@ -198,13 +199,14 @@ export function HoroscopeSeasonReading({
           {/* Paid: full narrative + focus areas */}
           {hasPaidAccess && seasonData.paragraphs.length > 0 && (
             <div className='space-y-3'>
-              <AudioNarrator
+              {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+              {/* <AudioNarrator
                 text={[seasonData.summary, ...seasonData.paragraphs].join(
                   '\n\n',
                 )}
                 title={`${seasonData.seasonName} season reading`}
                 compactVariant='inline'
-              />
+              /> */}
               {seasonData.paragraphs.map((paragraph, i) => (
                 <AutoLinkText
                   key={i}
@@ -233,7 +235,7 @@ export function HoroscopeSeasonReading({
                       <span className='font-medium text-content-primary'>
                         {area.title}
                       </span>{' '}
-                      — {area.guidance}
+                      , {area.guidance}
                     </span>
                   </li>
                 ))}

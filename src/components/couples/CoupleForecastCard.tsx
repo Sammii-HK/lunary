@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting useMemo.
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Calendar, Heart, Lock, Sparkles, Users } from 'lucide-react';
@@ -9,7 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/Heading';
 import { cn } from '@/lib/utils';
 import { getPlanetSymbol } from '@/constants/symbols';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import type { CoupleSummary, CoupleDayTheme } from '@/lib/couples/types';
 
 type ForecastResponse =
@@ -39,30 +41,31 @@ function formatShortDate(iso: string): string {
   });
 }
 
-function buildNarrative(summary: CoupleSummary): string {
-  const parts: string[] = [];
-  parts.push(
-    `Today's compatibility score with ${summary.partnerName} sits at ${summary.dailyScore} out of one hundred.`,
-  );
-  if (summary.dailyAspect) {
-    parts.push(
-      `The strongest thread between your charts right now is ${summary.dailyAspect.planetA} ${summary.dailyAspect.aspect} ${summary.dailyAspect.planetB}.`,
-    );
-    parts.push(summary.dailyAspect.description);
-  }
-  const flowing = summary.fourteenDay.filter(
-    (d) => d.theme === 'harmonious',
-  ).length;
-  const friction = summary.fourteenDay.filter(
-    (d) => d.theme === 'friction',
-  ).length;
-  if (flowing || friction) {
-    parts.push(
-      `Across the next two weeks, expect ${flowing} flowing day${flowing === 1 ? '' : 's'} and ${friction} friction day${friction === 1 ? '' : 's'}.`,
-    );
-  }
-  return parts.join(' ');
-}
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// function buildNarrative(summary: CoupleSummary): string {
+//   const parts: string[] = [];
+//   parts.push(
+//     `Today's compatibility score with ${summary.partnerName} sits at ${summary.dailyScore} out of one hundred.`,
+//   );
+//   if (summary.dailyAspect) {
+//     parts.push(
+//       `The strongest thread between your charts right now is ${summary.dailyAspect.planetA} ${summary.dailyAspect.aspect} ${summary.dailyAspect.planetB}.`,
+//     );
+//     parts.push(summary.dailyAspect.description);
+//   }
+//   const flowing = summary.fourteenDay.filter(
+//     (d) => d.theme === 'harmonious',
+//   ).length;
+//   const friction = summary.fourteenDay.filter(
+//     (d) => d.theme === 'friction',
+//   ).length;
+//   if (flowing || friction) {
+//     parts.push(
+//       `Across the next two weeks, expect ${flowing} flowing day${flowing === 1 ? '' : 's'} and ${friction} friction day${friction === 1 ? '' : 's'}.`,
+//     );
+//   }
+//   return parts.join(' ');
+// }
 
 export function CoupleForecastCard() {
   const router = useRouter();
@@ -106,7 +109,8 @@ export function CoupleForecastCard() {
     };
   }, []);
 
-  const narrative = useMemo(() => (data ? buildNarrative(data) : ''), [data]);
+  // AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+  // const narrative = useMemo(() => (data ? buildNarrative(data) : ''), [data]);
 
   const handleUnpair = async () => {
     if (!window.confirm('Unpair from your partner? You can re-pair anytime.'))
@@ -225,18 +229,19 @@ export function CoupleForecastCard() {
         ) : (
           <div className='text-sm text-content-muted'>
             <Sparkles className='w-3.5 h-3.5 inline mr-1' />
-            The sky between you is quiet today — nothing acute, just the steady
+            The sky between you is quiet today, nothing acute, just the steady
             current of your charts.
           </div>
         )}
 
-        <div className='mt-4'>
+        {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+        {/* <div className='mt-4'>
           <AudioNarrator
             text={narrative}
             title={`Today with ${data.partnerName}`}
             compactVariant='pill'
           />
-        </div>
+        </div> */}
       </div>
 
       {/* ----- 14-day strip ----- */}

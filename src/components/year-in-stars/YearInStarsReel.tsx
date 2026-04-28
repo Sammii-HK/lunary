@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Year in Stars — swipeable Stories-style reel.
+ * Year in Stars, swipeable Stories-style reel.
  *
  * Renders the full year-wrap experience as a stack of `YearInStarsSlide`s
  * with progress bars across the top, touch-swipe + arrow-key navigation,
@@ -19,6 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { YearInStarsData } from '@/lib/year-in-stars/compute';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
 import {
   YearInStarsSlide,
   type YearInStarsAccent,
@@ -36,6 +37,12 @@ export interface YearInStarsReelProps {
   userId?: string;
   /** Auto-advance duration per slide (ms). Defaults to 6000. */
   slideDurationMs?: number;
+  /**
+   * When true, only the first teaser slide is rendered and a paywall
+   * overlay covers the rest. Year in Stars is gated on `yearly_forecast`
+   * (Lunary+ Pro Annual), set by the server-side entitlement check.
+   */
+  locked?: boolean;
 }
 
 const SLIDE_PLAN: ReelSlideConfig[] = [
@@ -53,22 +60,31 @@ export function YearInStarsReel({
   data,
   userId,
   slideDurationMs = 6000,
+  locked = false,
 }: YearInStarsReelProps) {
-  const slides = useMemo(() => SLIDE_PLAN, []);
+  // Free users get only the first teaser slide; the rest sits behind a
+  // paywall overlay. Pause auto-advance while locked so the timer doesn't
+  // try to flip past the gate.
+  const slides = useMemo(
+    () => (locked ? SLIDE_PLAN.slice(0, 1) : SLIDE_PLAN),
+    [locked],
+  );
   const [index, setIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [paused, setPaused] = useState(locked);
   const startRef = useRef<number | null>(null);
   const elapsedAtPauseRef = useRef<number>(0);
   const rafRef = useRef<number | null>(null);
 
   const goNext = useCallback(() => {
+    if (locked) return;
     setIndex((i) => Math.min(i + 1, slides.length - 1));
-  }, [slides.length]);
+  }, [slides.length, locked]);
 
   const goPrev = useCallback(() => {
+    if (locked) return;
     setIndex((i) => Math.max(i - 1, 0));
-  }, []);
+  }, [locked]);
 
   // Reset progress on slide change.
   useEffect(() => {
@@ -156,7 +172,7 @@ export function YearInStarsReel({
         ? `${window.location.origin}/year-in-stars/${data.year}`
         : `/year-in-stars/${data.year}`;
 
-    const shareText = `My year in stars — ${data.year}: ${data.journal.totalEntries} entries, ${data.topTransits.length} transits that mattered.`;
+    const shareText = `My year in stars, ${data.year}: ${data.journal.totalEntries} entries, ${data.topTransits.length} transits that mattered.`;
 
     if (typeof navigator !== 'undefined' && 'share' in navigator) {
       try {
@@ -167,7 +183,7 @@ export function YearInStarsReel({
         });
         return;
       } catch {
-        // User cancelled or share failed — fall through to clipboard.
+        // User cancelled or share failed, fall through to clipboard.
       }
     }
 
@@ -314,8 +330,25 @@ export function YearInStarsReel({
         </button>
       </div>
 
+      {/* Locked overlay, covers the rest of the reel for free users. */}
+      {locked && (
+        <div
+          className='absolute inset-0 z-40 flex items-end justify-center bg-gradient-to-t from-black/85 via-black/60 to-black/10 p-6 pb-10 backdrop-blur-sm'
+          aria-label='Year in Stars paywall'
+        >
+          <div className='w-full max-w-md'>
+            <UpgradePrompt
+              variant='card'
+              featureName='yearly_forecast'
+              title='Unlock your full Year in Stars'
+              description='See every transit, journal pattern, and moon moment that shaped your year. Lunary+ Pro Annual unlocks the full reel.'
+            />
+          </div>
+        </div>
+      )}
+
       {/* Final-slide share CTA */}
-      {isLast && (
+      {isLast && !locked && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

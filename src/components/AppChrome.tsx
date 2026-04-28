@@ -33,11 +33,13 @@ export function AppChrome() {
   const authState = useAuthStatus();
   const [isAdminHost, setIsAdminHost] = useState(false);
   const [cameFromApp, setCameFromApp] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
   const [isNativeApp, setIsNativeApp] = useState(false);
   const navOverride = searchParams?.get('nav');
   const isNativeIOS = useIsNativeIOS();
 
   useEffect(() => {
+    setHasMounted(true);
     setIsNativeApp(Capacitor.isNativePlatform());
   }, []);
 
@@ -400,7 +402,7 @@ export function AppChrome() {
               <TrialCountdownBanner />
               <PastDueBanner />
               <Navbar />
-              {authState.isAuthenticated && (
+              {hasMounted && authState.isAuthenticated && (
                 <SmartSearchTrigger className='fixed top-3 right-3 z-40' />
               )}
             </>

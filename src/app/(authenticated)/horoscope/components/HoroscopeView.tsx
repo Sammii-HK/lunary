@@ -26,7 +26,8 @@ import { HoroscopeSeasonReading } from '@/components/horoscope/HoroscopeSeasonRe
 import { HoroscopeRitualForDay } from '@/components/horoscope/HoroscopeRitualForDay';
 import { Heading } from '@/components/ui/Heading';
 import { TransitScrubber } from '@/components/charts/TransitScrubber';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 import { CosmicSkeleton } from '@/components/states/CosmicSkeleton';
 
@@ -316,7 +317,7 @@ export function HoroscopeView({
         )
       : [];
 
-  // Content sources — personalized for paid, general for free
+  // Content sources, personalized for paid, general for free
   const cosmicHighlight =
     hasPaidAccess && horoscope
       ? horoscope.cosmicHighlight
@@ -362,7 +363,7 @@ export function HoroscopeView({
             <p className='text-sm text-content-muted'>
               {hasPaidAccess
                 ? 'How the planets are moving through your chart right now'
-                : 'Live planetary positions — unlock your personal chart transits'}
+                : 'Live planetary positions, unlock your personal chart transits'}
             </p>
           </div>
           <div className='flex items-center gap-2'>
@@ -390,7 +391,7 @@ export function HoroscopeView({
         </div>
       </div>
 
-      {/* Animated transit scrubber — natal inner, transit outer, scrub through time */}
+      {/* Animated transit scrubber, natal inner, transit outer, scrub through time */}
       {birthChart && birthChart.length > 0 && (
         <div className='rounded-2xl border border-stroke-subtle/70 bg-gradient-to-br from-surface-elevated/70 via-surface-base/70 to-layer-deep p-4'>
           <TransitScrubber birthChart={birthChart} />
@@ -406,11 +407,12 @@ export function HoroscopeView({
           <Heading variant='h2' as='h2'>
             {cosmicHighlight}
           </Heading>
-          <AudioNarrator
+          {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+          {/* <AudioNarrator
             text={`${cosmicHighlight}. ${dailyGuidance}`}
             title="Today's reading"
             compactVariant='inline'
-          />
+          /> */}
         </div>
         <AutoLinkText
           as='p'
@@ -427,7 +429,7 @@ export function HoroscopeView({
               <p className='text-xs text-content-muted blur-sm'>
                 {personalizedTeaser.dailyGuidance}
               </p>
-              {/* Clear layer on top — bg covers blur bleed, mask fades to reveal blur */}
+              {/* Clear layer on top, bg covers blur bleed, mask fades to reveal blur */}
               <p
                 className='absolute inset-0 text-xs text-content-muted bg-surface-base'
                 style={{
@@ -464,7 +466,7 @@ export function HoroscopeView({
           className='mt-2 grid grid-cols-2 gap-3 items-stretch'
           data-testid='numerology-section'
         >
-          {/* Universal Day — always interactive */}
+          {/* Universal Day, always interactive */}
           <div className='relative'>
             <button
               type='button'
@@ -507,7 +509,7 @@ export function HoroscopeView({
             </button>
           </div>
 
-          {/* Personal Day — paid: modal + share; free: number + badge */}
+          {/* Personal Day, paid: modal + share; free: number + badge */}
           {personalDay ? (
             <div className='relative'>
               {hasPaidAccess ? (
@@ -587,10 +589,10 @@ export function HoroscopeView({
         </p> */}
       </div>
 
-      {/* GuideNudge — paid only */}
+      {/* GuideNudge, paid only */}
       <GuideNudge location='horoscope' />
 
-      {/* Season & Ritual — paid with horoscope data */}
+      {/* Season & Ritual, paid with horoscope data */}
       {hasPaidAccess && horoscope && (
         <div className='space-y-3' data-testid='ritual-section'>
           <HoroscopeSeasonReading
@@ -606,7 +608,7 @@ export function HoroscopeView({
         </div>
       )}
 
-      {/* Season & Ritual preview — free users FOMO */}
+      {/* Season & Ritual preview, free users FOMO */}
       {!hasPaidAccess && (
         <FeaturePreview
           title='Your Cosmic Season & Rituals'
@@ -658,13 +660,13 @@ export function HoroscopeView({
         />
       )}
 
-      {/* Reflection Prompts — all users (component handles its own gating) */}
+      {/* Reflection Prompts, all users (component handles its own gating) */}
       <HoroscopeReflectionPrompts
         sunSign={horoscope?.sunSign}
         moonPhase={horoscope?.moonPhase || generalHoroscope?.moonPhase}
       />
 
-      {/* Transit Wisdom — paid: full component; free: locked preview */}
+      {/* Transit Wisdom, paid: full component; free: locked preview */}
       {hasPaidAccess && birthChart && currentTransits.length > 0 ? (
         <HoroscopeSection
           title='Transit Wisdom'
@@ -684,7 +686,7 @@ export function HoroscopeView({
         !hasPaidAccess && (
           <FeaturePreview
             title='Transit Wisdom'
-            description="See how today's planetary shifts are touching your life — intensity, themes, and what to watch for"
+            description="See how today's planetary shifts are touching your life, intensity, themes, and what to watch for"
             feature='personalized_horoscope'
             ctaKey='horoscope'
             trackingFeature='transit_wisdom'
@@ -735,7 +737,7 @@ export function HoroscopeView({
                   </div>
                   <p className='text-sm text-content-secondary leading-relaxed'>
                     Emotional harmony and creative flow. Your intuition is
-                    especially sharp — lean into connections that feel
+                    especially sharp, lean into connections that feel
                     nourishing.
                   </p>
                 </div>
@@ -745,7 +747,7 @@ export function HoroscopeView({
         )
       )}
 
-      {/* Current Lunar Energy — free users only (paid get it inside SeasonReading) */}
+      {/* Current Lunar Energy, free users only (paid get it inside SeasonReading) */}
       {!hasPaidAccess && (
         <HoroscopeSection
           title='Current Lunar Energy'
@@ -763,7 +765,7 @@ export function HoroscopeView({
         </HoroscopeSection>
       )}
 
-      {/* Today's Aspects — paid: full component; free: locked preview */}
+      {/* Today's Aspects, paid: full component; free: locked preview */}
       {hasPaidAccess && birthChart && currentTransits.length > 0 ? (
         <HoroscopeSection
           title="Today's Aspects to Your Chart"
@@ -816,7 +818,7 @@ export function HoroscopeView({
                         <span className='text-content-muted'>4°45</span>
                       </div>
                       <p className='text-xs text-content-muted leading-relaxed'>
-                        Saturn's energy is blending with yours — a time for
+                        Saturn's energy is blending with yours, a time for
                         grounding and stepping into your own authority.
                       </p>
                     </div>
@@ -861,7 +863,7 @@ export function HoroscopeView({
         )
       )}
 
-      {/* Upcoming Transits — unified, gated internally */}
+      {/* Upcoming Transits, unified, gated internally */}
       <HoroscopeSection
         title='Upcoming Transits'
         color='zinc'
@@ -870,7 +872,7 @@ export function HoroscopeView({
         <p className='text-sm text-content-muted mb-2'>
           {hasPaidAccess
             ? 'How upcoming shifts touch your life'
-            : 'Planetary events in the next 30 days — unlock personal impact for each'}
+            : 'Planetary events in the next 30 days, unlock personal impact for each'}
         </p>
         <UnifiedTransitList
           transits={upcomingTransits}
@@ -879,7 +881,7 @@ export function HoroscopeView({
         />
       </HoroscopeSection>
 
-      {/* Solar Return — paid: full section; free: locked preview */}
+      {/* Solar Return, paid: full section; free: locked preview */}
       {hasPaidAccess && solarReturnData ? (
         <HoroscopeSection title='Solar Return Insights' color='amber'>
           <div className='space-y-3 pt-3'>
@@ -955,7 +957,7 @@ export function HoroscopeView({
                 <p className='text-sm text-content-secondary leading-relaxed'>
                   This solar return chart emphasizes introspection and spiritual
                   deepening. A year of withdrawal from noise and reconnection
-                  with your deeper purpose — trust the quiet.
+                  with your deeper purpose, trust the quiet.
                 </p>
                 <div>
                   <h4 className='text-xs font-medium text-content-muted mb-2 uppercase tracking-wide'>
@@ -979,7 +981,7 @@ export function HoroscopeView({
         )
       )}
 
-      {/* Complete Profile prompt — paid only, no birthday */}
+      {/* Complete Profile prompt, paid only, no birthday */}
       {hasPaidAccess && !userBirthday && (
         <HoroscopeSection title='Complete Your Profile' color='amber'>
           <p className='text-sm text-content-secondary mb-4 leading-relaxed'>
@@ -995,7 +997,7 @@ export function HoroscopeView({
         </HoroscopeSection>
       )}
 
-      {/* PremiumPathway — paid only */}
+      {/* PremiumPathway, paid only */}
       {hasPaidAccess && <PremiumPathway variant='transits' className='mt-6' />}
 
       {/* Modals */}

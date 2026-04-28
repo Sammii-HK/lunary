@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, type MouseEvent } from 'react';
 import { ChevronDown, Heart, Briefcase, Sparkles } from 'lucide-react';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 
 type FocusArea = {
@@ -87,7 +88,8 @@ export function MoreForToday({ focusAreas }: { focusAreas: FocusArea[] }) {
         style={{ maxHeight: isOpen ? contentHeight : 0 }}
       >
         <div ref={contentRef} className='mt-3 space-y-2'>
-          {isOpen && focusAreas.length > 0 && (
+          {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+          {/* {isOpen && focusAreas.length > 0 && (
             <AudioNarrator
               text={focusAreas
                 .map((f) => `${f.title}. ${f.guidance}`)
@@ -95,7 +97,7 @@ export function MoreForToday({ focusAreas }: { focusAreas: FocusArea[] }) {
               title='More for today'
               compactVariant='inline'
             />
-          )}
+          )} */}
           {focusAreas.map((focus) => {
             const config = AREA_CONFIG[focus.area];
             const Icon = config.icon;

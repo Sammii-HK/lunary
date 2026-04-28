@@ -16,7 +16,8 @@ import {
 } from '../../../utils/astrology/synastry';
 import type { BirthChartData } from '../../../utils/astrology/birthChart';
 import type { SynastryAspectLine } from './SynastryChart';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 
 const SIGN_ELEMENTS: Record<string, 'Fire' | 'Earth' | 'Air' | 'Water'> = {
@@ -44,7 +45,7 @@ const ELEMENT_TINTS: Record<string, string> = {
 type Props = {
   userChart: BirthChartData[];
   friendChart: BirthChartData[];
-  /** Aspects from SynastryChart (preferred — keeps the visual + breakdown in sync). */
+  /** Aspects from SynastryChart (preferred, keeps the visual + breakdown in sync). */
   aspects?: SynastryAspectLine[];
   userName?: string;
   friendName?: string;
@@ -176,11 +177,11 @@ const CATEGORIES: Category[] = [
 function reframe(aspect: string): string {
   switch (aspect.toLowerCase()) {
     case 'square':
-      return 'Friction here is the muscle of growth — it shows you where to flex.';
+      return 'Friction here is the muscle of growth, it shows you where to flex.';
     case 'opposition':
-      return 'Opposites that sharpen each other — practice meeting in the middle.';
+      return 'Opposites that sharpen each other, practice meeting in the middle.';
     case 'conjunction':
-      return 'Powerful merge — keep checking that you both still have your own shape.';
+      return 'Powerful merge, keep checking that you both still have your own shape.';
     default:
       return 'A subtle edge that becomes a gift once you name it together.';
   }
@@ -210,7 +211,7 @@ export function CompatibilityBreakdown({
   );
 
   // For the chart-side breakdown we use the same aspects the SynastryChart
-  // computed (richer planet set) — falls back to synastry.ts aspects.
+  // computed (richer planet set), falls back to synastry.ts aspects.
   const aspectsForCategories = useMemo<SynastryAspectLine[]>(() => {
     if (providedAspects && providedAspects.length > 0) return providedAspects;
     return synastry.aspects.map((a) => ({
@@ -259,34 +260,35 @@ export function CompatibilityBreakdown({
 
   const score = synastry.compatibilityScore;
 
+  // AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
   // Concatenate all narrative prose for the audio narrator at the top.
-  const narratorText = useMemo(() => {
-    const parts: string[] = [
-      `Cosmic match: ${score} percent.`,
-      synastry.summary,
-    ];
-    if (highlights.length > 0) {
-      parts.push('Highlights:');
-      for (const a of highlights) {
-        parts.push(
-          `${a.personA.planet} ${a.aspect} ${a.personB.planet}. ${a.description}`,
-        );
-      }
-    }
-    if (growthEdges.length > 0) {
-      parts.push('Growth edges:');
-      for (const a of growthEdges) {
-        parts.push(
-          `${a.personA.planet} ${a.aspect} ${a.personB.planet}. ${a.description}`,
-        );
-      }
-    }
-    if (synastry.strengths.length > 0) {
-      parts.push('What you bring out in each other:');
-      parts.push(...synastry.strengths);
-    }
-    return parts.join('\n\n');
-  }, [score, synastry.summary, synastry.strengths, highlights, growthEdges]);
+  // const narratorText = useMemo(() => {
+  //   const parts: string[] = [
+  //     `Cosmic match: ${score} percent.`,
+  //     synastry.summary,
+  //   ];
+  //   if (highlights.length > 0) {
+  //     parts.push('Highlights:');
+  //     for (const a of highlights) {
+  //       parts.push(
+  //         `${a.personA.planet} ${a.aspect} ${a.personB.planet}. ${a.description}`,
+  //       );
+  //     }
+  //   }
+  //   if (growthEdges.length > 0) {
+  //     parts.push('Growth edges:');
+  //     for (const a of growthEdges) {
+  //       parts.push(
+  //         `${a.personA.planet} ${a.aspect} ${a.personB.planet}. ${a.description}`,
+  //       );
+  //     }
+  //   }
+  //   if (synastry.strengths.length > 0) {
+  //     parts.push('What you bring out in each other:');
+  //     parts.push(...synastry.strengths);
+  //   }
+  //   return parts.join('\n\n');
+  // }, [score, synastry.summary, synastry.strengths, highlights, growthEdges]);
 
   return (
     <div className='space-y-5' data-testid='compatibility-breakdown'>
@@ -325,13 +327,14 @@ export function CompatibilityBreakdown({
           </AutoLinkText>
         </div>
 
-        <div className='mt-4 flex justify-end'>
+        {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+        {/* <div className='mt-4 flex justify-end'>
           <AudioNarrator
             text={narratorText}
             title='Compatibility breakdown'
             compactVariant='inline'
           />
-        </div>
+        </div> */}
 
         {/* Bar */}
         <div className='mt-5 h-2 rounded-full bg-surface-overlay overflow-hidden'>

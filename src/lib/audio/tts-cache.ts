@@ -115,7 +115,7 @@ export async function setCachedAudioUrl(
 
 /**
  * Lightweight content hash so callers can build cache keys without dragging in
- * a crypto dep. Collisions are fine here — worst case we fall back to
+ * a crypto dep. Collisions are fine here, worst case we fall back to
  * regenerating audio.
  */
 export function hashContent(text: string): string {
@@ -142,6 +142,96 @@ export interface SpeakOptions {
   onResume?: () => void;
 }
 
+const PREFERRED_VOICE_NAMES = [
+  'Samantha',
+  'Ava',
+  'Zoe',
+  'Serena',
+  'Moira',
+  'Tessa',
+  'Google UK English Female',
+  'Google US English',
+  'Microsoft Sonia Online',
+  'Microsoft Libby Online',
+  'Microsoft Aria Online',
+  'Microsoft Jenny Online',
+];
+
+const BAD_VOICE_PATTERNS = [
+  /compact/i,
+  /robot/i,
+  /novelty/i,
+  /whisper/i,
+  /zarvox/i,
+  /trinoids/i,
+  /bells/i,
+  /boing/i,
+  /bad news/i,
+  /good news/i,
+];
+
+function scoreVoice(voice: SpeechSynthesisVoice): number {
+  const name = voice.name || '';
+  const lang = voice.lang || '';
+  let score = 0;
+
+  if (/^en(-|_)?GB/i.test(lang)) score += 30;
+  if (/^en(-|_)?US/i.test(lang)) score += 22;
+  if (/^en/i.test(lang)) score += 15;
+  if (voice.default) score += 5;
+
+  const preferredIndex = PREFERRED_VOICE_NAMES.findIndex((preferred) =>
+    name.toLowerCase().includes(preferred.toLowerCase()),
+  );
+  if (preferredIndex >= 0) score += 100 - preferredIndex * 4;
+
+  if (/enhanced|premium|natural|neural|online/i.test(name)) score += 18;
+  if (
+    /female|samantha|ava|zoe|serena|moira|tessa|sonia|libby|aria|jenny/i.test(
+      name,
+    )
+  ) {
+    score += 8;
+  }
+  if (BAD_VOICE_PATTERNS.some((pattern) => pattern.test(name))) score -= 80;
+
+  return score;
+}
+
+function selectNarrationVoice(
+  voices: SpeechSynthesisVoice[],
+  requested?: string,
+): SpeechSynthesisVoice | undefined {
+  if (requested) {
+    const match =
+      voices.find((v) => v.name === requested) ||
+      voices.find((v) => v.voiceURI === requested);
+    if (match) return match;
+  }
+
+  return voices
+    .filter((voice) => /^en/i.test(voice.lang || ''))
+    .sort((a, b) => scoreVoice(b) - scoreVoice(a))[0];
+}
+
+async function waitForVoices(): Promise<SpeechSynthesisVoice[]> {
+  const initial = listVoices();
+  if (initial.length > 0) return initial;
+
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      window.speechSynthesis.onvoiceschanged = null;
+      resolve(listVoices());
+    };
+
+    window.speechSynthesis.onvoiceschanged = finish;
+    window.setTimeout(finish, 500);
+  });
+}
+
 /**
  * Speak the given text using the Web Speech Synthesis API.
  * Resolves with the utterance so callers can subscribe to lifecycle events
@@ -165,7 +255,7 @@ export async function speakText(
     return stub;
   }
 
-  // Ensure clean state — Safari sometimes gets stuck with paused queues.
+  // Ensure clean state, Safari sometimes gets stuck with paused queues.
   try {
     window.speechSynthesis.cancel();
   } catch {
@@ -173,17 +263,15 @@ export async function speakText(
   }
 
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = clamp(opts.rate ?? 1, 0.5, 2);
-  utterance.pitch = clamp(opts.pitch ?? 1, 0, 2);
+  utterance.rate = clamp(opts.rate ?? 0.95, 0.5, 2);
+  utterance.pitch = clamp(opts.pitch ?? 0.96, 0, 2);
   utterance.volume = clamp(opts.volume ?? 1, 0, 1);
   if (opts.lang) utterance.lang = opts.lang;
 
-  if (opts.voice) {
-    const voices = listVoices();
-    const match =
-      voices.find((v) => v.name === opts.voice) ||
-      voices.find((v) => v.voiceURI === opts.voice);
-    if (match) utterance.voice = match;
+  const selectedVoice = selectNarrationVoice(await waitForVoices(), opts.voice);
+  if (selectedVoice) {
+    utterance.voice = selectedVoice;
+    utterance.lang = selectedVoice.lang || utterance.lang;
   }
 
   if (opts.onStart) utterance.addEventListener('start', opts.onStart);

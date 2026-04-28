@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { Heading } from '@/components/ui/Heading';
 import { AutoLinkText } from '@/components/glossary/AutoLinkText';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { CyclesTimeline } from './CyclesTimeline';
 import type {
   SaturnReturnResult,
@@ -112,11 +113,12 @@ export function CycleSummaryCard({ className }: Props) {
               <Heading as='h3' variant='h3' className='mb-0'>
                 Where you are right now
               </Heading>
-              <AudioNarrator
+              {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+              {/* <AudioNarrator
                 text={data.summary}
                 title='Your personal cycles'
                 compactVariant='inline'
-              />
+              /> */}
             </div>
             <AutoLinkText
               as='p'

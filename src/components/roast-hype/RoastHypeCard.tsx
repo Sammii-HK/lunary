@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * Roast Me / Hype Me — viral chart-aware shareable.
+ * Roast Me / Hype Me, viral chart-aware shareable.
  *
- * Two big buttons (Roast / Hype). On tap we fetch `/api/roast-hype?mode=…`,
+ * Two big buttons (Roast / Hype). On tap we fetch `/api/roast-hype?mode=...`,
  * fade-in the 3-line reading, expose an audio narrator below it, and offer
  * a "Share my reading" action that uses the native share sheet (with a
  * copy-to-clipboard fallback) and also opens the OG card preview.
@@ -12,7 +12,7 @@
  *   - Styling stays inside the brand palette via `cn()` and `lunary-*`
  *     colours; no raw Tailwind hexes.
  *   - Heading + Button come from `@/components/ui` (CLAUDE.md mandate).
- *   - lucide-react icons only — no emoji in the rendered surface.
+ *   - lucide-react icons only, no emoji in the rendered surface.
  *   - The component is pure UI: it never builds external URLs from
  *     unvalidated input. The OG share URL is built relative to the current
  *     origin and the few user-controlled params (mode, headline, lines,
@@ -22,7 +22,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Flame, Share2, Sparkles, Volume2 } from 'lucide-react';
 
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/Heading';
 import { cn } from '@/lib/utils';
@@ -38,11 +39,11 @@ interface Reading {
 
 interface RoastHypeCardProps {
   /**
-   * Optional public handle — included in the share URL so the OG card can
+   * Optional public handle, included in the share URL so the OG card can
    * stamp `@handle`. Validation happens in the OG route.
    */
   handle?: string | null;
-  /** Render variant — default vs. compact (sidebar/dashboard mount). */
+  /** Render variant, default vs. compact (sidebar/dashboard mount). */
   variant?: 'default' | 'compact';
   className?: string;
 }
@@ -53,7 +54,7 @@ const MODE_LABEL: Record<Mode, string> = {
 };
 
 const MODE_ACCENT: Record<Mode, string> = {
-  // Brand palette only — rose for roast (sharp), accent gold for hype.
+  // Brand palette only, rose for roast (sharp), accent gold for hype.
   roast:
     'border-lunary-rose-700 bg-layer-base text-lunary-rose-300 hover:bg-lunary-rose-900/40 hover:border-lunary-rose-500',
   hype: 'border-lunary-accent-700 bg-layer-base text-lunary-accent-300 hover:bg-lunary-accent-900/40 hover:border-lunary-accent-500',
@@ -83,7 +84,7 @@ export function RoastHypeCard({
     setReading(null);
     setShareStatus('idle');
     try {
-      // Relative URL — never built from request headers (CLAUDE.md SSRF rule).
+      // Relative URL, never built from request headers (CLAUDE.md SSRF rule).
       const res = await fetch(`/api/roast-hype?mode=${mode}`, {
         method: 'GET',
         credentials: 'include',
@@ -254,12 +255,13 @@ export function RoastHypeCard({
           </ul>
 
           <div className='mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-            <AudioNarrator
+            {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+            {/* <AudioNarrator
               text={narrationText}
               title={MODE_LABEL[reading.mode]}
               compactVariant='pill'
               className='flex-shrink-0'
-            />
+            /> */}
             <Button
               type='button'
               variant='lunary'
@@ -270,7 +272,7 @@ export function RoastHypeCard({
             >
               <Share2 className='h-4 w-4' aria-hidden />
               {shareStatus === 'copied'
-                ? 'Copied — preview opened'
+                ? 'Copied, preview opened'
                 : shareStatus === 'failed'
                   ? 'Try again'
                   : 'Share my reading'}

@@ -48,6 +48,19 @@ jest.mock('@/components/share/ShareSynastry', () => ({
   ShareSynastry: () => <button data-testid='share-synastry'>Share</button>,
 }));
 
+jest.mock('@/components/SmartTrialButton', () => ({
+  SmartTrialButton: ({ children }: { children?: React.ReactNode }) => (
+    <button>{children ?? 'Upgrade'}</button>
+  ),
+}));
+
+jest.mock('@/hooks/useSubscription', () => ({
+  useSubscription: () => ({
+    hasAccess: () => true,
+    isSubscribed: true,
+  }),
+}));
+
 // Sample birth chart data matching BirthChartData type
 const mockBirthChart = [
   {

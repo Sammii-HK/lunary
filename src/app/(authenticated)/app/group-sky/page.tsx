@@ -4,8 +4,15 @@ import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { CalendarDays, Lock, MessageCircle, Sparkles } from 'lucide-react';
+import {
+  CalendarDays,
+  Lock,
+  MessageCircle,
+  Sparkles,
+  Star,
+} from 'lucide-react';
 import { Heading } from '@/components/ui/Heading';
+import { cn } from '@/lib/utils';
 import { useUser } from '@/context/UserContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
@@ -26,7 +33,7 @@ import {
 import { CosmicSkeleton } from '@/components/states/CosmicSkeleton';
 import type { BirthChartData } from '../../../../../utils/astrology/birthChart';
 
-// Heavy SVG chart — only mount once we actually have a participant to draw.
+// Heavy SVG chart: only mount once we actually have a participant to draw.
 const GroupSkyChart = dynamic(
   () =>
     import('@/components/charts/GroupSkyChart').then((m) => ({
@@ -49,16 +56,19 @@ const GroupSkyChart = dynamic(
 );
 
 const PARTICIPANT_PALETTE = [
-  '#7BFFB8', // user — soft mint
-  '#C77DFF', // friend 1 — orchid
-  '#94d1ff', // friend 2 — sky
-  '#ffd6a3', // friend 3 — apricot
-  '#ff9bd2', // friend 4 — rose
-  '#ffe08a', // friend 5 — gold
-  '#9b9bff', // friend 6 — periwinkle
+  '#7BFFB8', // user: soft mint
+  '#C77DFF', // friend 1: orchid
+  '#94d1ff', // friend 2: sky
+  '#ffd6a3', // friend 3: apricot
+  '#ff9bd2', // friend 4: rose
+  '#ffe08a', // friend 5: gold
+  '#9b9bff', // friend 6: periwinkle
 ];
 
 const PLUS_FRIEND_CAP = 6;
+// Free users get 1: they can pick a single friend so the chart attempts to
+// render. The wheel itself shows blurred under a Lock + SmartTrialButton
+// overlay (FOMO play): you can feel the experience but not read it.
 const FREE_FRIEND_CAP = 1;
 
 type FriendListEntry = {
@@ -106,7 +116,9 @@ type TimingResponse = {
 export default function GroupSkyPage() {
   const { user, loading: userLoading } = useUser();
   const sub = useSubscription();
-  const hasGroupAccess = sub.hasAccess('personalized_transit_readings');
+  // Group Sky is a premium teaser. The chart computation is client-side, so
+  // the cap and blurred preview live here in the UI.
+  const hasGroupAccess = sub.hasAccess('group_sky');
 
   const friendCap = hasGroupAccess ? PLUS_FRIEND_CAP : FREE_FRIEND_CAP;
 
@@ -190,9 +202,12 @@ export default function GroupSkyPage() {
     };
   }, []);
 
-  // Auto-pre-select the first friend (so the chart isn't lonely).
+  // Auto-pre-select the first friend (so the chart isn't lonely). Free users
+  // must opt in by tapping a friend themselves. That tap is the FOMO trigger
+  // that surfaces the blurred wheel + paywall, so don't pre-pick for them.
   useEffect(() => {
     if (friendsLoading) return;
+    if (!hasGroupAccess) return;
     setSelected((prev) => {
       if (prev.size > 0) return prev;
       if (friends.length === 0) return prev;
@@ -200,7 +215,7 @@ export default function GroupSkyPage() {
       next.add(friends[0].id);
       return next;
     });
-  }, [friendsLoading, friends]);
+  }, [friendsLoading, friends, hasGroupAccess]);
 
   // Cap selection if subscription tier changes.
   useEffect(() => {
@@ -426,20 +441,21 @@ export default function GroupSkyPage() {
         </div>
       )}
 
-      {/* Free-tier gate banner */}
-      {!hasGroupAccess && !sub.loading && (
-        <div className='rounded-xl border border-amber-400/30 bg-amber-400/5 p-4 mb-6 flex flex-wrap items-center gap-3'>
-          <Lock className='w-4 h-4 text-amber-300 shrink-0' />
-          <div className='flex-1 min-w-0'>
-            <div className='text-sm font-medium text-content-primary'>
-              Plus unlocks the full group sky
-            </div>
-            <div className='text-xs text-content-muted'>
-              Free shows 1 friend at a time. Plus shows up to 6 — the whole
-              group on one wheel.
-            </div>
+      {/* Soft pitch: only when free user hasn't selected anyone yet. Once they
+          pick a friend, the blurred-wheel + Lock overlay does the FOMO work. */}
+      {!hasGroupAccess && !sub.loading && selected.size === 0 && (
+        <div className='rounded-2xl border border-stroke-subtle bg-surface-elevated/80 p-6 mb-6 text-center'>
+          <div className='w-14 h-14 bg-gradient-to-br from-lunary-primary to-lunary-secondary rounded-full flex items-center justify-center mx-auto mb-4'>
+            <Star className='w-7 h-7 text-content-primary' />
           </div>
-          <SmartTrialButton size='sm' feature='personalized_transit_readings' />
+          <Heading as='h2' variant='h3' className='mb-2'>
+            Pick a friend to preview Group Sky
+          </Heading>
+          <p className='text-sm text-content-muted mb-5 max-w-md mx-auto'>
+            Tap any friend below to see today&apos;s transits drawn against your
+            two charts. Lunary+ unlocks the full reading and up to 6 friends on
+            one wheel.
+          </p>
         </div>
       )}
 
@@ -469,83 +485,85 @@ export default function GroupSkyPage() {
           selected={selected}
           colorById={colorById}
           canSelectMore={selected.size < friendCap}
-          locked={!hasGroupAccess}
+          locked={false}
           onToggle={handleToggle}
         />
       </div>
 
-      {primaryFriend && primaryFriend.source !== 'profile' && (
-        <div className='mb-5 rounded-2xl border border-stroke-subtle bg-surface-elevated/45 p-4'>
-          <div className='mb-3 flex items-start justify-between gap-3'>
-            <div>
-              <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-content-muted'>
-                Relationship timing
-              </p>
-              <h2 className='mt-1 text-sm font-semibold text-content-primary'>
-                Best day to message {primaryFriend.name.split(' ')[0]}
-              </h2>
+      {hasGroupAccess &&
+        primaryFriend &&
+        primaryFriend.source !== 'profile' && (
+          <div className='mb-5 rounded-2xl border border-stroke-subtle bg-surface-elevated/45 p-4'>
+            <div className='mb-3 flex items-start justify-between gap-3'>
+              <div>
+                <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-content-muted'>
+                  Relationship timing
+                </p>
+                <h2 className='mt-1 text-sm font-semibold text-content-primary'>
+                  Best day to message {primaryFriend.name.split(' ')[0]}
+                </h2>
+              </div>
+              <MessageCircle className='h-4 w-4 text-lunary-primary' />
             </div>
-            <MessageCircle className='h-4 w-4 text-lunary-primary' />
+
+            {timingLoading ? (
+              <p className='text-xs text-content-muted'>
+                Checking the next connection window...
+              </p>
+            ) : timing?.requiresProForTiming ? (
+              <div className='flex flex-wrap items-center justify-between gap-3'>
+                <p className='text-xs text-content-secondary'>
+                  Lunary Pro unlocks best days to reconnect, shared events and
+                  timing reasons.
+                </p>
+                <SmartTrialButton
+                  size='sm'
+                  feature='personalized_transit_readings'
+                />
+              </div>
+            ) : timing?.timingWindows && timing.timingWindows.length > 0 ? (
+              (() => {
+                const best =
+                  timing.timingWindows.find((window) =>
+                    ['great', 'good'].includes(window.quality),
+                  ) ?? timing.timingWindows[0];
+                const params = new URLSearchParams({
+                  date: best.date,
+                  label: `Message ${primaryFriend.name}`,
+                });
+
+                return (
+                  <Link
+                    href={`/app/time-machine?${params.toString()}`}
+                    className='group flex items-start gap-3 rounded-xl border border-white/10 bg-surface-base/35 p-3 transition-colors hover:border-lunary-primary/45 hover:bg-surface-base/55'
+                  >
+                    <span className='mt-0.5 flex h-9 w-9 items-center justify-center rounded-full border border-lunary-primary/35 bg-lunary-primary/10 text-lunary-primary'>
+                      <CalendarDays className='h-4 w-4' />
+                    </span>
+                    <span className='min-w-0 flex-1'>
+                      <span className='flex flex-wrap items-center gap-2'>
+                        <span className='text-sm font-semibold text-content-primary'>
+                          {best.dateFormatted}
+                        </span>
+                        <span className='rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wide text-content-muted'>
+                          {best.quality}
+                        </span>
+                      </span>
+                      <span className='mt-1 block text-xs leading-relaxed text-content-secondary'>
+                        {best.reason}
+                      </span>
+                    </span>
+                  </Link>
+                );
+              })()
+            ) : (
+              <p className='text-xs text-content-muted'>
+                No obvious green-light window in the next month. Keep this one
+                gentle, or check again tomorrow.
+              </p>
+            )}
           </div>
-
-          {timingLoading ? (
-            <p className='text-xs text-content-muted'>
-              Checking the next connection window...
-            </p>
-          ) : timing?.requiresProForTiming ? (
-            <div className='flex flex-wrap items-center justify-between gap-3'>
-              <p className='text-xs text-content-secondary'>
-                Lunary Pro unlocks best days to reconnect, shared events and
-                timing reasons.
-              </p>
-              <SmartTrialButton
-                size='sm'
-                feature='personalized_transit_readings'
-              />
-            </div>
-          ) : timing?.timingWindows && timing.timingWindows.length > 0 ? (
-            (() => {
-              const best =
-                timing.timingWindows.find((window) =>
-                  ['great', 'good'].includes(window.quality),
-                ) ?? timing.timingWindows[0];
-              const params = new URLSearchParams({
-                date: best.date,
-                label: `Message ${primaryFriend.name}`,
-              });
-
-              return (
-                <Link
-                  href={`/app/time-machine?${params.toString()}`}
-                  className='group flex items-start gap-3 rounded-xl border border-white/10 bg-surface-base/35 p-3 transition-colors hover:border-lunary-primary/45 hover:bg-surface-base/55'
-                >
-                  <span className='mt-0.5 flex h-9 w-9 items-center justify-center rounded-full border border-lunary-primary/35 bg-lunary-primary/10 text-lunary-primary'>
-                    <CalendarDays className='h-4 w-4' />
-                  </span>
-                  <span className='min-w-0 flex-1'>
-                    <span className='flex flex-wrap items-center gap-2'>
-                      <span className='text-sm font-semibold text-content-primary'>
-                        {best.dateFormatted}
-                      </span>
-                      <span className='rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wide text-content-muted'>
-                        {best.quality}
-                      </span>
-                    </span>
-                    <span className='mt-1 block text-xs leading-relaxed text-content-secondary'>
-                      {best.reason}
-                    </span>
-                  </span>
-                </Link>
-              );
-            })()
-          ) : (
-            <p className='text-xs text-content-muted'>
-              No obvious green-light window in the next month. Keep this one
-              gentle, or check again tomorrow.
-            </p>
-          )}
-        </div>
-      )}
+        )}
 
       {friendsLoading ? (
         <div className='space-y-4'>
@@ -572,18 +590,43 @@ export default function GroupSkyPage() {
           </p>
         </div>
       ) : (
-        <motion.div
-          key={participants.map((p) => p.id).join('|')}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <GroupSkyChart participants={participants} now={today} />
-        </motion.div>
+        // Chart attempts to render for everyone with a participant selected.
+        // For free users we layer a blur + Lock + SmartTrialButton overlay on
+        // top. FOMO play: you can feel it, but you can't read it.
+        <div className='relative'>
+          <motion.div
+            key={participants.map((p) => p.id).join('|')}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className={cn(
+              !hasGroupAccess && 'pointer-events-none select-none blur-md',
+            )}
+            aria-hidden={!hasGroupAccess ? true : undefined}
+          >
+            <GroupSkyChart participants={participants} now={today} />
+          </motion.div>
+
+          {!hasGroupAccess && (
+            <div className='absolute inset-0 flex items-center justify-center p-6'>
+              <div className='max-w-sm rounded-2xl border border-stroke-subtle bg-surface-base/80 p-5 text-center backdrop-blur-md'>
+                <Lock className='w-8 h-8 text-lunary-primary mx-auto mb-3' />
+                <p className='text-sm font-medium text-content-primary mb-1'>
+                  Unlock the whole group&apos;s sky
+                </p>
+                <p className='text-xs text-content-muted mb-4'>
+                  Lunary+ draws today&apos;s transits against everyone&apos;s
+                  natal placements on one wheel, up to 6 friends at once.
+                </p>
+                <SmartTrialButton fullWidth feature='group_sky' />
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
-      {/* Insight panel */}
-      {participants.length > 0 && topAspects.length > 0 && (
+      {/* Insight panel: premium only. */}
+      {hasGroupAccess && participants.length > 0 && topAspects.length > 0 && (
         <div className='mt-8'>
           <h2 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-3'>
             What&apos;s active across the group
@@ -626,12 +669,15 @@ export default function GroupSkyPage() {
         </div>
       )}
 
-      {participants.length > 0 && topAspects.length === 0 && range && (
-        <div className='mt-8 rounded-xl border border-stroke-subtle bg-surface-elevated/60 p-5 text-sm text-content-muted text-center'>
-          The sky is quiet between you all today — no tight aspects within 3°.
-          Try again tomorrow.
-        </div>
-      )}
+      {hasGroupAccess &&
+        participants.length > 0 &&
+        topAspects.length === 0 &&
+        range && (
+          <div className='mt-8 rounded-xl border border-stroke-subtle bg-surface-elevated/60 p-5 text-sm text-content-muted text-center'>
+            The sky is quiet between you all today: no tight aspects within 3°.
+            Try again tomorrow.
+          </div>
+        )}
     </div>
   );
 }

@@ -4,7 +4,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { Calendar, ChevronRight, Loader2, Sparkles } from 'lucide-react';
 
 import { Heading } from '@/components/ui/Heading';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { cn } from '@/lib/utils';
 
 // Mirror the server type so the client doesn't pull the score module.
@@ -25,7 +26,7 @@ interface TimingResponse {
 }
 
 /**
- * Pretty date helpers — `date` is `YYYY-MM-DD` (UTC). We split manually
+ * Pretty date helpers, `date` is `YYYY-MM-DD` (UTC). We split manually
  * rather than `new Date(ymd)` to dodge the "interpreted as midnight UTC"
  * trap that can shift the displayed weekday by one in negative offsets.
  */
@@ -70,15 +71,16 @@ export default function TimingAssistantCard({ className }: Props) {
 
   const dates = useMemo(() => response?.dates ?? [], [response?.dates]);
 
-  const narrationText = useMemo(() => {
-    if (dates.length === 0) return '';
-    const lines = dates.map((d, i) => {
-      const dow = formatDayOfWeek(d.date);
-      const long = formatLongDate(d.date);
-      return `Option ${i + 1}: ${dow}, ${long}. ${d.reasoning}`;
-    });
-    return `Here are three windows for ${response?.category ?? 'this'}. ${lines.join(' ')}`;
-  }, [dates, response?.category]);
+  // AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+  // const narrationText = useMemo(() => {
+  //   if (dates.length === 0) return '';
+  //   const lines = dates.map((d, i) => {
+  //     const dow = formatDayOfWeek(d.date);
+  //     const long = formatLongDate(d.date);
+  //     return `Option ${i + 1}: ${dow}, ${long}. ${d.reasoning}`;
+  //   });
+  //   return `Here are three windows for ${response?.category ?? 'this'}. ${lines.join(' ')}`;
+  // }, [dates, response?.category]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -133,7 +135,7 @@ export default function TimingAssistantCard({ className }: Props) {
       </div>
 
       <Heading as='h2' variant='h2'>
-        When should I…
+        When should I...
       </Heading>
 
       <form onSubmit={handleSubmit} className='flex flex-col gap-3'>
@@ -164,7 +166,7 @@ export default function TimingAssistantCard({ className }: Props) {
             ) : (
               <Calendar className='h-4 w-4' aria-hidden='true' />
             )}
-            <span>{loading ? 'Scanning…' : 'Find 3 dates'}</span>
+            <span>{loading ? 'Scanning...' : 'Find 3 dates'}</span>
           </button>
         </div>
       </form>
@@ -192,15 +194,16 @@ export default function TimingAssistantCard({ className }: Props) {
             ))}
           </ul>
 
-          {narrationText ? (
+          {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+          {/* {narrationText ? (
             <div className='pt-1'>
               <AudioNarrator
                 text={narrationText}
-                title='The cosmos suggests…'
+                title='The cosmos suggests...'
                 compactVariant='pill'
               />
             </div>
-          ) : null}
+          ) : null} */}
         </div>
       ) : null}
 

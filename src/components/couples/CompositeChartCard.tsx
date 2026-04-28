@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Share2, Sparkles } from 'lucide-react';
 
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { BirthChart } from '@/components/BirthChart';
 import { Heading } from '@/components/ui/Heading';
 import type { CompositeChart } from '@/lib/couples/composite';
@@ -115,13 +116,14 @@ export function CompositeChartCard() {
         <p className='text-sm leading-relaxed text-content-secondary'>
           {successData.reading}
         </p>
-        <div className='mt-3'>
+        {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+        {/* <div className='mt-3'>
           <AudioNarrator
             text={successData.reading}
             title='Composite reading'
             compactVariant='pill'
           />
-        </div>
+        </div> */}
       </div>
     </section>
   );

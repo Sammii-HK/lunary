@@ -36,7 +36,8 @@ import { ChartPreviewTeaser } from './ChartPreviewTeaser';
 import { SignTransitTeaser } from './SignTransitTeaser';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 import { GrimoireExitIntent } from './GrimoireExitIntent';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 
 /**
@@ -394,7 +395,8 @@ export async function SEOContentTemplate({
             {description}
           </AutoLinkText>
         )}
-        {(() => {
+        {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+        {/* {(() => {
           const narrationParts = [
             h1 || title,
             description,
@@ -415,7 +417,7 @@ export async function SEOContentTemplate({
               />
             </div>
           );
-        })()}
+        })()} */}
       </header>
 
       <div className='space-y-8 p-2 md:p-4'>

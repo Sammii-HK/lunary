@@ -8,7 +8,8 @@ import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { iosLabel } from '@/lib/ios-labels';
 import { Collapse } from '@/components/ui/Collapse';
-import AudioNarrator from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
 import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 
 interface HoroscopeRitualForDayProps {
@@ -53,14 +54,14 @@ const ELEMENT_FLAVOR: Record<string, ElementToolsAndSteps> = {
     tools: ['A candle (orange or red)', 'Cinnamon or ginger incense'],
     steps: [
       'Light your candle and focus on its flame.',
-      'Move your body — stretch, dance, or do a brief power pose to activate your fire energy.',
+      'Move your body, stretch, dance, or do a brief power pose to activate your fire energy.',
     ],
   },
   earth: {
     tools: ['A crystal (citrine or smoky quartz)', 'A small plant or soil'],
     steps: [
       'Place your bare feet on the ground and take three deep breaths.',
-      'Hold your crystal and feel its weight — let it anchor your intention into the physical world.',
+      'Hold your crystal and feel its weight, let it anchor your intention into the physical world.',
     ],
   },
   air: {
@@ -129,7 +130,7 @@ const MOON_PHASE_RITUALS: Record<string, Omit<Ritual, 'tools' | 'steps'>> = {
   waningGibbous: {
     title: 'Waning Gibbous Sharing Ritual',
     oneLine:
-      'Share a lesson or kindness with someone — what you give returns to you.',
+      'Share a lesson or kindness with someone, what you give returns to you.',
     intention:
       'To share wisdom from your experience and give back with a grateful heart.',
     timing: 'Afternoon, during a moment of connection.',
@@ -145,7 +146,7 @@ const MOON_PHASE_RITUALS: Record<string, Omit<Ritual, 'tools' | 'steps'>> = {
   },
   waningCrescent: {
     title: 'Waning Crescent Rest Ritual',
-    oneLine: 'Honor the quiet before the new cycle — rest is a form of wisdom.',
+    oneLine: 'Honor the quiet before the new cycle, rest is a form of wisdom.',
     intention:
       'To rest deeply, reflect on the full cycle, and prepare for renewal.',
     timing: 'Before bed, as part of a winding-down routine.',
@@ -245,7 +246,8 @@ export function HoroscopeRitualForDay({
 
           {hasPaidAccess ? (
             <div className='space-y-3'>
-              <AudioNarrator
+              {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+              {/* <AudioNarrator
                 text={[
                   ritual.title,
                   ritual.oneLine,
@@ -256,7 +258,7 @@ export function HoroscopeRitualForDay({
                 ].join('\n\n')}
                 title={ritual.title}
                 compactVariant='inline'
-              />
+              /> */}
               <div>
                 <p className='text-xs font-medium text-content-muted uppercase tracking-wide mb-1'>
                   Intention

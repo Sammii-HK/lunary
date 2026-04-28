@@ -20,6 +20,16 @@ export interface UseAudioNarrationOptions {
   voice?: string;
   /** initial playback rate (0.5 - 2). default 1. */
   rate?: number;
+  /**
+   * If true, the hook will always use the browser's free Web Speech
+   * Synthesis API and never reach for a paid TTS audio URL. Used by
+   * `AudioNarrator` to enforce the `voice_narration` premium gate while
+   * letting free users keep the (zero-cost) browser voice fallback.
+   * Today the underlying `speakText` path is browser-only, so this is a
+   * forward-compatible flag that becomes load-bearing once the route
+   * starts returning real `audioUrl`s.
+   */
+  forceBrowserSynth?: boolean;
 }
 
 export interface UseAudioNarrationResult {
@@ -58,14 +68,20 @@ function estimateDurationSeconds(text: string, rate: number): number {
  *
  * Internally uses `speakText` from `@/lib/audio/tts-cache` (Web Speech API).
  * If/when the server route returns a real `audioUrl`, this hook can be
- * upgraded to use an <audio> element instead — the public API stays the same.
+ * upgraded to use an <audio> element instead, the public API stays the same.
  */
 export function useAudioNarration(
   text: string,
   opts: UseAudioNarrationOptions = {},
 ): UseAudioNarrationResult {
-  const { voice } = opts;
+  const { voice, forceBrowserSynth: _forceBrowserSynth } = opts;
   const initialRate = opts.rate ?? 1;
+  // `_forceBrowserSynth` is intentionally consumed here even though the
+  // underlying `speakText` path is browser-only today. Once the server
+  // route starts returning paid TTS `audioUrl`s, this flag is the gate
+  // that keeps free users on the zero-cost browser voice. See
+  // `voice_narration` in `utils/entitlements.ts`.
+  void _forceBrowserSynth;
 
   const [state, setState] = useState<NarrationState>('idle');
   const [position, setPosition] = useState(0);
@@ -203,7 +219,7 @@ export function useAudioNarration(
     (next: number) => {
       const clamped = Math.min(2, Math.max(0.5, next));
       setRateState(clamped);
-      // Web Speech doesn't allow live rate changes — restart at the new rate
+      // Web Speech doesn't allow live rate changes, restart at the new rate
       // if currently playing so the change is felt immediately.
       if (state === 'playing' || state === 'paused') {
         stopAll();

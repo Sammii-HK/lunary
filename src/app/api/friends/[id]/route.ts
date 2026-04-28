@@ -31,7 +31,10 @@ export async function GET(
     const user = await requireUser(request);
     const { id } = await params;
 
-    // Check subscription access
+    // Check subscription access. Free users with `friend_connections_basic`
+    // get a stripped profile (compatibility % + summary + key placements);
+    // only paid `friend_connections` unlocks the bi-wheel chart, full aspect
+    // list, and the CompatibilityBreakdown payload.
     const subscriptionResult = await sql`
       SELECT status FROM subscriptions
       WHERE user_id = ${user.id}
@@ -40,9 +43,18 @@ export async function GET(
     `;
     const subscriptionStatus = subscriptionResult.rows[0]?.status || 'free';
 
-    if (
-      !hasFeatureAccess(subscriptionStatus, user.plan, 'friend_connections')
-    ) {
+    const hasFullAccess = hasFeatureAccess(
+      subscriptionStatus,
+      user.plan,
+      'friend_connections',
+    );
+    const hasBasicAccess = hasFeatureAccess(
+      subscriptionStatus,
+      user.plan,
+      'friend_connections_basic',
+    );
+
+    if (!hasFullAccess && !hasBasicAccess) {
       return NextResponse.json(
         {
           error: 'Friend profiles require a Lunary+ subscription',
@@ -150,6 +162,30 @@ export async function GET(
       sunSign = getSunSign(date.getMonth() + 1, date.getDate());
     }
 
+    // Strip premium-only fields for free (basic) users: keep compatibility %
+    // and summary, drop aspect list, element/modality breakdowns, and the
+    // friend's birth chart (which would let them re-render the bi-wheel
+    // client-side). The UI also gates these views, but server-side stripping
+    // is the source of truth for revenue protection.
+    const synastryPayload = synastry
+      ? hasFullAccess
+        ? {
+            compatibilityScore: synastry.compatibilityScore,
+            summary: synastry.summary,
+            aspects: synastry.aspects,
+            elementBalance: synastry.elementBalance,
+            modalityBalance: synastry.modalityBalance,
+          }
+        : {
+            compatibilityScore: synastry.compatibilityScore,
+            summary: synastry.summary,
+            // Free tier: no aspects, no element/modality detail.
+            aspects: [],
+            elementBalance: synastry.elementBalance,
+            modalityBalance: synastry.modalityBalance,
+          }
+      : null;
+
     return NextResponse.json({
       id: connection.id,
       friendId: connection.friend_id,
@@ -159,16 +195,11 @@ export async function GET(
       birthday: friendProfile.birthday ?? null,
       relationshipType: connection.relationship_type,
       hasBirthChart: !!friendBirthChart,
-      birthChart: friendBirthChart || undefined,
-      synastry: synastry
-        ? {
-            compatibilityScore: synastry.compatibilityScore,
-            summary: synastry.summary,
-            aspects: synastry.aspects,
-            elementBalance: synastry.elementBalance,
-            modalityBalance: synastry.modalityBalance,
-          }
-        : null,
+      // Only paid users receive the friend's birth chart. Free users can't
+      // re-render the synastry bi-wheel without it.
+      birthChart: hasFullAccess ? friendBirthChart || undefined : undefined,
+      synastry: synastryPayload,
+      tier: hasFullAccess ? 'full' : 'basic',
     });
   } catch (error) {
     console.error('[Friends] Error fetching friend:', error);
@@ -257,7 +288,7 @@ export async function PATCH(
 
     // Use COALESCE-on-NULL pattern: if a field is undefined in the body,
     // pass NULL to keep the existing value. If null is explicitly sent,
-    // we still want to clear it — handle that by using a sentinel.
+    // we still want to clear it, handle that by using a sentinel.
     const updateNickname = nickname !== undefined;
     const updateRelType = relationshipType !== undefined;
 

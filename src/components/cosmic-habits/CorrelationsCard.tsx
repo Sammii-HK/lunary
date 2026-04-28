@@ -1,14 +1,15 @@
 'use client';
 
 /**
- * CorrelationsCard — surfaces the user's strongest habit×transit
+ * CorrelationsCard, surfaces the user's strongest habit×transit
  * correlations from `/api/cosmic-habits/correlations`. Renders the top 3
  * insights as plain-language one-liners and narrates the headline through
  * AudioNarrator. Empty state nudges users to keep tracking when sample size
  * is too low to be meaningful.
  */
 import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore dynamic import below.
+// import dynamic from 'next/dynamic';
 import { Heart, Moon, Sparkles } from 'lucide-react';
 import { Heading } from '@/components/ui/Heading';
 import { cn } from '@/lib/utils';
@@ -17,10 +18,11 @@ import type {
   HabitCorrelationKind,
 } from '@/lib/cosmic-habits/types';
 
-const AudioNarrator = dynamic(
-  () => import('@/components/audio/AudioNarrator'),
-  { ssr: false },
-);
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// const AudioNarrator = dynamic(
+//   () => import('@/components/audio/AudioNarrator'),
+//   { ssr: false },
+// );
 
 interface CorrelationsResponse {
   success: boolean;
@@ -87,7 +89,7 @@ export function CorrelationsCard({ className }: CorrelationsCardProps) {
         )}
       >
         <div className='animate-pulse text-sm text-content-muted'>
-          Reading the sky against your journal…
+          Reading the sky against your journal...
         </div>
       </div>
     );
@@ -96,7 +98,7 @@ export function CorrelationsCard({ className }: CorrelationsCardProps) {
   const sampleSize = data?.sampleSize ?? 0;
   const correlations = data?.correlations ?? [];
 
-  // Empty state — too little data to show real correlations.
+  // Empty state, too little data to show real correlations.
   if (sampleSize < 10 || correlations.length === 0) {
     return (
       <div
@@ -113,20 +115,21 @@ export function CorrelationsCard({ className }: CorrelationsCardProps) {
         </div>
         <p className='text-sm text-content-secondary'>
           Track your sleep, mood, or practice on a few more entries and Lunary
-          will start surfacing your personal evidence-based patterns — which
+          will start surfacing your personal evidence-based patterns, which
           transits actually move the needle for <em>you</em>.
         </p>
         <p className='mt-2 text-xs text-content-muted'>
           {sampleSize === 0
             ? 'No tracked entries yet.'
-            : `${sampleSize} tracked ${sampleSize === 1 ? 'entry' : 'entries'} so far — keep going.`}
+            : `${sampleSize} tracked ${sampleSize === 1 ? 'entry' : 'entries'} so far, keep going.`}
         </p>
       </div>
     );
   }
 
   const top = correlations.slice(0, 3);
-  const headline = top[0];
+  // AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+  // const headline = top[0];
 
   return (
     <div
@@ -167,7 +170,8 @@ export function CorrelationsCard({ className }: CorrelationsCardProps) {
         })}
       </ul>
 
-      {headline && (
+      {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+      {/* {headline && (
         <div className='mt-3'>
           <AudioNarrator
             text={headline.oneLiner}
@@ -175,7 +179,7 @@ export function CorrelationsCard({ className }: CorrelationsCardProps) {
             compactVariant='inline'
           />
         </div>
-      )}
+      )} */}
     </div>
   );
 }

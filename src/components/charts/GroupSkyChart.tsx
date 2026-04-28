@@ -16,6 +16,12 @@ import {
 } from '@/components/charts/useEphemerisRange';
 import { bodiesSymbols, zodiacSymbol } from '@/constants/symbols';
 import type { BirthChartData } from '../../../utils/astrology/birthChart';
+import {
+  CHART_ASPECT_COLORS,
+  CHART_COLORS,
+  CHART_ELEMENT_COLORS,
+  CHART_GLYPH_SHADOW,
+} from '@/components/charts/chartTheme';
 
 export type GroupParticipant = {
   id: string;
@@ -31,13 +37,7 @@ type Props = {
   now?: Date;
 };
 
-const ELEMENT_COLORS = {
-  Fire: '#ff6b6b',
-  Earth: '#6b8e4e',
-  Air: '#5dade2',
-  Water: '#9b59b6',
-} as const;
-const SIGN_ELEMENTS: Record<string, keyof typeof ELEMENT_COLORS> = {
+const SIGN_ELEMENTS: Record<string, keyof typeof CHART_ELEMENT_COLORS> = {
   Aries: 'Fire',
   Taurus: 'Earth',
   Gemini: 'Air',
@@ -53,11 +53,41 @@ const SIGN_ELEMENTS: Record<string, keyof typeof ELEMENT_COLORS> = {
 };
 
 const ASPECTS = [
-  { name: 'Conjunction', symbol: '☌', angle: 0, orb: 3, tint: '#C77DFF' },
-  { name: 'Opposition', symbol: '☍', angle: 180, orb: 3, tint: '#ffd6a3' },
-  { name: 'Trine', symbol: '△', angle: 120, orb: 3, tint: '#7BFFB8' },
-  { name: 'Square', symbol: '□', angle: 90, orb: 3, tint: '#f87171' },
-  { name: 'Sextile', symbol: '⚹', angle: 60, orb: 3, tint: '#94d1ff' },
+  {
+    name: 'Conjunction',
+    symbol: '☌',
+    angle: 0,
+    orb: 3,
+    tint: CHART_ASPECT_COLORS.Conjunction,
+  },
+  {
+    name: 'Opposition',
+    symbol: '☍',
+    angle: 180,
+    orb: 3,
+    tint: CHART_ASPECT_COLORS.Opposition,
+  },
+  {
+    name: 'Trine',
+    symbol: '△',
+    angle: 120,
+    orb: 3,
+    tint: CHART_ASPECT_COLORS.Trine,
+  },
+  {
+    name: 'Square',
+    symbol: '□',
+    angle: 90,
+    orb: 3,
+    tint: CHART_ASPECT_COLORS.Square,
+  },
+  {
+    name: 'Sextile',
+    symbol: '⚹',
+    angle: 60,
+    orb: 3,
+    tint: CHART_ASPECT_COLORS.Sextile,
+  },
 ] as const;
 
 type AspectName = (typeof ASPECTS)[number]['name'];
@@ -362,11 +392,18 @@ export function GroupSkyChart({ participants, now }: Props) {
         >
           <defs>
             <radialGradient id='gs-transit-sun' cx='50%' cy='50%' r='50%'>
-              <stop offset='0%' stopColor='#ffe9a8' />
-              <stop offset='100%' stopColor='#ff7a45' />
+              <stop offset='0%' stopColor={CHART_COLORS.sunA} />
+              <stop offset='100%' stopColor={CHART_COLORS.sunB} />
             </radialGradient>
           </defs>
 
+          <circle
+            cx={0}
+            cy={0}
+            r={132}
+            fill={CHART_COLORS.surface}
+            opacity={0.84}
+          />
           <CosmicBackdrop seed={11} />
 
           {/* Ring guides */}
@@ -375,7 +412,7 @@ export function GroupSkyChart({ participants, now }: Props) {
             cy={0}
             r={130}
             fill='none'
-            stroke='#52525b'
+            stroke={CHART_COLORS.stroke}
             strokeWidth={0.5}
             opacity={0.5}
           />
@@ -384,7 +421,7 @@ export function GroupSkyChart({ participants, now }: Props) {
             cy={0}
             r={108}
             fill='none'
-            stroke='#52525b'
+            stroke={CHART_COLORS.strokeSubtle}
             strokeWidth={0.4}
             opacity={0.35}
           />
@@ -416,7 +453,7 @@ export function GroupSkyChart({ participants, now }: Props) {
                 y1={p1.y}
                 x2={p2.x}
                 y2={p2.y}
-                stroke='#52525b'
+                stroke={CHART_COLORS.strokeSubtle}
                 strokeWidth={0.4}
                 opacity={0.45}
               />
@@ -433,7 +470,7 @@ export function GroupSkyChart({ participants, now }: Props) {
               dominantBaseline='central'
               className='font-astro'
               fontSize={10}
-              fill={ELEMENT_COLORS[SIGN_ELEMENTS[sign]]}
+              fill={CHART_ELEMENT_COLORS[SIGN_ELEMENTS[sign]]}
               opacity={0.95}
             >
               {zodiacSymbol[sign.toLowerCase() as keyof typeof zodiacSymbol]}
@@ -573,7 +610,7 @@ export function GroupSkyChart({ participants, now }: Props) {
               const lon = snapshot.longitudes[name];
               const pos = polar(lon, TRANSIT_R);
               const sign = signFromLongitude(lon);
-              const elColor = ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
+              const elColor = CHART_ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
               const isMoon = name === 'Moon';
               const isSun = name === 'Sun';
               return (
@@ -625,10 +662,8 @@ export function GroupSkyChart({ participants, now }: Props) {
                       dominantBaseline='central'
                       className='font-astro'
                       fontSize={12}
-                      fill={isSun ? 'url(#gs-transit-sun)' : '#ffffff'}
-                      style={{
-                        filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.6))',
-                      }}
+                      fill={isSun ? 'url(#gs-transit-sun)' : CHART_COLORS.text}
+                      style={{ filter: CHART_GLYPH_SHADOW }}
                     >
                       {symbolFor(name)}
                     </text>
@@ -638,7 +673,7 @@ export function GroupSkyChart({ participants, now }: Props) {
                       x={pos.x + 7}
                       y={pos.y - 1}
                       fontSize={6}
-                      fill='#f87171'
+                      fill={CHART_COLORS.retrograde}
                       textAnchor='middle'
                     >
                       ℞

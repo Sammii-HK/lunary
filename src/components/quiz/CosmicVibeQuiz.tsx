@@ -11,7 +11,8 @@ import {
   Share2,
   Sparkles,
 } from 'lucide-react';
-import { AudioNarrator } from '@/components/audio/AudioNarrator';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import { AudioNarrator } from '@/components/audio/AudioNarrator';
 import { Heading } from '@/components/ui/Heading';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -59,7 +60,7 @@ export function CosmicVibeQuiz() {
         }
       })
       .catch(() => {
-        /* offline or unauthenticated — silently ignore */
+        /* offline or unauthenticated, silently ignore */
       });
     return () => {
       cancelled = true;
@@ -128,7 +129,7 @@ export function CosmicVibeQuiz() {
         : new URL(ogUrl, window.location.origin).toString();
     const shareData: ShareData = {
       title: `I'm ${vibe.vibeName} on Lunary`,
-      text: `${vibe.oneLiner} — find your cosmic vibe at lunary.app`,
+      text: `${vibe.oneLiner}, find your cosmic vibe at lunary.app`,
       url: fullOgUrl,
     };
     try {
@@ -144,7 +145,7 @@ export function CosmicVibeQuiz() {
       }
       setShareNote('Sharing not supported on this device');
     } catch {
-      // user cancelled / blocked — silently no-op
+      // user cancelled / blocked, silently no-op
     }
   };
 
@@ -155,7 +156,7 @@ export function CosmicVibeQuiz() {
 
   return (
     <section className='flex flex-col gap-6'>
-      {/* Inline keyframes — co-located so we don't need a new stylesheet */}
+      {/* Inline keyframes, co-located so we don't need a new stylesheet */}
       <style>{`
         @keyframes cosmic-vibe-question-in {
           from { opacity: 0; transform: translateY(16px); }
@@ -350,16 +351,17 @@ function VibeResultCard({
             </span>
           </div>
           <p className='max-w-md text-base italic leading-relaxed text-white/95 sm:text-lg'>
-            “{vibe.oneLiner}”
+            "{vibe.oneLiner}"
           </p>
         </div>
       </div>
 
-      <AudioNarrator
+      {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+      {/* <AudioNarrator
         text={vibe.oneLiner}
         title={`Hear ${vibe.vibeName}`}
         className='self-start'
-      />
+      /> */}
 
       <div className='flex flex-wrap items-center gap-3'>
         <Button
@@ -400,7 +402,7 @@ function VibeResultCard({
 
       {saveState === 'error' ? (
         <p className='text-sm text-lunary-rose'>
-          Couldn’t save right now — try again in a moment.
+          Couldn't save right now, try again in a moment.
         </p>
       ) : null}
       {shareNote ? (
@@ -408,7 +410,7 @@ function VibeResultCard({
       ) : null}
 
       <p className='text-xs text-content-muted'>
-        This is your fast read — for the full picture, add your birth chart in
+        This is your fast read, for the full picture, add your birth chart in
         Profile.
       </p>
     </div>

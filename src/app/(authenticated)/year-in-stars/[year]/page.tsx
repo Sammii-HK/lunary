@@ -12,6 +12,7 @@ import type { RankableTransit } from '@/lib/transits/personal-impact-rank';
 import type { BirthChartData } from '../../../../../utils/astrology/birthChart';
 import { YearInStarsReel } from '@/components/year-in-stars/YearInStarsReel';
 import { Heading } from '@/components/ui/Heading';
+import { hasFeatureAccess } from '../../../../../utils/pricing';
 
 export const dynamic = 'force-dynamic';
 
@@ -248,6 +249,10 @@ export default async function YearInStarsByYearPage({
   }
 
   const userId = session.user.id;
+
+  // Server-side gate: 'yearly_forecast' is on the lunary_plus_ai_annual tier.
+  const hasYearlyAccess = await loadHasYearlyAccess(userId);
+
   const data = await loadYearData(userId, year);
 
   if (!data) {
@@ -264,5 +269,30 @@ export default async function YearInStarsByYearPage({
     );
   }
 
-  return <YearInStarsReel data={data} userId={userId} />;
+  return (
+    <YearInStarsReel data={data} userId={userId} locked={!hasYearlyAccess} />
+  );
+}
+
+async function loadHasYearlyAccess(userId: string): Promise<boolean> {
+  try {
+    const result = await sql<{
+      status: string | null;
+      plan_type: string | null;
+    }>`
+      SELECT status, plan_type FROM subscriptions
+      WHERE user_id = ${userId}
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    const row = result.rows[0];
+    return hasFeatureAccess(
+      row?.status ?? 'free',
+      row?.plan_type ?? undefined,
+      'yearly_forecast',
+    );
+  } catch (err) {
+    console.error('[YearInStars] failed to check entitlement', err);
+    return false;
+  }
 }

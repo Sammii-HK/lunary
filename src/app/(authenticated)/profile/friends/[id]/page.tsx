@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Clock,
   Gift,
+  Lock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/Heading';
@@ -27,6 +28,8 @@ import {
 import { ShareSynastry } from '@/components/share/ShareSynastry';
 import { getSynastryArchetype } from '@/utils/astrology/synastry-archetype';
 import { useUser } from '@/context/UserContext';
+import { useSubscription } from '@/hooks/useSubscription';
+import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { BirthChart } from '@/components/BirthChart';
 import {
   SynastryChart,
@@ -51,19 +54,6 @@ function extractBigThree(chart?: BirthChartData[]) {
   if (!sun && !moon && !rising) return undefined;
   return { sun, moon, rising };
 }
-
-type FriendProfile = {
-  id: string;
-  friendId: string;
-  name: string;
-  avatar?: string;
-  sunSign?: string;
-  birthday?: string | null;
-  relationshipType?: string;
-  hasBirthChart: boolean;
-  synastry?: SynastryData;
-  birthChart?: BirthChartData[];
-};
 
 type SynastryAspect = {
   person1Planet: string;
@@ -90,6 +80,19 @@ type SynastryData = {
     mutable: { person1: number; person2: number; combined: number };
     compatibility: string;
   };
+};
+
+type FriendProfile = {
+  id: string;
+  friendId: string;
+  name: string;
+  avatar?: string;
+  sunSign?: string;
+  birthday?: string | null;
+  relationshipType?: string;
+  hasBirthChart: boolean;
+  synastry?: SynastryData;
+  birthChart?: BirthChartData[];
 };
 
 type FriendTab = 'overview' | 'synastry' | 'chart' | 'timing';
@@ -130,6 +133,12 @@ export default function FriendProfilePage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useUser();
+  const sub = useSubscription();
+  // Free users with `friend_connections_basic` see compatibility % only.
+  // Paid `friend_connections` unlocks the bi-wheel, full aspect list, and
+  // the CompatibilityBreakdown panel. Server-side gating in
+  // /api/friends/[id] also strips the friend's birthChart for free users.
+  const hasFullSynastry = sub.hasAccess('friend_connections');
   const friendId = params.id as string;
 
   const [friend, setFriend] = useState<FriendProfile | null>(null);
@@ -348,6 +357,7 @@ export default function FriendProfilePage() {
             friendChart={friend.birthChart}
             userName={user?.name?.split(' ')[0]}
             friendName={friend.name}
+            hasFullSynastry={hasFullSynastry}
           />
         )}
         {activeTab === 'chart' && (
@@ -547,17 +557,20 @@ function SynastryTab({
   friendChart,
   userName,
   friendName,
+  hasFullSynastry,
 }: {
   synastry?: SynastryData;
   userChart?: BirthChartData[];
   friendChart?: BirthChartData[];
   userName?: string;
   friendName?: string;
+  hasFullSynastry: boolean;
 }) {
   const [showAllAspects, setShowAllAspects] = useState(false);
 
   // Compute the synastry aspects once for both the chart and breakdown so
-  // the visual + numbers stay perfectly in sync.
+  // the visual + numbers stay perfectly in sync. Free users won't have
+  // `friendChart` (the API strips it) so this naturally returns [] for them.
   const interChartAspects: SynastryAspectLine[] = useMemo(() => {
     if (!userChart || !friendChart) return [];
     return computeSynastryAspects(userChart, friendChart);
@@ -585,8 +598,8 @@ function SynastryTab({
 
   return (
     <div className='space-y-6' data-testid='synastry-tab-content'>
-      {/* New: synastry bi-wheel hero */}
-      {userChart && friendChart && (
+      {/* Synastry bi-wheel hero: premium-only */}
+      {hasFullSynastry && userChart && friendChart && (
         <div className='rounded-2xl border border-stroke-subtle bg-surface-elevated/70 p-4 md:p-5 backdrop-blur'>
           <SynastryChart
             userChart={userChart}
@@ -598,8 +611,8 @@ function SynastryTab({
         </div>
       )}
 
-      {/* New: rich breakdown grounded in utils/astrology/synastry.ts */}
-      {userChart && friendChart && (
+      {/* Rich breakdown grounded in utils/astrology/synastry.ts: premium-only */}
+      {hasFullSynastry && userChart && friendChart && (
         <CompatibilityBreakdown
           userChart={userChart}
           friendChart={friendChart}
@@ -607,6 +620,42 @@ function SynastryTab({
           userName={userName}
           friendName={friendName}
         />
+      )}
+
+      {/* Free-tier teaser + paywall block: replaces bi-wheel + breakdown +
+          aspect list. Compatibility % above stays so free users still get
+          the basic friend_connections_basic value prop. */}
+      {!hasFullSynastry && (
+        <div
+          className='relative overflow-hidden rounded-2xl border border-stroke-subtle bg-surface-elevated/70 p-6 md:p-8 text-center'
+          data-testid='synastry-paywall'
+        >
+          {/* Soft teaser background, evokes the bi-wheel without rendering it. */}
+          <div
+            className='pointer-events-none absolute inset-0'
+            aria-hidden='true'
+            style={{
+              background:
+                'radial-gradient(circle at 50% 40%, rgba(199,125,255,0.18), transparent 60%), radial-gradient(circle at 70% 60%, rgba(123,255,184,0.15), transparent 55%)',
+              filter: 'blur(8px)',
+            }}
+          />
+          <div className='relative'>
+            <div className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-lunary-primary to-lunary-secondary'>
+              <Lock className='h-7 w-7 text-content-primary' />
+            </div>
+            <Heading as='h3' variant='h3' className='mb-2'>
+              Unlock the full synastry
+            </Heading>
+            <p className='mx-auto mb-5 max-w-md text-sm text-content-muted'>
+              See your bi-wheel chart with {friendName ?? 'your friend'}, every
+              connecting aspect, and the element/modality breakdown.
+            </p>
+            <div className='mx-auto max-w-xs'>
+              <SmartTrialButton fullWidth feature='friend_connections' />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Score */}
@@ -636,141 +685,147 @@ function SynastryTab({
         </div>
       </div>
 
-      {/* Element Balance */}
-      <div
-        className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
-        data-testid='synastry-element-balance'
-      >
-        <h3 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-4'>
-          Element Balance
-        </h3>
+      {/* Element Balance: premium-only (free users see compatibility % only) */}
+      {hasFullSynastry && (
         <div
-          className='grid grid-cols-4 gap-3'
-          data-testid='element-balance-grid'
+          className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
+          data-testid='synastry-element-balance'
         >
-          {(['fire', 'earth', 'air', 'water'] as const).map((element) => {
-            const data = synastry.elementBalance[element];
-            const colors: Record<string, string> = {
-              fire: 'from-red-500 to-orange-500',
-              earth: 'from-green-600 to-emerald-500',
-              air: 'from-sky-400 to-blue-400',
-              water: 'from-blue-500 to-indigo-500',
-            };
-            return (
-              <div
-                key={element}
-                className='rounded-lg bg-surface-card/50 p-3 text-center'
-              >
+          <h3 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-4'>
+            Element Balance
+          </h3>
+          <div
+            className='grid grid-cols-4 gap-3'
+            data-testid='element-balance-grid'
+          >
+            {(['fire', 'earth', 'air', 'water'] as const).map((element) => {
+              const data = synastry.elementBalance[element];
+              const colors: Record<string, string> = {
+                fire: 'from-red-500 to-orange-500',
+                earth: 'from-green-600 to-emerald-500',
+                air: 'from-sky-400 to-blue-400',
+                water: 'from-blue-500 to-indigo-500',
+              };
+              return (
                 <div
-                  className={`text-2xl font-bold bg-gradient-to-r ${colors[element]} bg-clip-text text-transparent`}
+                  key={element}
+                  className='rounded-lg bg-surface-card/50 p-3 text-center'
                 >
-                  {data.combined}
+                  <div
+                    className={`text-2xl font-bold bg-gradient-to-r ${colors[element]} bg-clip-text text-transparent`}
+                  >
+                    {data.combined}
+                  </div>
+                  <div className='text-xs text-content-muted capitalize'>
+                    {element}
+                  </div>
+                  <div className='text-[10px] text-content-muted mt-1'>
+                    You: {data.person1} / Them: {data.person2}
+                  </div>
                 </div>
-                <div className='text-xs text-content-muted capitalize'>
-                  {element}
-                </div>
-                <div className='text-[10px] text-content-muted mt-1'>
-                  You: {data.person1} / Them: {data.person2}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+          <p className='text-xs text-content-muted mt-3'>
+            Elements:{' '}
+            <span
+              className={
+                synastry.elementBalance.compatibility === 'complementary'
+                  ? 'text-green-400'
+                  : synastry.elementBalance.compatibility === 'challenging'
+                    ? 'text-lunary-error-300'
+                    : 'text-content-secondary'
+              }
+            >
+              {synastry.elementBalance.compatibility}
+            </span>
+          </p>
         </div>
-        <p className='text-xs text-content-muted mt-3'>
-          Elements:{' '}
-          <span
-            className={
-              synastry.elementBalance.compatibility === 'complementary'
-                ? 'text-green-400'
-                : synastry.elementBalance.compatibility === 'challenging'
-                  ? 'text-lunary-error-300'
-                  : 'text-content-secondary'
-            }
-          >
-            {synastry.elementBalance.compatibility}
-          </span>
-        </p>
-      </div>
+      )}
 
-      {/* Modality Balance */}
-      <div
-        className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
-        data-testid='synastry-modality-balance'
-      >
-        <h3 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-4'>
-          Modality Balance
-        </h3>
+      {/* Modality Balance: premium-only */}
+      {hasFullSynastry && (
         <div
-          className='grid grid-cols-3 gap-3'
-          data-testid='modality-balance-grid'
+          className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
+          data-testid='synastry-modality-balance'
         >
-          {(['cardinal', 'fixed', 'mutable'] as const).map((modality) => {
-            const data = synastry.modalityBalance[modality];
-            return (
-              <div
-                key={modality}
-                className='rounded-lg bg-surface-card/50 p-3 text-center'
-              >
-                <div className='text-2xl font-bold text-content-primary'>
-                  {data.combined}
-                </div>
-                <div className='text-xs text-content-muted capitalize'>
-                  {modality}
-                </div>
-                <div className='text-[10px] text-content-muted mt-1'>
-                  You: {data.person1} / Them: {data.person2}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Aspects */}
-      <div
-        className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
-        data-testid='synastry-aspects-section'
-      >
-        <h3 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-4'>
-          Aspects ({synastry.aspects.length})
-        </h3>
-
-        <div className='grid sm:grid-cols-2 gap-4 mb-4'>
-          <div className='space-y-2' data-testid='harmonious-aspects'>
-            <h4 className='text-xs font-medium text-green-400 flex items-center gap-1'>
-              <TrendingUp className='w-3 h-3' />
-              Harmonious ({harmoniousAspects.length})
-            </h4>
-            {harmoniousAspects
-              .slice(0, showAllAspects ? undefined : 5)
-              .map((aspect, i) => (
-                <AspectRow key={i} aspect={aspect} />
-              ))}
-          </div>
-          <div className='space-y-2' data-testid='challenging-aspects'>
-            <h4 className='text-xs font-medium text-lunary-error-300 flex items-center gap-1'>
-              <Sparkles className='w-3 h-3' />
-              Challenging ({challengingAspects.length})
-            </h4>
-            {challengingAspects
-              .slice(0, showAllAspects ? undefined : 5)
-              .map((aspect, i) => (
-                <AspectRow key={i} aspect={aspect} />
-              ))}
-          </div>
-        </div>
-
-        {synastry.aspects.length > 10 && (
-          <Button
-            onClick={() => setShowAllAspects(!showAllAspects)}
-            variant='outline'
-            size='sm'
-            data-testid='toggle-all-aspects'
+          <h3 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-4'>
+            Modality Balance
+          </h3>
+          <div
+            className='grid grid-cols-3 gap-3'
+            data-testid='modality-balance-grid'
           >
-            {showAllAspects ? 'Show Less' : 'Show All Aspects'}
-          </Button>
-        )}
-      </div>
+            {(['cardinal', 'fixed', 'mutable'] as const).map((modality) => {
+              const data = synastry.modalityBalance[modality];
+              return (
+                <div
+                  key={modality}
+                  className='rounded-lg bg-surface-card/50 p-3 text-center'
+                >
+                  <div className='text-2xl font-bold text-content-primary'>
+                    {data.combined}
+                  </div>
+                  <div className='text-xs text-content-muted capitalize'>
+                    {modality}
+                  </div>
+                  <div className='text-[10px] text-content-muted mt-1'>
+                    You: {data.person1} / Them: {data.person2}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Aspects: premium-only (server returns [] for free users anyway) */}
+      {hasFullSynastry && (
+        <div
+          className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
+          data-testid='synastry-aspects-section'
+        >
+          <h3 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-4'>
+            Aspects ({synastry.aspects.length})
+          </h3>
+
+          <div className='grid sm:grid-cols-2 gap-4 mb-4'>
+            <div className='space-y-2' data-testid='harmonious-aspects'>
+              <h4 className='text-xs font-medium text-green-400 flex items-center gap-1'>
+                <TrendingUp className='w-3 h-3' />
+                Harmonious ({harmoniousAspects.length})
+              </h4>
+              {harmoniousAspects
+                .slice(0, showAllAspects ? undefined : 5)
+                .map((aspect, i) => (
+                  <AspectRow key={i} aspect={aspect} />
+                ))}
+            </div>
+            <div className='space-y-2' data-testid='challenging-aspects'>
+              <h4 className='text-xs font-medium text-lunary-error-300 flex items-center gap-1'>
+                <Sparkles className='w-3 h-3' />
+                Challenging ({challengingAspects.length})
+              </h4>
+              {challengingAspects
+                .slice(0, showAllAspects ? undefined : 5)
+                .map((aspect, i) => (
+                  <AspectRow key={i} aspect={aspect} />
+                ))}
+            </div>
+          </div>
+
+          {synastry.aspects.length > 10 && (
+            <Button
+              onClick={() => setShowAllAspects(!showAllAspects)}
+              variant='outline'
+              size='sm'
+              data-testid='toggle-all-aspects'
+            >
+              {showAllAspects ? 'Show Less' : 'Show All Aspects'}
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

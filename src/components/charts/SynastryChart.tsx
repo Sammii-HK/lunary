@@ -14,20 +14,18 @@ import {
   astroPointSymbols,
 } from '@/constants/symbols';
 import type { BirthChartData } from '../../../utils/astrology/birthChart';
+import {
+  CHART_ASPECT_COLORS,
+  CHART_COLORS,
+  CHART_ELEMENT_COLORS,
+} from '@/components/charts/chartTheme';
 
 const cx = classNames;
 
 /** Round to 6dp to keep SSR stable. */
 const r6 = (n: number) => Math.round(n * 1e6) / 1e6;
 
-const ELEMENT_COLORS = {
-  Fire: '#ff6b6b',
-  Earth: '#6b8e4e',
-  Air: '#5dade2',
-  Water: '#9b59b6',
-} as const;
-
-const SIGN_ELEMENTS: Record<string, keyof typeof ELEMENT_COLORS> = {
+const SIGN_ELEMENTS: Record<string, keyof typeof CHART_ELEMENT_COLORS> = {
   Aries: 'Fire',
   Taurus: 'Earth',
   Gemini: 'Air',
@@ -76,29 +74,35 @@ const SYNASTRY_ASPECTS = [
     name: 'Conjunction',
     angle: 0,
     orb: 8,
-    color: '#C77DFF',
+    color: CHART_ASPECT_COLORS.Conjunction,
     nature: 'neutral',
   },
   {
     name: 'Opposition',
     angle: 180,
     orb: 8,
-    color: '#ffd6a3',
+    color: CHART_ASPECT_COLORS.Opposition,
     nature: 'challenging',
   },
-  { name: 'Trine', angle: 120, orb: 6, color: '#7BFFB8', nature: 'harmonious' },
+  {
+    name: 'Trine',
+    angle: 120,
+    orb: 6,
+    color: CHART_ASPECT_COLORS.Trine,
+    nature: 'harmonious',
+  },
   {
     name: 'Square',
     angle: 90,
     orb: 6,
-    color: '#f87171',
+    color: CHART_ASPECT_COLORS.Square,
     nature: 'challenging',
   },
   {
     name: 'Sextile',
     angle: 60,
     orb: 4,
-    color: '#94d1ff',
+    color: CHART_ASPECT_COLORS.Sextile,
     nature: 'harmonious',
   },
 ] as const;
@@ -127,7 +131,7 @@ function symbolFor(body: string) {
 function elementColor(sign?: string) {
   if (!sign) return '#a1a1aa';
   const el = SIGN_ELEMENTS[sign];
-  return el ? ELEMENT_COLORS[el] : '#a1a1aa';
+  return el ? CHART_ELEMENT_COLORS[el] : CHART_COLORS.textMuted;
 }
 
 /**
@@ -321,21 +325,6 @@ export function SynastryChart({
       className='flex flex-col items-center gap-3'
       data-testid='synastry-chart'
     >
-      <div className='flex items-center justify-between gap-4 w-full max-w-[440px] px-2 text-[11px]'>
-        <div className='flex items-center gap-1.5'>
-          <span className='inline-block w-2 h-2 rounded-full bg-lunary-primary' />
-          <span className='text-content-secondary'>
-            {userName ? `${userName} (you)` : 'You'} · inside
-          </span>
-        </div>
-        <div className='flex items-center gap-1.5'>
-          <span className='inline-block w-2 h-2 rounded-full bg-lunary-highlight' />
-          <span className='text-content-secondary'>
-            {friendName || 'Friend'} · outside
-          </span>
-        </div>
-      </div>
-
       <div className='relative w-full max-w-[360px] md:max-w-[440px] aspect-square select-none'>
         <motion.svg
           viewBox='-140 -140 280 280'
@@ -361,8 +350,8 @@ export function SynastryChart({
               x2='100%'
               y2='100%'
             >
-              <stop offset='0%' stopColor='#ffe08a' />
-              <stop offset='100%' stopColor='#ff7a45' />
+              <stop offset='0%' stopColor={CHART_COLORS.sunA} />
+              <stop offset='100%' stopColor={CHART_COLORS.sunB} />
             </linearGradient>
             <radialGradient
               id={`syn-user-glow-${uid}`}
@@ -370,8 +359,16 @@ export function SynastryChart({
               cy='50%'
               r='50%'
             >
-              <stop offset='0%' stopColor='#C77DFF' stopOpacity='0.35' />
-              <stop offset='100%' stopColor='#C77DFF' stopOpacity='0' />
+              <stop
+                offset='0%'
+                stopColor={CHART_COLORS.selected}
+                stopOpacity='0.28'
+              />
+              <stop
+                offset='100%'
+                stopColor={CHART_COLORS.selected}
+                stopOpacity='0'
+              />
             </radialGradient>
             <radialGradient
               id={`syn-friend-glow-${uid}`}
@@ -379,8 +376,16 @@ export function SynastryChart({
               cy='50%'
               r='50%'
             >
-              <stop offset='0%' stopColor='#ff6ec7' stopOpacity='0.32' />
-              <stop offset='100%' stopColor='#ff6ec7' stopOpacity='0' />
+              <stop
+                offset='0%'
+                stopColor={CHART_ASPECT_COLORS.Sextile}
+                stopOpacity='0.28'
+              />
+              <stop
+                offset='100%'
+                stopColor={CHART_ASPECT_COLORS.Sextile}
+                stopOpacity='0'
+              />
             </radialGradient>
           </defs>
 
@@ -392,7 +397,7 @@ export function SynastryChart({
             cy='0'
             r={ZODIAC_OUTER_R}
             fill='none'
-            stroke='#3f3f46'
+            stroke={CHART_COLORS.stroke}
             strokeWidth='0.8'
             opacity='0.6'
           />
@@ -401,7 +406,7 @@ export function SynastryChart({
             cy='0'
             r={ZODIAC_INNER_R}
             fill='none'
-            stroke='#3f3f46'
+            stroke={CHART_COLORS.stroke}
             strokeWidth='0.8'
             opacity='0.5'
           />
@@ -410,7 +415,7 @@ export function SynastryChart({
             cy='0'
             r={USER_DOT_R}
             fill='none'
-            stroke='#27272a'
+            stroke={CHART_COLORS.strokeSubtle}
             strokeWidth='0.6'
             opacity='0.55'
           />
@@ -436,7 +441,7 @@ export function SynastryChart({
                 key={`syn-sector-${i}`}
                 d={`M ${x1} ${y1} A ${rO} ${rO} 0 ${sweep} 1 ${x2} ${y2} L ${x3} ${y3} A ${rI} ${rI} 0 ${sweep} 0 ${x4} ${y4} Z`}
                 fill={elementColor(sign)}
-                opacity='0.07'
+                opacity='0.045'
               />
             );
           })}
@@ -453,7 +458,7 @@ export function SynastryChart({
                 y1={p1.y}
                 x2={p2.x}
                 y2={p2.y}
-                stroke='#52525b'
+                stroke={CHART_COLORS.stroke}
                 strokeWidth='0.4'
                 opacity='0.5'
               />
@@ -473,7 +478,9 @@ export function SynastryChart({
                 y1={inner.y}
                 x2={outer.x}
                 y2={outer.y}
-                stroke={isAngular ? '#7B7BE8' : '#52525b'}
+                stroke={
+                  isAngular ? CHART_COLORS.angular : CHART_COLORS.strokeSubtle
+                }
                 strokeWidth={isAngular ? 1.2 : 0.4}
                 opacity={isAngular ? 0.7 : 0.35}
               />
@@ -514,7 +521,7 @@ export function SynastryChart({
                   : 0.32;
 
               // Bezier curve bulged toward centre for harmonious, away for
-              // challenging — mirrors AspectLines.tsx aesthetic.
+              // challenging, mirrors AspectLines.tsx aesthetic.
               const mx = (u.x + f.x) / 2;
               const my = (u.y + f.y) / 2;
               const dist = Math.hypot(f.x - u.x, f.y - u.y);
@@ -573,7 +580,7 @@ export function SynastryChart({
             })}
           </AnimatePresence>
 
-          {/* User natal planets — inner ring */}
+          {/* User natal planets, inner ring */}
           {userPlacements.map((p, idx) => {
             const pos = polar(p.eclipticLongitude, USER_GLYPH_R);
             const dotPos = polar(p.eclipticLongitude, USER_DOT_R);
@@ -593,7 +600,7 @@ export function SynastryChart({
               p.body === 'Sun'
                 ? `url(#syn-sun-${uid})`
                 : isSelected
-                  ? '#ffffff'
+                  ? CHART_COLORS.text
                   : elColor;
 
             return (
@@ -650,13 +657,13 @@ export function SynastryChart({
                 )}
                 {isSelected && (
                   <>
-                    {/* Steady glow ring — clearly marks the spotlighted planet */}
+                    {/* Steady glow ring, clearly marks the spotlighted planet */}
                     <circle
                       cx={pos.x}
                       cy={pos.y}
                       r={9}
                       fill='none'
-                      stroke='#C77DFF'
+                      stroke={CHART_COLORS.selected}
                       strokeWidth={1.2}
                       opacity={0.95}
                     />
@@ -666,7 +673,7 @@ export function SynastryChart({
                       cy={pos.y}
                       r={9}
                       fill='none'
-                      stroke='#C77DFF'
+                      stroke={CHART_COLORS.selected}
                       strokeWidth={0.6}
                       animate={{ r: [9, 14, 9], opacity: [0.5, 0, 0.5] }}
                       transition={{
@@ -709,7 +716,7 @@ export function SynastryChart({
                     x={pos.x + 7}
                     y={pos.y - 6}
                     fontSize='6'
-                    fill='#f87171'
+                    fill={CHART_COLORS.retrograde}
                     textAnchor='middle'
                   >
                     ℞
@@ -726,7 +733,7 @@ export function SynastryChart({
             );
           })}
 
-          {/* Friend natal planets — outer ring */}
+          {/* Friend natal planets, outer ring */}
           {friendPlacements.map((p, idx) => {
             const pos = polar(p.eclipticLongitude, FRIEND_GLYPH_R);
             const dotPos = polar(p.eclipticLongitude, FRIEND_DOT_R);
@@ -743,7 +750,7 @@ export function SynastryChart({
               p.body === 'Sun'
                 ? `url(#syn-sun-${uid})`
                 : isSelected
-                  ? '#ffffff'
+                  ? CHART_COLORS.text
                   : elColor;
 
             return (
@@ -795,7 +802,7 @@ export function SynastryChart({
                       cy={pos.y}
                       r={9}
                       fill='none'
-                      stroke='#ff6ec7'
+                      stroke={CHART_ASPECT_COLORS.Sextile}
                       strokeWidth={1.2}
                       opacity={0.95}
                     />
@@ -804,7 +811,7 @@ export function SynastryChart({
                       cy={pos.y}
                       r={9}
                       fill='none'
-                      stroke='#ff6ec7'
+                      stroke={CHART_ASPECT_COLORS.Sextile}
                       strokeWidth={0.6}
                       animate={{ r: [9, 14, 9], opacity: [0.5, 0, 0.5] }}
                       transition={{
@@ -847,7 +854,7 @@ export function SynastryChart({
                     x={pos.x + 7}
                     y={pos.y - 6}
                     fontSize='6'
-                    fill='#f87171'
+                    fill={CHART_COLORS.retrograde}
                     textAnchor='middle'
                   >
                     ℞
@@ -881,10 +888,29 @@ export function SynastryChart({
         </AnimatePresence>
       </div>
 
-      {/* Aspect legend */}
-      <div className='flex flex-wrap items-center justify-center gap-x-3 gap-y-1 max-w-[440px] text-[10px] text-content-muted px-2'>
+      {/* Who's who legend, moved below chart so the wheel reads as hero */}
+      <div className='flex items-center justify-between gap-4 w-full max-w-[440px] px-2 text-[11px]'>
+        <div className='flex items-center gap-1.5'>
+          <span className='inline-block w-2 h-2 rounded-full bg-lunary-primary' />
+          <span className='text-content-secondary'>
+            {userName ? `${userName} (you)` : 'You'} · inside
+          </span>
+        </div>
+        <div className='flex items-center gap-1.5'>
+          <span className='inline-block w-2 h-2 rounded-full bg-lunary-highlight' />
+          <span className='text-content-secondary'>
+            {friendName || 'Friend'} · outside
+          </span>
+        </div>
+      </div>
+
+      {/* Aspect legend, collapsed by default on mobile (saves ~32px), expanded on md+ */}
+      <div className='hidden w-full max-w-[440px] px-2 md:flex md:flex-wrap md:items-center md:justify-center md:gap-x-3 md:gap-y-1'>
         {SYNASTRY_ASPECTS.map((a) => (
-          <span key={a.name} className='inline-flex items-center gap-1.5'>
+          <span
+            key={a.name}
+            className='inline-flex items-center gap-1.5 text-[10px] text-content-muted'
+          >
             <span
               className={cx('inline-block w-2 h-0.5 rounded')}
               style={{ backgroundColor: a.color }}
@@ -893,6 +919,23 @@ export function SynastryChart({
           </span>
         ))}
       </div>
+      <details className='group w-full max-w-[440px] px-2 md:hidden'>
+        <summary className='inline-flex cursor-pointer list-none items-center gap-1.5 text-[10px] uppercase tracking-wider text-content-muted hover:text-content-secondary'>
+          <span className='group-open:hidden'>Show aspect legend</span>
+          <span className='hidden group-open:inline'>Hide aspect legend</span>
+        </summary>
+        <div className='mt-1 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px] text-content-muted'>
+          {SYNASTRY_ASPECTS.map((a) => (
+            <span key={a.name} className='inline-flex items-center gap-1.5'>
+              <span
+                className={cx('inline-block w-2 h-0.5 rounded')}
+                style={{ backgroundColor: a.color }}
+              />
+              <span>{a.name}</span>
+            </span>
+          ))}
+        </div>
+      </details>
     </div>
   );
 }
