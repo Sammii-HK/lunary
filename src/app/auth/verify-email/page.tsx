@@ -45,10 +45,58 @@ export default function VerifyEmailPage() {
             'Email verified successfully! You can now sign in to your account.',
           );
 
-          // Redirect to profile after successful verification
-          setTimeout(() => {
-            window.location.href = '/profile';
-          }, 3000);
+          // If the user came from a quiz, claim their pending result and
+          // redirect to the full reading page instead of /profile. This stores
+          // the cookie birth data in sessionStorage so /full can later post
+          // "email this to me" without making the user retake the quiz.
+          let redirectedToQuiz = false;
+          if (
+            typeof document !== 'undefined' &&
+            document.cookie.includes('lunary_pending_quiz=')
+          ) {
+            try {
+              const match = document.cookie.match(
+                /lunary_pending_quiz=([^;]+)/,
+              );
+              if (match) {
+                sessionStorage.setItem(
+                  'lunary_quiz_birth_data',
+                  decodeURIComponent(match[1]),
+                );
+              }
+              const res = await fetch('/api/quiz/claim', {
+                method: 'POST',
+                credentials: 'include',
+              });
+              if (res.ok) {
+                const data = await res.json().catch(() => null);
+                if (data?.result?.quizSlug) {
+                  try {
+                    sessionStorage.setItem(
+                      'lunary_claimed_quiz_result',
+                      JSON.stringify(data.result),
+                    );
+                  } catch {
+                    // Non-fatal, /full will fall back to re-claiming.
+                  }
+                  const slug = data.result.quizSlug;
+                  setTimeout(() => {
+                    window.location.href = `/quiz/beyond-your-sun-sign/${encodeURIComponent(slug)}/full`;
+                  }, 1500);
+                  redirectedToQuiz = true;
+                }
+              }
+            } catch {
+              // Graceful degrade, fall through to /profile redirect below.
+            }
+          }
+
+          if (!redirectedToQuiz) {
+            // Redirect to profile after successful verification
+            setTimeout(() => {
+              window.location.href = '/profile';
+            }, 3000);
+          }
         }
       } catch (error) {
         console.error('Verification error:', error);

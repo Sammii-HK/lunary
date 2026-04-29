@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Star, Sword, Trophy, Wand } from 'lucide-react';
+import { Crown, Star, Sword, Trophy, Wand } from 'lucide-react';
 
 type TarotSuitIconProps = {
   cardName?: string;
@@ -46,9 +46,10 @@ export function getTarotSuitIcon({
     case 'wands':
       return Wand;
     case 'pentacles':
+      return Star;
     case 'major':
     default:
-      return Star;
+      return Crown;
   }
 }
 
