@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getCurrentUser } from '@/lib/get-user-session';
 import { decryptLocation, encryptLocation } from '@/lib/location-encryption';
+import { normalizeProfileLocationTimezones } from '@/lib/location/normalize-profile-location';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,9 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      location: decryptLocation(result.rows[0].location),
+      location: normalizeProfileLocationTimezones(
+        decryptLocation(result.rows[0].location),
+      ),
     });
   } catch (error) {
     console.error('Error fetching location:', error);
@@ -67,6 +70,7 @@ export async function PUT(request: NextRequest) {
       ...location,
       lastUpdated: new Date().toISOString(),
     };
+    normalizeProfileLocationTimezones(mergedLocation);
     const encryptedLocation = encryptLocation(mergedLocation);
 
     await sql`

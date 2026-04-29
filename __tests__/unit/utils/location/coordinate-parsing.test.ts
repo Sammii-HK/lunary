@@ -5,7 +5,14 @@
  * which handles multiple coordinate input formats.
  */
 
-import { parseCoordinates } from 'utils/location';
+import {
+  getBirthLocationFallback,
+  isDefaultLocation,
+  parseCoordinates,
+  resolveCoordinateTimezone,
+} from 'utils/location';
+
+jest.mock('tz-lookup', () => jest.fn(() => 'Europe/London'));
 
 describe('Coordinate parsing', () => {
   // --- Decimal pair with comma ---
@@ -89,5 +96,117 @@ describe('Coordinate parsing', () => {
   it('parses "-90, -180" (opposite extreme)', () => {
     const result = parseCoordinates('-90, -180');
     expect(result).toEqual({ latitude: -90, longitude: -180 });
+  });
+});
+
+describe('birth location fallback', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('uses saved birth coordinates with the birth timezone', async () => {
+    const result = await getBirthLocationFallback({
+      birthLocation: 'London, UK',
+      birthCoordinates: { latitude: 51.5074, longitude: -0.1278 },
+      birthTimezone: 'Europe/London',
+    });
+
+    expect(result).toEqual({
+      latitude: 51.5074,
+      longitude: -0.1278,
+      city: 'London, UK',
+      timezone: 'Europe/London',
+      country: undefined,
+      accuracy: undefined,
+    });
+  });
+
+  it('geocodes a saved birth location string when coordinates are missing', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({ latitude: 55.9533, longitude: -3.1883 }),
+    } as Response);
+
+    const result = await getBirthLocationFallback({
+      birthLocation: 'Edinburgh, Scotland',
+      birthTimezone: 'Europe/London',
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/location/geocode?q=Edinburgh%2C%20Scotland',
+    );
+    expect(result).toMatchObject({
+      latitude: 55.9533,
+      longitude: -3.1883,
+      city: 'Edinburgh, Scotland',
+      timezone: 'Europe/London',
+    });
+  });
+
+  it('looks up timezone from birth coordinates instead of reusing profile timezone', async () => {
+    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({ timezone: 'Europe/London' }),
+    } as Response);
+
+    const result = await getBirthLocationFallback({
+      timezone: 'America/New_York',
+      birthLocation: 'London, UK',
+      birthCoordinates: { latitude: 51.5074, longitude: -0.1278 },
+    });
+
+    expect(fetchSpy).not.toHaveBeenCalledWith(
+      '/api/location/reverse?lat=51.5074&lon=-0.1278',
+    );
+    expect(result).toMatchObject({
+      latitude: 51.5074,
+      longitude: -0.1278,
+      city: 'London, UK',
+      timezone: 'Europe/London',
+    });
+  });
+
+  it('identifies the baked New York fallback so callers can ignore it', () => {
+    expect(
+      isDefaultLocation({
+        latitude: 40.7128,
+        longitude: -74.006,
+        city: 'New York',
+        timezone: 'America/New_York',
+      }),
+    ).toBe(true);
+  });
+
+  it('does not treat a real New York geolocation as the baked fallback', () => {
+    expect(
+      isDefaultLocation({
+        latitude: 40.7128,
+        longitude: -74.006,
+        city: 'New York',
+        timezone: 'America/New_York',
+        accuracy: 25,
+      }),
+    ).toBe(false);
+  });
+
+  it('corrects a stale timezone on otherwise valid coordinates', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({ timezone: 'Europe/London' }),
+    } as Response);
+
+    const result = await resolveCoordinateTimezone({
+      latitude: 51.5074,
+      longitude: -0.1278,
+      city: 'London',
+      timezone: 'America/New_York',
+    });
+
+    expect(result).toMatchObject({
+      latitude: 51.5074,
+      longitude: -0.1278,
+      city: 'London',
+      timezone: 'Europe/London',
+    });
   });
 });

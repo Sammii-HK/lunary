@@ -4,13 +4,16 @@ import { revalidateTag } from 'next/cache';
 import { requireUser } from '@/lib/ai/auth';
 import { decrypt } from '@/lib/encryption';
 import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
-import { getDailyCacheHeaders } from '@/lib/cache-utils';
 import { CURRENT_BIRTH_CHART_VERSION } from '../../../../../utils/astrology/chart-version';
 import { decryptLocation } from '@/lib/location-encryption';
 
 export const dynamic = 'force-dynamic';
 
 export const runtime = 'nodejs';
+
+const PRIVATE_DAILY_HEADERS = {
+  'Cache-Control': 'private, no-store, max-age=0, must-revalidate',
+};
 
 interface UserProfile {
   name?: string;
@@ -87,6 +90,13 @@ function hasUnavailableChartCopy(text: string | undefined): boolean {
   );
 }
 
+function hasGenericFallbackCopy(text: string | undefined): boolean {
+  if (!text) return false;
+  return /today's wider sky|notice what feels ready to begin|universal day \d+ brings/i.test(
+    text,
+  );
+}
+
 function hasUsableBirthChart(chart: unknown): boolean {
   return Array.isArray(chart) && chart.length > 0;
 }
@@ -99,7 +109,9 @@ function cachedMentionsMissingChart(data: CachedHoroscope | null): boolean {
     data.dailyGuidance,
     data.personalInsight,
     data.cosmicHighlight,
-  ].some(hasUnavailableChartCopy);
+  ].some(
+    (text) => hasUnavailableChartCopy(text) || hasGenericFallbackCopy(text),
+  );
 }
 
 function sanitiseHoroscopeCopy<T extends CachedHoroscope>(data: T): T {
@@ -260,7 +272,7 @@ export async function GET(request: NextRequest) {
               cached: false,
             },
             {
-              headers: getDailyCacheHeaders(),
+              headers: PRIVATE_DAILY_HEADERS,
             },
           );
 
@@ -322,7 +334,7 @@ export async function GET(request: NextRequest) {
           cached: true,
         },
         {
-          headers: getDailyCacheHeaders(), // Resets at midnight London time
+          headers: PRIVATE_DAILY_HEADERS,
         },
       );
 
@@ -398,7 +410,7 @@ export async function GET(request: NextRequest) {
         cached: false,
       },
       {
-        headers: getDailyCacheHeaders(), // Resets at midnight London time
+        headers: PRIVATE_DAILY_HEADERS,
       },
     );
   } catch (error: any) {
@@ -460,11 +472,16 @@ export async function POST(request: NextRequest) {
     // Save to cache
     await saveHoroscope(userId, dateStr, horoscopeData);
 
-    return NextResponse.json({
-      ...horoscopeData,
-      cached: false,
-      refreshed: true,
-    });
+    return NextResponse.json(
+      {
+        ...horoscopeData,
+        cached: false,
+        refreshed: true,
+      },
+      {
+        headers: PRIVATE_DAILY_HEADERS,
+      },
+    );
   } catch (error: any) {
     if (error.name === 'UnauthorizedError') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

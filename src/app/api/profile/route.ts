@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/get-user-session';
 import { encrypt, decrypt } from '@/lib/encryption';
 import { normalizeIsoDateOnly } from '@/lib/date-only';
 import { decryptLocation, encryptLocation } from '@/lib/location-encryption';
+import { normalizeProfileLocationTimezones } from '@/lib/location/normalize-profile-location';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,6 +57,10 @@ export async function GET(request: NextRequest) {
       : null;
     const decryptedBirthday = normalizeIsoDateOnly(decryptedBirthdayRaw);
 
+    const decryptedLocation = normalizeProfileLocationTimezones(
+      decryptLocation(profile?.location),
+    );
+
     return NextResponse.json(
       {
         profile: profile
@@ -66,7 +71,7 @@ export async function GET(request: NextRequest) {
               birthday: decryptedBirthday,
               birthChart: profile.birth_chart,
               personalCard: profile.personal_card,
-              location: decryptLocation(profile.location),
+              location: decryptedLocation,
               stripeCustomerId: profile.stripe_customer_id,
               intention: profile.intention,
               birthChartHouseSystem:
@@ -143,7 +148,12 @@ export async function PUT(request: NextRequest) {
       ? encrypt(normalizedBirthday)
       : null;
 
-    const encryptedLocation = location ? encryptLocation(location) : null;
+    const normalizedLocation = location
+      ? normalizeProfileLocationTimezones(location)
+      : null;
+    const encryptedLocation = normalizedLocation
+      ? encryptLocation(normalizedLocation)
+      : null;
 
     const result = await sql`
       INSERT INTO user_profiles (
