@@ -41,7 +41,10 @@ import { useSubscription } from '../../../../hooks/useSubscription';
 import { useTarotShare } from '@/hooks/useTarotShare';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { TarotTransitConnection } from '@/components/tarot/TarotTransitConnection';
-import { TarotSuitIcon } from '@/components/tarot/TarotSuitIcon';
+import {
+  getTarotSuitAccent,
+  TarotSuitIcon,
+} from '@/components/tarot/TarotSuitIcon';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { shouldRedactWord } from '@/constants/redactedWords';
@@ -637,8 +640,15 @@ export function TarotView({
   };
 
   const renderCardGlyph = (name: string) => {
+    const cardAccent = getTarotSuitAccent({ cardName: name });
+
     return (
-      <div className='flex h-28 w-20 shrink-0 items-center justify-center rounded-[1.15rem] border border-white/15 bg-gradient-to-b from-lunary-primary-900/70 via-layer-deep/80 to-surface-base shadow-[0_18px_45px_rgba(0,0,0,0.28)] sm:h-32 sm:w-24'>
+      <div
+        className={cn(
+          'flex h-28 w-20 shrink-0 items-center justify-center rounded-[1.15rem] border border-white/15 bg-gradient-to-br shadow-[0_18px_45px_rgba(0,0,0,0.28)] sm:h-32 sm:w-24',
+          cardAccent,
+        )}
+      >
         <TarotSuitIcon
           cardName={name}
           className='h-10 w-10 text-content-brand-accent sm:h-12 sm:w-12'

@@ -24,7 +24,7 @@ import {
 } from '@/constants/tarotSpreads';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { TarotTransitConnection } from './TarotTransitConnection';
-import { TarotSuitIcon } from './TarotSuitIcon';
+import { getTarotSuitAccent, TarotSuitIcon } from './TarotSuitIcon';
 import type { BirthChartPlacement } from '@/context/UserContext';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { isInDemoMode } from '@/lib/demo-mode';
@@ -102,14 +102,6 @@ const PLAN_LABEL: Record<TarotPlan, string> = {
   free: 'Cosmic Explorer',
   monthly: 'Lunary+',
   yearly: 'Lunary+ Pro Annual',
-};
-
-const SUIT_ACCENTS: Record<string, string> = {
-  cups: 'from-sky-400/25 to-lunary-primary/15',
-  wands: 'from-amber-300/25 to-lunary-rose-500/15',
-  swords: 'from-zinc-200/25 to-lunary-accent/15',
-  pentacles: 'from-emerald-300/25 to-lunary-secondary/15',
-  major: 'from-lunary-primary/30 to-lunary-accent/15',
 };
 
 // Map TarotPlan to actual plan ID for UpgradePrompt
@@ -913,12 +905,11 @@ export function TarotSpreadExperience({
                 {currentReading?.cards?.map((card, cardIndex) => {
                   const isTransitExpanded =
                     expandedTransitCardIndex === cardIndex;
-                  const cardAccentKey =
-                    card.card.arcana === 'major'
-                      ? 'major'
-                      : card.card.suit?.toLowerCase() || 'major';
-                  const cardAccent =
-                    SUIT_ACCENTS[cardAccentKey] || SUIT_ACCENTS.major;
+                  const cardAccent = getTarotSuitAccent({
+                    cardName: card.card.name,
+                    suit: card.card.suit,
+                    arcana: card.card.arcana,
+                  });
                   return (
                     <div
                       key={card.positionId}
