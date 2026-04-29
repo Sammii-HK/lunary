@@ -13,9 +13,11 @@ describe('normalizeProfileLocationTimezones', () => {
   });
 
   it('fills missing birth timezone from saved birth coordinates', () => {
-    const location = normalizeProfileLocationTimezones({
-      birthCoordinates: { latitude: 51.5074, longitude: -0.1278 },
-    });
+    const location = normalizeProfileLocationTimezones<Record<string, unknown>>(
+      {
+        birthCoordinates: { latitude: 51.5074, longitude: -0.1278 },
+      },
+    );
 
     expect(location.birthTimezone).toBe('Europe/London');
   });

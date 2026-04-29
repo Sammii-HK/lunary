@@ -211,10 +211,10 @@ export const geocodeLocation = async (
   return null;
 };
 
-const reverseGeocode = async (
+async function reverseGeocode(
   lat: number,
   lng: number,
-): Promise<Partial<LocationData>> => {
+): Promise<Partial<LocationData>> {
   try {
     const response = await fetch(`/api/location/reverse?lat=${lat}&lon=${lng}`);
 
@@ -239,7 +239,7 @@ const reverseGeocode = async (
   } catch {
     return {};
   }
-};
+}
 
 const getTimezoneForCoordinates = async (
   latitude: number,
