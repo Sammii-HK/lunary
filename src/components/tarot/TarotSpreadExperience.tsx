@@ -932,7 +932,7 @@ export function TarotSpreadExperience({
                             cardName={card.card.name}
                             suit={card.card.suit}
                             arcana={card.card.arcana}
-                            className='h-6 w-6 text-content-brand-accent sm:h-7 sm:w-7'
+                            className='h-6 w-6 text-content-primary sm:h-7 sm:w-7'
                           />
                         </div>
                         <div className='flex min-w-0 flex-1 flex-col items-start gap-2'>

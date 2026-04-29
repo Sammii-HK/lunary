@@ -651,7 +651,7 @@ export function TarotView({
       >
         <TarotSuitIcon
           cardName={name}
-          className='h-10 w-10 text-content-brand-accent sm:h-12 sm:w-12'
+          className='h-10 w-10 text-content-primary sm:h-12 sm:w-12'
         />
       </div>
     );
