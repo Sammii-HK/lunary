@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Share2 } from 'lucide-react';
+import { ShareIconButton } from '@/components/share/ShareIconButton';
 import { useUser } from '@/context/UserContext';
 import { useShareModal } from '@/hooks/useShareModal';
 import { ShareModal } from './ShareModal';
@@ -36,6 +37,7 @@ export function ShareSkyNow({ compact = false }: ShareSkyNowProps) {
     shareUrl: string;
   } | null>(null);
   const [skyData, setSkyData] = useState<SkyNowData | null>(null);
+  const lastGeneratedFormatRef = useRef<string | null>(null);
 
   const {
     isOpen,
@@ -167,15 +169,19 @@ export function ShareSkyNow({ compact = false }: ShareSkyNowProps) {
     }
     openModal();
     if (!imageBlob) {
+      lastGeneratedFormatRef.current = format;
       generateCard();
     }
   };
 
   useEffect(() => {
-    if (isOpen && !loading && !error && imageBlob) {
-      generateCard();
-    }
-  }, [format]);
+    if (!isOpen) return;
+    if (loading || error || !imageBlob) return;
+    if (lastGeneratedFormatRef.current === format) return;
+
+    lastGeneratedFormatRef.current = format;
+    generateCard();
+  }, [error, format, generateCard, imageBlob, isOpen, loading]);
 
   const handleShare = async () => {
     if (!imageBlob) return;
@@ -202,7 +208,7 @@ export function ShareSkyNow({ compact = false }: ShareSkyNowProps) {
     }
   };
 
-  const handleDownload = () => {
+  function handleDownload() {
     if (!imageBlob) return;
 
     const url = URL.createObjectURL(imageBlob);
@@ -215,7 +221,7 @@ export function ShareSkyNow({ compact = false }: ShareSkyNowProps) {
     URL.revokeObjectURL(url);
 
     shareTracking.shareCompleted(user?.id, 'sky-now', 'download');
-  };
+  }
 
   const handleCopyLink = async () => {
     if (!shareRecord?.shareUrl) return;
@@ -243,19 +249,29 @@ export function ShareSkyNow({ compact = false }: ShareSkyNowProps) {
     : undefined;
 
   return (
-    <div className='flex flex-col items-center justify-center'>
-      <button
-        onClick={handleOpen}
-        className={
-          compact
-            ? 'inline-flex items-center justify-center rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-2 text-content-secondary hover:text-content-secondary hover:bg-layer-base/20 transition-colors'
-            : 'inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-layer-base/10 px-4 py-2 text-sm font-medium text-content-secondary hover:text-content-secondary hover:bg-layer-base/20 transition-colors'
-        }
-        title={compact ? 'Share Sky Now' : undefined}
-      >
-        <Share2 className='w-4 h-4' />
-        {!compact && 'Share Sky Now'}
-      </button>
+    <div className='flex items-center justify-center'>
+      {compact ? (
+        <ShareIconButton
+          label='Share Sky Now'
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleOpen();
+          }}
+        />
+      ) : (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleOpen();
+          }}
+          className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-layer-base/10 px-4 py-2 text-sm font-medium text-content-secondary hover:text-content-secondary hover:bg-layer-base/20 transition-colors'
+        >
+          <Share2 className='h-4 w-4' />
+          Share Sky Now
+        </button>
+      )}
 
       <ShareModal isOpen={isOpen} onClose={closeModal} title='Share Sky Now'>
         <SharePreview

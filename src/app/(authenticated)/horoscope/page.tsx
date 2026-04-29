@@ -55,6 +55,16 @@ export default function HoroscopePage() {
       // Free users: track generic horoscope view
       conversionTracking.horoscopeViewed(user.id, subscription.plan);
     }
+
+    // Mark dashboard-engaged so the contextual web-push prompt can
+    // appear next time the user visits /app.
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('dashboard-engaged', String(Date.now()));
+      }
+    } catch {
+      /* ignore storage errors */
+    }
   }, [hasPersonalHoroscopeAccess, user?.id, subscription.plan]);
 
   // Simple sequential loading checks - prioritize unauthenticated users

@@ -4,7 +4,8 @@ import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useRouter } from 'next/navigation';
-import { X, Gem, ArrowRight, Sparkles } from 'lucide-react';
+import { Gem, ArrowRight, Sparkles } from 'lucide-react';
+import { InfoBottomSheet } from '../ui/InfoBottomSheet';
 import { getAstrologicalChart } from '../../../utils/astrology/astrology';
 import { getGeneralCrystalRecommendation } from '../../../utils/crystals/generalCrystals';
 import {
@@ -109,15 +110,6 @@ export const CrystalPreview = () => {
     : generalCrystal?.reason;
 
   const closeModal = useCallback(() => setIsModalOpen(false), []);
-
-  useEffect(() => {
-    if (!isModalOpen) return;
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeModal();
-    };
-    document.addEventListener('keydown', handleEsc);
-    return () => document.removeEventListener('keydown', handleEsc);
-  }, [isModalOpen, closeModal]);
 
   // Helper to render preview based on A/B test variant
   const renderPreview = () => {
@@ -350,162 +342,137 @@ export const CrystalPreview = () => {
         </div>
       </div>
 
-      {isModalOpen && (
-        <div
-          className='fixed inset-0 bg-surface-base/70 backdrop-blur-sm flex items-center justify-center p-4 z-50'
-          onClick={closeModal}
-          data-testid='crystal-modal'
-        >
-          <div
-            className='bg-surface-elevated border border-stroke-default rounded-xl p-6 max-w-md w-full relative'
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={closeModal}
-              className='absolute top-4 right-4 text-content-muted hover:text-content-primary transition-colors'
-            >
-              <X className='w-5 h-5' />
-            </button>
-
-            <div className='text-center mb-6'>
-              <div className='w-16 h-16 bg-layer-base rounded-full flex items-center justify-center mx-auto mb-4'>
-                <Gem className='w-8 h-8 text-lunary-accent' />
-              </div>
-              <h2 className='text-xl font-semibold text-content-primary mb-1'>
-                {crystalName}
-              </h2>
-              {canAccessPersonalized && (
-                <p className='text-xs text-lunary-accent'>
-                  Personalized for your chart
-                </p>
-              )}
-            </div>
-
-            <div className='space-y-4'>
-              {/* Properties as keyword chips */}
-              {crystalData?.crystal && (
-                <div className='flex flex-wrap gap-1.5'>
-                  {crystalData.crystal.properties.map((prop: string) => (
-                    <span
-                      key={prop}
-                      className='text-xs bg-surface-card text-content-secondary px-2 py-0.5 rounded'
-                    >
-                      {prop}
-                    </span>
-                  ))}
-                  <span className='text-xs bg-surface-card text-content-secondary px-2 py-0.5 rounded'>
-                    {crystalData.crystal.chakra} Chakra
-                  </span>
-                </div>
-              )}
-
-              {/* Why this crystal */}
-              <div>
-                <h3 className='text-xs text-content-muted uppercase tracking-wide mb-2'>
-                  Why this crystal today
-                </h3>
-                {canAccessPersonalized && crystalData?.reasons ? (
-                  <ul className='space-y-1.5'>
-                    {crystalData.reasons.map((reason, idx) => (
-                      <li
-                        key={idx}
-                        className='text-sm text-content-secondary flex items-center gap-2'
-                      >
-                        <span className='w-1.5 h-1.5 bg-lunary-accent rounded-full flex-shrink-0' />
-                        {reason}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className='text-sm text-content-secondary'>
-                    {crystalReason}
-                  </p>
-                )}
-              </div>
-
-              {/* Intention */}
-              {crystalData?.crystal && (
-                <div>
-                  <h3 className='text-xs text-content-muted uppercase tracking-wide mb-1'>
-                    Intention
-                  </h3>
-                  <p className='text-sm text-content-secondary italic'>
-                    &ldquo;{crystalData.crystal.intention}&rdquo;
-                  </p>
-                </div>
-              )}
-
-              {/* Upgrade CTA for free users */}
-              {!canAccessPersonalized && (
-                <Button
-                  variant='lunary-soft'
-                  onClick={() => {
-                    if (router) {
-                      router.push(
-                        authStatus.isAuthenticated
-                          ? '/pricing?nav=app'
-                          : '/auth?signup=true',
-                      );
-                    }
-                  }}
-                  className='text-xs'
-                >
-                  <Sparkles className='w-4 h-4' />
-                  Get personalized recommendations with Lunary+
-                </Button>
-              )}
-
-              {/* Journal prompt */}
-              {authStatus.isAuthenticated && (
-                <div className='bg-surface-card/50 rounded-lg p-3'>
-                  <h3 className='text-xs text-content-muted uppercase tracking-wide mb-1'>
-                    Journal prompt
-                  </h3>
-                  <p className='text-sm text-content-secondary'>
-                    {crystalData?.crystal
-                      ? `${crystalData.crystal.name} invites you to focus on ${crystalData.crystal.properties[0]?.toLowerCase() || 'healing'}. How can you bring this energy into your day?`
-                      : `How can ${crystalName} support your intentions today?`}
-                  </p>
-                </div>
-              )}
-
-              {isInDemoMode() ? (
-                <button
-                  onClick={() => {
-                    window.dispatchEvent(
-                      new CustomEvent('demo-action-blocked', {
-                        detail: { action: 'Viewing Grimoire pages' },
-                      }),
-                    );
-                  }}
-                  className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-content-brand-accent transition-colors'
-                >
-                  Explore all crystals
-                </button>
-              ) : (
+      <InfoBottomSheet
+        open={isModalOpen}
+        onClose={closeModal}
+        title={crystalName ?? 'Crystal'}
+        subtitle={
+          canAccessPersonalized ? 'Personalized for your chart' : undefined
+        }
+        accentColor='text-lunary-accent'
+        leading={<Gem className='w-7 h-7 text-lunary-accent' />}
+      >
+        <div className='space-y-4' data-testid='crystal-modal'>
+          {/* Properties as keyword chips */}
+          {crystalData?.crystal && (
+            <div className='flex flex-wrap gap-1.5'>
+              {crystalData.crystal.properties.map((prop: string) => (
                 <span
-                  role='button'
-                  tabIndex={0}
-                  onClick={() => {
-                    router.push('/grimoire/crystals');
-                    setIsModalOpen(false);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      router.push('/grimoire/crystals');
-                      setIsModalOpen(false);
-                    }
-                  }}
-                  className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-content-brand-accent transition-colors'
+                  key={prop}
+                  className='text-xs bg-surface-card text-content-secondary px-2 py-0.5 rounded'
                 >
-                  Explore all crystals
+                  {prop}
                 </span>
-              )}
+              ))}
+              <span className='text-xs bg-surface-card text-content-secondary px-2 py-0.5 rounded'>
+                {crystalData.crystal.chakra} Chakra
+              </span>
             </div>
+          )}
+
+          {/* Why this crystal */}
+          <div>
+            <h3 className='text-xs text-content-muted uppercase tracking-wide mb-2'>
+              Why this crystal today
+            </h3>
+            {canAccessPersonalized && crystalData?.reasons ? (
+              <ul className='space-y-1.5'>
+                {crystalData.reasons.map((reason, idx) => (
+                  <li
+                    key={idx}
+                    className='text-sm text-content-secondary flex items-center gap-2'
+                  >
+                    <span className='w-1.5 h-1.5 bg-lunary-accent rounded-full flex-shrink-0' />
+                    {reason}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className='text-sm text-content-secondary'>{crystalReason}</p>
+            )}
           </div>
+
+          {/* Intention */}
+          {crystalData?.crystal && (
+            <div>
+              <h3 className='text-xs text-content-muted uppercase tracking-wide mb-1'>
+                Intention
+              </h3>
+              <p className='text-sm text-content-secondary italic'>
+                &ldquo;{crystalData.crystal.intention}&rdquo;
+              </p>
+            </div>
+          )}
+
+          {/* Upgrade CTA for free users */}
+          {!canAccessPersonalized && (
+            <Button
+              variant='lunary-soft'
+              onClick={() => {
+                if (router) {
+                  router.push(
+                    authStatus.isAuthenticated
+                      ? '/pricing?nav=app'
+                      : '/auth?signup=true',
+                  );
+                }
+              }}
+              className='text-xs'
+            >
+              <Sparkles className='w-4 h-4' />
+              Get personalized recommendations with Lunary+
+            </Button>
+          )}
+
+          {/* Journal prompt */}
+          {authStatus.isAuthenticated && (
+            <div className='bg-surface-card/50 rounded-lg p-3'>
+              <h3 className='text-xs text-content-muted uppercase tracking-wide mb-1'>
+                Journal prompt
+              </h3>
+              <p className='text-sm text-content-secondary'>
+                {crystalData?.crystal
+                  ? `${crystalData.crystal.name} invites you to focus on ${crystalData.crystal.properties[0]?.toLowerCase() || 'healing'}. How can you bring this energy into your day?`
+                  : `How can ${crystalName} support your intentions today?`}
+              </p>
+            </div>
+          )}
+
+          {isInDemoMode() ? (
+            <button
+              onClick={() => {
+                window.dispatchEvent(
+                  new CustomEvent('demo-action-blocked', {
+                    detail: { action: 'Viewing Grimoire pages' },
+                  }),
+                );
+              }}
+              className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-content-brand-accent transition-colors'
+            >
+              Explore all crystals
+            </button>
+          ) : (
+            <span
+              role='button'
+              tabIndex={0}
+              onClick={() => {
+                router.push('/grimoire/crystals');
+                setIsModalOpen(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  router.push('/grimoire/crystals');
+                  setIsModalOpen(false);
+                }
+              }}
+              className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-content-brand-accent transition-colors'
+            >
+              Explore all crystals
+            </span>
+          )}
         </div>
-      )}
+      </InfoBottomSheet>
     </>
   );
 };

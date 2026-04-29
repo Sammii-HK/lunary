@@ -31,13 +31,13 @@ import { PersonalCardModal } from '@/components/profile/PersonalCardModal';
 import { JourneySection } from '@/components/profile/JourneySection';
 import { SettingsTab } from '@/components/profile/SettingsTab';
 import { CircleTab } from '@/components/profile/CircleTab';
+import { CosmicSpinner } from '@/components/states/CosmicSpinner';
+import { CosmicSkeleton } from '@/components/states/CosmicSkeleton';
 
 const AuthComponent = dynamic(
   () => import('@/components/Auth').then((m) => ({ default: m.AuthComponent })),
   {
-    loading: () => (
-      <div className='h-48 bg-surface-card animate-pulse rounded-lg' />
-    ),
+    loading: () => <CosmicSkeleton height={192} />,
   },
 );
 
@@ -483,7 +483,7 @@ export default function ProfilePage() {
   if (authState.loading || isLoading) {
     return (
       <div className='flex flex-col items-center justify-center min-h-[400px] gap-4'>
-        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-lunary-primary'></div>
+        <CosmicSpinner size='lg' />
         <p className='text-content-muted'>Loading your profile...</p>
       </div>
     );

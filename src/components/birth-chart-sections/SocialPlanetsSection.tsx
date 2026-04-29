@@ -3,6 +3,7 @@
 import { BirthChartData } from '../../../utils/astrology/birthChart';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { bodiesSymbols } from '../../../utils/zodiac/zodiac';
+import { SectionGuide } from './SectionGuide';
 
 interface SocialPlanetsSectionProps {
   birthChartData: BirthChartData[];
@@ -65,11 +66,15 @@ export function SocialPlanetsSection({
 
   return (
     <CollapsibleSection
-      title='Social Planets'
+      title='Next layer: Social Planets'
       defaultCollapsed={true}
       persistState={true}
     >
       <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+        <SectionGuide label='Next layer' variant='next'>
+          Jupiter and Saturn describe growth, limits, timing, and the way you
+          meet the wider world. Open this when the personal planets feel clear.
+        </SectionGuide>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           {socialPlanets.map((planet) => {
             const interpretation = getPlanetaryInterpretation(planet);

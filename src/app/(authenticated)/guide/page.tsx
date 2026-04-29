@@ -16,7 +16,14 @@ import {
   ChevronUp,
   Square,
   NotebookPen,
+  Mic,
+  MicOff,
 } from 'lucide-react';
+import {
+  isRecognitionSupported,
+  startContinuousRecognition,
+  type ContinuousRecognitionHandle,
+} from '@/lib/voice/recognition';
 
 import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
@@ -53,6 +60,8 @@ import { mutate } from 'swr';
 import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
 import { Heading } from '@/components/ui/Heading';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
+import { PersonaPicker } from '@/components/personas/PersonaPicker';
+import type { PersonaConfig } from '@/lib/personas/types';
 
 interface CollectionFolder {
   id: number;
@@ -421,11 +430,26 @@ function BookOfShadowsContent() {
   const [isJournalMode, setIsJournalMode] = useState(false);
   const [isSubmittingJournal, setIsSubmittingJournal] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [dailyExpanded, setDailyExpanded] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return localStorage.getItem('daily-thread-collapsed') !== 'true';
+    if (typeof window === 'undefined') return false;
+    const saved = localStorage.getItem('daily-thread-collapsed');
+    if (saved === 'true') return false;
+    if (saved === 'false') return true;
+    // No saved preference: collapse by default on mobile, expand on >= sm
+    return window.innerWidth >= 640;
   });
   const [hasDailyModules, setHasDailyModules] = useState(false);
+
+  // Track mobile viewport so we can downscale chunky header pieces.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(max-width: 639px)');
+    const update = () => setIsMobileViewport(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   // Astral guide daily message limit is a hard paywall moment: surface an
   // UpgradePrompt modal (not just the inline error toast) so the upgrade
@@ -626,6 +650,71 @@ function BookOfShadowsContent() {
     user?.id,
   ]);
   const [input, setInput] = useState('');
+  const [personaPickerOpen, setPersonaPickerOpen] = useState(false);
+  const [activePersona, setActivePersona] = useState<PersonaConfig | null>(
+    null,
+  );
+  useEffect(() => {
+    if (!authState.isAuthenticated || authState.loading) return;
+    fetch('/api/personas', { credentials: 'include' })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.success && data.persona) {
+          setActivePersona(data.persona);
+        }
+      })
+      .catch(() => {});
+  }, [authState.isAuthenticated, authState.loading]);
+  const [voiceSupported, setVoiceSupported] = useState<boolean | null>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [interimTranscript, setInterimTranscript] = useState('');
+  const voiceHandleRef = useRef<ContinuousRecognitionHandle | null>(null);
+  useEffect(() => {
+    setVoiceSupported(isRecognitionSupported());
+    return () => {
+      voiceHandleRef.current?.stop();
+      voiceHandleRef.current = null;
+    };
+  }, []);
+  const toggleVoiceInput = useCallback(() => {
+    if (isListening) {
+      voiceHandleRef.current?.stop();
+      voiceHandleRef.current = null;
+      setIsListening(false);
+      setInterimTranscript('');
+      return;
+    }
+    if (!isRecognitionSupported()) {
+      setVoiceSupported(false);
+      return;
+    }
+    setIsListening(true);
+    setInterimTranscript('');
+    voiceHandleRef.current = startContinuousRecognition({
+      onEvent: (event) => {
+        if (event.type === 'transcript') {
+          if (event.isFinal) {
+            setInput((prev) => {
+              const sep = prev.length === 0 || /\s$/.test(prev) ? '' : ' ';
+              return `${prev}${sep}${event.text}`;
+            });
+            setInterimTranscript('');
+          } else {
+            setInterimTranscript(event.text);
+          }
+          return;
+        }
+
+        if (
+          event.type === 'state' &&
+          ['idle', 'denied', 'unsupported', 'error'].includes(event.state)
+        ) {
+          setIsListening(false);
+          setInterimTranscript('');
+        }
+      },
+    });
+  }, [isListening]);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'signIn' | 'signUp'>('signIn');
   const [promptHandled, setPromptHandled] = useState<string | null>(null);
@@ -959,7 +1048,7 @@ function BookOfShadowsContent() {
           <SkillProgressWidget
             skillTree='journal'
             className='mb-1.5 shrink-0'
-            scrolled={isScrolled}
+            scrolled={isScrolled || isMobileViewport}
           />
 
           <div className='flex items-center justify-between gap-2'>
@@ -990,14 +1079,16 @@ function BookOfShadowsContent() {
                 {getPublicPlanName(planId)}
               </span>
             ) : null}
+            <button
+              type='button'
+              onClick={() => setPersonaPickerOpen(true)}
+              className='rounded-full border border-stroke-default/60 px-2.5 py-1 text-content-muted transition hover:border-lunary-primary/60 hover:text-content-primary'
+            >
+              {activePersona ? `${activePersona.label} voice` : 'Change voice'}
+            </button>
             {usage ? (
               <span className='rounded-full border border-stroke-default/60 px-2.5 py-1'>
                 {usage.used}/{usage.limit}
-              </span>
-            ) : null}
-            {(dailyHighlight as { primaryEvent?: string })?.primaryEvent ? (
-              <span className='max-w-full truncate rounded-full border border-stroke-default/60 px-2.5 py-1'>
-                {(dailyHighlight as { primaryEvent?: string }).primaryEvent}
               </span>
             ) : null}
           </div>
@@ -1007,6 +1098,13 @@ function BookOfShadowsContent() {
                 Plan: {getPublicPlanName(planId)}
               </span>
             ) : null}
+            <button
+              type='button'
+              onClick={() => setPersonaPickerOpen(true)}
+              className='rounded-full border border-stroke-default/60 px-3 py-1 text-content-muted transition hover:border-lunary-primary/60 hover:text-content-primary'
+            >
+              {activePersona ? `Voice: ${activePersona.label}` : 'Change voice'}
+            </button>
             {usage ? (
               <span className='rounded-full border border-stroke-default/60 px-3 py-1'>
                 Usage: {usage.used}/{usage.limit}
@@ -1310,14 +1408,19 @@ function BookOfShadowsContent() {
               placeholder={
                 isJournalMode
                   ? 'Write a journal entry...'
-                  : "Write your heart's question…"
+                  : "Write your heart's question..."
               }
-              className={`w-full min-h-[56px] resize-none rounded-2xl border bg-surface-elevated/70 pl-4 pr-12 py-3 text-[15px] text-content-primary placeholder:text-content-muted focus:outline-none focus:ring-2 md:min-h-8 md:rounded-xl md:py-2.5 md:text-sm ${
+              className={`w-full min-h-[56px] resize-none rounded-2xl border bg-surface-elevated/70 pl-4 pr-24 py-3 text-[15px] text-content-primary placeholder:text-content-muted focus:outline-none focus:ring-2 md:min-h-8 md:rounded-xl md:py-2.5 md:text-sm ${
                 isJournalMode
                   ? 'border-lunary-primary-600/50 focus:border-lunary-primary focus:ring-lunary-primary-700'
                   : 'border-stroke-default/60 focus:border-lunary-primary focus:ring-lunary-primary-800'
               }`}
             />
+            {interimTranscript && isListening ? (
+              <div className='pointer-events-none absolute bottom-full left-3 right-3 mb-2 truncate rounded-full border border-stroke-subtle bg-layer-base/90 px-3 py-1.5 text-xs italic text-content-muted shadow-lg'>
+                {interimTranscript}
+              </div>
+            ) : null}
             {isStreaming ? (
               <button
                 type='button'
@@ -1327,26 +1430,54 @@ function BookOfShadowsContent() {
                 <Square className='w-4 h-4' />
               </button>
             ) : (
-              <button
-                type='submit'
-                data-testid='guide-submit'
-                disabled={input.trim().length === 0 || isSubmittingJournal}
-                className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-content-primary transition disabled:opacity-40 disabled:cursor-not-allowed ${
-                  isJournalMode
-                    ? 'bg-lunary-primary-500 hover:bg-lunary-primary-400'
-                    : 'bg-lunary-primary-600 hover:bg-lunary-primary-500'
-                }`}
-              >
-                {isJournalMode ? (
-                  <NotebookPen className='w-4 h-4' />
-                ) : (
-                  <ArrowUp className='w-4 h-4' />
-                )}
-              </button>
+              <div className='absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1'>
+                {voiceSupported ? (
+                  <button
+                    type='button'
+                    onClick={toggleVoiceInput}
+                    aria-label={
+                      isListening ? 'Stop voice input' : 'Start voice input'
+                    }
+                    aria-pressed={isListening}
+                    className={`rounded-lg p-1.5 transition ${
+                      isListening
+                        ? 'bg-lunary-rose/80 text-white'
+                        : 'bg-layer-base text-content-secondary hover:text-content-primary'
+                    }`}
+                  >
+                    {isListening ? (
+                      <MicOff className='w-4 h-4' />
+                    ) : (
+                      <Mic className='w-4 h-4' />
+                    )}
+                  </button>
+                ) : null}
+                <button
+                  type='submit'
+                  data-testid='guide-submit'
+                  disabled={input.trim().length === 0 || isSubmittingJournal}
+                  className={`p-1.5 rounded-lg text-content-primary transition disabled:opacity-40 disabled:cursor-not-allowed ${
+                    isJournalMode
+                      ? 'bg-lunary-primary-500 hover:bg-lunary-primary-400'
+                      : 'bg-lunary-primary-600 hover:bg-lunary-primary-500'
+                  }`}
+                >
+                  {isJournalMode ? (
+                    <NotebookPen className='w-4 h-4' />
+                  ) : (
+                    <ArrowUp className='w-4 h-4' />
+                  )}
+                </button>
+              </div>
             )}
           </form>
         </div>
       </div>
+      <PersonaPicker
+        open={personaPickerOpen}
+        onClose={() => setPersonaPickerOpen(false)}
+        onChange={setActivePersona}
+      />
       <UpgradePrompt
         variant='modal'
         featureName='astral-guide'

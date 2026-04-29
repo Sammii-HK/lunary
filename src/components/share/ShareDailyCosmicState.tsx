@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Share2 } from 'lucide-react';
+import { ShareIconButton } from '@/components/share/ShareIconButton';
 import { useUser } from '@/context/UserContext';
 import { useShareModal } from '@/hooks/useShareModal';
 import { ShareModal } from './ShareModal';
@@ -240,7 +241,7 @@ export function ShareDailyCosmicState({
     }
   };
 
-  const handleDownload = () => {
+  function handleDownload() {
     if (!imageBlob) return;
 
     const url = URL.createObjectURL(imageBlob);
@@ -253,7 +254,7 @@ export function ShareDailyCosmicState({
     URL.revokeObjectURL(url);
 
     shareTracking.shareCompleted(user?.id, 'cosmic-state', 'download');
-  };
+  }
 
   const handleCopyLink = async () => {
     try {
@@ -277,19 +278,29 @@ export function ShareDailyCosmicState({
   };
 
   return (
-    <div className='flex flex-col items-center justify-center'>
-      <button
-        onClick={handleOpen}
-        className={
-          compact
-            ? 'inline-flex items-center justify-center rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-2 text-content-secondary hover:text-content-secondary hover:bg-layer-base/20 transition-colors'
-            : 'inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-layer-base/10 px-4 py-2 text-sm font-medium text-content-secondary hover:text-content-secondary hover:bg-layer-base/20 transition-colors'
-        }
-        title={compact ? "Share Today's Cosmic State" : undefined}
-      >
-        <Share2 className='w-4 h-4' />
-        {!compact && "Share Today's Cosmic State"}
-      </button>
+    <div className='flex items-center justify-center'>
+      {compact ? (
+        <ShareIconButton
+          label="Share Today's Cosmic State"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            handleOpen();
+          }}
+        />
+      ) : (
+        <button
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            handleOpen();
+          }}
+          className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-layer-base/10 px-4 py-2 text-sm font-medium text-content-secondary hover:text-content-secondary hover:bg-layer-base/20 transition-colors'
+        >
+          <Share2 className='h-4 w-4' />
+          Share Today&apos;s Cosmic State
+        </button>
+      )}
 
       <ShareModal
         isOpen={isOpen}

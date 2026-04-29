@@ -3,6 +3,7 @@
 import { BirthChartData } from '../../../utils/astrology/birthChart';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { bodiesSymbols } from '../../../utils/zodiac/zodiac';
+import { SectionGuide } from './SectionGuide';
 
 interface GenerationalPlanetsSectionProps {
   birthChartData: BirthChartData[];
@@ -65,11 +66,15 @@ export function GenerationalPlanetsSection({
 
   return (
     <CollapsibleSection
-      title='Generational Planets'
+      title='Pro layer: Generational Planets'
       defaultCollapsed={true}
       persistState={true}
     >
       <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+        <SectionGuide label='Pro layer' variant='pro'>
+          Uranus, Neptune, and Pluto move slowly, so they speak more to
+          generational themes and long-form change than daily personality.
+        </SectionGuide>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           {generationalPlanets.map((planet) => {
             const interpretation = getPlanetaryInterpretation(planet);

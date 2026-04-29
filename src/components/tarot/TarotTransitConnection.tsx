@@ -29,6 +29,7 @@ interface TarotTransitConnectionProps {
 
   // User's birth location for accurate transit calculations
   userBirthLocation?: string | null;
+  onReadMore?: () => void;
 }
 
 export function TarotTransitConnection({
@@ -41,6 +42,7 @@ export function TarotTransitConnection({
   historicalTimestamp,
   readingCreatedAt,
   userBirthLocation,
+  onReadMore,
 }: TarotTransitConnectionProps) {
   const [currentConnection, setCurrentConnection] = useState<{
     compact: string;
@@ -98,11 +100,22 @@ export function TarotTransitConnection({
           })),
         };
 
-        // Generate current transit insights
-        const currentAspects = calculateTransitAspects(
+        // Generate current transit insights. Overview cards show only the
+        // tightest aspect; full card sheets keep the broader list.
+        const calculatedCurrentAspects = calculateTransitAspects(
           birthChart as any,
           currentTransits as any,
         );
+        const currentAspects =
+          variant === 'compact'
+            ? [...calculatedCurrentAspects]
+                .sort(
+                  (a: any, b: any) =>
+                    (a.orbDegrees ?? Number.POSITIVE_INFINITY) -
+                    (b.orbDegrees ?? Number.POSITIVE_INFINITY),
+                )
+                .slice(0, 1)
+            : calculatedCurrentAspects;
 
         if (currentAspects.length > 0) {
           const currentResult = await generateTarotTransitConnection(
@@ -190,6 +203,7 @@ export function TarotTransitConnection({
     historicalTimestamp,
     readingCreatedAt,
     userBirthLocation,
+    variant,
   ]);
 
   if (loading) {
@@ -214,6 +228,15 @@ export function TarotTransitConnection({
         <p className='text-xs text-content-brand-accent leading-relaxed'>
           {currentConnection?.compact}
         </p>
+        {onReadMore && (
+          <button
+            type='button'
+            onClick={onReadMore}
+            className='mt-2 text-xs font-medium text-content-brand transition-colors hover:text-content-secondary'
+          >
+            Click to read more
+          </button>
+        )}
       </div>
     );
   }

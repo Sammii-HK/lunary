@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { sql } from '@vercel/postgres';
 
 import { requireUser, UnauthorizedError } from '@/lib/ai/auth';
 import { buildLunaryContext } from '@/lib/ai/context';
@@ -36,6 +37,8 @@ import {
 } from '@/lib/ai/astral-guide';
 import { formatBirthChartSummary } from '@/lib/ai/birth-chart-with-patterns';
 import { analyzeContextNeeds } from '@/lib/ai/context-optimizer';
+import { getActivePersona } from '@/lib/personas/get-active';
+import { getPersonaConfig } from '@/lib/personas/library';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,6 +59,28 @@ const jsonResponse = (payload: unknown, status = 200, init?: ResponseInit) =>
     status,
     ...init,
   });
+
+async function buildAstralSystemPrompt(userId: string): Promise<string> {
+  try {
+    const result = await sql`
+      SELECT personal_card
+      FROM user_profiles
+      WHERE user_id = ${userId}
+      LIMIT 1
+    `;
+    const personalCard = result.rows[0]?.personal_card;
+    const personaId = getActivePersona(
+      personalCard && typeof personalCard === 'object'
+        ? (personalCard as Record<string, unknown>)
+        : {},
+    );
+    const persona = getPersonaConfig(personaId);
+    return `${persona.systemPrompt}\n\n${ASTRAL_GUIDE_PROMPT}`;
+  } catch (error) {
+    console.error('[AI Chat] Failed to load persona:', error);
+    return ASTRAL_GUIDE_PROMPT;
+  }
+}
 
 export async function POST(request: NextRequest) {
   const now = new Date();
@@ -96,6 +121,9 @@ export async function POST(request: NextRequest) {
 
     // Detect if this is an astral query
     const useAstralContext = isAstralQuery(userMessage) || aiMode === 'astral';
+    const astralSystemPrompt = useAstralContext
+      ? await buildAstralSystemPrompt(user.id)
+      : undefined;
 
     // Use userMessage throughout instead of userMessage
     const memorySnippetLimit = MEMORY_SNIPPET_LIMITS[planId] ?? 0;
@@ -302,9 +330,7 @@ export async function POST(request: NextRequest) {
           context,
           memorySnippets,
           userMessage: userMessage,
-          systemPromptOverride: useAstralContext
-            ? ASTRAL_GUIDE_PROMPT
-            : undefined,
+          systemPromptOverride: astralSystemPrompt,
         });
 
         const assistantContent = assistSnippet;
@@ -464,7 +490,7 @@ export async function POST(request: NextRequest) {
       memorySnippets,
       userMessage: userMessage,
       grimoireData,
-      systemPromptOverride: useAstralContext ? ASTRAL_GUIDE_PROMPT : undefined,
+      systemPromptOverride: astralSystemPrompt,
     });
 
     const aiStartTime = Date.now();

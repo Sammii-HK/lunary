@@ -17,6 +17,8 @@ import {
   Gift,
   MessageCircleQuestion,
   Share2,
+  Clock,
+  Globe2,
 } from 'lucide-react';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import { HappeningNowSection } from '@/components/explore/HappeningNowSection';
@@ -99,6 +101,34 @@ const cosmicTools: ExploreItem[] = [
     label: 'Gifts',
     description: 'Send cosmic gifts to friends',
     icon: Gift,
+  },
+  {
+    href: '/app/time-machine',
+    label: 'Time Machine',
+    description: 'Explore the sky on any date',
+    icon: Clock,
+  },
+  {
+    href: '/app/timing',
+    label: 'Timing Assistant',
+    description: 'Find three strong dates for your next move',
+    icon: Calendar,
+    highlighted: true,
+    badge: 'New',
+  },
+  {
+    href: '/app/couple',
+    label: 'Couples Mode',
+    description: 'Pair charts, synastry and composite relationship weather',
+    icon: Users,
+    highlighted: true,
+    badge: 'New',
+  },
+  {
+    href: '/app/group-sky',
+    label: 'Group Sky',
+    description: 'See the sky through your circle',
+    icon: Globe2,
   },
 ];
 

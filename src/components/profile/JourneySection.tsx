@@ -1,10 +1,9 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { CosmicSkeleton } from '@/components/states/CosmicSkeleton';
 
-const SkeletonCard = () => (
-  <div className='h-32 bg-surface-card animate-pulse rounded-xl' />
-);
+const SkeletonCard = () => <CosmicSkeleton height={128} radius={12} />;
 
 const StreakDisplay = dynamic(
   () =>
@@ -22,13 +21,10 @@ const CosmicProgress = dynamic(
   {
     loading: () => (
       <div className='space-y-3'>
-        <div className='h-8 w-48 bg-surface-card animate-pulse rounded' />
+        <CosmicSkeleton variant='text' width={192} height={32} />
         <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-4'>
           {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className='h-32 bg-surface-card animate-pulse rounded-xl'
-            />
+            <CosmicSkeleton key={i} height={128} radius={12} />
           ))}
         </div>
       </div>
@@ -42,9 +38,7 @@ const MonthlyInsights = dynamic(
       default: m.MonthlyInsights,
     })),
   {
-    loading: () => (
-      <div className='h-64 bg-surface-card animate-pulse rounded-xl' />
-    ),
+    loading: () => <CosmicSkeleton height={256} radius={12} />,
   },
 );
 

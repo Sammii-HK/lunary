@@ -10,6 +10,7 @@ import {
 } from './shared';
 import { auth } from '@/lib/auth';
 import { formatTextArray } from '@/lib/postgres/formatTextArray';
+import { trackConversionEvent } from '@/lib/analytics/tracking';
 
 export const dynamic = 'force-dynamic';
 
@@ -505,6 +506,25 @@ export async function POST(request: NextRequest) {
 
     // Check referral activation for multi-card spreads (fire-and-forget)
     const cardCount = cardsForStorage.length;
+    try {
+      await trackConversionEvent({
+        userId,
+        conversionType: 'tarot_drawn',
+        triggerFeature: 'tarot',
+        metadata: {
+          spreadSlug: reading.spreadSlug,
+          spreadName: reading.spreadName,
+          cardCount,
+          planType: subscription.plan,
+        },
+      });
+    } catch (analyticsError) {
+      console.warn(
+        '[tarot/readings] Failed to track tarot draw:',
+        analyticsError,
+      );
+    }
+
     if (cardCount > 1) {
       import('@/lib/referrals/check-activation')
         .then(({ checkInviteActivation }) =>

@@ -1091,12 +1091,21 @@ model user {
   emailVerified             Boolean   @default(false)
   image                     String?
   birthChartHouseSystem     String    @default("placidus")
+  /// Per-user opaque token used to authenticate the .ics calendar
+  /// subscription endpoint (calendar apps can't carry session cookies).
+  /// Issued on first subscribe. Rotatable.
+  calendarToken             String?   @unique @map("calendar_token")
+  /// Public Linktree-style handle for /me/{handle} cosmic identity profile.
+  /// Lowercase a-z, 0-9, hyphen — 3-30 chars. Optional + unique.
+  publicHandle              String?   @unique @map("public_handle")
   createdAt                 DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt                 DateTime  @default(now()) @db.Timestamptz(6)
   account                   account[]
   session                   session[]
 
   @@index([email], map: "idx_user_email")
+  @@index([calendarToken], map: "idx_user_calendar_token")
+  @@index([publicHandle], map: "idx_user_public_handle")
 }
 
 model user_attribution {
@@ -1250,6 +1259,23 @@ model user_progress {
   @@unique([user_id, skill_tree], map: "idx_user_progress_user_skill_unique")
   @@index([user_id], map: "idx_user_progress_user_id")
   @@index([skill_tree], map: "idx_user_progress_skill_tree")
+}
+
+/// Couples Mode v1 — pairs two Lunary users into a daily shared compatibility
+/// dashboard. `pairingCode` is set while one user is waiting for their partner
+/// to enter the 6-digit code; once the second user joins, `pairedAt` is filled
+/// and `pairingCode` is cleared (so the same code can be re-used in the future).
+model couple_pairings {
+  id          String    @id @default(cuid())
+  userAId     String
+  userBId     String
+  pairingCode String?   @unique
+  pairedAt    DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([userAId, userBId])
+  @@index([userAId])
+  @@index([userBId])
 }
 
 model relationship_profiles {
@@ -2035,4 +2061,21 @@ enum tour_status {
   ACTIVE
   COMPLETED
   DISMISSED
+}
+
+model TransitContentCache {
+  id         String   @id @default(cuid())
+  eventType  String   @map("event_type") // 'planet_in_sign' | 'aspect_to_natal' | 'retrograde' | 'ingress' | 'eclipse' | 'lunation'
+  eventKey   String   @map("event_key") // canonical identifier, e.g. 'Saturn_Pisces' or 'Mars_Square_Venus'
+  audience   String   // 'free' (template) | 'plus' (AI-generated)
+  content    String   @db.Text
+  source     String   // 'template' | 'gpt-4o' | 'gpt-4o-mini' etc.
+  validFrom  DateTime @map("valid_from") @db.Timestamptz(6)
+  validUntil DateTime @map("valid_until") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([eventType, eventKey, audience], map: "transit_content_cache_event_audience_key")
+  @@index([eventType, eventKey], map: "idx_transit_content_cache_event")
+  @@index([validUntil], map: "idx_transit_content_cache_valid_until")
+  @@map("transit_content_cache")
 }

@@ -7,10 +7,10 @@ import { ChevronDown } from 'lucide-react';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { hapticService } from '@/services/native/haptic-service';
+import { CosmicSkeleton } from '@/components/states/CosmicSkeleton';
+import { CosmicSpinner } from '@/components/states/CosmicSpinner';
 
-const SkeletonCard = () => (
-  <div className='h-32 bg-surface-card animate-pulse rounded-xl' />
-);
+const SkeletonCard = () => <CosmicSkeleton height={128} radius={12} />;
 
 const SubscriptionManagement = dynamic(
   () => import('@/components/SubscriptionManagement'),
@@ -68,6 +68,14 @@ const AppleAccountLink = dynamic(
       default: m.AppleAccountLink,
     })),
   { ssr: false },
+);
+
+const CalendarSubscribeCard = dynamic(
+  () =>
+    import('@/components/profile/CalendarSubscribeCard').then((m) => ({
+      default: m.default,
+    })),
+  { ssr: false, loading: () => <SkeletonCard /> },
 );
 
 type SettingSection = {
@@ -252,6 +260,12 @@ export function SettingsTab({
         </div>
       )}
 
+      {/* Calendar Subscription */}
+      <div className='w-full max-w-3xl space-y-3'>
+        <SectionTitle as='h2'>Calendar</SectionTitle>
+        <CalendarSubscribeCard />
+      </div>
+
       {/* Subscription */}
       <div className='w-full max-w-3xl space-y-3'>
         <SectionTitle as='h2'>Subscription</SectionTitle>
@@ -339,7 +353,7 @@ export function SettingsTab({
 
             {deleteState === 'deleting' && (
               <div className='flex items-center gap-2 py-1'>
-                <div className='h-4 w-4 border-2 border-stroke-strong border-t-zinc-200 rounded-full animate-spin' />
+                <CosmicSpinner size='sm' />
                 <p className='text-sm text-content-muted'>
                   Processing deletion request...
                 </p>

@@ -16,7 +16,7 @@ export interface JournalEntry {
   cardReferences: string[];
   moonPhase: string | null;
   transitHighlight: string | null;
-  source: 'manual' | 'chat' | 'astral-guide';
+  source: 'manual' | 'chat' | 'astral-guide' | 'tarot';
   sourceMessageId: string | null;
   createdAt: string;
   category?: JournalCategory;
@@ -106,6 +106,74 @@ export async function POST(request: NextRequest) {
     const isPaid =
       subscriptionStatus === 'active' || subscriptionStatus === 'trial';
 
+    const body = await request.json();
+
+    const {
+      content,
+      moodTags = [],
+      cardReferences = [],
+      moonPhase = null,
+      transitHighlight = null,
+      source = 'manual',
+      sourceMessageId = null,
+      category = null,
+      habitCapture = null,
+    } = body;
+
+    const normalizedSourceMessageId =
+      typeof sourceMessageId === 'string' && sourceMessageId.trim().length > 0
+        ? sourceMessageId.trim()
+        : null;
+
+    if (
+      !content ||
+      typeof content !== 'string' ||
+      content.trim().length === 0
+    ) {
+      return NextResponse.json(
+        { success: false, error: 'Content is required' },
+        { status: 400 },
+      );
+    }
+
+    if (source === 'tarot' && normalizedSourceMessageId) {
+      const existingResult = await sql`
+        SELECT id, category, content, created_at
+        FROM collections
+        WHERE user_id = ${user.id}
+          AND category IN ('journal', 'dream', 'ritual')
+          AND content->>'source' = 'tarot'
+          AND content->>'sourceMessageId' = ${normalizedSourceMessageId}
+        ORDER BY created_at DESC
+        LIMIT 1
+      `;
+
+      const existing = existingResult.rows[0];
+      if (existing) {
+        const existingContent =
+          typeof existing.content === 'string'
+            ? JSON.parse(existing.content)
+            : existing.content;
+
+        return NextResponse.json({
+          success: true,
+          deduped: true,
+          entry: {
+            id: existing.id,
+            content: existingContent.text || '',
+            moodTags: existingContent.moodTags || [],
+            cardReferences: existingContent.cardReferences || [],
+            moonPhase: existingContent.moonPhase || null,
+            transitHighlight: existingContent.transitHighlight || null,
+            source: existingContent.source || 'tarot',
+            sourceMessageId: existingContent.sourceMessageId || null,
+            createdAt: existing.created_at,
+            category: existing.category,
+          },
+        });
+      }
+    }
+
     if (!isPaid && planType === 'free') {
       const limit = JOURNAL_LIMITS.freeMonthlyEntries;
       const entryCountResult = await sql`
@@ -127,29 +195,6 @@ export async function POST(request: NextRequest) {
         );
       }
     }
-    const body = await request.json();
-
-    const {
-      content,
-      moodTags = [],
-      cardReferences = [],
-      moonPhase = null,
-      transitHighlight = null,
-      source = 'manual',
-      sourceMessageId = null,
-      category = null,
-    } = body;
-
-    if (
-      !content ||
-      typeof content !== 'string' ||
-      content.trim().length === 0
-    ) {
-      return NextResponse.json(
-        { success: false, error: 'Content is required' },
-        { status: 400 },
-      );
-    }
 
     const title =
       content.length > 50 ? content.substring(0, 50) + '...' : content;
@@ -170,7 +215,10 @@ export async function POST(request: NextRequest) {
       moonPhase,
       transitHighlight,
       source,
-      sourceMessageId,
+      sourceMessageId: normalizedSourceMessageId,
+      ...(habitCapture && typeof habitCapture === 'object'
+        ? { habitCapture }
+        : {}),
     };
 
     const result = await sql`
@@ -235,7 +283,7 @@ export async function POST(request: NextRequest) {
         moonPhase,
         transitHighlight,
         source,
-        sourceMessageId,
+        sourceMessageId: normalizedSourceMessageId,
         createdAt: entry.created_at,
         category: entry.category,
       },

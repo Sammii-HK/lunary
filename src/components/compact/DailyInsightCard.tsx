@@ -74,6 +74,21 @@ const highlightInlineTime = (text: string): React.ReactNode => {
   );
 };
 
+const hasUsableBirthChart = (chart: unknown): chart is any[] =>
+  Array.isArray(chart) && chart.length > 0;
+
+const sanitiseUnavailableChartCopy = (text: string | null | undefined) => {
+  if (!text) return '';
+  if (
+    /birth chart data is not available|birth chart isn't available|birth chart is not available|while your birth chart isn't available|while your birth chart is not available/i.test(
+      text,
+    )
+  ) {
+    return "Today's wider sky is still moving with you. Notice what feels ready to begin, then choose the smallest next step.";
+  }
+  return text;
+};
+
 /** Compact inline relative time: "3h ago", "in 5h", "yesterday", "tomorrow" */
 const inlineRelativeTime = (date: dayjs.Dayjs): string => {
   const now = dayjs();
@@ -105,6 +120,36 @@ const formatTransitSentence = (
   const sentence = `${prefix}${base}`.trim();
   const capitalized = sentence.charAt(0).toUpperCase() + sentence.slice(1);
   return capitalized.endsWith('.') ? capitalized : `${capitalized}.`;
+};
+
+const getTransitRarityNote = (detail: TransitDetail): string => {
+  const transitPlanet = detail.title.split(' ')[0];
+  if (['Pluto', 'Neptune', 'Uranus', 'Saturn'].includes(transitPlanet)) {
+    return 'This is a slower, rarer influence that can colour a longer chapter.';
+  }
+  if (['Jupiter'].includes(transitPlanet)) {
+    return 'This is a bigger growth transit that tends to build over weeks.';
+  }
+  if (['Moon'].includes(transitPlanet)) {
+    return 'This is brief and emotional, strongest for hours rather than days.';
+  }
+  return 'This is a short personal transit, strongest across the next few days.';
+};
+
+const formatPrimaryTransitText = (detail: TransitDetail): string => {
+  const orb = `${detail.orbDegrees.toFixed(1)}° orb`;
+  const exactness =
+    detail.intensity === 'Exact'
+      ? 'exact'
+      : detail.intensity === 'Strong'
+        ? 'close'
+        : 'active';
+  const duration =
+    detail.duration?.displayText ||
+    detail.premium?.timingSummary ||
+    detail.transitCycle;
+
+  return `${detail.title} is ${exactness} now (${orb}). ${detail.meaning} ${getTransitRarityNote(detail)} ${duration}`;
 };
 
 function calculateAspects(
@@ -147,6 +192,8 @@ function calculateAspects(
             aspectType: aspectDef.name,
             orbDegrees: Math.round(orb * 10) / 10,
             house: natal.house,
+            transitLongitude: transit.eclipticLongitude,
+            natalLongitude: natal.eclipticLongitude,
           });
           break;
         }
@@ -167,9 +214,14 @@ export const DailyInsightCard = () => {
     [currentDate],
   );
   const router = useRouter();
+  const authUserId = authStatus.user?.id;
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const birthChart = user?.birthChart;
+  const usableBirthChart = useMemo(
+    () => (hasUsableBirthChart(birthChart) ? birthChart : null),
+    [birthChart],
+  );
   const [lifeThemeName, setLifeThemeName] = useState<string | null>(null);
   const [observer, setObserver] = useState<any>(null);
   const variant = useFeatureFlagVariant('paywall_preview_style_v1');
@@ -185,15 +237,15 @@ export const DailyInsightCard = () => {
     authStatus.isAuthenticated &&
     hasPersonalizedAccess &&
     userBirthday &&
-    birthChart;
+    usableBirthChart;
 
   useEffect(() => {
-    if (!authStatus.isAuthenticated || !birthChart) return;
+    if (!authStatus.isAuthenticated || !usableBirthChart) return;
     import('astronomy-engine').then((module) => {
       const { Observer } = module;
       setObserver(new Observer(51.4769, 0.0005, 0));
     });
-  }, [authStatus.isAuthenticated, birthChart]);
+  }, [authStatus.isAuthenticated, usableBirthChart]);
 
   useEffect(() => {
     if (!canAccessPersonalized) return;
@@ -201,7 +253,7 @@ export const DailyInsightCard = () => {
     async function loadTheme() {
       try {
         // Check cache first
-        const userId = authStatus.user?.id || 'anon';
+        const userId = authUserId || 'anon';
         const journalCacheKey = `journal_${userId}`;
         const patternsCacheKey = `patterns_${userId}`;
 
@@ -260,7 +312,7 @@ export const DailyInsightCard = () => {
     }
 
     loadTheme();
-  }, [canAccessPersonalized]);
+  }, [authUserId, canAccessPersonalized]);
 
   const insight = useMemo(() => {
     const selectedDate = selectedDay.toDate();
@@ -269,11 +321,11 @@ export const DailyInsightCard = () => {
       const horoscope = getEnhancedPersonalizedHoroscope(
         userBirthday!,
         userName || undefined,
-        { birthday: userBirthday!, birthChart: birthChart! },
+        { birthday: userBirthday!, birthChart: usableBirthChart },
         selectedDate,
       );
       return {
-        text: horoscope.personalInsight,
+        text: sanitiseUnavailableChartCopy(horoscope.personalInsight),
         isPersonalized: true,
       };
     }
@@ -288,17 +340,21 @@ export const DailyInsightCard = () => {
     canAccessPersonalized,
     userBirthday,
     userName,
-    birthChart,
-    selectedDay.valueOf(),
+    usableBirthChart,
+    selectedDay,
   ]);
 
   // Calculate transit event sentences (enters/leaves) — TODAY ONLY
   const transitHighlights = useMemo<PersonalTransitImpact[]>(() => {
-    if (!authStatus.isAuthenticated || !birthChart) return [];
+    if (!authStatus.isAuthenticated || !usableBirthChart) return [];
     const todayStart = selectedDay.startOf('day');
     const todayEnd = todayStart.add(1, 'day');
     const upcomingTransits = getUpcomingTransits(selectedDay);
-    const impacts = getPersonalTransitImpacts(upcomingTransits, birthChart, 60);
+    const impacts = getPersonalTransitImpacts(
+      upcomingTransits,
+      usableBirthChart,
+      60,
+    );
 
     const significanceOrder: Record<
       PersonalTransitImpact['significance'],
@@ -336,7 +392,7 @@ export const DailyInsightCard = () => {
       }
     }
     return result;
-  }, [authStatus.isAuthenticated, birthChart, selectedDay.valueOf()]);
+  }, [authStatus.isAuthenticated, usableBirthChart, selectedDay]);
 
   const transitSummaryText = useMemo(() => {
     if (transitHighlights.length === 0) return null;
@@ -347,14 +403,22 @@ export const DailyInsightCard = () => {
 
   // Calculate transit aspect titles (short bios) for ALL authenticated users
   const transitDetails = useMemo<TransitDetail[]>(() => {
-    if (!authStatus.isAuthenticated || !birthChart || !observer) return [];
+    if (!authStatus.isAuthenticated || !usableBirthChart || !observer)
+      return [];
     const normalizedDate = new Date(dayjs().format('YYYY-MM-DD') + 'T12:00:00');
     const currentTransits = getAstrologicalChart(normalizedDate, observer);
-    const aspects = calculateAspects(birthChart, currentTransits);
-    return buildTransitDetails(aspects, { maxItems: 2 });
-  }, [authStatus.isAuthenticated, birthChart, observer]);
+    const aspects = calculateAspects(usableBirthChart, currentTransits);
+    return buildTransitDetails(aspects, { maxItems: 1 });
+  }, [authStatus.isAuthenticated, usableBirthChart, observer]);
 
-  const displayText = transitSummaryText ?? insight.text;
+  const primaryTransitText = useMemo(() => {
+    const primary = transitDetails[0];
+    return primary ? formatPrimaryTransitText(primary) : null;
+  }, [transitDetails]);
+
+  const displayText = sanitiseUnavailableChartCopy(
+    primaryTransitText ?? transitSummaryText ?? insight.text,
+  );
 
   // General (non-personalized) transit text for free users — TODAY ONLY
   const generalTransitText = useMemo(() => {
@@ -395,12 +459,12 @@ export const DailyInsightCard = () => {
         return cap.endsWith('.') ? cap : `${cap}.`;
       })
       .join(' ');
-  }, [selectedDay.valueOf()]);
+  }, [selectedDay]);
 
   // Helper to render preview based on A/B test variant
   const renderPreview = () => {
     // Mirror paid view: transit sentence + aspect short bios
-    const previewText = transitSummaryText ?? insight.text;
+    const previewText = displayText;
     const aspectBios = transitDetails
       .map((d) => `${d.title} · ${d.header}`)
       .join(' | ');
@@ -564,7 +628,7 @@ export const DailyInsightCard = () => {
             <div className='mt-2 space-y-1'>
               {transitDetails.map((detail) => (
                 <p key={detail.id} className='text-xs text-content-muted'>
-                  {detail.title} · {detail.header}
+                  {detail.degreeInfo}
                 </p>
               ))}
             </div>

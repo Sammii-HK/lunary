@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 import dayjs from 'dayjs';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import { getAstrologicalChart, AstroChartInformation } from './astrology';
@@ -700,7 +701,7 @@ const generateEnhancedPersonalInsight = (
 ): string => {
   if (!natalChart || natalChart.length === 0) {
     const seasonalInsight = getSeasonalInsight(today);
-    return `While your birth chart isn't available, ${seasonalInsight} Trust in the natural cycles and your inner wisdom.`;
+    return `Today's wider sky carries ${seasonalInsight} Notice what feels ready to begin, then choose the smallest next step.`;
   }
 
   const transits: any[] = [];

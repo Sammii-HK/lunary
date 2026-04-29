@@ -98,6 +98,31 @@ html {
   --stroke-default: 62 29 124; /* #3e1d7c primary-700 */
   --stroke-strong: 103 48 207; /* #6730cf primary-500 */
 
+  /* chart tokens */
+  --chart-surface: 25 12 50;
+  --chart-surface-soft: 12 6 25;
+  --chart-stroke: 103 72 166;
+  --chart-stroke-subtle: 62 42 103;
+  --chart-text: 255 255 255;
+  --chart-text-muted: 176 148 230;
+  --chart-angular: 142 142 235;
+  --chart-selected: 199 125 255;
+  --chart-shadow: 0 0 0;
+  --chart-fire: 255 123 116;
+  --chart-earth: 136 176 112;
+  --chart-air: 134 192 235;
+  --chart-water: 184 134 218;
+  --chart-aspect-conjunction: 199 125 255;
+  --chart-aspect-opposition: 255 214 163;
+  --chart-aspect-trine: 123 255 184;
+  --chart-aspect-square: 248 113 113;
+  --chart-aspect-sextile: 148 209 255;
+  --chart-retrograde: 248 113 113;
+  --chart-backdrop-center: 46 26 94;
+  --chart-backdrop-mid: 21 16 45;
+  --chart-backdrop-edge: 8 6 15;
+  --chart-star: 255 248 231;
+
   /* glow */
   --glow-primary:
     0 0 20px rgba(123, 123, 232, 0.5), 0 0 40px rgba(123, 123, 232, 0.25);
@@ -135,6 +160,31 @@ html {
   --stroke-subtle: 212 196 235; /* #d4c4eb — visible lavender */
   --stroke-default: 176 148 230; /* #b094e6 primary-300 */
   --stroke-strong: 132 88 216; /* #8458d8 primary-400 */
+
+  /* chart tokens — calmer than the app text palette for dense SVG work */
+  --chart-surface: 255 255 255;
+  --chart-surface-soft: 250 247 255;
+  --chart-stroke: 197 181 224;
+  --chart-stroke-subtle: 226 216 241;
+  --chart-text: 44 31 68;
+  --chart-text-muted: 112 93 145;
+  --chart-angular: 104 96 190;
+  --chart-selected: 116 0 204;
+  --chart-shadow: 255 255 255;
+  --chart-fire: 198 92 92;
+  --chart-earth: 83 123 89;
+  --chart-air: 74 139 188;
+  --chart-water: 134 88 176;
+  --chart-aspect-conjunction: 137 88 202;
+  --chart-aspect-opposition: 170 120 66;
+  --chart-aspect-trine: 67 139 101;
+  --chart-aspect-square: 190 72 72;
+  --chart-aspect-sextile: 76 130 178;
+  --chart-retrograde: 190 72 72;
+  --chart-backdrop-center: 250 247 255;
+  --chart-backdrop-mid: 242 236 250;
+  --chart-backdrop-edge: 255 255 255;
+  --chart-star: 126 88 190;
 
   --glow-primary: none;
   --glow-subtle: none;
@@ -668,4 +718,16 @@ img {
   background-color: rgba(253, 242, 248, 0.8);
   color: rgb(157, 23, 77);
   border-color: rgba(236, 72, 153, 0.3);
+}
+
+/* Dashboard share buttons must stay icon-sized inside compact cards. */
+[data-dashboard-share='compact'] {
+  width: 1.75rem !important;
+  min-width: 1.75rem !important;
+  height: 1.75rem !important;
+  min-height: 1.75rem !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }

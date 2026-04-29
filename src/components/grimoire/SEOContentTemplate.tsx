@@ -36,6 +36,9 @@ import { ChartPreviewTeaser } from './ChartPreviewTeaser';
 import { SignTransitTeaser } from './SignTransitTeaser';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 import { GrimoireExitIntent } from './GrimoireExitIntent';
+// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
+// import AudioNarrator from '@/components/audio/AudioNarrator';
+import { AutoLinkText } from '@/components/glossary/AutoLinkText';
 
 /**
  * Format a URL segment into a human-readable label
@@ -385,10 +388,36 @@ export async function SEOContentTemplate({
           </span>
         )}
         {description && (
-          <p className='text-content-muted leading-relaxed break-words mt-4'>
+          <AutoLinkText
+            as='p'
+            className='text-content-muted leading-relaxed break-words mt-4'
+          >
             {description}
-          </p>
+          </AutoLinkText>
         )}
+        {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
+        {/* {(() => {
+          const narrationParts = [
+            h1 || title,
+            description,
+            tldr,
+            whatIs?.answer,
+            intro,
+            symbolism,
+            numerology,
+            astrologyCorrespondences,
+          ].filter((p): p is string => Boolean(p && p.trim()));
+          if (narrationParts.length < 2) return null;
+          return (
+            <div className='mt-4'>
+              <AudioNarrator
+                text={narrationParts.join('\n\n')}
+                title={h1 || title}
+                compactVariant='inline'
+              />
+            </div>
+          );
+        })()} */}
       </header>
 
       <div className='space-y-8 p-2 md:p-4'>
@@ -433,9 +462,12 @@ export async function SEOContentTemplate({
             >
               Quick Meaning
             </Heading>
-            <p className='text-content-primary leading-relaxed break-words'>
+            <AutoLinkText
+              as='p'
+              className='text-content-primary leading-relaxed break-words'
+            >
               {tldr}
-            </p>
+            </AutoLinkText>
           </div>
         )}
 
@@ -445,18 +477,24 @@ export async function SEOContentTemplate({
             <Heading as='h2' variant='h2'>
               {whatIs.question}
             </Heading>
-            <p className='what-is-answer text-content-secondary leading-relaxed break-words'>
+            <AutoLinkText
+              as='p'
+              className='what-is-answer text-content-secondary leading-relaxed break-words'
+            >
               {whatIs.answer}
-            </p>
+            </AutoLinkText>
           </section>
         )}
 
         {/* Intro */}
         {intro && (
           <section className='prose prose-invert max-w-none overflow-x-hidden'>
-            <p className='text-content-secondary leading-relaxed break-words'>
+            <AutoLinkText
+              as='p'
+              className='text-content-secondary leading-relaxed break-words'
+            >
               {intro}
-            </p>
+            </AutoLinkText>
           </section>
         )}
 
@@ -534,9 +572,12 @@ export async function SEOContentTemplate({
                   key={index}
                   className='bg-surface-elevated/50 border border-stroke-subtle/50 rounded-lg p-4 w-full overflow-x-hidden'
                 >
-                  <p className='text-content-secondary leading-relaxed break-words'>
+                  <AutoLinkText
+                    as='p'
+                    className='text-content-secondary leading-relaxed break-words'
+                  >
                     {item}
-                  </p>
+                  </AutoLinkText>
                 </div>
               ))}
             </div>
@@ -586,9 +627,12 @@ export async function SEOContentTemplate({
               Symbolism Breakdown
             </Heading>
             <div className='prose prose-invert max-w-none break-words'>
-              <p className='text-content-secondary leading-relaxed whitespace-pre-line break-words'>
+              <AutoLinkText
+                as='p'
+                className='text-content-secondary leading-relaxed whitespace-pre-line break-words'
+              >
                 {symbolism}
-              </p>
+              </AutoLinkText>
             </div>
           </section>
         )}
@@ -600,9 +644,12 @@ export async function SEOContentTemplate({
               Numerology & Astrology Correspondences
             </Heading>
             <div className='prose prose-invert max-w-none break-words'>
-              <p className='text-content-secondary leading-relaxed whitespace-pre-line break-words'>
+              <AutoLinkText
+                as='p'
+                className='text-content-secondary leading-relaxed whitespace-pre-line break-words'
+              >
                 {numerology}
-              </p>
+              </AutoLinkText>
             </div>
           </section>
         )}
@@ -614,9 +661,12 @@ export async function SEOContentTemplate({
               Astrological Correspondences
             </Heading>
             <div className='prose prose-invert max-w-none break-words'>
-              <p className='text-content-secondary leading-relaxed whitespace-pre-line break-words'>
+              <AutoLinkText
+                as='p'
+                className='text-content-secondary leading-relaxed whitespace-pre-line break-words'
+              >
                 {astrologyCorrespondences}
-              </p>
+              </AutoLinkText>
             </div>
           </section>
         )}
@@ -680,9 +730,12 @@ export async function SEOContentTemplate({
                   key={index}
                   className='bg-surface-elevated/50 border border-stroke-subtle/50 rounded-lg p-4 w-full overflow-x-hidden'
                 >
-                  <p className='text-content-secondary leading-relaxed break-words'>
+                  <AutoLinkText
+                    as='p'
+                    className='text-content-secondary leading-relaxed break-words'
+                  >
                     {placement}
-                  </p>
+                  </AutoLinkText>
                 </div>
               ))}
             </div>
@@ -702,9 +755,12 @@ export async function SEOContentTemplate({
                   className='bg-surface-elevated/50 border border-stroke-subtle/50 rounded-lg p-4 sm:p-6 w-full overflow-x-hidden'
                 >
                   <div className='prose prose-invert max-w-none break-words'>
-                    <p className='text-content-secondary leading-relaxed whitespace-pre-line break-words'>
+                    <AutoLinkText
+                      as='p'
+                      className='text-content-secondary leading-relaxed whitespace-pre-line break-words'
+                    >
                       {ritual}
-                    </p>
+                    </AutoLinkText>
                   </div>
                 </div>
               ))}

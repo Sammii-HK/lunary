@@ -41,10 +41,12 @@ LUNARY_API_URL=https://lunary.app
 LUNARY_ADMIN_KEY=<your-admin-api-key>
 ```
 
-The client checks `process.env` first, then falls back to `.env`. Startup logs show the source:
+The client checks `process.env` first, then falls back to `.env`. It only logs
+startup diagnostics when `LUNARY_MCP_DEBUG=1` is set, and it never prints key
+prefixes or lengths:
 
 ```
-[lunary-mcp] BASE_URL=https://lunary.app ADMIN_KEY=eKwpmqza...(len=35) (source: .env file)
+[lunary-mcp] BASE_URL=https://lunary.app keySource=.env file
 ```
 
 ### 4. Set the server-side env var
@@ -113,13 +115,14 @@ Claude Code spawns MCP servers once at session start. If you change the key in `
 
 **Fix:** Restart Claude Code. There is no way to reload MCP servers without restarting the session.
 
-To verify the process has the right key, check stderr output on startup — the client logs:
+To verify the process is loading config, temporarily set `LUNARY_MCP_DEBUG=1`
+and restart Claude Code. The client logs:
 
 ```
-[lunary-mcp] BASE_URL=https://lunary.app ADMIN_KEY=eKwpmqza...(len=35)
+[lunary-mcp] BASE_URL=https://lunary.app keySource=env
 ```
 
-If it says `ADMIN_KEY=EMPTY`, the env var isn't being passed through.
+If the key is missing, debug mode logs `Missing LUNARY_ADMIN_KEY`.
 
 **Check 4: Test outside the MCP**
 
@@ -163,13 +166,14 @@ node dist/index.js  # should hang waiting for stdio input (ctrl+c to exit)
 
 ### Debugging request failures
 
-The client logs failed requests to stderr with the URL, status, and key prefix:
+By default, failed requests are returned as structured MCP errors without extra
+stderr noise. Set `LUNARY_MCP_DEBUG=1` when you need request diagnostics:
 
 ```
-[lunary-mcp] FAILED GET https://lunary.app/api/admin/analytics/dashboard → 401 | key=eKwpmqza...
+[lunary-mcp] GET /analytics/dashboard failed with 401 (auth)
 ```
 
-If `key=EMPTY`, the `LUNARY_ADMIN_KEY` env var is missing from the MCP process.
+If `LUNARY_ADMIN_KEY` is missing, debug mode logs that once at startup.
 
 ## Development
 

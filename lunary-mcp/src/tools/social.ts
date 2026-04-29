@@ -1,10 +1,23 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { lunary, BASE_URL, SPELLCAST_URL, SPELLCAST_KEY } from '../client.js';
-import { jsonResult, errorResult } from '../types.js';
+import {
+  jsonResult,
+  errorResult,
+  statusCategory,
+  ToolApiError,
+} from '../types.js';
 
 const SPELLCAST_API_URL = SPELLCAST_URL;
 const SPELLCAST_API_KEY = SPELLCAST_KEY;
+
+function spellcastHttpFailure(operation: string, status: number) {
+  const category = statusCategory(status);
+  return {
+    message: `Spellcast ${operation} failed with ${status} (${category})`,
+    details: { service: 'spellcast', operation, status, category },
+  };
+}
 
 // Lunary account set on Spellcast
 const LUNARY_ACCOUNT_SET_ID = 'a190e806-5bac-497b-88bd-b1d96ed1f2e8';
@@ -17,7 +30,7 @@ const SAMMII_EMAIL = 'kellow.sammii@gmail.com';
 
 /** Personal OG image types for Sammii's share posts. Each entry describes how to build the URL. */
 const SAMMII_OG_TYPES = {
-  // Daily — content changes every day, post frequently
+  // Daily, content changes every day, post frequently
   horoscope: { label: 'Daily Horoscope', needsCosmic: false, cadence: 'daily' },
   'daily-insight': {
     label: 'Daily Insight',
@@ -34,7 +47,7 @@ const SAMMII_OG_TYPES = {
     needsCosmic: true,
     cadence: 'daily',
   },
-  // Weekly — changes but not daily, post once or twice a week
+  // Weekly, changes but not daily, post once or twice a week
   'zodiac-season': {
     label: 'Zodiac Season',
     needsCosmic: true,
@@ -46,7 +59,7 @@ const SAMMII_OG_TYPES = {
     cadence: 'weekly',
   },
   streak: { label: 'Streak & Stats', needsCosmic: false, cadence: 'weekly' },
-  // Monthly — largely static, post once a month at most
+  // Monthly, largely static, post once a month at most
   'big-three': {
     label: 'Big Three (Sun/Moon/Rising)',
     needsCosmic: false,
@@ -155,10 +168,8 @@ async function uploadToSpellcast(
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(
-      `Spellcast upload failed (${res.status}): ${text.slice(0, 200)}`,
-    );
+    const failure = spellcastHttpFailure('media_upload', res.status);
+    throw new ToolApiError(failure.message, failure.details);
   }
 
   const data = (await res.json()) as {
@@ -196,10 +207,8 @@ async function autoScheduleOnSpellcast(
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(
-      `Auto-schedule failed (${res.status}): ${text.slice(0, 200)}`,
-    );
+    const failure = spellcastHttpFailure('auto_schedule', res.status);
+    throw new ToolApiError(failure.message, failure.details);
   }
 
   const data = (await res.json()) as {
@@ -488,7 +497,7 @@ export function registerSocialTools(server: McpServer) {
         `lunary-${og_type}-story-${targetDate}.${storyExt}`,
       );
 
-      // Fetch and upload feed image (for Threads) — skip re-fetch if same URL
+      // Fetch and upload feed image (for Threads), skip re-fetch if same URL
       let feedUploaded = storyUploaded;
       if (feedUrl.toString() !== storyUrl.toString()) {
         const feedRes = await fetch(feedUrl.toString());
@@ -524,17 +533,17 @@ export function registerSocialTools(server: McpServer) {
         .filter((a) => a.platform === 'threads')
         .map((a) => a.id);
 
-      // Instagram story caption — short, no hashtags (stories don't show them anyway)
+      // Instagram story caption, short, no hashtags (stories don't show them anyway)
       const storyCaption =
         captionOverride ??
         ((await generateSpellcastCaption(
           `Write a very short Instagram Story caption for a Lunary ${ogLabel} graphic (${targetDate}).\n` +
-            '1-2 lines max, 80 characters max. Punchy, direct — people tap through stories fast.\n' +
+            '1-2 lines max, 80 characters max. Punchy, direct, people tap through stories fast.\n' +
             'Sentence case, UK English, 1 emoji max, no hashtags, no links.',
         )) ||
           ogLabel);
 
-      // Threads caption — punchy short post
+      // Threads caption, punchy short post
       const threadsCaption =
         (await generateSpellcastCaption(
           `Write a 1-3 line Threads caption for a Lunary ${ogLabel} post (${targetDate}). Punchy, specific, no fluff. Under 200 chars. No hashtags. Sentence case, UK English.`,
@@ -631,9 +640,9 @@ export function registerSocialTools(server: McpServer) {
     [
       "Post a personal Lunary OG image from Sammii's own account to Instagram Story (@sammiisparkle) and Threads.",
       "Fetches Sammii's birth chart + today's cosmic data from Lunary, builds a personalised story-sized OG image,",
-      'uploads it to Spellcast, and schedules it — bypassing auto-schedule cadence so date-specific images go out on the right day.',
+      'uploads it to Spellcast, and schedules it, bypassing auto-schedule cadence so date-specific images go out on the right day.',
       'Instagram Stories have no caption (image is the content). Threads gets a short punchy caption.',
-      'CADENCE RULES — respect these when deciding how often to post each type:',
+      'CADENCE RULES, respect these when deciding how often to post each type:',
       `Daily (post every day or every other day): ${Object.entries(
         SAMMII_OG_TYPES,
       )
@@ -644,7 +653,7 @@ export function registerSocialTools(server: McpServer) {
         .filter(([, v]) => v.cadence === 'weekly')
         .map(([k, v]) => `${k} (${v.label})`)
         .join(', ')}.`,
-      `Monthly (post at most once a month — content is largely static): ${Object.entries(
+      `Monthly (post at most once a month, content is largely static): ${Object.entries(
         SAMMII_OG_TYPES,
       )
         .filter(([, v]) => v.cadence === 'monthly')
@@ -720,7 +729,7 @@ export function registerSocialTools(server: McpServer) {
           new Error('SPELLCAST_API_KEY not configured in lunary-mcp env'),
         );
 
-      // Cadence guard — check recent posts for this og_type unless force=true
+      // Cadence guard, check recent posts for this og_type unless force=true
       if (!force) {
         const typeConfig = SAMMII_OG_TYPES[og_type];
         const cadenceDays =
@@ -976,7 +985,7 @@ export function registerSocialTools(server: McpServer) {
           ogPath = `/api/og/share/sky-now?format=story&name=${p(firstName)}&positions=${p(JSON.stringify(planets))}&date=${dateStr}`;
           break;
         case 'numerology':
-          ogPath = `/api/og/share/numerology?format=story&name=${p(firstName)}&birthDate=${birthday}&lifePath=${lifePath}&soulUrge=${soulUrge}&expression=${expression}&lifePathMeaning=${p('The Seeker — wisdom and introspection')}&soulUrgeMeaning=${p('The Creative — self-expression and joy')}&expressionMeaning=${p('The Explorer — freedom and change')}`;
+          ogPath = `/api/og/share/numerology?format=story&name=${p(firstName)}&birthDate=${birthday}&lifePath=${lifePath}&soulUrge=${soulUrge}&expression=${expression}&lifePathMeaning=${p('The Seeker, wisdom and introspection')}&soulUrgeMeaning=${p('The Creative, self-expression and joy')}&expressionMeaning=${p('The Explorer, freedom and change')}`;
           break;
         case 'zodiac-season':
           ogPath = `/api/og/share/zodiac-season?format=story&name=${p(firstName)}&sign=${zodiacSeason}&element=${zodiacEl}&modality=${zodiacMod}&themes=${p('Intuition,Depth,Transformation')}`;
@@ -1032,7 +1041,7 @@ export function registerSocialTools(server: McpServer) {
       // 5. Generate captions
       const ogLabel = SAMMII_OG_TYPES[og_type].label;
 
-      // Instagram Stories don't need text content — the image is the post
+      // Instagram Stories don't need text content, the image is the post
       const storyCaption = '';
 
       const rawThreadsCaption =
@@ -1048,7 +1057,7 @@ export function registerSocialTools(server: McpServer) {
         .replace(/^["']|["']$/g, '')
         .trim();
 
-      // 6. Schedule Instagram Story (bypass cadence — post at exact time)
+      // 6. Schedule Instagram Story (bypass cadence, post at exact time)
       let igStory: { id: string } | null = null;
       let igError: string | null = null;
       const igRes = await fetch(`${SPELLCAST_API_URL}/api/posts`, {
@@ -1070,7 +1079,10 @@ export function registerSocialTools(server: McpServer) {
       if (igRes.ok) {
         igStory = (await igRes.json()) as { id: string };
       } else {
-        igError = `${igRes.status}: ${await igRes.text().catch(() => '')}`;
+        igError = spellcastHttpFailure(
+          'instagram_schedule',
+          igRes.status,
+        ).message;
       }
 
       // 7. Schedule Threads feed post at the same time
@@ -1095,7 +1107,10 @@ export function registerSocialTools(server: McpServer) {
       if (threadsRes.ok) {
         threadsPost = (await threadsRes.json()) as { id: string };
       } else {
-        threadsError = `${threadsRes.status}: ${await threadsRes.text().catch(() => '')}`;
+        threadsError = spellcastHttpFailure(
+          'threads_schedule',
+          threadsRes.status,
+        ).message;
       }
 
       return jsonResult({

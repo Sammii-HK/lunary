@@ -1,21 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { z } from 'zod';
 import { requireUser } from '@/lib/ai/auth';
 import { hasFeatureAccess } from '../../../../utils/pricing';
 import { decrypt } from '@/lib/encryption';
 import { FRIEND_LIMITS } from '../../../../utils/entitlements';
+import type { BirthChartData } from '../../../../utils/astrology/birthChart';
 
 export const dynamic = 'force-dynamic';
+
+const createFriendSchema = z.object({
+  friendUserId: z.string().min(1, 'friendUserId is required'),
+  nickname: z.string().trim().max(64).optional(),
+  relationshipType: z.string().trim().max(64).optional(),
+});
 
 /**
  * GET /api/friends
  * List all friends with their basic profile info
  * Free users: up to 5 friends with basic compatibility %
  * Paid users: unlimited friends with full synastry
+ *
+ * Pass `?charts=1` to also include each friend's `birthChart` in the response.
+ * Used by Group Sky to avoid N+1 fetches against `/api/friends/[id]` (which
+ * also runs synastry on every call).
  */
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request);
+    const includeCharts = request.nextUrl.searchParams.get('charts') === '1';
 
     // Check subscription access
     const subscriptionResult = await sql`
@@ -48,23 +61,42 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const result = await sql`
-      SELECT
-        fc.id,
-        fc.friend_id,
-        fc.nickname,
-        fc.relationship_type,
-        fc.synastry_score,
-        fc.created_at,
-        up.name as friend_name,
-        up.birthday as friend_birthday,
-        u.image as friend_avatar
-      FROM friend_connections fc
-      LEFT JOIN user_profiles up ON up.user_id = fc.friend_id
-      LEFT JOIN "user" u ON u.id = fc.friend_id
-      WHERE fc.user_id = ${user.id}
-      ORDER BY fc.created_at DESC
-    `;
+    const result = includeCharts
+      ? await sql`
+        SELECT
+          fc.id,
+          fc.friend_id,
+          fc.nickname,
+          fc.relationship_type,
+          fc.synastry_score,
+          fc.created_at,
+          up.name as friend_name,
+          up.birthday as friend_birthday,
+          up.birth_chart as friend_birth_chart,
+          u.image as friend_avatar
+        FROM friend_connections fc
+        LEFT JOIN user_profiles up ON up.user_id = fc.friend_id
+        LEFT JOIN "user" u ON u.id = fc.friend_id
+        WHERE fc.user_id = ${user.id}
+        ORDER BY fc.created_at DESC
+      `
+      : await sql`
+        SELECT
+          fc.id,
+          fc.friend_id,
+          fc.nickname,
+          fc.relationship_type,
+          fc.synastry_score,
+          fc.created_at,
+          up.name as friend_name,
+          up.birthday as friend_birthday,
+          u.image as friend_avatar
+        FROM friend_connections fc
+        LEFT JOIN user_profiles up ON up.user_id = fc.friend_id
+        LEFT JOIN "user" u ON u.id = fc.friend_id
+        WHERE fc.user_id = ${user.id}
+        ORDER BY fc.created_at DESC
+      `;
 
     // Mask birthdays for privacy (just show zodiac sign)
     const friends = result.rows.map((row) => {
@@ -83,7 +115,18 @@ export async function GET(request: NextRequest) {
       // Decrypt friend name (stored encrypted in user_profiles)
       const friendName = row.friend_name ? decrypt(row.friend_name) : null;
 
-      return {
+      const base: {
+        id: string;
+        friendId: string;
+        name: string;
+        avatar: string | null;
+        relationshipType: string | null;
+        sunSign: string | null;
+        synastryScore: number | null;
+        connectedAt: string;
+        hasBirthChart?: boolean;
+        birthChart?: BirthChartData[];
+      } = {
         id: row.id,
         friendId: row.friend_id,
         name: row.nickname || friendName || 'Friend',
@@ -93,6 +136,14 @@ export async function GET(request: NextRequest) {
         synastryScore: row.synastry_score,
         connectedAt: row.created_at,
       };
+
+      if (includeCharts) {
+        const chart = row.friend_birth_chart as BirthChartData[] | null;
+        base.hasBirthChart = Array.isArray(chart) && chart.length > 0;
+        if (base.hasBirthChart) base.birthChart = chart!;
+      }
+
+      return base;
     });
 
     return NextResponse.json({
@@ -109,6 +160,147 @@ export async function GET(request: NextRequest) {
     console.error('[Friends] Error fetching friends:', error);
     return NextResponse.json(
       { error: 'Failed to fetch friends' },
+      { status: 500 },
+    );
+  }
+}
+
+/**
+ * POST /api/friends
+ * Body: { friendUserId, nickname?, relationshipType? }
+ * Creates a friend connection. Synastry is computed lazily on read,
+ * not on create. Returns 409 if a connection already exists for
+ * (user_id, friend_id).
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const user = await requireUser(request);
+
+    let parsed;
+    try {
+      parsed = createFriendSchema.parse(await request.json());
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return NextResponse.json(
+          { error: 'Invalid request body', issues: err.issues },
+          { status: 400 },
+        );
+      }
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+
+    const { friendUserId, nickname, relationshipType } = parsed;
+
+    if (friendUserId === user.id) {
+      return NextResponse.json(
+        { error: 'Cannot connect to yourself' },
+        { status: 400 },
+      );
+    }
+
+    // Check subscription access (matches GET behaviour)
+    const subscriptionResult = await sql`
+      SELECT status FROM subscriptions
+      WHERE user_id = ${user.id}
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    const subscriptionStatus = subscriptionResult.rows[0]?.status || 'free';
+
+    const hasFullAccess = hasFeatureAccess(
+      subscriptionStatus,
+      user.plan,
+      'friend_connections',
+    );
+    const hasBasicAccess = hasFeatureAccess(
+      subscriptionStatus,
+      user.plan,
+      'friend_connections_basic',
+    );
+
+    if (!hasFullAccess && !hasBasicAccess) {
+      return NextResponse.json(
+        {
+          error: 'Friend connections require a Lunary+ subscription',
+          requiresUpgrade: true,
+        },
+        { status: 403 },
+      );
+    }
+
+    // Verify friend exists in user table
+    const friendUser = await sql`
+      SELECT id FROM "user" WHERE id = ${friendUserId} LIMIT 1
+    `;
+    if (friendUser.rows.length === 0) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Enforce free-tier limit
+    if (!hasFullAccess && hasBasicAccess) {
+      const countResult = await sql`
+        SELECT COUNT(*)::int AS count
+        FROM friend_connections
+        WHERE user_id = ${user.id}
+      `;
+      const count = Number(countResult.rows[0]?.count ?? 0);
+      if (count >= FRIEND_LIMITS.free) {
+        return NextResponse.json(
+          {
+            error: `Free plan limited to ${FRIEND_LIMITS.free} friends`,
+            requiresUpgrade: true,
+          },
+          { status: 403 },
+        );
+      }
+    }
+
+    // Check for existing connection
+    const existing = await sql`
+      SELECT id FROM friend_connections
+      WHERE user_id = ${user.id} AND friend_id = ${friendUserId}
+      LIMIT 1
+    `;
+    if (existing.rows.length > 0) {
+      return NextResponse.json(
+        { error: 'Already connected to this user' },
+        { status: 409 },
+      );
+    }
+
+    const insertResult = await sql`
+      INSERT INTO friend_connections (user_id, friend_id, nickname, relationship_type)
+      VALUES (
+        ${user.id},
+        ${friendUserId},
+        ${nickname ?? null},
+        ${relationshipType ?? null}
+      )
+      RETURNING id, friend_id, nickname, relationship_type, created_at
+    `;
+
+    const row = insertResult.rows[0];
+    return NextResponse.json(
+      {
+        id: row.id,
+        friendId: row.friend_id,
+        nickname: row.nickname,
+        relationshipType: row.relationship_type,
+        connectedAt: row.created_at,
+      },
+      { status: 201 },
+    );
+  } catch (error: any) {
+    // Race condition fallback: unique constraint violation
+    if (error?.code === '23505') {
+      return NextResponse.json(
+        { error: 'Already connected to this user' },
+        { status: 409 },
+      );
+    }
+    console.error('[Friends] Error creating connection:', error);
+    return NextResponse.json(
+      { error: 'Failed to create connection' },
       { status: 500 },
     );
   }

@@ -11,7 +11,10 @@ const config: CapacitorConfig = {
 
   ios: {
     scheme: 'Lunary',
-    contentInset: 'automatic',
+    // 'never' lets the WebView extend edge-to-edge so the bottom nav
+    // can sit flush with the home indicator. CSS env(safe-area-inset-bottom)
+    // is the single source of truth for keeping tap targets above it.
+    contentInset: 'never',
     backgroundColor: '#0a0a0f',
     preferredContentMode: 'mobile',
   },
