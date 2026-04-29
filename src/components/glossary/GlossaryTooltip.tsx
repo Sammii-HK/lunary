@@ -74,9 +74,12 @@ export function GlossaryTooltip({ term, children, className }: Props) {
   const computePosition = useCallback(() => {
     const trigger = triggerRef.current;
     const pop = popoverRef.current;
-    if (!trigger || !pop) return;
+    if (!trigger) return;
     const rect = trigger.getBoundingClientRect();
-    const popRect = pop.getBoundingClientRect();
+    const popRect = pop?.getBoundingClientRect() ?? {
+      width: 260,
+      height: 140,
+    };
     const margin = 8;
     const viewportW = window.innerWidth;
     const viewportH = window.innerHeight;
@@ -125,7 +128,11 @@ export function GlossaryTooltip({ term, children, className }: Props) {
       <button
         ref={triggerRef}
         type='button'
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          setActiveTerm(resolved);
+          setSheetOpen(true);
+          setOpen(false);
+        }}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={(e) => {
           // Don't close if pointer moves into the popover.
@@ -151,7 +158,7 @@ export function GlossaryTooltip({ term, children, className }: Props) {
       </button>
 
       <AnimatePresence>
-        {open && coords && (
+        {open && (
           <motion.div
             ref={popoverRef}
             id={tooltipId}
@@ -159,20 +166,21 @@ export function GlossaryTooltip({ term, children, className }: Props) {
             aria-label={ariaLabel}
             initial={{
               opacity: 0,
-              y: coords.side === 'bottom' ? -4 : 4,
+              y: (coords?.side ?? 'bottom') === 'bottom' ? -4 : 4,
               scale: 0.98,
             }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{
               opacity: 0,
-              y: coords.side === 'bottom' ? -4 : 4,
+              y: (coords?.side ?? 'bottom') === 'bottom' ? -4 : 4,
               scale: 0.98,
             }}
             transition={{ duration: 0.14, ease: 'easeOut' }}
             style={{
               position: 'absolute',
-              top: coords.top,
-              left: coords.left,
+              top: coords?.top ?? 0,
+              left: coords?.left ?? 0,
+              visibility: coords ? 'visible' : 'hidden',
               zIndex: 60,
             }}
             onMouseEnter={() => setOpen(true)}

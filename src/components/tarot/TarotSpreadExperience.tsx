@@ -24,6 +24,7 @@ import {
 } from '@/constants/tarotSpreads';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { TarotTransitConnection } from './TarotTransitConnection';
+import { TarotSuitIcon } from './TarotSuitIcon';
 import type { BirthChartPlacement } from '@/context/UserContext';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { isInDemoMode } from '@/lib/demo-mode';
@@ -110,19 +111,6 @@ const SUIT_ACCENTS: Record<string, string> = {
   pentacles: 'from-emerald-300/25 to-lunary-secondary/15',
   major: 'from-lunary-primary/30 to-lunary-accent/15',
 };
-
-function getCardMark(card: SpreadReadingCard['card']) {
-  if (card.arcana === 'major') {
-    return card.name
-      .replace(/^The\s+/i, '')
-      .split(/\s+/)
-      .map((part) => part[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase();
-  }
-  return (card.suit?.[0] || card.name[0] || '?').toUpperCase();
-}
 
 // Map TarotPlan to actual plan ID for UpgradePrompt
 function mapTarotPlanToPlanId(
@@ -945,11 +933,16 @@ export function TarotSpreadExperience({
                       >
                         <div
                           className={clsx(
-                            'flex h-16 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-gradient-to-br text-sm font-semibold tracking-[0.18em] text-content-primary shadow-inner shadow-black/25 sm:h-20 sm:w-14 sm:rounded-xl',
+                            'flex h-16 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-gradient-to-br text-content-primary shadow-inner shadow-black/25 sm:h-20 sm:w-14 sm:rounded-xl',
                             cardAccent,
                           )}
                         >
-                          {getCardMark(card.card)}
+                          <TarotSuitIcon
+                            cardName={card.card.name}
+                            suit={card.card.suit}
+                            arcana={card.card.arcana}
+                            className='h-6 w-6 text-content-brand-accent sm:h-7 sm:w-7'
+                          />
                         </div>
                         <div className='flex min-w-0 flex-1 flex-col items-start gap-2'>
                           <div className='flex w-full items-start justify-between gap-3'>
