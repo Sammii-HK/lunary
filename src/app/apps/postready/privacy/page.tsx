@@ -4,10 +4,10 @@ import {
   createAppPrivacyMetadata,
 } from '../../_components/AppPrivacyPolicyPage';
 
-const app = getActiveAppPolicyOrThrow('iprep');
+const app = getActiveAppPolicyOrThrow('postready');
 
 export const metadata = createAppPrivacyMetadata(app);
 
-export default function IPrepPrivacyPage() {
+export default function PostReadyPrivacyPage() {
   return <AppPrivacyPolicyPage app={app} />;
 }
