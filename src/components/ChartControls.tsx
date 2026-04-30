@@ -133,7 +133,7 @@ export function ChartControls({
     label: string;
     selectable: boolean;
   }> = [
-    { value: 'guided', label: 'Guided', selectable: true },
+    { value: 'guided', label: 'Beginner', selectable: true },
     { value: 'pro', label: 'Pro', selectable: true },
     { value: 'custom', label: 'Custom', selectable: false },
   ];
@@ -232,7 +232,7 @@ export function ChartControls({
             {chartDensityMode === 'pro'
               ? 'Pro shows aspects, asteroids, and points for the full reading.'
               : chartDensityMode === 'guided'
-                ? 'Guided hides aspects, asteroids, and points. Tap Pro for everything.'
+                ? 'Beginner hides aspects, asteroids, and points. Tap Pro for everything.'
                 : 'Custom: your manual switches drift from the presets.'}
           </p>
         </div>

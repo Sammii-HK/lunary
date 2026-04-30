@@ -2,11 +2,12 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { MarketingFooter } from '@/components/MarketingFooter';
 import { MarketingBreadcrumbs } from '@/components/MarketingBreadcrumbs';
+import { activeAppPolicies } from '@/data/app-policy-pages';
 
 export const metadata: Metadata = {
   title: 'Terms of Service | Lunary iOS Apps',
   description:
-    "Terms and conditions for Lunary iOS apps (iPrep, Yes/No Oracle, Spell Book, Astrologer's Ephemeris).",
+    'Terms and conditions for Lunar Computing iOS apps, including purchases, app content, local data, and support.',
   robots: 'index, follow',
   alternates: {
     canonical: 'https://lunary.app/apps/terms',
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default function AppsTermsOfServicePage() {
-  const lastUpdated = 'March 14, 2026';
+  const lastUpdated = 'April 25, 2026';
 
   return (
     <div className='min-h-screen bg-surface-base text-content-primary flex flex-col pt-16'>
@@ -33,10 +34,10 @@ export default function AppsTermsOfServicePage() {
           <section>
             <p className='text-content-secondary leading-relaxed'>
               These Terms of Service (&quot;Terms&quot;) govern your access to
-              and use of the Lunary iOS applications, including iPrep, Yes/No
-              Oracle, Spell Book, and Astrologer&apos;s Ephemeris (collectively,
-              the &quot;Apps&quot;) provided by Lunar Computing, Inc.
-              (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;).
+              and use of the Lunar Computing iOS applications listed on our app
+              portfolio page (collectively, the &quot;Apps&quot;) provided by
+              Lunar Computing, Inc. (&quot;we,&quot; &quot;us,&quot; or
+              &quot;our&quot;).
             </p>
             <p className='text-content-secondary leading-relaxed'>
               By downloading and using the Apps, you agree to be bound by these
@@ -47,11 +48,11 @@ export default function AppsTermsOfServicePage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-content-primary mb-4'>
-              1. License and Use
+              1. Licence and use
             </h2>
             <p className='text-content-secondary leading-relaxed mb-4'>
               Subject to your compliance with these Terms, we grant you a
-              limited, non-exclusive, non-transferable license to download and
+              limited, non-exclusive, non-transferable licence to download and
               use the Apps on your Apple device for personal, non-commercial
               use. You may not:
             </p>
@@ -138,31 +139,34 @@ export default function AppsTermsOfServicePage() {
             </h3>
             <p className='text-content-secondary leading-relaxed'>
               You retain ownership of any data you create or store in the Apps
-              (e.g., saved readings, notes, collections). Your data is stored
-              securely using Apple CloudKit and syncs only to your own Apple
-              devices. We do not access your encrypted CloudKit data.
+              (for example, notes, journals, recordings, saved reference items,
+              practice sessions, check-ins, collections, or media projects). App
+              data is generally stored on your device. Where an App offers
+              iCloud sync, data syncs through Apple CloudKit to devices signed
+              in to your Apple account.
             </p>
 
             <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               4.2 App Content
             </h3>
             <p className='text-content-secondary leading-relaxed'>
-              The Apps contain content (such as tarot card descriptions, spell
-              information, astronomical data, and ephemeris calculations) that
-              is provided for informational and entertainment purposes only.
-              This content is not medical, legal, financial, or professional
-              advice.
+              The Apps may contain reference material, journalling prompts,
+              habit tools, study tools, sleep timing calculations, card
+              reflection prompts, crystal information, wallpaper content, book
+              tracking tools, or video creation tools. This content is provided
+              for personal use, education, utility, and self-reflection only.
             </p>
 
             <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               4.3 Disclaimer of Professional Advice
             </h3>
             <p className='text-content-secondary leading-relaxed'>
-              The Apps are tools for spiritual exploration and reflection. They
-              are not a substitute for professional consultation with medical
-              doctors, therapists, legal advisors, financial advisors, or other
-              qualified professionals. Always consult a qualified professional
-              for important decisions.
+              The Apps are not medical devices and do not provide medical,
+              psychological, legal, financial, or other professional advice.
+              They are not a substitute for professional consultation with
+              medical doctors, therapists, legal advisers, financial advisers,
+              or other qualified professionals. Always consult a qualified
+              professional for important decisions.
             </p>
           </section>
 
@@ -180,7 +184,7 @@ export default function AppsTermsOfServicePage() {
                 regulation
               </li>
               <li>
-                Attempt to gain unauthorized access to the Apps or related
+                Attempt to gain unauthorised access to the Apps or related
                 systems
               </li>
               <li>Use automated tools to extract data from the Apps</li>
@@ -275,29 +279,20 @@ export default function AppsTermsOfServicePage() {
             </h2>
             <div className='flex flex-wrap gap-4'>
               <Link
-                href='/apps/iprep/privacy'
+                href='/apps'
                 className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
-                iPrep Privacy
+                All app privacy and support pages
               </Link>
-              <Link
-                href='/apps/yesnooracle/privacy'
-                className='text-lunary-primary-400 hover:text-content-brand text-sm'
-              >
-                Yes/No Oracle Privacy
-              </Link>
-              <Link
-                href='/apps/spellbook/privacy'
-                className='text-lunary-primary-400 hover:text-content-brand text-sm'
-              >
-                Spell Book Privacy
-              </Link>
-              <Link
-                href='/apps/ephemeris/privacy'
-                className='text-lunary-primary-400 hover:text-content-brand text-sm'
-              >
-                Ephemeris Privacy
-              </Link>
+              {activeAppPolicies.slice(0, 6).map((app) => (
+                <Link
+                  key={app.slug}
+                  href={`/apps/${app.slug}/privacy`}
+                  className='text-lunary-primary-400 hover:text-content-brand text-sm'
+                >
+                  {app.name} Privacy
+                </Link>
+              ))}
               <Link
                 href='/terms'
                 className='text-lunary-primary-400 hover:text-content-brand text-sm'

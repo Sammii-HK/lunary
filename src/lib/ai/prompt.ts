@@ -413,7 +413,7 @@ const describeContext = (
             const ascIndex = getZodiacIndex(ascendant.sign);
             if (signIndex === -1 || ascIndex === -1) return null;
             const houseNum = ((signIndex - ascIndex + 12) % 12) + 1;
-            return `${t.from} in H${houseNum}`;
+            return `${t.to} in H${houseNum}`;
           })
           .filter(Boolean);
         if (transitHouses.length > 0) {

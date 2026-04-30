@@ -369,14 +369,14 @@ export const formatTime = (date: Date | null, timezone?: string): string => {
     return date.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: false,
+      hourCycle: 'h23',
       timeZone: timezone,
     });
   } catch {
     return date.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: false,
+      hourCycle: 'h23',
     });
   }
 };

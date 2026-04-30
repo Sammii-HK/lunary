@@ -96,6 +96,7 @@ export async function POST(request: NextRequest) {
       ...existingLocation,
       ...(birthTime ? { birthTime } : {}),
       ...(birthLocation ? { birthLocation } : {}),
+      ...(coords ? { birthCoordinates: coords } : {}),
       ...(resolvedTimezone ? { birthTimezone: resolvedTimezone } : {}),
       birthChartVersion: CURRENT_BIRTH_CHART_VERSION,
     };

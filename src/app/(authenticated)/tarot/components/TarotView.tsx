@@ -41,6 +41,10 @@ import { useSubscription } from '../../../../hooks/useSubscription';
 import { useTarotShare } from '@/hooks/useTarotShare';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { TarotTransitConnection } from '@/components/tarot/TarotTransitConnection';
+import {
+  getTarotSuitAccent,
+  TarotSuitIcon,
+} from '@/components/tarot/TarotSuitIcon';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { shouldRedactWord } from '@/constants/redactedWords';
@@ -635,26 +639,20 @@ export function TarotView({
     if (card) setSelectedCard(card);
   };
 
-  const renderCardGlyph = (name: string, index: number) => {
-    const symbols = ['✦', '✧', '◇', '✶', '✴'];
-    const symbol =
-      symbols[
-        Math.abs(
-          name.split('').reduce((total, char) => total + char.charCodeAt(0), 0),
-        ) % symbols.length
-      ];
+  const renderCardGlyph = (name: string) => {
+    const cardAccent = getTarotSuitAccent({ cardName: name });
 
     return (
-      <div className='relative flex h-28 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[1.15rem] border border-white/15 bg-gradient-to-b from-lunary-primary-900/70 via-layer-deep/80 to-surface-base shadow-[0_18px_45px_rgba(0,0,0,0.28)] sm:h-32 sm:w-24'>
-        <div className='absolute inset-x-3 top-3 h-px bg-white/20' />
-        <div className='absolute -left-6 top-6 h-16 w-16 rounded-full bg-lunary-rose-500/15 blur-2xl' />
-        <div className='absolute -right-8 bottom-4 h-20 w-20 rounded-full bg-lunary-highlight-500/15 blur-2xl' />
-        <div className='relative flex h-14 w-14 items-center justify-center rounded-full border border-white/15 bg-surface-elevated/45 text-3xl text-content-brand-accent'>
-          {symbol}
-        </div>
-        <span className='absolute bottom-3 text-[10px] uppercase tracking-[0.3em] text-content-muted'>
-          {index === 0 ? 'Daily' : 'Weekly'}
-        </span>
+      <div
+        className={cn(
+          'flex h-28 w-20 shrink-0 items-center justify-center rounded-[1.15rem] border border-white/15 bg-gradient-to-br shadow-[0_18px_45px_rgba(0,0,0,0.28)] sm:h-32 sm:w-24',
+          cardAccent,
+        )}
+      >
+        <TarotSuitIcon
+          cardName={name}
+          className='h-10 w-10 text-content-primary sm:h-12 sm:w-12'
+        />
       </div>
     );
   };
@@ -667,7 +665,6 @@ export function TarotView({
     onOpen,
     children,
     isMuted = false,
-    index,
     repeat,
   }: {
     label: string;
@@ -677,7 +674,6 @@ export function TarotView({
     onOpen?: () => void;
     children?: React.ReactNode;
     isMuted?: boolean;
-    index: number;
     repeat?: { count: number; window: number } | null;
   }) => {
     const primaryKeyword = keywords[2] || keywords[0];
@@ -695,7 +691,7 @@ export function TarotView({
         <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(238,120,158,0.16),transparent_34%),radial-gradient(circle_at_90%_25%,rgba(132,88,216,0.18),transparent_36%)]' />
         <div className='relative flex items-start justify-between gap-3'>
           <div className='flex items-center gap-3'>
-            {renderCardGlyph(cardName, index)}
+            {renderCardGlyph(cardName)}
             <div className='min-w-0'>
               <p className='text-[11px] font-semibold uppercase tracking-[0.24em] text-content-brand-accent/85'>
                 {label}
@@ -708,7 +704,7 @@ export function TarotView({
               >
                 {cardName}
               </button>
-              <div className='mt-3 flex flex-wrap items-center gap-2 text-xs'>
+              <div className='mt-3 flex flex-col items-center gap-2 text-center text-xs'>
                 {primaryKeyword && (
                   <span className='inline-flex items-center rounded-full border border-lunary-primary-600/35 bg-layer-base/55 px-2.5 py-1 font-medium text-content-brand-accent'>
                     {primaryKeyword}
@@ -902,7 +898,6 @@ export function TarotView({
                 cardName: dailyCardName,
                 keywords: dailyCardKeywords,
                 share: dailyShare,
-                index: 0,
                 repeat: dailyRepeat,
                 onOpen: () => openCardByName(personalizedReading!.daily.name),
                 children: (
@@ -929,7 +924,6 @@ export function TarotView({
                 cardName: weeklyCardName,
                 keywords: weeklyCardKeywords,
                 share: weeklyShare,
-                index: 1,
                 repeat: weeklyRepeat,
                 onOpen: () => openCardByName(personalizedReading!.weekly.name),
                 children: (
@@ -953,7 +947,7 @@ export function TarotView({
             </div>
 
             {recurringThemeItems.length > 0 && (
-              <div className='mt-4 grid gap-2 rounded-2xl border border-stroke-subtle/50 bg-surface-base/35 p-3 sm:grid-cols-3'>
+              <div className='mt-4 grid gap-2 rounded-2xl border border-stroke-subtle/50 bg-surface-base/35 p-3 text-center sm:grid-cols-3'>
                 {recurringThemeItems.map(
                   (item: { label: string; detail?: string }) => (
                     <div key={item.label} className='min-w-0'>
@@ -1015,7 +1009,6 @@ export function TarotView({
                 cardName: dailyCardName,
                 keywords: dailyCardKeywords,
                 share: dailyShare,
-                index: 0,
                 repeat: dailyRepeat,
                 onOpen: () => openCardByName(generalTarot!.daily.name),
                 children: (
@@ -1045,7 +1038,6 @@ export function TarotView({
                   label: 'Weekly card preview',
                   cardName: weeklyCardName,
                   keywords: weeklyCardKeywords,
-                  index: 1,
                   isMuted: true,
                   repeat: weeklyRepeat,
                   children: (

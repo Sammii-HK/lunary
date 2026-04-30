@@ -38,6 +38,7 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { getAllProducts } from '@/lib/shop/generators';
 import { prisma } from '@/lib/prisma';
+import { activeAppPolicySlugs } from '@/data/app-policy-pages';
 
 dayjs.extend(isoWeek);
 import { getAllSynastryAspectSlugs } from '@/constants/seo/synastry-aspects';
@@ -253,9 +254,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'birth-chart': ['src/app/birth-chart/page.tsx'],
     guide: ['src/app/guide/page.tsx'],
     help: ['src/app/help/page.tsx'],
+    apps: ['src/app/apps/page.tsx', 'src/data/app-policy-pages.ts'],
     'press-kit': ['src/app/press-kit/page.tsx'],
     privacy: ['src/app/privacy/page.tsx'],
     terms: ['src/app/terms/page.tsx'],
+    'apps/terms': [
+      'src/app/apps/terms/page.tsx',
+      'src/data/app-policy-pages.ts',
+    ],
     cookies: ['src/app/cookies/page.tsx'],
     refund: ['src/app/refund/page.tsx'],
     'acceptable-use': ['src/app/acceptable-use/page.tsx'],
@@ -324,6 +330,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       'src/app/grimoire/astronomy-vs-astrology/page.tsx',
     ],
   };
+
+  for (const appSlug of activeAppPolicySlugs) {
+    staticPageSources[`apps/${appSlug}/privacy`] = [
+      'src/data/app-policy-pages.ts',
+      'src/app/apps/_components/AppPrivacyPolicyPage.tsx',
+      'src/app/apps/[slug]/privacy/page.tsx',
+    ];
+    staticPageSources[`apps/${appSlug}/support`] = [
+      'src/data/app-policy-pages.ts',
+      'src/app/apps/_components/AppSupportPage.tsx',
+      'src/app/apps/[slug]/support/page.tsx',
+    ];
+  }
 
   const staticPageMeta: RouteConfig[] = [
     { path: '', changeFrequency: 'daily', priority: 1 },
@@ -416,11 +435,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: 'birth-chart', changeFrequency: 'weekly', priority: 0.9 },
     { path: 'guide', changeFrequency: 'monthly', priority: 0.7 },
     { path: 'help', changeFrequency: 'monthly', priority: 0.7 },
+    { path: 'apps', changeFrequency: 'monthly', priority: 0.5 },
     { path: 'press-kit', changeFrequency: 'monthly', priority: 0.6 },
     { path: 'privacy', changeFrequency: 'monthly', priority: 0.5 },
     { path: 'terms', changeFrequency: 'monthly', priority: 0.5 },
+    { path: 'apps/terms', changeFrequency: 'monthly', priority: 0.4 },
     { path: 'cookies', changeFrequency: 'monthly', priority: 0.4 },
     { path: 'refund', changeFrequency: 'monthly', priority: 0.4 },
+    ...activeAppPolicySlugs.flatMap((appSlug) => [
+      {
+        path: `apps/${appSlug}/privacy`,
+        changeFrequency: 'monthly' as const,
+        priority: 0.4,
+      },
+      {
+        path: `apps/${appSlug}/support`,
+        changeFrequency: 'monthly' as const,
+        priority: 0.4,
+      },
+    ]),
     {
       path: 'acceptable-use',
       changeFrequency: 'monthly',
