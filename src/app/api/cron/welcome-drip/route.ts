@@ -66,14 +66,6 @@ async function renderQuizDayEmail(
 
 export const dynamic = 'force-dynamic';
 
-type QuizClaim = {
-  quizSlug: string;
-  archetype: string | null;
-  archetypeTagline: string | null;
-  risingSign: string | null;
-  sunSign: string | null;
-};
-
 function extractSunSign(birthChart: unknown): string | undefined {
   if (!Array.isArray(birthChart)) return undefined;
   for (const placement of birthChart) {
@@ -83,48 +75,6 @@ function extractSunSign(birthChart: unknown): string | undefined {
     if (body === 'Sun' && sign) return sign;
   }
   return undefined;
-}
-
-async function getLatestQuizClaim(userId: string): Promise<QuizClaim | null> {
-  try {
-    const res = await sql.query(
-      `SELECT metadata
-       FROM conversion_events
-       WHERE event_type = 'quiz_claim' AND user_id = $1
-       ORDER BY created_at DESC
-       LIMIT 1`,
-      [userId],
-    );
-    if (!res.rows.length) return null;
-    const meta = res.rows[0].metadata as Partial<QuizClaim> | null;
-    if (!meta?.quizSlug) return null;
-    return {
-      quizSlug: meta.quizSlug,
-      archetype: meta.archetype ?? null,
-      archetypeTagline: meta.archetypeTagline ?? null,
-      risingSign: meta.risingSign ?? null,
-      sunSign: meta.sunSign ?? null,
-    };
-  } catch {
-    return null;
-  }
-}
-
-async function renderQuizDayEmail(
-  day: 'day2' | 'day5',
-  claim: QuizClaim,
-  ctx: Omit<DripRenderContext, 'archetype' | 'archetypeTagline' | 'risingSign'>,
-): Promise<DripEmail | null> {
-  const config = getDripConfig(claim.quizSlug);
-  const renderer = config?.[day];
-  if (!renderer) return null;
-  return renderer({
-    ...ctx,
-    archetype: claim.archetype ?? undefined,
-    archetypeTagline: claim.archetypeTagline ?? undefined,
-    risingSign: claim.risingSign ?? undefined,
-    sunSign: ctx.sunSign ?? claim.sunSign ?? undefined,
-  });
 }
 
 export async function GET(request: NextRequest) {

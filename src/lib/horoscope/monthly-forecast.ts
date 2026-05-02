@@ -139,7 +139,14 @@ function getMonthDate(year: number, month: Month, day: number): Date {
 
 function toUtcNoon(date: Date): Date {
   return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 12, 0, 0),
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      12,
+      0,
+      0,
+    ),
   );
 }
 
@@ -202,7 +209,9 @@ function getSignTransitsForDate(sign: ZodiacSign, date: Date): SignTransit[] {
 
 function summariseInfluence(influence: InfluenceSummary): string {
   const retrogradeBit =
-    influence.retrogradeDays > 0 ? ` and spends part of the month retrograde` : '';
+    influence.retrogradeDays > 0
+      ? ` and spends part of the month retrograde`
+      : '';
   return `${influence.planet} ${ASPECT_VERBS[influence.aspect]} from ${influence.transitSign}, so ${PLANET_THEMES[influence.planet]} stay active for roughly ${influence.days} days${retrogradeBit}.`;
 }
 
@@ -305,7 +314,10 @@ function buildKeyEvents(
         if (!previous) continue;
 
         const planet = String(current.body);
-        const relation = getAspectForSign(SIGN_DISPLAY_NAMES[sign], current.sign);
+        const relation = getAspectForSign(
+          SIGN_DISPLAY_NAMES[sign],
+          current.sign,
+        );
         const changedSign = previous.sign !== current.sign;
         const changedRetrograde = previous.retrograde !== current.retrograde;
 
@@ -367,7 +379,10 @@ function pickInfluence(
   return influences.find((item) => preferred.includes(item.aspect)) ?? null;
 }
 
-function buildThemePill(label: string, influence: InfluenceSummary | null): string {
+function buildThemePill(
+  label: string,
+  influence: InfluenceSummary | null,
+): string {
   if (!influence) return label;
   return `${label}: ${influence.planet} ${influence.aspect}`;
 }
@@ -385,7 +400,9 @@ export function buildMonthlyForecast(
     influences[0] ??
     null;
   const challenging =
-    pickInfluence(influences, ['square', 'opposition']) ?? influences[1] ?? null;
+    pickInfluence(influences, ['square', 'opposition']) ??
+    influences[1] ??
+    null;
   const checkpointLines = buildCheckpointLines(sign, year, month);
   const keyEvents = buildKeyEvents(sign, year, month);
   const monthMidpoint = getMonthDate(
@@ -396,7 +413,8 @@ export function buildMonthlyForecast(
   const midpointMoon = getAccurateMoonPhase(monthMidpoint);
   const midpointSky = getAstrologicalChart(monthMidpoint, DEFAULT_OBSERVER);
   const midpointMoonSign =
-    midpointSky.find((body) => String(body.body) === 'Moon')?.sign ?? 'unknown sign';
+    midpointSky.find((body) => String(body.body) === 'Moon')?.sign ??
+    'unknown sign';
 
   const focus = supportive
     ? `${supportive.planet} is the cleanest helper for ${signName} this month. Because it ${ASPECT_VERBS[supportive.aspect]} from ${supportive.transitSign}, ${PLANET_THEMES[supportive.planet]} are where you get traction fastest.`
@@ -415,38 +433,52 @@ export function buildMonthlyForecast(
 
   const timing = checkpointLines.join(' ');
 
-  const love = supportive?.planet === 'Venus'
-    ? `Relationships are easier to move forward when you say the simple thing clearly and early. Venus is active for ${signName}, so attraction and values are not abstract topics this month; they want decisions.`
-    : challenging?.planet === 'Venus'
-      ? `Love is less about chasing intensity and more about noticing where expectations and reality diverge. If something feels off, slow the pace long enough to name it properly.`
-      : `In love, ${signName} does better with steadiness than drama this month. Small honest adjustments will matter more than one big declaration.`;
+  const love =
+    supportive?.planet === 'Venus'
+      ? `Relationships are easier to move forward when you say the simple thing clearly and early. Venus is active for ${signName}, so attraction and values are not abstract topics this month; they want decisions.`
+      : challenging?.planet === 'Venus'
+        ? `Love is less about chasing intensity and more about noticing where expectations and reality diverge. If something feels off, slow the pace long enough to name it properly.`
+        : `In love, ${signName} does better with steadiness than drama this month. Small honest adjustments will matter more than one big declaration.`;
 
-  const career = supportive?.planet === 'Saturn' || challenging?.planet === 'Saturn'
-    ? `Work and money respond to structure. Saturn is involved, which usually means the month gets better when you narrow scope, define the actual deliverable, and stop negotiating with vague deadlines.`
-    : supportive?.planet === 'Jupiter'
-      ? `Career momentum comes from visibility and useful expansion. Jupiter is helping, so pitches, publishing, and asking for a bigger container all make more sense than playing small.`
-      : `Career matters improve when you focus on one measurable priority at a time. The month is less about dramatic wins and more about compounding clean decisions.`;
+  const career =
+    supportive?.planet === 'Saturn' || challenging?.planet === 'Saturn'
+      ? `Work and money respond to structure. Saturn is involved, which usually means the month gets better when you narrow scope, define the actual deliverable, and stop negotiating with vague deadlines.`
+      : supportive?.planet === 'Jupiter'
+        ? `Career momentum comes from visibility and useful expansion. Jupiter is helping, so pitches, publishing, and asking for a bigger container all make more sense than playing small.`
+        : `Career matters improve when you focus on one measurable priority at a time. The month is less about dramatic wins and more about compounding clean decisions.`;
 
   const wellbeing =
     midpointMoon.name && midpointMoonSign
       ? `Your bandwidth is tied closely to the lunar rhythm. Around mid-month the Moon is ${midpointMoon.name} in ${midpointMoonSign}, so watch how your energy changes around that pivot instead of pushing through it blindly.`
       : `Your body will tell you the truth faster than your plans do this month. Build in more recovery than your ambitious brain thinks you need.`;
 
-  const summary = supportive && challenging
-    ? `${monthName} ${year} is not random for ${signName}: ${supportive.planet} helps, ${challenging.planet} tests, and the quality of the month depends on whether you work with the supportive current before the tense one hijacks your attention.`
-    : `${monthName} ${year} asks ${signName} to be selective, responsive, and properly timed rather than generic.`;
+  const summary =
+    supportive && challenging
+      ? `${monthName} ${year} is not random for ${signName}: ${supportive.planet} helps, ${challenging.planet} tests, and the quality of the month depends on whether you work with the supportive current before the tense one hijacks your attention.`
+      : `${monthName} ${year} asks ${signName} to be selective, responsive, and properly timed rather than generic.`;
 
-  const tldr = supportive && challenging
-    ? `${signName}: ${supportive.planet} gives you momentum, ${challenging.planet} adds pressure, and the win is using the opening before the friction turns into noise.`
-    : `${signName}: the month works better when you stay precise about what matters and let the sky set the tempo.`;
+  const tldr =
+    supportive && challenging
+      ? `${signName}: ${supportive.planet} gives you momentum, ${challenging.planet} adds pressure, and the win is using the opening before the friction turns into noise.`
+      : `${signName}: the month works better when you stay precise about what matters and let the sky set the tempo.`;
 
   const whatToExpect = supportive
     ? `${monthName} ${year} for ${signName} is shaped most clearly by ${supportive.planet} in ${supportive.transitSign}, which ${ASPECT_VERBS[supportive.aspect]} your sign and keeps ${PLANET_THEMES[supportive.planet]} on the front burner.`
     : `${monthName} ${year} for ${signName} is more about timing and selective focus than one dominant transit.`;
 
   const tableRows: string[][] = [
-    ['Strongest support', supportive ? summariseInfluence(supportive) : 'No single supportive transit dominates the month.'],
-    ['Main pressure point', challenging ? summariseInfluence(challenging) : 'No single tense transit dominates the month.'],
+    [
+      'Strongest support',
+      supportive
+        ? summariseInfluence(supportive)
+        : 'No single supportive transit dominates the month.',
+    ],
+    [
+      'Main pressure point',
+      challenging
+        ? summariseInfluence(challenging)
+        : 'No single tense transit dominates the month.',
+    ],
     [
       'Mid-month lunar tone',
       `${midpointMoon.name} in ${midpointMoonSign} — useful for checking the emotional pace of the month before you overcommit.`,
@@ -503,11 +535,14 @@ export function buildTransitWindowSnapshot(
     influences[0] ??
     null;
   const challenging =
-    pickInfluence(influences, ['square', 'opposition']) ?? influences[1] ?? null;
+    pickInfluence(influences, ['square', 'opposition']) ??
+    influences[1] ??
+    null;
   const moon = getAccurateMoonPhase(toUtcNoon(startDate));
   const moonSky = getAstrologicalChart(toUtcNoon(startDate), DEFAULT_OBSERVER);
   const moonSign =
-    moonSky.find((body) => String(body.body) === 'Moon')?.sign ?? 'unknown sign';
+    moonSky.find((body) => String(body.body) === 'Moon')?.sign ??
+    'unknown sign';
 
   return {
     summary:

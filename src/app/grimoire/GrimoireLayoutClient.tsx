@@ -44,7 +44,8 @@ const GRIMOIRE_RECOVERY_FEATURES = [
   {
     title: `${nextYear} Horoscopes`,
     href: `/grimoire/horoscopes/aries/${nextYear}`,
-    description: 'Year-ahead forecast path with real sign/year inventory behind it.',
+    description:
+      'Year-ahead forecast path with real sign/year inventory behind it.',
   },
   {
     title: 'Moon Phases',
@@ -59,7 +60,8 @@ const GRIMOIRE_RECOVERY_FEATURES = [
   {
     title: 'Retrogrades',
     href: '/grimoire/astronomy/retrogrades',
-    description: 'One of the clearest astrology intent clusters outside horoscopes.',
+    description:
+      'One of the clearest astrology intent clusters outside horoscopes.',
   },
 ];
 

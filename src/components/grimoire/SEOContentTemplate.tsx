@@ -331,19 +331,18 @@ export async function SEOContentTemplate({
     : undefined;
   const horoscopeEmailCaptureVariant =
     contextualHub === 'horoscopes'
-      ? assignVariantServer(
-          HOROSCOPE_EMAIL_CAPTURE_TEST,
-          stableSeoSeed,
-          ['cosmic_newsletter', 'daily_horoscope'] as const,
-        )
+      ? assignVariantServer(HOROSCOPE_EMAIL_CAPTURE_TEST, stableSeoSeed, [
+          'cosmic_newsletter',
+          'daily_horoscope',
+        ] as const)
       : undefined;
   const horoscopeEmailUpsellVariant =
     contextualHub === 'horoscopes'
-      ? assignVariantServer(
-          HOROSCOPE_EMAIL_UPSELL_TEST,
-          stableSeoSeed,
-          ['full_chart', 'exact_degree', 'exact_timing'] as const,
-        )
+      ? assignVariantServer(HOROSCOPE_EMAIL_UPSELL_TEST, stableSeoSeed, [
+          'full_chart',
+          'exact_degree',
+          'exact_timing',
+        ] as const)
       : undefined;
 
   return (

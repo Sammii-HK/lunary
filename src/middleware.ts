@@ -124,7 +124,11 @@ const shouldSkipTracking = (request: NextRequest, hostname: string) => {
 
   const pathname = request.nextUrl.pathname;
   if (pathname.startsWith('/admin')) return true;
-  if (PUBLIC_SEO_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
+  if (
+    PUBLIC_SEO_PREFIXES.some(
+      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+    )
+  ) {
     return true;
   }
 
