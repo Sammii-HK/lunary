@@ -1,5 +1,5 @@
 import { tarotCards } from '../../../utils/tarot/tarot-cards';
-import { tarotSpreads } from '@/constants/tarot';
+import { TAROT_SPREADS } from '@/constants/tarotSpreads';
 import { stringToKebabCase } from '../../../utils/string';
 
 const baseUrl = 'https://lunary.app';
@@ -36,18 +36,16 @@ export async function GET() {
     });
   });
 
-  const spreadUrls = Object.keys(tarotSpreads)
-    .map((spreadKey) => {
-      const slug = stringToKebabCase(spreadKey);
-      return `
+  const spreadUrls = TAROT_SPREADS.map((spread) => {
+    const slug = stringToKebabCase(spread.slug);
+    return `
     <url>
-      <loc>${baseUrl}/grimoire/tarot-spreads/${slug}</loc>
+      <loc>${baseUrl}/grimoire/tarot/spreads/${slug}</loc>
       <lastmod>${now}</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.7</priority>
     </url>`;
-    })
-    .join('');
+  }).join('');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

@@ -9,7 +9,6 @@ import Crystals from '../components/Crystals';
 import {
   crystalCategories,
   crystalDatabase,
-  searchCrystals,
 } from '@/constants/grimoire/crystals';
 import { stringToKebabCase } from 'utils/string';
 import { Heading } from '@/components/ui/Heading';
@@ -98,40 +97,11 @@ const tableOfContents = [
   { href: '#faq', label: '8. FAQ' },
 ];
 
-type CrystalSearchParams = {
-  q?: string;
-};
-
-export default async function CrystalsPage({
-  searchParams,
-}: {
-  searchParams?: Promise<CrystalSearchParams>;
-}) {
-  const resolvedSearchParams = await searchParams;
-  const query = (resolvedSearchParams?.q || '').trim();
-  const normalizedQuery = query.toLowerCase();
-  const querySlug = stringToKebabCase(query);
-  const categoryMatch = query
-    ? crystalCategories.find((category) => {
-        const normalizedCategory = category.toLowerCase();
-        return (
-          normalizedCategory === normalizedQuery ||
-          normalizedCategory.includes(normalizedQuery) ||
-          stringToKebabCase(category) === querySlug
-        );
-      })
-    : undefined;
-  const filteredCrystals = query
-    ? categoryMatch
-      ? crystalDatabase.filter((crystal) =>
-          crystal.categories?.includes(categoryMatch),
-        )
-      : searchCrystals(query)
-    : crystalDatabase;
-  const totalCount = filteredCrystals.length;
+export default function CrystalsPage() {
+  const totalCount = crystalDatabase.length;
   const categories = crystalCategories
     .map((categoryName) => {
-      const crystalsInCategory = filteredCrystals.filter((crystal) =>
+      const crystalsInCategory = crystalDatabase.filter((crystal) =>
         crystal.categories?.includes(categoryName),
       );
       return {
@@ -593,7 +563,8 @@ export default async function CrystalsPage({
         <Crystals
           categories={categories}
           totalCount={totalCount}
-          initialQuery={query}
+          allCrystals={crystalDatabase}
+          allCategoryNames={crystalCategories}
         />
       </section>
     </SEOContentTemplate>

@@ -122,56 +122,19 @@ function getGlobalCategoryCounts(allSpells: SpellForClient[]) {
   return counts;
 }
 
-export default async function SpellsIndexPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{
-    q?: string;
-    category?: string;
-    difficulty?: string;
-  }>;
-}) {
-  const sp = (await searchParams) ?? {};
-
-  const initialQuery = sp.q ?? '';
-  const initialCategory = sp.category ?? 'all';
-  const initialDifficulty = sp.difficulty ?? 'all';
+export default function SpellsIndexPage() {
   const allSpells: SpellForClient[] = spellDatabase.map(toClientSpell);
   const allCategories = getAllCategories();
 
-  // filter globally (this is the key change)
-  const filteredAll = allSpells.filter((s) => {
-    const matchesQ =
-      !sp.q ||
-      s.title.toLowerCase().includes(sp.q) ||
-      s.description.toLowerCase().includes(sp.q) ||
-      s.purpose.toLowerCase().includes(sp.q) ||
-      s.category.toLowerCase().includes(sp.q) ||
-      (s.subcategory ? s.subcategory.toLowerCase().includes(sp.q) : false);
-
-    const matchesCategory =
-      initialCategory === 'all' ? true : s.category === initialCategory;
-    const matchesDifficulty =
-      initialDifficulty === 'all' ? true : s.difficulty === initialDifficulty;
-
-    return matchesQ && matchesCategory && matchesDifficulty;
-  });
-
-  const totalCount = filteredAll.length;
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-  const currentPage = 1;
-
-  const spellsForPage = filteredAll.slice(0, PAGE_SIZE);
-
   // counts should match the filtered result set (so they feel correct during search)
-  const categoryCounts = getGlobalCategoryCounts(filteredAll);
+  const categoryCounts = getGlobalCategoryCounts(allSpells);
 
   const spellListSchema = createItemListSchema({
     name: 'Spell Collection',
     description:
       'Curated collection of spells for protection, love, prosperity, healing, moon magic, shadow work, and magical practice.',
     url: 'https://lunary.app/grimoire/spells',
-    items: spellsForPage.map((spell) => ({
+    items: allSpells.slice(0, PAGE_SIZE).map((spell) => ({
       name: spell.title,
       url: `https://lunary.app/grimoire/spells/${spell.id}`,
       description: spell.description,
@@ -249,17 +212,15 @@ export default async function SpellsIndexPage({
         ]}
       >
         <SpellsClient
-          spells={spellsForPage}
-          totalCount={totalCount}
-          currentPage={currentPage}
-          totalPages={totalPages}
+          spells={allSpells.slice(0, PAGE_SIZE)}
+          totalCount={allSpells.length}
+          currentPage={1}
+          totalPages={Math.max(1, Math.ceil(allSpells.length / PAGE_SIZE))}
           pageSize={PAGE_SIZE}
           basePath='/grimoire/spells'
+          allSpells={allSpells}
           categories={allCategories}
           categoryCounts={categoryCounts}
-          initialQuery={initialQuery}
-          initialCategory={initialCategory}
-          initialDifficulty={initialDifficulty}
         />
       </SEOContentTemplate>
     </>

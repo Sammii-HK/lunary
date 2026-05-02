@@ -909,7 +909,7 @@ export default function ProfilePage() {
                     Browse Shop
                   </Link>
                   <Link
-                    href='/blog?from=explore'
+                    href='/blog'
                     className='rounded-full border border-stroke-default/70 px-4 py-1.5 text-content-secondary transition hover:border-lunary-primary-600 hover:text-content-brand-accent'
                   >
                     Read the Blog
