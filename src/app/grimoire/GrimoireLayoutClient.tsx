@@ -3,7 +3,7 @@
 import { grimoire } from '@/constants/grimoire';
 import Link from 'next/link';
 import { slugToSection } from '@/utils/grimoire';
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import type { ComponentProps } from 'react';
 import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
