@@ -46,10 +46,63 @@ export default function AuthPage() {
 
     if (!authState.loading && authState.isAuthenticated) {
       redirectExecuted.current = true;
-      if (Capacitor.isNativePlatform()) {
-        router.replace('/app');
+
+      const goToApp = () => {
+        if (Capacitor.isNativePlatform()) {
+          router.replace('/app');
+        } else {
+          window.location.replace('/app');
+        }
+      };
+
+      // If the user came in from a quiz (cookie set on the quiz result page),
+      // claim their pending result before redirecting. Also stash the birth
+      // data (from the cookie) in sessionStorage so the full page can offer
+      // an opt-in "email this to me" button.
+      if (document.cookie.includes('lunary_pending_quiz=')) {
+        // Snapshot the birth data from the cookie BEFORE the claim endpoint
+        // clears it. Stored client-side only — never transmitted to analytics.
+        try {
+          const match = document.cookie.match(/lunary_pending_quiz=([^;]+)/);
+          if (match) {
+            const decoded = decodeURIComponent(match[1]);
+            sessionStorage.setItem('lunary_quiz_birth_data', decoded);
+          }
+        } catch {
+          // No-op — claim will still work without it.
+        }
+
+        fetch('/api/quiz/claim', {
+          method: 'POST',
+          credentials: 'include',
+        })
+          .then(async (res) => {
+            if (!res.ok) {
+              goToApp();
+              return;
+            }
+            const data = await res.json().catch(() => null);
+            if (data?.result?.quizSlug) {
+              try {
+                sessionStorage.setItem(
+                  'lunary_claimed_quiz_result',
+                  JSON.stringify(data.result),
+                );
+              } catch {
+                goToApp();
+                return;
+              }
+              const slug = data.result.quizSlug;
+              window.location.replace(
+                `/quiz/beyond-your-sun-sign/${encodeURIComponent(slug)}/full`,
+              );
+              return;
+            }
+            goToApp();
+          })
+          .catch(() => goToApp());
       } else {
-        window.location.replace('/app');
+        goToApp();
       }
     }
   }, [authState.isAuthenticated, authState.loading, router]);

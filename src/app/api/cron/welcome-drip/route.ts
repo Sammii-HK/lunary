@@ -9,8 +9,6 @@ import {
 import { getDripConfig } from '@/lib/quiz/drip/registry';
 import type { DripEmail, DripRenderContext } from '@/lib/quiz/drip/types';
 
-export const dynamic = 'force-dynamic';
-
 type QuizClaim = {
   quizSlug: string;
   archetype: string | null;
@@ -19,17 +17,11 @@ type QuizClaim = {
   sunSign: string | null;
 };
 
-function extractSunSign(birthChart: unknown): string | undefined {
-  if (!Array.isArray(birthChart)) return undefined;
-  for (const placement of birthChart) {
-    if (typeof placement !== 'object' || !placement) continue;
-    const body = (placement as Record<string, unknown>).body as string;
-    const sign = (placement as Record<string, unknown>).sign as string;
-    if (body === 'Sun' && sign) return sign;
-  }
-  return undefined;
-}
-
+/**
+ * Look up the most recent quiz_claim conversion event for a user.
+ * Used by the welcome drip cron to decide whether to send the generic
+ * welcome email or a quiz-personalised variant.
+ */
 async function getLatestQuizClaim(userId: string): Promise<QuizClaim | null> {
   try {
     const res = await sql.query(
@@ -70,6 +62,19 @@ async function renderQuizDayEmail(
     risingSign: claim.risingSign ?? undefined,
     sunSign: ctx.sunSign ?? claim.sunSign ?? undefined,
   });
+}
+
+export const dynamic = 'force-dynamic';
+
+function extractSunSign(birthChart: unknown): string | undefined {
+  if (!Array.isArray(birthChart)) return undefined;
+  for (const placement of birthChart) {
+    if (typeof placement !== 'object' || !placement) continue;
+    const body = (placement as Record<string, unknown>).body as string;
+    const sign = (placement as Record<string, unknown>).sign as string;
+    if (body === 'Sun' && sign) return sign;
+  }
+  return undefined;
 }
 
 export async function GET(request: NextRequest) {
@@ -113,6 +118,8 @@ export async function GET(request: NextRequest) {
       try {
         const sunSign = extractSunSign(user.birth_chart);
 
+        // If the user came from a quiz, route to the quiz's Day 2 template.
+        // Otherwise fall back to the generic welcome drip.
         const claim = await getLatestQuizClaim(user.user_id);
         const quizEmail = claim
           ? await renderQuizDayEmail('day2', claim, {

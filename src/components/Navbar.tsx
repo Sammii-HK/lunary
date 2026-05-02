@@ -34,11 +34,8 @@ export const Navbar = () => {
     '/birth-chart',
     '/guide',
     '/book-of-shadows',
-    '/grimoire',
     '/profile',
     '/cosmic-report-generator',
-    '/blog',
-    '/pricing',
     ...(isNativeIOS ? [] : ['/shop']),
     '/moon-circles',
     '/collections',
@@ -125,10 +122,8 @@ const isActive = (pathname: string | null, href: string) => {
   if (href === '/explore') {
     const explorePages = [
       '/explore',
-      '/grimoire',
       '/profile',
       '/book-of-shadows/journal',
-      '/blog',
       '/pricing',
       '/shop',
       '/moon-circles',

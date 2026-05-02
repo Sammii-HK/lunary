@@ -63,7 +63,7 @@ export default function HelpPage() {
               subscriptions, and account management.
             </p>
             <a
-              href='#faq'
+              href='/faq'
               className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
             >
               View FAQs →

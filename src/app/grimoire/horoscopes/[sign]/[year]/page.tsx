@@ -19,6 +19,7 @@ import {
   formatRulershipValue,
   getPrimaryRuler,
 } from '@/lib/astrology/rulerships';
+import { buildMonthlyForecast } from '@/lib/horoscope/monthly-forecast';
 
 // 30-day revalidation for yearly horoscopes
 export const revalidate = 2592000;
@@ -165,6 +166,9 @@ export default async function YearHoroscopePage({
   const currentMonthSlug = MONTHS[now.getMonth()];
 
   const meta = yearMeta(signName, sign, year);
+  const januaryForecast = buildMonthlyForecast(signKey, yearNum, 'january');
+  const juneForecast = buildMonthlyForecast(signKey, yearNum, 'june');
+  const octoberForecast = buildMonthlyForecast(signKey, yearNum, 'october');
   const canonicalValue =
     meta.alternates?.canonical ?? `/grimoire/horoscopes/${sign}/${year}`;
   const canonicalUrl = resolveCanonicalUrl(
@@ -280,29 +284,20 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
           <h2 className='text-lg font-medium text-content-primary mb-2'>
             Love
           </h2>
-          <p className='text-sm text-content-muted'>
-            {year} invites {signName} to build love through{' '}
-            {element.toLowerCase()} consistency. Lead with honesty and let
-            relationships deepen through shared routines.
-          </p>
+          <p className='text-sm text-content-muted'>{januaryForecast.love}</p>
         </div>
         <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
           <h2 className='text-lg font-medium text-content-primary mb-2'>
             Career
           </h2>
-          <p className='text-sm text-content-muted'>
-            Your ruler, {ruler}, highlights long-term momentum. Focus on steady
-            growth, visible wins, and a clearer public direction.
-          </p>
+          <p className='text-sm text-content-muted'>{juneForecast.career}</p>
         </div>
         <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
           <h2 className='text-lg font-medium text-content-primary mb-2'>
             Year
           </h2>
           <p className='text-sm text-content-muted'>
-            This year is about aligning your monthly choices with a single
-            through-line. Let {signName} set the tone for what you want to be
-            known for.
+            {octoberForecast.summary}
           </p>
         </div>
       </section>

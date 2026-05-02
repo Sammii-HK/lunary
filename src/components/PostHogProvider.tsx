@@ -50,6 +50,17 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
   const isAdminHost =
     typeof window !== 'undefined' &&
     window.location.hostname.startsWith('admin.');
+  const publicSeoPrefixes = [
+    '/grimoire',
+    '/blog',
+    '/comparison',
+    '/features',
+    '/pricing',
+    '/shop',
+  ];
+  const isPublicSeoSurface = publicSeoPrefixes.some(
+    (prefix) => pathname === prefix || pathname?.startsWith(`${prefix}/`),
+  );
   const authStatus = useAuthStatus();
 
   useEffect(() => {
@@ -83,6 +94,7 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
   const shouldInitPosthog =
     !isAdminPath &&
     !isAdminHost &&
+    !isPublicSeoSurface &&
     !Capacitor.isNativePlatform() &&
     (hasConsent === true || authStatus.isAuthenticated === true);
 

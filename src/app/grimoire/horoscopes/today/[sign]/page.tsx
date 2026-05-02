@@ -10,6 +10,7 @@ import {
 } from '@/constants/seo/monthly-horoscope';
 import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
 import { PlacementSelector } from '@/components/grimoire/PlacementSelector';
+import { buildTransitWindowSnapshot } from '@/lib/horoscope/monthly-forecast';
 
 export const revalidate = 86400;
 export const dynamicParams = false;
@@ -58,6 +59,10 @@ export async function generateMetadata({
   return {
     title: `${signData.name} Horoscope Today: Daily Astrology | Lunary`,
     description: `Today's horoscope for ${signData.name} (${signData.dates}). Daily astrology insights, cosmic guidance, and what the stars have in store for you.`,
+    robots: {
+      index: false,
+      follow: true,
+    },
     openGraph: {
       title: `${signData.name} Horoscope Today | Lunary`,
       description: `Daily horoscope for ${signData.name}.`,
@@ -115,6 +120,12 @@ export default async function DailyHoroscopePage({
   const currentYear = currentDate.getFullYear();
 
   const horoscope = await getHoroscope(sign);
+  const snapshot = buildTransitWindowSnapshot(
+    signKey,
+    currentDate,
+    currentDate,
+    'Today',
+  );
 
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -137,6 +148,7 @@ export default async function DailyHoroscopePage({
       ]}
       canonicalUrl={`https://lunary.app/grimoire/horoscopes/today/${sign}`}
       intro={`Today for ${signData.name} reflects the current Moon and the most active transits. Use this daily pulse as a quick check-in, then go deeper inside the app for your birth-chart timing.`}
+      tldr={snapshot.summary}
       heroContent={
         <div className='text-center space-y-2'>
           <div className='text-4xl md:text-5xl'>{signData.symbol}</div>
@@ -168,28 +180,19 @@ export default async function DailyHoroscopePage({
           <h2 className='text-lg font-medium text-content-primary mb-2'>
             Love
           </h2>
-          <p className='text-sm text-content-muted'>
-            Keep love simple today. {signData.name} benefits from honest signals
-            and gentle pacing.
-          </p>
+          <p className='text-sm text-content-muted'>{snapshot.focus}</p>
         </div>
         <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
           <h2 className='text-lg font-medium text-content-primary mb-2'>
             Career
           </h2>
-          <p className='text-sm text-content-muted'>
-            Focus on one visible task. Small wins build momentum for
-            {signData.name}.
-          </p>
+          <p className='text-sm text-content-muted'>{snapshot.challenge}</p>
         </div>
         <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
           <h2 className='text-lg font-medium text-content-primary mb-2'>
-            Year
+            Timing
           </h2>
-          <p className='text-sm text-content-muted'>
-            Today&apos;s choices set a tone. Stay aligned with what you want to
-            be known for this year.
-          </p>
+          <p className='text-sm text-content-muted'>{snapshot.moonTone}</p>
         </div>
       </section>
 

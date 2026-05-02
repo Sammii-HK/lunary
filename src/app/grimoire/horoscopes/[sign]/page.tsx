@@ -15,6 +15,7 @@ import {
   MONTHS,
 } from '@/constants/seo/monthly-horoscope';
 import { formatRulershipValue } from '@/lib/astrology/rulerships';
+import { buildTransitWindowSnapshot } from '@/lib/horoscope/monthly-forecast';
 
 // 30-day revalidation for sign overview pages
 export const revalidate = 2592000;
@@ -66,7 +67,13 @@ export async function generateMetadata({
   }
 
   const signName = SIGN_DISPLAY_NAMES[signKey];
-  return signMeta(signName, sign);
+  return {
+    ...signMeta(signName, sign),
+    robots: {
+      index: false,
+      follow: true,
+    },
+  };
 }
 
 export default async function SignHoroscopePage({
@@ -103,6 +110,12 @@ export default async function SignHoroscopePage({
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonthSlug = MONTHS[now.getMonth()];
+  const currentSnapshot = buildTransitWindowSnapshot(
+    signKey,
+    now,
+    now,
+    'Today',
+  );
 
   const meta = signMeta(signName, sign);
   const canonicalValue =
@@ -135,10 +148,11 @@ export default async function SignHoroscopePage({
       description={meta.description ?? ''}
       keywords={keywords}
       canonicalUrl={canonicalUrl}
+      tldr={currentSnapshot.summary}
       image={image}
       imageAlt={`${signName} Horoscopes | Lunary`}
-      intro={`Select a year to read ${signName} horoscopes written with real planetary context. Each month includes lunations, transits, and practical guidance tailored to ${element.toLowerCase()} energy.`}
-      meaning={`${signName} is a ${element} sign with rulership ${rulership}. These horoscopes help you channel your natural strengths into the rituals, relationships, and work that matter most.`}
+      intro={`Select a year to read ${signName} horoscopes written with real planetary context. Each month is grounded in actual sky movement, not generic mood-board filler.`}
+      meaning={`${signName} is a ${element} sign with rulership ${rulership}. ${currentSnapshot.summary} ${currentSnapshot.focus}`}
       heroContent={heroContent}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },

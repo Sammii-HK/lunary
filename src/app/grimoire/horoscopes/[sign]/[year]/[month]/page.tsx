@@ -7,15 +7,13 @@ import {
   SIGN_DISPLAY_NAMES,
   MONTH_DISPLAY_NAMES,
   SIGN_SYMBOLS,
-  SIGN_ELEMENTS,
-  SIGN_RULERS,
-  getMonthlyTheme,
   ZodiacSign,
   Month,
 } from '@/constants/seo/monthly-horoscope';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
 import { monthMeta } from '@/lib/horoscope-meta';
+import { buildMonthlyForecast } from '@/lib/horoscope/monthly-forecast';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 // 30-day revalidation for monthly horoscopes
@@ -110,9 +108,7 @@ export default async function MonthlyHoroscopePage({
   const signName = SIGN_DISPLAY_NAMES[sign];
   const monthName = MONTH_DISPLAY_NAMES[month];
   const symbol = SIGN_SYMBOLS[sign];
-  const element = SIGN_ELEMENTS[sign];
-  const ruler = SIGN_RULERS[sign];
-  const theme = getMonthlyTheme(sign, month, year);
+  const forecast = buildMonthlyForecast(sign, year, month);
 
   const monthIndex = MONTHS.indexOf(month);
   const prevMonth = monthIndex > 0 ? MONTHS[monthIndex - 1] : MONTHS[11];
@@ -178,81 +174,50 @@ export default async function MonthlyHoroscopePage({
       ]}
       whatIs={{
         question: `What can ${signName} expect in ${monthName} ${year}?`,
-        answer: `${monthName} ${year} for ${signName} focuses on ${theme.focus}. This month brings opportunities in ${theme.opportunities}, with challenges around ${theme.challenges}. Lucky days are ${theme.luckyDays.join(', ')}, and your power color is ${theme.powerColor}.`,
+        answer: forecast.whatToExpect,
       }}
-      tldr={`${signName}, ${monthName} brings ${theme.opportunities}. Focus on ${theme.focus}. Luck Days: ${theme.luckyDays.join(' & ')} (wear ${theme.powerColor}). Navigate: ${theme.challenges}.`}
-      faqs={[
-        {
-          question: `What can ${signName} expect in ${monthName} ${year}?`,
-          answer: `${signName} ${monthName} ${year} focuses on ${theme.focus}. Key highlights include lucky days on the ${theme.luckyDays.join(', ')}, power color ${theme.powerColor}, main opportunity in ${theme.opportunities}, and key challenge around ${theme.challenges}.`,
-        },
-        {
-          question: `What are the lucky days for ${signName} in ${monthName} ${year}?`,
-          answer: `The most auspicious days for ${signName} in ${monthName} ${year} are ${theme.luckyDays.join(', ')}. These dates carry especially favorable energy for ${signName}.`,
-        },
-        {
-          question: `What is ${signName}'s power color for ${monthName} ${year}?`,
-          answer: `${signName}'s power color for ${monthName} ${year} is ${theme.powerColor}. Incorporating this color can help align your energy with the month's cosmic themes.`,
-        },
-      ]}
+      tldr={forecast.tldr}
+      faqs={forecast.faqs}
       meaning={`
 ## ${signName} Overview for ${monthName} ${year}
 
-Dear ${signName}, ${monthName} ${year} brings important cosmic shifts that will impact your ${theme.focus}. As a ${element} sign guided by ${ruler}, you have natural strengths that will serve you well this month.
+${forecast.summary}
 
 ### Monthly Focus
 
-This month emphasizes ${theme.focus}. The planetary alignments suggest this is an ideal time to direct your energy toward these areas of life. ${signName}'s natural ${element.toLowerCase()} energy harmonizes beautifully with these themes.
+${forecast.focus}
 
 ### Challenges to Navigate
 
-Be mindful of ${theme.challenges}. This is a common growth edge for ${signName} during this period. Your ruling planet ${ruler} offers guidance—channel its energy consciously to overcome obstacles.
+${forecast.challenge}
 
 ### Opportunities Ahead
 
-The cosmos opens doors for ${theme.opportunities}. This is where ${signName} can truly shine this month. Trust your instincts and take aligned action when these opportunities present themselves.
+${forecast.opportunity}
 
-### Lucky Days
+### Timing Through the Month
 
-The ${theme.luckyDays.join(', ')} of ${monthName} carry especially favorable energy for you. Consider scheduling important meetings, launches, or personal initiatives on these dates.
-
-### Power Color
-
-Wearing or surrounding yourself with ${theme.powerColor} can help align your energy with the month's cosmic currents.
+${forecast.timing}
 
 ### Love
 
-In love, ${signName} benefits from focusing on ${theme.opportunities}. Keep communication soft and steady while navigating ${theme.challenges}. Small acts of care build momentum this month.
+${forecast.love}
 
 ### Career
 
-Career energy centers on ${theme.focus}. Prioritize what is most visible and measurable, and use your ${element.toLowerCase()} strengths to move toward ${theme.opportunities}.
+${forecast.career}
 
-### Year Ahead
+### Wellbeing
 
-${monthName} sets the tone for ${year}. Use this month to lay foundations that support your bigger goals, especially around ${theme.focus} and ${theme.opportunities}.
+${forecast.wellbeing}
       `}
-      emotionalThemes={[
-        `Focus: ${theme.focus}`,
-        `Challenge: ${theme.challenges}`,
-        `Opportunity: ${theme.opportunities}`,
-        `Power Color: ${theme.powerColor}`,
-      ]}
+      emotionalThemes={forecast.emotionalThemes}
       signsMostAffected={[signName]}
       tables={[
         {
           title: `${signName} ${monthName} ${year} At a Glance`,
           headers: ['Aspect', 'Details'],
-          rows: [
-            ['Sign', `${signName} ${symbol}`],
-            ['Element', element],
-            ['Ruling Planet', ruler],
-            ['Monthly Focus', theme.focus],
-            ['Key Challenge', theme.challenges],
-            ['Opportunity', theme.opportunities],
-            ['Lucky Days', theme.luckyDays.join(', ')],
-            ['Power Color', theme.powerColor],
-          ],
+          rows: [['Sign', `${signName} ${symbol}`], ...forecast.tableRows],
         },
       ]}
       components={null}
@@ -269,9 +234,29 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
       ctaHref='/horoscope'
       sources={[
         { name: 'Planetary transit calculations' },
+        { name: 'Astronomy Engine sky positions' },
+        { name: 'Moon phase calculations' },
         { name: 'Traditional astrological interpretations' },
       ]}
     >
+      {forecast.keyEvents.length > 0 && (
+        <section className='mt-8 rounded-xl border border-stroke-subtle/50 bg-surface-elevated/40 p-5'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
+            Real sky shifts this month
+          </h3>
+          <div className='space-y-3'>
+            {forecast.keyEvents.map((event) => (
+              <div key={`${event.dateLabel}-${event.title}`}>
+                <p className='text-sm font-medium text-content-primary'>
+                  {event.dateLabel} — {event.title}
+                </p>
+                <p className='text-sm text-content-muted'>{event.meaning}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <div className='mt-8 flex justify-between text-lg'>
         <div className='space-x-4'>
           {prevMonth && (

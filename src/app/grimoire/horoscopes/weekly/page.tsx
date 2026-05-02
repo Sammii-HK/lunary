@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   title: 'Weekly Horoscope: This Week for All 12 Signs | Lunary',
   description:
     'Read your weekly horoscope for all 12 zodiac signs. Extended astrology forecasts with insights for love, career, and personal growth this week.',
+  robots: {
+    index: false,
+    follow: true,
+  },
   keywords: [
     'weekly horoscope',
     'weekly astrology',

@@ -37,17 +37,22 @@ type HubVariant = Extract<
 >;
 
 const HUB_TIMELINE_LINKS: Array<{ id: string; label: string; href: string }> = [
-  {
-    id: 'daily',
-    label: 'Daily Horoscopes',
-    href: '/grimoire/horoscopes/today',
-  },
-  {
-    id: 'weekly',
-    label: 'Weekly Horoscopes',
-    href: '/grimoire/horoscopes/weekly',
-  },
   { id: 'monthly', label: 'Monthly Horoscopes', href: '/grimoire/horoscopes' },
+  {
+    id: 'yearly',
+    label: `${CURRENT_YEAR} Horoscopes`,
+    href: `/grimoire/horoscopes/aries/${CURRENT_YEAR}`,
+  },
+  {
+    id: 'next-year',
+    label: `${CURRENT_YEAR + 1} Horoscopes`,
+    href: `/grimoire/horoscopes/aries/${CURRENT_YEAR + 1}`,
+  },
+  {
+    id: 'events',
+    label: `${CURRENT_YEAR} Astrology Events`,
+    href: `/grimoire/events/${CURRENT_YEAR}`,
+  },
 ];
 
 const HUB_FALLBACK_LINKS: Array<{ id: string; label: string; href: string }> = [
@@ -58,8 +63,8 @@ const HUB_FALLBACK_LINKS: Array<{ id: string; label: string; href: string }> = [
 ];
 
 const HUB_EXCLUSIONS: Record<HubVariant, Set<string>> = {
-  'daily-hub': new Set(['daily']),
-  'weekly-hub': new Set(['weekly']),
+  'daily-hub': new Set(),
+  'weekly-hub': new Set(),
   'monthly-hub': new Set(['monthly']),
 };
 
@@ -114,20 +119,20 @@ function buildSignTimelineLinks({
 
   return [
     {
-      label: 'Daily Horoscope',
-      href: '/grimoire/horoscopes/today',
-    },
-    {
-      label: 'Weekly Horoscope',
-      href: '/grimoire/horoscopes/weekly',
-    },
-    {
       label: `${monthLabel} ${target.year} Horoscope`,
       href: `/grimoire/horoscopes/${sign}/${target.year}/${target.month}`,
     },
     {
-      label: `Explore all ${signName} horoscopes`,
-      href: `/grimoire/horoscopes/${sign}`,
+      label: `${signName} Horoscope ${target.year}`,
+      href: `/grimoire/horoscopes/${sign}/${target.year}`,
+    },
+    {
+      label: 'Monthly Horoscopes',
+      href: '/grimoire/horoscopes',
+    },
+    {
+      label: `${target.year} Astrology Events`,
+      href: `/grimoire/events/${target.year}`,
     },
   ];
 }

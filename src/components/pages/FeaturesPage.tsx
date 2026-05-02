@@ -59,6 +59,10 @@ export default function FeaturesPage() {
             From your daily morning briefing to deep pattern recognition,
             everything you need to understand yourself through the cosmos
           </p>
+          <p className='text-xs md:text-sm text-content-muted max-w-2xl mx-auto'>
+            Built on your full birth chart, with 24+ celestial bodies, 5 house
+            systems, and 3 zodiac systems.
+          </p>
         </div>
       </section>
 
@@ -126,7 +130,7 @@ export default function FeaturesPage() {
           <FeatureCard
             icon={<Map className='w-5 h-5 md:w-6 md:h-6' />}
             title='Birth Chart Calculator'
-            description='The most comprehensive free birth chart available - 24+ celestial bodies with educational interpretations'
+            description='A precision-first birth chart with 24+ celestial bodies, 5 house systems, 3 zodiac systems, and educational interpretations'
             features={[
               'All 10 planets + 8 asteroids (Ceres, Pallas, Juno, Vesta, Hygiea, Pholus, Psyche, Eros)',
               'Planetary dignities (Rulership, Exaltation, Detriment, Fall)',

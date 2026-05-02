@@ -27,15 +27,13 @@ import { ReadFullGuidePrompt } from '@/app/grimoire/guides/ReadFullGuidePrompt';
 import {
   assignVariantServer,
   getInlineCtaVariant,
-  getAnonId,
-} from '@/lib/ab-tests-server';
+} from '@/lib/ab-tests-static';
 import { GrimoireSearch } from '@/app/grimoire/GrimoireSearch';
 import { StickyBottomCTA } from './StickyBottomCTA';
 import { MidArticleEmailCapture } from './MidArticleEmailCapture';
 import { ChartPreviewTeaser } from './ChartPreviewTeaser';
 import { SignTransitTeaser } from './SignTransitTeaser';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
-import { GrimoireExitIntent } from './GrimoireExitIntent';
 // AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
 // import AudioNarrator from '@/components/audio/AudioNarrator';
 import { AutoLinkText } from '@/components/glossary/AutoLinkText';
@@ -229,9 +227,10 @@ export async function SEOContentTemplate({
   transitSign,
   transitSignDisplay,
 }: SEOContentTemplateProps) {
-  // Get A/B test variant for inline CTA (server-side)
+  // Keep SEO pages statically renderable: do not read request cookies here.
+  // Public grimoire pages should not depend on per-request anon ids, otherwise
+  // Next marks them dynamic/private and Google receives uncachable HTML.
   const inlineCtaVariant = await getInlineCtaVariant();
-  const anonId = await getAnonId();
 
   // Auto-generate breadcrumbs from URL if not provided
   const autoBreadcrumbs =
@@ -320,8 +319,9 @@ export async function SEOContentTemplate({
       ? 'bg-gradient-to-r from-layer-base to-lunary-highlight-900 border border-transparent text-content-primary'
       : 'bg-surface-elevated/40 border border-stroke-subtle text-content-primary';
   const shouldShowContextualNudge = !disableContextualNudge;
+  const stableSeoSeed = canonicalPathname;
   const contextualNudge = shouldShowContextualNudge
-    ? getContextualNudge(canonicalPathname, anonId)
+    ? getContextualNudge(canonicalPathname, stableSeoSeed)
     : null;
   const hasContextualNudge =
     Boolean(contextualNudge?.headline) && Boolean(contextualNudge?.buttonLabel);
@@ -331,19 +331,18 @@ export async function SEOContentTemplate({
     : undefined;
   const horoscopeEmailCaptureVariant =
     contextualHub === 'horoscopes'
-      ? assignVariantServer(
-          HOROSCOPE_EMAIL_CAPTURE_TEST,
-          anonId || canonicalPathname,
-          ['cosmic_newsletter', 'daily_horoscope'] as const,
-        )
+      ? assignVariantServer(HOROSCOPE_EMAIL_CAPTURE_TEST, stableSeoSeed, [
+          'cosmic_newsletter',
+          'daily_horoscope',
+        ] as const)
       : undefined;
   const horoscopeEmailUpsellVariant =
     contextualHub === 'horoscopes'
-      ? assignVariantServer(
-          HOROSCOPE_EMAIL_UPSELL_TEST,
-          anonId || canonicalPathname,
-          ['full_chart', 'exact_degree', 'exact_timing'] as const,
-        )
+      ? assignVariantServer(HOROSCOPE_EMAIL_UPSELL_TEST, stableSeoSeed, [
+          'full_chart',
+          'exact_degree',
+          'exact_timing',
+        ] as const)
       : undefined;
 
   return (
@@ -908,14 +907,11 @@ export async function SEOContentTemplate({
         <StickyBottomCTA
           nudge={getContextualNudge(
             canonicalPathname,
-            anonId,
+            stableSeoSeed,
             inlineVariantIndex,
           )}
         />
       )}
-
-      {/* Exit intent popup for anonymous grimoire readers */}
-      <GrimoireExitIntent hub={contextualHub} />
     </article>
   );
 }

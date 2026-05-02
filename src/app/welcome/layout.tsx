@@ -1,23 +1,22 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Personalized Astrology App [Based on YOUR Birth Chart] | Lunary',
+  title: 'Lunary | Personalized Astrology App for Your Birth Chart',
   description:
-    'Get daily horoscopes, tarot readings & cosmic insights calculated from YOUR exact birth time. Real astronomical data, not generic zodiac signs. Join 10,000+ cosmic explorers. Try a free 7-day trial.',
+    'Learn to read your own birth chart through daily practice. Track patterns, interpret transits, and understand relationships with full synastry analysis. 2,000+ free astrology articles.',
   keywords: [
-    'AI astrology',
     'personalized astrology',
-    'AI astral guide',
-    'personalized horoscope',
     'birth chart astrology',
+    'learn astrology',
+    'synastry analysis',
+    'daily horoscopes',
     'tarot readings',
-    'lunar cycles',
     'planetary transits',
-    'cosmic guidance',
-    'astrological insights',
-    'personalized tarot',
     'astrology app',
+    'astrological insights',
     'natal chart analysis',
+    'real astronomical data',
+    'free astrology articles',
   ],
   authors: [{ name: 'Lunary' }],
   creator: 'Lunary',
@@ -26,9 +25,9 @@ export const metadata: Metadata = {
     canonical: 'https://lunary.app/welcome',
   },
   openGraph: {
-    title: 'Personalized Astrology App [Based on YOUR Birth Chart] | Lunary',
+    title: 'Lunary | Personalized Astrology App for Your Birth Chart',
     description:
-      'Daily horoscopes, tarot readings & cosmic insights calculated from YOUR exact birth time. Real astronomical data, not generic zodiac signs. Try a free 7-day trial.',
+      'Learn to read your own birth chart through daily practice. Track patterns, interpret transits, and understand relationships with full synastry analysis. 2,000+ free astrology articles.',
     url: 'https://lunary.app/welcome',
     siteName: 'Lunary',
     images: [
@@ -36,7 +35,7 @@ export const metadata: Metadata = {
         url: '/api/og/cosmic',
         width: 1200,
         height: 630,
-        alt: 'Lunary - Your AI-Powered Astral Guide',
+        alt: 'Lunary - Personalized Astrology App for Your Birth Chart',
       },
     ],
     locale: 'en_US',
@@ -44,9 +43,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Personalized Astrology App [Based on YOUR Birth Chart] | Lunary',
+    title: 'Lunary | Personalized Astrology App for Your Birth Chart',
     description:
-      'Daily horoscopes, tarot readings & cosmic insights calculated from YOUR exact birth time. Real astronomical data. Try a free 7-day trial.',
+      'Learn to read your own birth chart through daily practice. Track patterns, interpret transits, and understand relationships with full synastry analysis.',
     images: ['/api/og/cosmic'],
   },
   robots: {

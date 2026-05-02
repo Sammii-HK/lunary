@@ -110,8 +110,8 @@ export default async function TransitOfTheDayPage() {
               type: 'topic',
             },
             {
-              name: "Today's Horoscopes",
-              href: '/grimoire/horoscopes/today',
+              name: 'Monthly Horoscopes',
+              href: '/grimoire/horoscopes',
               type: 'topic',
             },
             {

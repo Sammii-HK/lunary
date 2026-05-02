@@ -37,6 +37,17 @@ export function AppChrome() {
   const [isNativeApp, setIsNativeApp] = useState(false);
   const navOverride = searchParams?.get('nav');
   const isNativeIOS = useIsNativeIOS();
+  const publicSeoPrefixes = [
+    '/grimoire',
+    '/blog',
+    '/comparison',
+    '/features',
+    '/pricing',
+    '/shop',
+  ];
+  const isPublicSeoSurface = publicSeoPrefixes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
 
   useEffect(() => {
     setHasMounted(true);
@@ -124,12 +135,9 @@ export function AppChrome() {
       : false;
 
     // Check if current page is a contextual page (blog/pricing/shop)
-    const isContextualPageCheck = [
-      '/blog',
-      '/pricing',
-      '/shop',
-      '/grimoire',
-    ].some((page) => pathname === page || pathname.startsWith(`${page}/`));
+    const isContextualPageCheck = ['/pricing', '/shop'].some(
+      (page) => pathname === page || pathname.startsWith(`${page}/`),
+    );
 
     if (isContextualPageCheck) {
       // For contextual pages, be strict: ONLY show app nav with explicit signal
@@ -160,15 +168,12 @@ export function AppChrome() {
     '/horoscope',
     '/app/birth-chart',
     '/book-of-shadows',
-    '/grimoire',
     '/profile',
     '/cosmic-state',
     '/cosmic-report-generator',
     '/guide',
-    '/blog',
     '/explore', // Explore is always app-only
     '/community',
-    '/pricing', // Pricing always shows app nav (in-app paywall on iOS, Stripe on web)
     '/referrals',
   ];
 
@@ -178,6 +183,8 @@ export function AppChrome() {
     '/welcome',
     '/help',
     '/auth',
+    '/blog',
+    '/grimoire',
     '/comparison',
     '/product',
     '/resources',
@@ -195,6 +202,7 @@ export function AppChrome() {
     '/trademark',
     '/press-kit',
     '/developers',
+    '/pricing',
     '/features',
     '/faq',
     '/about',
@@ -218,9 +226,8 @@ export function AppChrome() {
     '/cosmic-state',
   ];
 
-  // Pages that can show app nav if coming from app: blog, explore pages
-  // Note: /pricing is now in appPages so always shows app nav
-  const contextualPages = ['/blog', '/grimoire', ...explorePages];
+  // Pages that can show app nav if coming from app
+  const contextualPages = ['/pricing', ...explorePages];
   const isContextualPage = contextualPages.some(
     (page) => pathname === page || pathname?.startsWith(`${page}/`),
   );
@@ -236,6 +243,7 @@ export function AppChrome() {
   // Native app rating prompt (iOS + Android) — replaces testimonial modal
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
+    if (isPublicSeoSurface) return;
     if (!authState.isAuthenticated || isAdminSurface) return;
     if (ratingCheckedRef.current) return;
     if (sessionStorage.getItem('rating-prompted')) return;
@@ -252,12 +260,13 @@ export function AppChrome() {
         }
       })
       .catch(() => {});
-  }, [authState.isAuthenticated, isAdminSurface]);
+  }, [authState.isAuthenticated, isAdminSurface, isPublicSeoSurface]);
 
   // Fetch testimonial prompt status from server
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (Capacitor.isNativePlatform()) return;
+    if (isPublicSeoSurface) return;
     if (!authState.isAuthenticated || isAdminSurface) return;
     if (testimonialCheckedRef.current) return;
 
@@ -281,7 +290,7 @@ export function AppChrome() {
     };
 
     checkTestimonialPrompt();
-  }, [authState.isAuthenticated, isAdminSurface]);
+  }, [authState.isAuthenticated, isAdminSurface, isPublicSeoSurface]);
 
   const handleTestimonialModalClose = async () => {
     setTestimonialModalOpen(false);
@@ -414,7 +423,7 @@ export function AppChrome() {
           allowUnauthenticatedInstall={isAdminSurface}
           silent={isAdminSurface}
         />
-        {!isAdminSurface && !isNativeApp && (
+        {!isAdminSurface && !isNativeApp && !isPublicSeoSurface && (
           <>
             <NotificationManager />
             <ExitIntent />
@@ -422,7 +431,7 @@ export function AppChrome() {
           </>
         )}
       </ErrorBoundaryWrapper>
-      {!isAdminSurface && (
+      {!isAdminSurface && !isPublicSeoSurface && (
         <Modal
           isOpen={testimonialModalOpen}
           onClose={handleTestimonialModalClose}

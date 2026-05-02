@@ -119,10 +119,10 @@ function getSignConnections(signKey: string): CosmicConnectionSection[] {
 
   const tools: CosmicConnectionLink[] = [
     {
-      label: `${signName} Daily Horoscope`,
-      href: `/grimoire/horoscopes/${signLower}`,
+      label: `${signName} ${new Date().getFullYear()} Horoscope`,
+      href: `/grimoire/horoscopes/${signLower}/${new Date().getFullYear()}`,
     },
-    { label: 'Weekly Horoscope', href: '/grimoire/horoscopes/weekly' },
+    { label: 'Monthly Horoscopes', href: '/grimoire/horoscopes' },
   ];
 
   if (signData?.crystals?.[0]) {
