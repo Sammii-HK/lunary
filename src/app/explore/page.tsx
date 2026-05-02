@@ -169,14 +169,14 @@ const learnConnectItems: ExploreItem[] = [
     icon: BookMarked,
   },
   {
-    href: '/shop?from=explore',
+    href: '/shop',
     label: 'Shop',
     description: 'Practice guides, crystal reference, and more',
     icon: Store,
     hideOnNativeIOS: true,
   },
   {
-    href: '/blog?from=explore',
+    href: '/blog',
     label: 'Blog',
     description: 'Latest cosmic insights',
     icon: BookOpen,
@@ -192,7 +192,7 @@ const accountItems: ExploreItem[] = [
     icon: User,
   },
   {
-    href: '/pricing?from=explore',
+    href: '/pricing',
     label: 'Pricing',
     description: 'Subscription plans',
     icon: Tag,

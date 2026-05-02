@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { grimoire } from '@/constants/grimoire';
 import { slugToSection, isValidGrimoireSection } from '@/utils/grimoire';
-import GrimoireLayout, { GrimoireSearchParams } from '../GrimoireLayout';
+import GrimoireLayout from '../GrimoireLayout';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
 const sectionDescriptions: Record<string, string> = {
@@ -282,13 +282,10 @@ export async function generateMetadata({
 
 export default async function GrimoireSectionPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ section: string }>;
-  searchParams?: Promise<GrimoireSearchParams>;
 }) {
   const { section } = await params;
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   if (!isValidGrimoireSection(section)) {
     notFound();
   }
@@ -304,7 +301,6 @@ export default async function GrimoireSectionPage({
       <GrimoireBreadcrumbs items={breadcrumbItems} />
       <GrimoireLayout
         currentSectionSlug={section}
-        searchParams={resolvedSearchParams}
         pathname={`/grimoire/${section}`}
       />
     </>

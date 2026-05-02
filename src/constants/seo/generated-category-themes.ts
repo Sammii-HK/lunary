@@ -2478,37 +2478,37 @@ export const generatedThemeBuckets: Record<string, ThemeBucket> = {
       'tarot-spreads-cross-spread': {
         key: 'tarot-spreads-cross-spread',
         name: 'Tarot Spreads Cross Spread',
-        slugs: ['tarot-spreads/cross-spread'],
+        slugs: ['tarot/spreads/cross-spread'],
       },
       'tarot-spreads-five-card': {
         key: 'tarot-spreads-five-card',
         name: 'Tarot Spreads Five Card',
-        slugs: ['tarot-spreads/five-card'],
+        slugs: ['tarot/spreads/five-card'],
       },
       'tarot-spreads-past-present-future': {
         key: 'tarot-spreads-past-present-future',
         name: 'Tarot Spreads Past Present Future',
-        slugs: ['tarot-spreads/past-present-future'],
+        slugs: ['tarot/spreads/past-present-future'],
       },
       'tarot-spreads-seven-card': {
         key: 'tarot-spreads-seven-card',
         name: 'Tarot Spreads Seven Card',
-        slugs: ['tarot-spreads/seven-card'],
+        slugs: ['tarot/spreads/seven-card'],
       },
       'tarot-spreads-ten-card': {
         key: 'tarot-spreads-ten-card',
         name: 'Tarot Spreads Ten Card',
-        slugs: ['tarot-spreads/ten-card'],
+        slugs: ['tarot/spreads/ten-card'],
       },
       'tarot-spreads-three-card': {
         key: 'tarot-spreads-three-card',
         name: 'Tarot Spreads Three Card',
-        slugs: ['tarot-spreads/three-card'],
+        slugs: ['tarot/spreads/three-card'],
       },
       'tarot-spreads-year-ahead': {
         key: 'tarot-spreads-year-ahead',
         name: 'Tarot Spreads Year Ahead',
-        slugs: ['tarot-spreads/year-ahead'],
+        slugs: ['tarot/spreads/year-ahead'],
       },
     },
   },
@@ -37973,7 +37973,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 0,
         title: 'Cross Spread',
-        grimoireSlug: 'tarot-spreads/cross-spread',
+        grimoireSlug: 'tarot/spreads/cross-spread',
         focus: 'Meaning, themes, and how to work with Cross Spread.',
         shortFormHook:
           "In Lunary's Grimoire, Cross Spread is explained through meaning, themes, and practical reflection.",
@@ -37985,7 +37985,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 1,
         title: 'Five Card',
-        grimoireSlug: 'tarot-spreads/five-card',
+        grimoireSlug: 'tarot/spreads/five-card',
         focus: 'Meaning, themes, and how to work with Five Card.',
         shortFormHook:
           "In Lunary's Grimoire, Five Card is explained through meaning, themes, and practical reflection.",
@@ -37997,7 +37997,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 2,
         title: 'Past Present Future',
-        grimoireSlug: 'tarot-spreads/past-present-future',
+        grimoireSlug: 'tarot/spreads/past-present-future',
         focus: 'Meaning, themes, and how to work with Past Present Future.',
         shortFormHook:
           "In Lunary's Grimoire, Past Present Future is explained through meaning, themes, and practical reflection.",
@@ -38009,7 +38009,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 3,
         title: 'Seven Card',
-        grimoireSlug: 'tarot-spreads/seven-card',
+        grimoireSlug: 'tarot/spreads/seven-card',
         focus: 'Meaning, themes, and how to work with Seven Card.',
         shortFormHook:
           "In Lunary's Grimoire, Seven Card is explained through meaning, themes, and practical reflection.",
@@ -38021,7 +38021,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 4,
         title: 'Ten Card',
-        grimoireSlug: 'tarot-spreads/ten-card',
+        grimoireSlug: 'tarot/spreads/ten-card',
         focus: 'Meaning, themes, and how to work with Ten Card.',
         shortFormHook:
           "In Lunary's Grimoire, Ten Card is explained through meaning, themes, and practical reflection.",
@@ -38033,7 +38033,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 5,
         title: 'Three Card',
-        grimoireSlug: 'tarot-spreads/three-card',
+        grimoireSlug: 'tarot/spreads/three-card',
         focus: 'Meaning, themes, and how to work with Three Card.',
         shortFormHook:
           "In Lunary's Grimoire, Three Card is explained through meaning, themes, and practical reflection.",
@@ -38045,7 +38045,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 6,
         title: 'Year Ahead',
-        grimoireSlug: 'tarot-spreads/year-ahead',
+        grimoireSlug: 'tarot/spreads/year-ahead',
         focus: 'Meaning, themes, and how to work with Year Ahead.',
         shortFormHook:
           "In Lunary's Grimoire, Year Ahead is explained through meaning, themes, and practical reflection.",
@@ -38070,7 +38070,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 0,
         title: 'Five Card',
-        grimoireSlug: 'tarot-spreads/five-card',
+        grimoireSlug: 'tarot/spreads/five-card',
         focus: 'Meaning, themes, and how to work with Five Card.',
         shortFormHook:
           "In Lunary's Grimoire, Five Card is explained through meaning, themes, and practical reflection.",
@@ -38082,7 +38082,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 1,
         title: 'Cross Spread',
-        grimoireSlug: 'tarot-spreads/cross-spread',
+        grimoireSlug: 'tarot/spreads/cross-spread',
         focus: 'Meaning, themes, and how to work with Cross Spread.',
         shortFormHook:
           "In Lunary's Grimoire, Cross Spread is explained through meaning, themes, and practical reflection.",
@@ -38094,7 +38094,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 2,
         title: 'Past Present Future',
-        grimoireSlug: 'tarot-spreads/past-present-future',
+        grimoireSlug: 'tarot/spreads/past-present-future',
         focus: 'Meaning, themes, and how to work with Past Present Future.',
         shortFormHook:
           "In Lunary's Grimoire, Past Present Future is explained through meaning, themes, and practical reflection.",
@@ -38106,7 +38106,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 3,
         title: 'Seven Card',
-        grimoireSlug: 'tarot-spreads/seven-card',
+        grimoireSlug: 'tarot/spreads/seven-card',
         focus: 'Meaning, themes, and how to work with Seven Card.',
         shortFormHook:
           "In Lunary's Grimoire, Seven Card is explained through meaning, themes, and practical reflection.",
@@ -38118,7 +38118,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 4,
         title: 'Ten Card',
-        grimoireSlug: 'tarot-spreads/ten-card',
+        grimoireSlug: 'tarot/spreads/ten-card',
         focus: 'Meaning, themes, and how to work with Ten Card.',
         shortFormHook:
           "In Lunary's Grimoire, Ten Card is explained through meaning, themes, and practical reflection.",
@@ -38130,7 +38130,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 5,
         title: 'Three Card',
-        grimoireSlug: 'tarot-spreads/three-card',
+        grimoireSlug: 'tarot/spreads/three-card',
         focus: 'Meaning, themes, and how to work with Three Card.',
         shortFormHook:
           "In Lunary's Grimoire, Three Card is explained through meaning, themes, and practical reflection.",
@@ -38142,7 +38142,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 6,
         title: 'Year Ahead',
-        grimoireSlug: 'tarot-spreads/year-ahead',
+        grimoireSlug: 'tarot/spreads/year-ahead',
         focus: 'Meaning, themes, and how to work with Year Ahead.',
         shortFormHook:
           "In Lunary's Grimoire, Year Ahead is explained through meaning, themes, and practical reflection.",
@@ -38167,7 +38167,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 0,
         title: 'Past Present Future',
-        grimoireSlug: 'tarot-spreads/past-present-future',
+        grimoireSlug: 'tarot/spreads/past-present-future',
         focus: 'Meaning, themes, and how to work with Past Present Future.',
         shortFormHook:
           "In Lunary's Grimoire, Past Present Future is explained through meaning, themes, and practical reflection.",
@@ -38179,7 +38179,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 1,
         title: 'Cross Spread',
-        grimoireSlug: 'tarot-spreads/cross-spread',
+        grimoireSlug: 'tarot/spreads/cross-spread',
         focus: 'Meaning, themes, and how to work with Cross Spread.',
         shortFormHook:
           "In Lunary's Grimoire, Cross Spread is explained through meaning, themes, and practical reflection.",
@@ -38191,7 +38191,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 2,
         title: 'Five Card',
-        grimoireSlug: 'tarot-spreads/five-card',
+        grimoireSlug: 'tarot/spreads/five-card',
         focus: 'Meaning, themes, and how to work with Five Card.',
         shortFormHook:
           "In Lunary's Grimoire, Five Card is explained through meaning, themes, and practical reflection.",
@@ -38203,7 +38203,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 3,
         title: 'Seven Card',
-        grimoireSlug: 'tarot-spreads/seven-card',
+        grimoireSlug: 'tarot/spreads/seven-card',
         focus: 'Meaning, themes, and how to work with Seven Card.',
         shortFormHook:
           "In Lunary's Grimoire, Seven Card is explained through meaning, themes, and practical reflection.",
@@ -38215,7 +38215,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 4,
         title: 'Ten Card',
-        grimoireSlug: 'tarot-spreads/ten-card',
+        grimoireSlug: 'tarot/spreads/ten-card',
         focus: 'Meaning, themes, and how to work with Ten Card.',
         shortFormHook:
           "In Lunary's Grimoire, Ten Card is explained through meaning, themes, and practical reflection.",
@@ -38227,7 +38227,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 5,
         title: 'Three Card',
-        grimoireSlug: 'tarot-spreads/three-card',
+        grimoireSlug: 'tarot/spreads/three-card',
         focus: 'Meaning, themes, and how to work with Three Card.',
         shortFormHook:
           "In Lunary's Grimoire, Three Card is explained through meaning, themes, and practical reflection.",
@@ -38239,7 +38239,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 6,
         title: 'Year Ahead',
-        grimoireSlug: 'tarot-spreads/year-ahead',
+        grimoireSlug: 'tarot/spreads/year-ahead',
         focus: 'Meaning, themes, and how to work with Year Ahead.',
         shortFormHook:
           "In Lunary's Grimoire, Year Ahead is explained through meaning, themes, and practical reflection.",
@@ -38264,7 +38264,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 0,
         title: 'Seven Card',
-        grimoireSlug: 'tarot-spreads/seven-card',
+        grimoireSlug: 'tarot/spreads/seven-card',
         focus: 'Meaning, themes, and how to work with Seven Card.',
         shortFormHook:
           "In Lunary's Grimoire, Seven Card is explained through meaning, themes, and practical reflection.",
@@ -38276,7 +38276,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 1,
         title: 'Cross Spread',
-        grimoireSlug: 'tarot-spreads/cross-spread',
+        grimoireSlug: 'tarot/spreads/cross-spread',
         focus: 'Meaning, themes, and how to work with Cross Spread.',
         shortFormHook:
           "In Lunary's Grimoire, Cross Spread is explained through meaning, themes, and practical reflection.",
@@ -38288,7 +38288,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 2,
         title: 'Five Card',
-        grimoireSlug: 'tarot-spreads/five-card',
+        grimoireSlug: 'tarot/spreads/five-card',
         focus: 'Meaning, themes, and how to work with Five Card.',
         shortFormHook:
           "In Lunary's Grimoire, Five Card is explained through meaning, themes, and practical reflection.",
@@ -38300,7 +38300,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 3,
         title: 'Past Present Future',
-        grimoireSlug: 'tarot-spreads/past-present-future',
+        grimoireSlug: 'tarot/spreads/past-present-future',
         focus: 'Meaning, themes, and how to work with Past Present Future.',
         shortFormHook:
           "In Lunary's Grimoire, Past Present Future is explained through meaning, themes, and practical reflection.",
@@ -38312,7 +38312,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 4,
         title: 'Ten Card',
-        grimoireSlug: 'tarot-spreads/ten-card',
+        grimoireSlug: 'tarot/spreads/ten-card',
         focus: 'Meaning, themes, and how to work with Ten Card.',
         shortFormHook:
           "In Lunary's Grimoire, Ten Card is explained through meaning, themes, and practical reflection.",
@@ -38324,7 +38324,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 5,
         title: 'Three Card',
-        grimoireSlug: 'tarot-spreads/three-card',
+        grimoireSlug: 'tarot/spreads/three-card',
         focus: 'Meaning, themes, and how to work with Three Card.',
         shortFormHook:
           "In Lunary's Grimoire, Three Card is explained through meaning, themes, and practical reflection.",
@@ -38336,7 +38336,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 6,
         title: 'Year Ahead',
-        grimoireSlug: 'tarot-spreads/year-ahead',
+        grimoireSlug: 'tarot/spreads/year-ahead',
         focus: 'Meaning, themes, and how to work with Year Ahead.',
         shortFormHook:
           "In Lunary's Grimoire, Year Ahead is explained through meaning, themes, and practical reflection.",
@@ -38361,7 +38361,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 0,
         title: 'Ten Card',
-        grimoireSlug: 'tarot-spreads/ten-card',
+        grimoireSlug: 'tarot/spreads/ten-card',
         focus: 'Meaning, themes, and how to work with Ten Card.',
         shortFormHook:
           "In Lunary's Grimoire, Ten Card is explained through meaning, themes, and practical reflection.",
@@ -38373,7 +38373,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 1,
         title: 'Cross Spread',
-        grimoireSlug: 'tarot-spreads/cross-spread',
+        grimoireSlug: 'tarot/spreads/cross-spread',
         focus: 'Meaning, themes, and how to work with Cross Spread.',
         shortFormHook:
           "In Lunary's Grimoire, Cross Spread is explained through meaning, themes, and practical reflection.",
@@ -38385,7 +38385,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 2,
         title: 'Five Card',
-        grimoireSlug: 'tarot-spreads/five-card',
+        grimoireSlug: 'tarot/spreads/five-card',
         focus: 'Meaning, themes, and how to work with Five Card.',
         shortFormHook:
           "In Lunary's Grimoire, Five Card is explained through meaning, themes, and practical reflection.",
@@ -38397,7 +38397,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 3,
         title: 'Past Present Future',
-        grimoireSlug: 'tarot-spreads/past-present-future',
+        grimoireSlug: 'tarot/spreads/past-present-future',
         focus: 'Meaning, themes, and how to work with Past Present Future.',
         shortFormHook:
           "In Lunary's Grimoire, Past Present Future is explained through meaning, themes, and practical reflection.",
@@ -38409,7 +38409,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 4,
         title: 'Seven Card',
-        grimoireSlug: 'tarot-spreads/seven-card',
+        grimoireSlug: 'tarot/spreads/seven-card',
         focus: 'Meaning, themes, and how to work with Seven Card.',
         shortFormHook:
           "In Lunary's Grimoire, Seven Card is explained through meaning, themes, and practical reflection.",
@@ -38421,7 +38421,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 5,
         title: 'Three Card',
-        grimoireSlug: 'tarot-spreads/three-card',
+        grimoireSlug: 'tarot/spreads/three-card',
         focus: 'Meaning, themes, and how to work with Three Card.',
         shortFormHook:
           "In Lunary's Grimoire, Three Card is explained through meaning, themes, and practical reflection.",
@@ -38433,7 +38433,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 6,
         title: 'Year Ahead',
-        grimoireSlug: 'tarot-spreads/year-ahead',
+        grimoireSlug: 'tarot/spreads/year-ahead',
         focus: 'Meaning, themes, and how to work with Year Ahead.',
         shortFormHook:
           "In Lunary's Grimoire, Year Ahead is explained through meaning, themes, and practical reflection.",
@@ -38458,7 +38458,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 0,
         title: 'Three Card',
-        grimoireSlug: 'tarot-spreads/three-card',
+        grimoireSlug: 'tarot/spreads/three-card',
         focus: 'Meaning, themes, and how to work with Three Card.',
         shortFormHook:
           "In Lunary's Grimoire, Three Card is explained through meaning, themes, and practical reflection.",
@@ -38470,7 +38470,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 1,
         title: 'Cross Spread',
-        grimoireSlug: 'tarot-spreads/cross-spread',
+        grimoireSlug: 'tarot/spreads/cross-spread',
         focus: 'Meaning, themes, and how to work with Cross Spread.',
         shortFormHook:
           "In Lunary's Grimoire, Cross Spread is explained through meaning, themes, and practical reflection.",
@@ -38482,7 +38482,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 2,
         title: 'Five Card',
-        grimoireSlug: 'tarot-spreads/five-card',
+        grimoireSlug: 'tarot/spreads/five-card',
         focus: 'Meaning, themes, and how to work with Five Card.',
         shortFormHook:
           "In Lunary's Grimoire, Five Card is explained through meaning, themes, and practical reflection.",
@@ -38494,7 +38494,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 3,
         title: 'Past Present Future',
-        grimoireSlug: 'tarot-spreads/past-present-future',
+        grimoireSlug: 'tarot/spreads/past-present-future',
         focus: 'Meaning, themes, and how to work with Past Present Future.',
         shortFormHook:
           "In Lunary's Grimoire, Past Present Future is explained through meaning, themes, and practical reflection.",
@@ -38506,7 +38506,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 4,
         title: 'Seven Card',
-        grimoireSlug: 'tarot-spreads/seven-card',
+        grimoireSlug: 'tarot/spreads/seven-card',
         focus: 'Meaning, themes, and how to work with Seven Card.',
         shortFormHook:
           "In Lunary's Grimoire, Seven Card is explained through meaning, themes, and practical reflection.",
@@ -38518,7 +38518,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 5,
         title: 'Ten Card',
-        grimoireSlug: 'tarot-spreads/ten-card',
+        grimoireSlug: 'tarot/spreads/ten-card',
         focus: 'Meaning, themes, and how to work with Ten Card.',
         shortFormHook:
           "In Lunary's Grimoire, Ten Card is explained through meaning, themes, and practical reflection.",
@@ -38530,7 +38530,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 6,
         title: 'Year Ahead',
-        grimoireSlug: 'tarot-spreads/year-ahead',
+        grimoireSlug: 'tarot/spreads/year-ahead',
         focus: 'Meaning, themes, and how to work with Year Ahead.',
         shortFormHook:
           "In Lunary's Grimoire, Year Ahead is explained through meaning, themes, and practical reflection.",
@@ -38555,7 +38555,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 0,
         title: 'Year Ahead',
-        grimoireSlug: 'tarot-spreads/year-ahead',
+        grimoireSlug: 'tarot/spreads/year-ahead',
         focus: 'Meaning, themes, and how to work with Year Ahead.',
         shortFormHook:
           "In Lunary's Grimoire, Year Ahead is explained through meaning, themes, and practical reflection.",
@@ -38567,7 +38567,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 1,
         title: 'Cross Spread',
-        grimoireSlug: 'tarot-spreads/cross-spread',
+        grimoireSlug: 'tarot/spreads/cross-spread',
         focus: 'Meaning, themes, and how to work with Cross Spread.',
         shortFormHook:
           "In Lunary's Grimoire, Cross Spread is explained through meaning, themes, and practical reflection.",
@@ -38579,7 +38579,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 2,
         title: 'Five Card',
-        grimoireSlug: 'tarot-spreads/five-card',
+        grimoireSlug: 'tarot/spreads/five-card',
         focus: 'Meaning, themes, and how to work with Five Card.',
         shortFormHook:
           "In Lunary's Grimoire, Five Card is explained through meaning, themes, and practical reflection.",
@@ -38591,7 +38591,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 3,
         title: 'Past Present Future',
-        grimoireSlug: 'tarot-spreads/past-present-future',
+        grimoireSlug: 'tarot/spreads/past-present-future',
         focus: 'Meaning, themes, and how to work with Past Present Future.',
         shortFormHook:
           "In Lunary's Grimoire, Past Present Future is explained through meaning, themes, and practical reflection.",
@@ -38603,7 +38603,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 4,
         title: 'Seven Card',
-        grimoireSlug: 'tarot-spreads/seven-card',
+        grimoireSlug: 'tarot/spreads/seven-card',
         focus: 'Meaning, themes, and how to work with Seven Card.',
         shortFormHook:
           "In Lunary's Grimoire, Seven Card is explained through meaning, themes, and practical reflection.",
@@ -38615,7 +38615,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 5,
         title: 'Ten Card',
-        grimoireSlug: 'tarot-spreads/ten-card',
+        grimoireSlug: 'tarot/spreads/ten-card',
         focus: 'Meaning, themes, and how to work with Ten Card.',
         shortFormHook:
           "In Lunary's Grimoire, Ten Card is explained through meaning, themes, and practical reflection.",
@@ -38627,7 +38627,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
       {
         dayIndex: 6,
         title: 'Three Card',
-        grimoireSlug: 'tarot-spreads/three-card',
+        grimoireSlug: 'tarot/spreads/three-card',
         focus: 'Meaning, themes, and how to work with Three Card.',
         shortFormHook:
           "In Lunary's Grimoire, Three Card is explained through meaning, themes, and practical reflection.",

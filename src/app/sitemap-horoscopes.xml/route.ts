@@ -6,8 +6,13 @@ import {
 export async function GET(): Promise<Response> {
   const baseUrl = 'https://lunary.app';
   const horoscopes = generateAllHoroscopeParams();
-  const yearlyHoroscopeYears = [2025, 2026, 2027, 2028, 2029, 2030];
   const currentYear = new Date().getFullYear();
+  const yearlyHoroscopeYears = [
+    Math.max(2025, currentYear - 1),
+    currentYear,
+    currentYear + 1,
+    currentYear + 2,
+  ];
   const currentMonthStamp = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`;
 
   const urls = [

@@ -3,7 +3,7 @@ import { getAllPlanetSignSlugs } from '@/constants/seo/planet-sign-content';
 const baseUrl = 'https://lunary.app';
 
 export async function GET() {
-  const now = new Date().toISOString();
+  const now = stableMonthStamp;
   const slugs = getAllPlanetSignSlugs();
 
   const placementUrls = slugs

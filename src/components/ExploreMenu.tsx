@@ -126,7 +126,7 @@ export const ExploreMenu = () => {
               return (
                 <Link
                   key={item.href}
-                  href={`${item.href}?from=explore`}
+                  href={item.href}
                   onClick={() => {
                     setIsOpen(false);
                     // Track that user is navigating from explore menu

@@ -18,17 +18,17 @@ export const marketingSectionItems: Record<
     },
     {
       title: 'Grimoire',
-      href: '/grimoire?nav=marketing',
+      href: '/grimoire',
       description: 'Deep dives into astrology, tarot, and ritual craft.',
     },
     {
       title: 'Horoscopes',
-      href: '/horoscope?nav=marketing',
+      href: '/horoscope',
       description: 'Daily and seasonal guidance tailored to your sky.',
     },
     {
       title: 'Blog',
-      href: '/blog?nav=marketing',
+      href: '/blog',
       description: 'Essays and updates from the Lunary team.',
     },
     {
@@ -38,7 +38,7 @@ export const marketingSectionItems: Record<
     },
     {
       title: 'Explore Features',
-      href: '/explore?nav=marketing',
+      href: '/explore',
       description: 'A tour of what Lunary can do for you.',
     },
   ],

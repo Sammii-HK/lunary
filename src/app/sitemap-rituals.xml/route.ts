@@ -11,7 +11,7 @@ function getAllSpells() {
 }
 
 export async function GET() {
-  const now = new Date().toISOString();
+  const now = stableMonthStamp;
   const allSpells = getAllSpells();
 
   const spellUrls = allSpells

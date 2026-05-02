@@ -2,18 +2,20 @@ import { generateAllAspectParams } from '@/constants/seo/aspects';
 
 export async function GET(): Promise<Response> {
   const baseUrl = 'https://lunary.app';
+  const currentYear = new Date().getFullYear();
+  const stableMonthStamp = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`;
   const aspects = generateAllAspectParams();
 
   const urls = [
     {
       loc: `${baseUrl}/grimoire/aspects`,
-      lastmod: new Date().toISOString().split('T')[0],
+      lastmod: stableMonthStamp,
       changefreq: 'monthly',
       priority: '0.8',
     },
     ...aspects.map((a) => ({
       loc: `${baseUrl}/grimoire/aspects/${a.planet1}/${a.aspect}/${a.planet2}`,
-      lastmod: new Date().toISOString().split('T')[0],
+      lastmod: stableMonthStamp,
       changefreq: 'yearly',
       priority: '0.6',
     })),

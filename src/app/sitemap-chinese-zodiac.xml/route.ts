@@ -2,17 +2,19 @@ import { CHINESE_ANIMALS } from '@/constants/seo/chinese-zodiac';
 
 export async function GET(): Promise<Response> {
   const baseUrl = 'https://lunary.app';
+  const currentYear = new Date().getFullYear();
+  const stableMonthStamp = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`;
 
   const urls = [
     {
       loc: `${baseUrl}/grimoire/chinese-zodiac`,
-      lastmod: new Date().toISOString().split('T')[0],
+      lastmod: stableMonthStamp,
       changefreq: 'monthly',
       priority: '0.8',
     },
     ...CHINESE_ANIMALS.map((animal) => ({
       loc: `${baseUrl}/grimoire/chinese-zodiac/${animal}`,
-      lastmod: new Date().toISOString().split('T')[0],
+      lastmod: stableMonthStamp,
       changefreq: 'yearly',
       priority: '0.7',
     })),

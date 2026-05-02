@@ -3,7 +3,7 @@ import { planetaryBodies } from '../../../utils/zodiac/zodiac';
 const baseUrl = 'https://lunary.app';
 
 export async function GET() {
-  const now = new Date().toISOString();
+  const now = stableMonthStamp;
 
   const planetKeys = Object.keys(planetaryBodies);
 

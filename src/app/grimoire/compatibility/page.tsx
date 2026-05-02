@@ -57,6 +57,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://lunary.app/grimoire/compatibility',
   },
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 export default function CompatibilityIndexPage() {

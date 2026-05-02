@@ -48,6 +48,7 @@ interface SpellsClientProps {
   totalPages: number;
   pageSize: number;
   basePath?: string; // default: /grimoire/spells
+  allSpells?: Spell[];
   categories: Record<
     string,
     { name: string; description: string; icon: string }
@@ -123,6 +124,7 @@ export function SpellsClient({
   totalPages,
   pageSize,
   basePath = '/grimoire/spells',
+  allSpells,
   categories,
   categoryCounts,
   initialQuery = '',
@@ -142,6 +144,10 @@ export function SpellsClient({
   const safeCategoryCounts = useMemo(
     () => categoryCounts ?? { all: totalCount },
     [categoryCounts, totalCount],
+  );
+  const safeAllSpells = useMemo(
+    () => (Array.isArray(allSpells) ? allSpells : null),
+    [allSpells],
   );
 
   // controlled UI state
@@ -210,17 +216,67 @@ export function SpellsClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQuery, selectedCategory, selectedDifficulty]);
 
-  // counts + categories
-  const activeCategories = useMemo(() => {
-    return Object.entries(safeCategories).filter(
-      ([key]) => (safeCategoryCounts[key] || 0) > 0,
-    );
-  }, [safeCategories, safeCategoryCounts]);
-
   const hasActiveFilters =
     (searchQuery?.trim()?.length ?? 0) > 0 ||
     selectedCategory !== 'all' ||
     selectedDifficulty !== 'all';
+
+  const localFilteredAll = useMemo(() => {
+    if (!safeAllSpells) return null;
+
+    const q = debouncedQuery.trim().toLowerCase();
+
+    return safeAllSpells.filter((s) => {
+      const matchesQ =
+        !q ||
+        s.title.toLowerCase().includes(q) ||
+        s.description.toLowerCase().includes(q) ||
+        s.purpose.toLowerCase().includes(q) ||
+        s.category.toLowerCase().includes(q) ||
+        (s.subcategory
+          ? String(s.subcategory).toLowerCase().includes(q)
+          : false);
+
+      const matchesCategory =
+        selectedCategory === 'all' ? true : s.category === selectedCategory;
+      const matchesDifficulty =
+        selectedDifficulty === 'all'
+          ? true
+          : s.difficulty === selectedDifficulty;
+
+      return matchesQ && matchesCategory && matchesDifficulty;
+    });
+  }, [debouncedQuery, safeAllSpells, selectedCategory, selectedDifficulty]);
+
+  const localCategoryCounts = useMemo(() => {
+    if (!localFilteredAll) return null;
+
+    const counts: Record<string, number> = { all: localFilteredAll.length };
+    for (const spell of localFilteredAll) {
+      if (!spell?.category) continue;
+      counts[spell.category] = (counts[spell.category] || 0) + 1;
+    }
+    return counts;
+  }, [localFilteredAll]);
+
+  const displayCategoryCounts = localCategoryCounts || safeCategoryCounts;
+  const displaySpells = localFilteredAll
+    ? localFilteredAll.slice(0, pageSize)
+    : safeSpells;
+  const displayTotalCount = localFilteredAll
+    ? localFilteredAll.length
+    : totalCount;
+  const displayCurrentPage = localFilteredAll ? 1 : currentPage;
+  const displayTotalPages = localFilteredAll
+    ? Math.max(1, Math.ceil(localFilteredAll.length / pageSize))
+    : totalPages;
+
+  // counts + categories
+  const activeCategories = useMemo(() => {
+    return Object.entries(safeCategories).filter(
+      ([key]) => (displayCategoryCounts[key] || 0) > 0,
+    );
+  }, [displayCategoryCounts, safeCategories]);
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -248,12 +304,13 @@ export function SpellsClient({
   ]);
 
   const pageNumbers = useMemo(
-    () => getPageNumbers(currentPage, totalPages, 7),
-    [currentPage, totalPages],
+    () => getPageNumbers(displayCurrentPage, displayTotalPages, 7),
+    [displayCurrentPage, displayTotalPages],
   );
 
-  const startIndex = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-  const endIndex = Math.min(currentPage * pageSize, totalCount);
+  const startIndex =
+    displayTotalCount === 0 ? 0 : (displayCurrentPage - 1) * pageSize + 1;
+  const endIndex = Math.min(displayCurrentPage * pageSize, displayTotalCount);
 
   return (
     <div className='space-y-8' data-testid='spells-page'>
@@ -263,8 +320,7 @@ export function SpellsClient({
         value={searchQuery}
         onChange={setSearchQuery}
         placeholder='Search spells by name, purpose, or category...'
-        // server-driven results count; avoid showing a misleading number while typing
-        resultCount={undefined}
+        resultCount={searchQuery ? displayTotalCount : undefined}
         resultLabel='spell'
         maxWidth='max-w-xl'
         className='mb-2'
@@ -309,7 +365,7 @@ export function SpellsClient({
                     : 'bg-white/5 text-content-primary/70 hover:bg-white/10'
                 }`}
               >
-                All ({safeCategoryCounts.all ?? totalCount})
+                All ({displayCategoryCounts.all ?? displayTotalCount})
               </button>
 
               {activeCategories.map(([key, cat]) => (
@@ -325,7 +381,7 @@ export function SpellsClient({
                   <span>{cat.icon}</span>
                   <span>{cat.name}</span>
                   <span className='text-xs opacity-60'>
-                    ({safeCategoryCounts[key] || 0})
+                    ({displayCategoryCounts[key] || 0})
                   </span>
                 </button>
               ))}
@@ -357,9 +413,9 @@ export function SpellsClient({
         </div>
       )}
 
-      {safeSpells.length > 0 ? (
+      {displaySpells.length > 0 ? (
         <div className='grid gap-4' data-testid='spell-list'>
-          {safeSpells.map((spell) => {
+          {displaySpells.map((spell) => {
             const TypeIcon = typeIcons[spell.type] ?? Sparkles;
 
             return (
@@ -440,14 +496,14 @@ export function SpellsClient({
         </div>
       )}
 
-      {totalPages > 1 && (
+      {displayTotalPages > 1 && (
         <nav
           className='flex items-center justify-center gap-2 mt-6 pt-6 border-t border-white/5'
           aria-label='Spells pagination'
         >
-          {currentPage > 1 ? (
+          {displayCurrentPage > 1 ? (
             <Link
-              href={getPageHref(basePath, currentPage - 1, preservedQs)}
+              href={getPageHref(basePath, displayCurrentPage - 1, preservedQs)}
               rel='prev'
               className='px-3 py-2 rounded-lg text-sm flex items-center gap-1 bg-white/5 text-content-primary/70 hover:bg-white/10 hover:text-content-primary transition-all'
               aria-label='Go to previous page'
@@ -475,9 +531,11 @@ export function SpellsClient({
                 <Link
                   key={page}
                   href={getPageHref(basePath, page, preservedQs)}
-                  aria-current={page === currentPage ? 'page' : undefined}
+                  aria-current={
+                    page === displayCurrentPage ? 'page' : undefined
+                  }
                   className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors flex items-center justify-center ${
-                    page === currentPage
+                    page === displayCurrentPage
                       ? 'bg-layer-base text-content-brand border border-lunary-primary-700'
                       : 'text-content-muted hover:text-content-primary hover:bg-surface-card'
                   }`}
@@ -488,9 +546,9 @@ export function SpellsClient({
             )}
           </div>
 
-          {currentPage < totalPages ? (
+          {displayCurrentPage < displayTotalPages ? (
             <Link
-              href={getPageHref(basePath, currentPage + 1, preservedQs)}
+              href={getPageHref(basePath, displayCurrentPage + 1, preservedQs)}
               rel='next'
               className='px-3 py-2 rounded-lg text-sm flex items-center gap-1 bg-white/5 text-content-primary/70 hover:bg-white/10 hover:text-content-primary transition-all'
               aria-label='Go to next page'
@@ -508,7 +566,7 @@ export function SpellsClient({
       )}
 
       <div className='text-center text-sm text-content-primary/40 pt-6'>
-        Showing {startIndex}–{endIndex} of {totalCount} spells
+        Showing {startIndex}–{endIndex} of {displayTotalCount} spells
       </div>
     </div>
   );

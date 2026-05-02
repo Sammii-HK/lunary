@@ -43,6 +43,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://lunary.app/grimoire/zodiac',
   },
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 export default function ZodiacIndexPage() {

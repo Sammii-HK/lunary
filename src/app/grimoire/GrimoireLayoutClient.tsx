@@ -3,9 +3,10 @@
 import { grimoire } from '@/constants/grimoire';
 import Link from 'next/link';
 import { slugToSection } from '@/utils/grimoire';
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import type { ComponentProps } from 'react';
 import dynamic from 'next/dynamic';
+import { useSearchParams } from 'next/navigation';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import {
   Sparkles,
@@ -710,11 +711,7 @@ const GRIMOIRE_FULL_STRUCTURE = [
   },
 ];
 
-function GrimoireIndexPage({
-  withNavParams,
-}: {
-  withNavParams: (href: string) => string;
-}) {
+function GrimoireIndexPage() {
   return (
     <div className='p-4 md:py-12 lg:py-16' data-testid='grimoire-page'>
       <div className='max-w-6xl mx-auto'>
@@ -749,7 +746,7 @@ function GrimoireIndexPage({
             {GRIMOIRE_RECOVERY_FEATURES.map((item) => (
               <Link
                 key={`recovery-${item.title}`}
-                href={withNavParams(item.href)}
+                href={item.href}
                 prefetch={true}
                 className='group rounded-lg border border-lunary-primary-700/40 bg-lunary-primary-950/10 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-500 transition-all'
               >
@@ -783,7 +780,7 @@ function GrimoireIndexPage({
                 {category.items.map((item) => (
                   <Link
                     key={`${category.name}-${item.title}`}
-                    href={withNavParams(item.href)}
+                    href={item.href}
                     prefetch={true}
                     className='group rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
                   >
@@ -804,33 +801,16 @@ function GrimoireIndexPage({
   );
 }
 
-export type GrimoireSearchParams = {
-  nav?: string | string[];
-  from?: string | string[];
-};
-
-/**
- * `pathname` and `searchParams` are supplied by the server page so the layout
- * can stay server-friendly while the client-side hooks hydrate afterwards.
- */
 export type GrimoireLayoutProps = {
   currentSectionSlug?: string;
-  searchParams?: GrimoireSearchParams;
   pathname: string;
 };
 
-function normalizeParam(value?: string | string[]): string | undefined {
-  if (!value) return undefined;
-  return Array.isArray(value) ? value[value.length - 1] : value;
-}
-
 export default function GrimoireLayout({
   currentSectionSlug,
-  searchParams,
   pathname,
 }: GrimoireLayoutProps) {
-  const navParam = normalizeParam(searchParams?.nav);
-  const fromParam = normalizeParam(searchParams?.from);
+  const searchParams = useSearchParams();
 
   const currentSection = currentSectionSlug
     ? slugToSection(currentSectionSlug)
@@ -891,24 +871,6 @@ export default function GrimoireLayout({
     });
   }, [pathname]);
 
-  const withNavParams = useCallback(
-    (href: string) => {
-      if (!navParam && !fromParam) return href;
-      if (/^https?:\/\//i.test(href)) return href;
-
-      const baseUrl = new URL(href, 'https://lunary.app');
-      if (navParam && !baseUrl.searchParams.get('nav')) {
-        baseUrl.searchParams.set('nav', navParam);
-      }
-      if (fromParam && !baseUrl.searchParams.get('from')) {
-        baseUrl.searchParams.set('from', fromParam);
-      }
-      const query = baseUrl.searchParams.toString();
-      return `${baseUrl.pathname}${query ? `?${query}` : ''}${baseUrl.hash}`;
-    },
-    [navParam, fromParam],
-  );
-
   return (
     <div className='h-full'>
       {currentSection ? (
@@ -922,7 +884,7 @@ export default function GrimoireLayout({
         </div>
       ) : (
         <div>
-          <GrimoireIndexPage withNavParams={withNavParams} />
+          <GrimoireIndexPage />
           <div className='max-w-6xl mx-auto px-4'>
             <MarketingFooterGate />
           </div>

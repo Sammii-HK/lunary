@@ -7,6 +7,7 @@ import { Heading } from '@/components/ui/Heading';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { stringToKebabCase } from 'utils/string';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { searchCrystals } from '@/constants/grimoire/crystals';
 
 interface Crystal {
   name: string;
@@ -24,25 +25,32 @@ type CrystalCategoryLink = { id: string; label: string };
 type CrystalsProps = {
   categories: CrystalCategory[];
   totalCount: number;
-  initialQuery?: string;
+  allCrystals: Array<{
+    name: string;
+    description?: string;
+    metaphysicalProperties?: string;
+    categories?: string[];
+  }>;
+  allCategoryNames: string[];
 };
 
 const Crystals = ({
   categories,
   totalCount,
-  initialQuery = '',
+  allCrystals,
+  allCategoryNames,
 }: CrystalsProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
 
-  const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [searchQuery, setSearchQuery] = useState(searchParams?.get('q') || '');
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
 
   useEffect(() => {
-    setSearchQuery(initialQuery);
-  }, [initialQuery]);
+    setSearchQuery(searchParams?.get('q') || '');
+  }, [searchParams]);
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams?.toString() || '');
@@ -59,10 +67,50 @@ const Crystals = ({
     });
   }, [debouncedQuery, pathname, router, searchParams, startTransition]);
 
-  const categoryLinks: CrystalCategoryLink[] = categories.map((category) => ({
-    id: `category-${stringToKebabCase(category.name)}`,
-    label: category.name,
-  }));
+  const normalizedQuery = debouncedQuery.trim().toLowerCase();
+  const querySlug = stringToKebabCase(debouncedQuery.trim());
+  const categoryMatch = normalizedQuery
+    ? allCategoryNames.find((category) => {
+        const normalizedCategory = category.toLowerCase();
+        return (
+          normalizedCategory === normalizedQuery ||
+          normalizedCategory.includes(normalizedQuery) ||
+          stringToKebabCase(category) === querySlug
+        );
+      })
+    : undefined;
+
+  const filteredCrystals = normalizedQuery
+    ? categoryMatch
+      ? allCrystals.filter((crystal) =>
+          crystal.categories?.includes(categoryMatch),
+        )
+      : searchCrystals(debouncedQuery.trim())
+    : allCrystals;
+
+  const filteredCategories = allCategoryNames
+    .map((categoryName) => {
+      const crystalsInCategory = filteredCrystals.filter((crystal) =>
+        crystal.categories?.includes(categoryName),
+      );
+      return {
+        name: categoryName,
+        crystals: crystalsInCategory.map((crystal) => ({
+          name: crystal.name,
+          properties:
+            crystal.description || crystal.metaphysicalProperties || '',
+          slug: stringToKebabCase(crystal.name),
+        })),
+      };
+    })
+    .filter((category) => category.crystals.length > 0);
+
+  const categoryLinks: CrystalCategoryLink[] = filteredCategories.map(
+    (category) => ({
+      id: `category-${stringToKebabCase(category.name)}`,
+      label: category.name,
+    }),
+  );
 
   return (
     <div className='space-y-8'>
@@ -100,7 +148,7 @@ const Crystals = ({
           value={searchQuery}
           onChange={setSearchQuery}
           placeholder='Search crystals by name, properties, or intentions...'
-          resultCount={searchQuery ? totalCount : undefined}
+          resultCount={searchQuery ? filteredCrystals.length : totalCount}
           resultLabel='crystal'
           className='pt-2'
           maxWidth='max-w-2xl'
@@ -118,7 +166,7 @@ const Crystals = ({
             ))}
           </div>
         )}
-        {categories.length === 0 ? (
+        {filteredCategories.length === 0 ? (
           <div className='rounded-lg border border-stroke-subtle/60 bg-surface-elevated/30 p-4'>
             <p className='text-sm text-content-muted'>
               No crystals match your search. Try a different keyword.
@@ -126,7 +174,7 @@ const Crystals = ({
           </div>
         ) : (
           <div className='space-y-6'>
-            {categories.map((category) => {
+            {filteredCategories.map((category) => {
               const categoryId = `category-${stringToKebabCase(category.name)}`;
               return (
                 <div key={category.name} id={categoryId}>

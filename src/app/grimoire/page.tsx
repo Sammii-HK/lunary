@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 
-import GrimoireLayout, { GrimoireSearchParams } from './GrimoireLayout';
+import GrimoireLayout from './GrimoireLayout';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 // 30-day ISR revalidation
@@ -98,12 +98,7 @@ const grimoireCategories = [
   },
 ];
 
-const GrimoireHome = async ({
-  searchParams,
-}: {
-  searchParams?: Promise<GrimoireSearchParams>;
-}) => {
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+const GrimoireHome = () => {
   const grimoireListSchema = createItemListSchema({
     name: 'Lunary Grimoire',
     description:
@@ -116,10 +111,7 @@ const GrimoireHome = async ({
   return (
     <div className='h-full w-full'>
       {renderJsonLd(grimoireListSchema)}
-      <GrimoireLayout
-        searchParams={resolvedSearchParams}
-        pathname='/grimoire'
-      />
+      <GrimoireLayout pathname='/grimoire' />
     </div>
   );
 };

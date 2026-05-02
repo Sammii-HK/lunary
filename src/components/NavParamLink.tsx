@@ -10,7 +10,7 @@ type NavParamLinkProps = React.ComponentProps<typeof Link> & {
 
 export function NavParamLink({
   href,
-  preserveNavParams = true,
+  preserveNavParams = false,
   ...rest
 }: NavParamLinkProps) {
   const searchParams = useSafeSearchParams();

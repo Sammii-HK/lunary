@@ -3,7 +3,7 @@ import { crystalDatabase } from '@/constants/grimoire/crystals';
 const baseUrl = 'https://lunary.app';
 
 export async function GET() {
-  const now = new Date().toISOString();
+  const now = stableMonthStamp;
 
   const crystalUrls = crystalDatabase
     .map((crystal) => {

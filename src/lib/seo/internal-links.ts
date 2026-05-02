@@ -210,12 +210,12 @@ export function getTarotInternalLinks(cardName: string): InternalLink[] {
     // Related spread
     {
       text: 'Three Card Spread',
-      href: '/grimoire/tarot/spreads/threeCard',
+      href: '/grimoire/tarot/spreads/past-present-future',
       priority: 7,
     },
     {
       text: 'Celtic Cross Spread',
-      href: '/grimoire/tarot/spreads/celticCross',
+      href: '/grimoire/tarot/spreads/celtic-cross',
       priority: 6,
     },
     // Major/Minor context
