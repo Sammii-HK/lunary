@@ -1,9 +1,13 @@
 export default function GrimoireLoading() {
   return (
-    <div className='h-full w-full flex items-center justify-center'>
-      <div className='flex flex-col items-center gap-4'>
-        <div className='w-8 h-8 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin' />
-        <p className='text-sm text-content-muted'>Loading grimoire...</p>
+    <div className='h-full w-full'>
+      <div className='mx-auto w-full max-w-5xl px-4 py-10 md:px-6 lg:px-8'>
+        <div className='space-y-4'>
+          <div className='h-9 w-48 animate-pulse rounded bg-surface-card/50' />
+          <div className='h-4 w-full animate-pulse rounded bg-surface-card/50' />
+          <div className='h-4 w-5/6 animate-pulse rounded bg-surface-card/50' />
+          <div className='h-4 w-2/3 animate-pulse rounded bg-surface-card/50' />
+        </div>
       </div>
     </div>
   );

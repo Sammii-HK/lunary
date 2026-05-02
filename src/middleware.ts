@@ -93,6 +93,16 @@ function assignVariant(
 const BOT_UA_PATTERN =
   /bot|crawler|spider|crawling|preview|facebookexternalhit|slackbot|discordbot|whatsapp|telegrambot|pinterest|embedly|quora|tumblr|redditbot|gpt|openai|anthropic|gemini|perplexity|cohere|googlebot|baiduspider|yandexbot|ccbot|duckduckbot|bingbot|python-requests|libcurl|scrapy|wget|curl\/|httrack|ahrefsbot|semrushbot|mj12bot|dotbot|petalbot|bytespider|sogou|applebot|dataforseo|zoominfobot|gptbot|claudebot|go-http-client|java\/|okhttp|axios|node-fetch|undici|headlesschrome|phantomjs|selenium|puppeteer|playwright|httpx|aiohttp|reqwest|colly|linkcheck|monitoring|uptime|pingdom|site24x7|statuscake|newrelic|datadog|cloudflare-workers|vercel-edge/i;
 
+const PUBLIC_SEO_PREFIXES = [
+  '/grimoire',
+  '/blog',
+  '/comparison',
+  '/guides',
+  '/features',
+  '/pricing',
+  '/shop',
+];
+
 const shouldSkipTracking = (request: NextRequest, hostname: string) => {
   if (request.method !== 'GET') return true;
 
@@ -114,6 +124,9 @@ const shouldSkipTracking = (request: NextRequest, hostname: string) => {
 
   const pathname = request.nextUrl.pathname;
   if (pathname.startsWith('/admin')) return true;
+  if (PUBLIC_SEO_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
+    return true;
+  }
 
   if (hostname.startsWith('admin.')) return true;
 

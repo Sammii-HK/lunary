@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   title: "Today's Horoscope: Daily Astrology for All 12 Signs | Lunary",
   description:
     "Read today's horoscope for all 12 zodiac signs. Daily astrology insights, cosmic guidance, and personalised readings updated every day.",
+  robots: {
+    index: false,
+    follow: true,
+  },
   keywords: [
     'today horoscope',
     'daily horoscope',

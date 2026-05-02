@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { initializeAttribution } from '@/lib/attribution';
 
 /**
@@ -15,15 +16,28 @@ import { initializeAttribution } from '@/lib/attribution';
  */
 export function AttributionCapture() {
   const initialized = useRef(false);
+  const pathname = usePathname() || '';
+  const publicSeoPrefixes = [
+    '/grimoire',
+    '/blog',
+    '/comparison',
+    '/features',
+    '/pricing',
+    '/shop',
+  ];
+  const isPublicSeoSurface = publicSeoPrefixes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
 
   useEffect(() => {
     if (initialized.current) return;
+    if (isPublicSeoSurface) return;
     initialized.current = true;
 
     // Capture attribution immediately on first page load
     // This ensures attribution is available for signup tracking
     initializeAttribution();
-  }, []);
+  }, [isPublicSeoSurface]);
 
   return null;
 }

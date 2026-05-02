@@ -28,6 +28,40 @@ import { conversionTracking } from '@/lib/analytics';
 import { getStoredAttribution, extractSearchQuery } from '@/lib/attribution';
 
 const currentYear = new Date().getFullYear();
+const nextYear = currentYear + 1;
+
+const GRIMOIRE_RECOVERY_FEATURES = [
+  {
+    title: 'Monthly Horoscopes',
+    href: '/grimoire/horoscopes',
+    description: 'The strongest sign-by-sign monthly forecast surface.',
+  },
+  {
+    title: `${currentYear} Transits`,
+    href: `/grimoire/transits/year/${currentYear}`,
+    description: 'Major ingress and timing pages for the current year.',
+  },
+  {
+    title: `${nextYear} Horoscopes`,
+    href: `/grimoire/horoscopes/aries/${nextYear}`,
+    description: 'Year-ahead forecast path with real sign/year inventory behind it.',
+  },
+  {
+    title: 'Moon Phases',
+    href: '/grimoire/moon/phases',
+    description: 'Evergreen lunar intent pages with clearer structure.',
+  },
+  {
+    title: 'Numerology',
+    href: '/grimoire/numerology',
+    description: 'Stable hub page rather than a request-time dynamic surface.',
+  },
+  {
+    title: 'Retrogrades',
+    href: '/grimoire/astronomy/retrogrades',
+    description: 'One of the clearest astrology intent clusters outside horoscopes.',
+  },
+];
 
 // Dynamic imports for grimoire components (lazy load to improve build speed)
 const Moon = dynamic(() => import('./components/Moon'), {
@@ -284,24 +318,14 @@ const GRIMOIRE_FULL_STRUCTURE = [
         description: 'Current planetary transits',
       },
       {
-        title: 'Daily Horoscopes',
-        href: '/grimoire/horoscopes/today',
-        description: 'Daily horoscope forecasts for all signs',
-      },
-      {
-        title: 'Weekly Horoscopes',
-        href: '/grimoire/horoscopes/weekly',
-        description: 'Weekly horoscope forecasts for all signs',
-      },
-      {
         title: 'Monthly Horoscopes',
         href: '/grimoire/horoscopes',
         description: 'Monthly horoscope forecasts for all signs',
       },
       {
         title: 'Yearly Horoscopes',
-        href: '/grimoire/horoscopes/yearly',
-        description: 'Yearly horoscope forecasts for all signs',
+        href: `/grimoire/horoscopes/aries/${nextYear}`,
+        description: `Year-ahead horoscope path for ${nextYear}`,
       },
       {
         title: 'Astronomy',
@@ -708,6 +732,33 @@ function GrimoireIndexPage({
             <GrimoireSearch placeholder='Search tarot, crystals, zodiac...' />
           </div>
         </div>
+
+        <section className='mb-12 md:mb-16'>
+          <div className='flex items-center gap-3 mb-6'>
+            <span className='text-lunary-primary-400'>
+              <Sparkles className='w-5 h-5' />
+            </span>
+            <h2 className='text-xl md:text-2xl font-medium text-content-primary'>
+              Start Here
+            </h2>
+            <div className='flex-1 h-px bg-surface-card' />
+          </div>
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'>
+            {GRIMOIRE_RECOVERY_FEATURES.map((item) => (
+              <Link
+                key={`recovery-${item.title}`}
+                href={withNavParams(item.href)}
+                prefetch={true}
+                className='group rounded-lg border border-lunary-primary-700/40 bg-lunary-primary-950/10 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-500 transition-all'
+              >
+                <h3 className='font-medium text-content-primary group-hover:text-content-brand transition-colors mb-1'>
+                  {item.title}
+                </h3>
+                <p className='text-xs text-content-muted'>{item.description}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
 
         {/* Categories with all subsections */}
         <div

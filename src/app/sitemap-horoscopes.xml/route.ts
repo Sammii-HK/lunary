@@ -6,51 +6,30 @@ import {
 export async function GET(): Promise<Response> {
   const baseUrl = 'https://lunary.app';
   const horoscopes = generateAllHoroscopeParams();
+  const yearlyHoroscopeYears = [2025, 2026, 2027, 2028, 2029, 2030];
+  const currentYear = new Date().getFullYear();
+  const currentMonthStamp = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`;
 
   const urls = [
     {
       loc: `${baseUrl}/grimoire/horoscopes`,
-      lastmod: new Date().toISOString().split('T')[0],
-      changefreq: 'daily',
+      lastmod: currentMonthStamp,
+      changefreq: 'weekly',
       priority: '0.9',
     },
-    {
-      loc: `${baseUrl}/grimoire/horoscopes/today`,
-      lastmod: new Date().toISOString().split('T')[0],
-      changefreq: 'daily',
-      priority: '0.8',
-    },
-    {
-      loc: `${baseUrl}/grimoire/horoscopes/weekly`,
-      lastmod: new Date().toISOString().split('T')[0],
-      changefreq: 'weekly',
-      priority: '0.8',
-    },
     ...ZODIAC_SIGNS.flatMap((sign) => [
-      {
-        loc: `${baseUrl}/grimoire/horoscopes/${sign}`,
-        lastmod: new Date().toISOString().split('T')[0],
-        changefreq: 'monthly',
-        priority: '0.7',
-      },
-      {
-        loc: `${baseUrl}/grimoire/horoscopes/today/${sign}`,
-        lastmod: new Date().toISOString().split('T')[0],
-        changefreq: 'daily',
-        priority: '0.6',
-      },
-      {
-        loc: `${baseUrl}/grimoire/horoscopes/weekly/${sign}`,
-        lastmod: new Date().toISOString().split('T')[0],
-        changefreq: 'weekly',
-        priority: '0.6',
-      },
+      ...yearlyHoroscopeYears.map((year) => ({
+        loc: `${baseUrl}/grimoire/horoscopes/${sign}/${year}`,
+        lastmod: `${year}-01-01`,
+        changefreq: 'monthly' as const,
+        priority: '0.8',
+      })),
     ]),
     ...horoscopes.map((h) => ({
       loc: `${baseUrl}/grimoire/horoscopes/${h.sign}/${h.year}/${h.month}`,
-      lastmod: new Date().toISOString().split('T')[0],
+      lastmod: `${h.year}-${String(new Date(`${h.month} 1, ${h.year}`).getMonth() + 1).padStart(2, '0')}-01`,
       changefreq: 'monthly',
-      priority: '0.7',
+      priority: '0.9',
     })),
   ];
 

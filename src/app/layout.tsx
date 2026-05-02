@@ -168,13 +168,6 @@ export default function RootLayout({
           crossOrigin='anonymous'
         />
         <link rel='dns-prefetch' href='https://fonts.googleapis.com' />
-        {/* Prefetch API endpoint for app dashboard */}
-        <link
-          rel='prefetch'
-          href='/api/cosmic/global'
-          as='fetch'
-          crossOrigin='anonymous'
-        />
       </head>
       <body
         className={`${roboto.className} ${astronomicon.variable} flex flex-col w-full h-dvh bg-surface-base text-content-primary overflow-hidden`}

@@ -5,9 +5,6 @@ import {
   getUniversalYear,
   getYearRange,
 } from '@/constants/seo/numerology';
-
-// Force dynamic rendering so Universal Year updates automatically
-export const dynamic = 'force-dynamic';
 import {
   angelNumbers,
   lifePathNumbers,
@@ -27,7 +24,8 @@ import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
-// 30-day ISR revalidation
+// 30-day ISR revalidation keeps the Universal Year current without forcing
+// per-request dynamic HTML on an SEO landing page.
 export const revalidate = 2592000;
 const faqs = [
   {

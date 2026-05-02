@@ -10,6 +10,7 @@ import {
 } from '@/constants/seo/monthly-horoscope';
 import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
 import { PlacementSelector } from '@/components/grimoire/PlacementSelector';
+import { buildTransitWindowSnapshot } from '@/lib/horoscope/monthly-forecast';
 
 export const revalidate = 604800;
 export const dynamicParams = false;
@@ -58,6 +59,10 @@ export async function generateMetadata({
   return {
     title: `${signData.name} Weekly Horoscope: This Week's Astrology | Lunary`,
     description: `This week's horoscope for ${signData.name} (${signData.dates}). Extended weekly forecast with insights on love, career, and personal growth.`,
+    robots: {
+      index: false,
+      follow: true,
+    },
     openGraph: {
       title: `${signData.name} Weekly Horoscope | Lunary`,
       description: `Weekly horoscope for ${signData.name}.`,
@@ -132,6 +137,14 @@ export default async function WeeklyHoroscopePage({
 
   const horoscope = await getHoroscope(sign);
   const weekRange = getWeekRange();
+  const weekEnd = new Date(currentDate);
+  weekEnd.setDate(currentDate.getDate() + 6);
+  const snapshot = buildTransitWindowSnapshot(
+    signKey,
+    currentDate,
+    weekEnd,
+    'This week',
+  );
 
   return (
     <SEOContentTemplate
@@ -147,6 +160,7 @@ export default async function WeeklyHoroscopePage({
       ]}
       canonicalUrl={`https://lunary.app/grimoire/horoscopes/weekly/${sign}`}
       intro={`This week for ${signData.name} highlights the current lunar rhythm and the transits shaping your sign. Use the cues below as timing signals, then cross-check with your full chart if you want personal precision.`}
+      tldr={snapshot.summary}
       heroContent={
         <div className='text-center space-y-2'>
           <div className='text-4xl md:text-5xl'>{signData.symbol}</div>
@@ -203,28 +217,19 @@ export default async function WeeklyHoroscopePage({
           <h2 className='text-lg font-medium text-content-primary mb-2'>
             Love
           </h2>
-          <p className='text-sm text-content-muted'>
-            Lean into steady communication. {signData.name} grows love through
-            clarity and consistent effort this week.
-          </p>
+          <p className='text-sm text-content-muted'>{snapshot.focus}</p>
         </div>
         <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
           <h2 className='text-lg font-medium text-content-primary mb-2'>
             Career
           </h2>
-          <p className='text-sm text-content-muted'>
-            Keep priorities tight. Visible progress will open new opportunities
-            for {signData.name}.
-          </p>
+          <p className='text-sm text-content-muted'>{snapshot.challenge}</p>
         </div>
         <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
           <h2 className='text-lg font-medium text-content-primary mb-2'>
-            Year
+            Timing
           </h2>
-          <p className='text-sm text-content-muted'>
-            This week supports long-range goals. Make one decision that moves
-            your year forward.
-          </p>
+          <p className='text-sm text-content-muted'>{snapshot.moonTone}</p>
         </div>
       </section>
 

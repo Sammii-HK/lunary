@@ -39,6 +39,8 @@ export function ConditionalMainWrapper({
       '/welcome',
       '/help',
       '/auth',
+      '/blog',
+      '/grimoire',
       '/comparison',
       '/product',
       '/resources',
@@ -75,11 +77,9 @@ export function ConditionalMainWrapper({
       '/horoscope',
       '/birth-chart',
       '/book-of-shadows',
-      '/grimoire',
       '/profile',
       '/cosmic-state',
       '/cosmic-report-generator',
-      '/blog',
       '/explore',
       '/guide',
       '/community',
@@ -96,7 +96,7 @@ export function ConditionalMainWrapper({
     ];
 
     // Pages that can show app nav if coming from app
-    const contextualPages = ['/blog', '/pricing', '/grimoire', ...explorePages];
+    const contextualPages = ['/pricing', ...explorePages];
     const isContextualPage = contextualPages.some(
       (page) => pathname === page || pathname.startsWith(`${page}/`),
     );
@@ -120,7 +120,6 @@ export function ConditionalMainWrapper({
       '/horoscope',
       '/birth-chart',
       '/book-of-shadows',
-      '/grimoire',
       '/profile',
       '/cosmic-state',
       '/cosmic-report-generator',
@@ -150,12 +149,9 @@ export function ConditionalMainWrapper({
       : false;
 
     // Check if current page is a contextual page (blog/pricing/shop)
-    const isContextualPageCheck = [
-      '/blog',
-      '/pricing',
-      '/shop',
-      '/grimoire',
-    ].some((page) => pathname === page || pathname.startsWith(`${page}/`));
+    const isContextualPageCheck = ['/pricing', '/shop'].some(
+      (page) => pathname === page || pathname.startsWith(`${page}/`),
+    );
 
     let cameFromApp: boolean;
     if (isContextualPageCheck) {

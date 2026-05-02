@@ -19,7 +19,7 @@ import { CrossPlatformCTA } from '@/components/CrossPlatformCTA';
 import { getContextualNudge } from '@/lib/grimoire/getContextualNudge';
 import { InlineContextualNudge } from '@/components/grimoire/InlineContextualNudge';
 import { ContextualNudgeSection } from '@/components/ui/ContextualNudgeSection';
-import { getInlineCtaVariant } from '@/lib/ab-tests-server';
+import { getInlineCtaVariant } from '@/lib/ab-tests-static';
 import {
   QuickStats,
   AspectNatureBadge,

@@ -186,10 +186,10 @@ export function HoroscopeNavigationLinks({
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
       <Link
-        href='/grimoire/horoscopes/weekly'
+        href='/grimoire/horoscopes'
         className='inline-flex items-center px-3 py-1.5 rounded-full border border-stroke-default/50 bg-surface-card/30 text-xs text-content-secondary hover:border-lunary-primary-700/50 hover:text-content-brand transition-colors'
       >
-        Your Weekly Horoscope
+        Monthly Horoscopes
       </Link>
       <Link
         href='/grimoire/horoscopes/monthly'

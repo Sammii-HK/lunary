@@ -6,15 +6,14 @@ import { stringToKebabCase } from '../../../utils/string';
 const baseUrl = 'https://lunary.app';
 
 export async function GET() {
-  const now = new Date().toISOString();
-  const currentYear = new Date().getFullYear();
+  const today = new Date().toISOString().split('T')[0];
 
   const retrogradeUrls = Object.entries(retrogradeInfo)
     .map(
-      ([slug, r]) => `
+      ([slug]) => `
     <url>
-      <loc>${baseUrl}/grimoire/retrogrades/${slug}</loc>
-      <lastmod>${now}</lastmod>
+      <loc>${baseUrl}/grimoire/astronomy/retrogrades/${slug}</loc>
+      <lastmod>${today}</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.7</priority>
     </url>`,
@@ -23,10 +22,10 @@ export async function GET() {
 
   const eclipseUrls = Object.entries(eclipseInfo)
     .map(
-      ([slug, e]) => `
+      ([slug]) => `
     <url>
       <loc>${baseUrl}/grimoire/eclipses/${slug}</loc>
-      <lastmod>${now}</lastmod>
+      <lastmod>${today}</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.7</priority>
     </url>`,
@@ -39,21 +38,21 @@ export async function GET() {
       const slug = stringToKebabCase(phaseType);
       return `
     <url>
-      <loc>${baseUrl}/grimoire/moon/${slug}</loc>
-      <lastmod>${now}</lastmod>
+      <loc>${baseUrl}/grimoire/moon/phases/${slug}</loc>
+      <lastmod>${today}</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.6</priority>
     </url>`;
     })
     .join('');
 
-  const fullMoonUrls = Object.values(annualFullMoons)
-    .map((moon) => {
-      const slug = stringToKebabCase(moon.name);
+  const fullMoonUrls = Object.keys(annualFullMoons)
+    .map((month) => {
+      const slug = stringToKebabCase(month);
       return `
     <url>
-      <loc>${baseUrl}/grimoire/moon/${slug}</loc>
-      <lastmod>${now}</lastmod>
+      <loc>${baseUrl}/grimoire/moon/full-moons/${slug}</loc>
+      <lastmod>${today}</lastmod>
       <changefreq>yearly</changefreq>
       <priority>0.7</priority>
     </url>`;
@@ -64,25 +63,26 @@ export async function GET() {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${baseUrl}/grimoire/moon</loc>
-    <lastmod>${now}</lastmod>
-    <changefreq>daily</changefreq>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>${baseUrl}/grimoire/retrogrades</loc>
-    <lastmod>${now}</lastmod>
+    <loc>${baseUrl}/grimoire/astronomy/retrogrades</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>${baseUrl}/grimoire/eclipses</loc>
-    <lastmod>${now}</lastmod>
+    <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+  ${fullMoonUrls}
+  ${moonPhaseUrls}
   ${retrogradeUrls}
   ${eclipseUrls}
-  ${fullMoonUrls}
 </urlset>`;
 
   return new Response(xml, {
