@@ -1,11 +1,8 @@
 import type { ReactNode } from 'react';
 import GrimoireLayoutClient, {
   GrimoireLayoutProps,
-  GrimoireSearchParams,
 } from './GrimoireLayoutClient';
 import { GrimoireClientIslands } from './GrimoireClientIslands';
-
-export type { GrimoireSearchParams };
 
 export default function GrimoireLayout(props: GrimoireLayoutProps) {
   return (

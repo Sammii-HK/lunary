@@ -6,6 +6,7 @@ import { slugToSection } from '@/utils/grimoire';
 import { useEffect, useRef, useCallback } from 'react';
 import type { ComponentProps } from 'react';
 import dynamic from 'next/dynamic';
+import { useSearchParams } from 'next/navigation';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import {
   Sparkles,
@@ -804,33 +805,18 @@ function GrimoireIndexPage({
   );
 }
 
-export type GrimoireSearchParams = {
-  nav?: string | string[];
-  from?: string | string[];
-};
-
-/**
- * `pathname` and `searchParams` are supplied by the server page so the layout
- * can stay server-friendly while the client-side hooks hydrate afterwards.
- */
 export type GrimoireLayoutProps = {
   currentSectionSlug?: string;
-  searchParams?: GrimoireSearchParams;
   pathname: string;
 };
 
-function normalizeParam(value?: string | string[]): string | undefined {
-  if (!value) return undefined;
-  return Array.isArray(value) ? value[value.length - 1] : value;
-}
-
 export default function GrimoireLayout({
   currentSectionSlug,
-  searchParams,
   pathname,
 }: GrimoireLayoutProps) {
-  const navParam = normalizeParam(searchParams?.nav);
-  const fromParam = normalizeParam(searchParams?.from);
+  const searchParams = useSearchParams();
+  const navParam = searchParams?.get('nav') || undefined;
+  const fromParam = searchParams?.get('from') || undefined;
 
   const currentSection = currentSectionSlug
     ? slugToSection(currentSectionSlug)
