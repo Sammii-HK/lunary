@@ -1,1 +1,1 @@
-export { TarotCardSVG, generateTarotCardSVGString } from './TarotCardSVG';
+export { TarotCardSVG } from './TarotCardSVG';

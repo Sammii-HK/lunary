@@ -23,6 +23,7 @@ import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { useAuthStatus } from './AuthStatus';
 import { TrialCountdownBanner } from './TrialCountdownBanner';
 import { PastDueBanner } from './PastDueBanner';
+import { SmartSearchTrigger } from '@/components/search/SmartSearchTrigger';
 
 const NAV_CONTEXT_KEY = 'lunary_nav_context';
 
@@ -32,6 +33,7 @@ export function AppChrome() {
   const authState = useAuthStatus();
   const [isAdminHost, setIsAdminHost] = useState(false);
   const [cameFromApp, setCameFromApp] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
   const [isNativeApp, setIsNativeApp] = useState(false);
   const navOverride = searchParams?.get('nav');
   const isNativeIOS = useIsNativeIOS();
@@ -48,6 +50,7 @@ export function AppChrome() {
   );
 
   useEffect(() => {
+    setHasMounted(true);
     setIsNativeApp(Capacitor.isNativePlatform());
   }, []);
 
@@ -408,6 +411,9 @@ export function AppChrome() {
               <TrialCountdownBanner />
               <PastDueBanner />
               <Navbar />
+              {hasMounted && authState.isAuthenticated && (
+                <SmartSearchTrigger className='fixed top-3 right-3 z-40' />
+              )}
             </>
           )}
         </>

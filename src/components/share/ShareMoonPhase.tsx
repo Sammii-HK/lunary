@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Share2 } from 'lucide-react';
+import { ShareIconButton } from '@/components/share/ShareIconButton';
 import { useUser } from '@/context/UserContext';
 import { useShareModal } from '@/hooks/useShareModal';
 import { ShareModal } from './ShareModal';
@@ -27,6 +28,7 @@ export function ShareMoonPhase({
   const { user } = useUser();
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const lastGeneratedFormatRef = useRef<string | null>(null);
 
   const {
     isOpen,
@@ -95,15 +97,19 @@ export function ShareMoonPhase({
     openModal();
     shareTracking.shareInitiated(user?.id, 'moon-phase');
     if (!imageBlob) {
+      lastGeneratedFormatRef.current = format;
       generateCard();
     }
   };
 
   useEffect(() => {
-    if (isOpen && !loading && !error && imageBlob) {
-      generateCard();
-    }
-  }, [format]);
+    if (!isOpen) return;
+    if (loading || error || !imageBlob) return;
+    if (lastGeneratedFormatRef.current === format) return;
+
+    lastGeneratedFormatRef.current = format;
+    generateCard();
+  }, [error, format, generateCard, imageBlob, isOpen, loading]);
 
   const handleShare = async () => {
     if (!imageBlob) return;
@@ -131,7 +137,7 @@ export function ShareMoonPhase({
     }
   };
 
-  const handleDownload = () => {
+  function handleDownload() {
     if (!imageBlob) return;
 
     const url = URL.createObjectURL(imageBlob);
@@ -144,7 +150,7 @@ export function ShareMoonPhase({
     URL.revokeObjectURL(url);
 
     shareTracking.shareCompleted(user?.id, 'moon-phase', 'download');
-  };
+  }
 
   const handleCopyLink = async () => {
     try {
@@ -171,22 +177,28 @@ export function ShareMoonPhase({
 
   return (
     <div className='flex items-center justify-center'>
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          handleOpen();
-        }}
-        className={
-          compact
-            ? 'inline-flex items-center justify-center rounded-md p-1.5 text-content-muted hover:text-content-brand-accent hover:bg-surface-card/50 transition-colors'
-            : 'inline-flex items-center gap-2 rounded-full border border-stroke-default px-4 py-2 text-xs font-semibold tracking-wide uppercase text-content-primary transition hover:border-lunary-primary-500 hover:text-content-primary'
-        }
-        title='Share Moon Phase'
-      >
-        <Share2 className='w-3.5 h-3.5' />
-        {!compact && 'Share'}
-      </button>
+      {compact ? (
+        <ShareIconButton
+          label='Share Moon Phase'
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleOpen();
+          }}
+        />
+      ) : (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleOpen();
+          }}
+          className='inline-flex items-center gap-2 rounded-full border border-stroke-default px-4 py-2 text-xs font-semibold tracking-wide uppercase text-content-primary transition hover:border-lunary-primary-500 hover:text-content-primary'
+        >
+          <Share2 className='w-3.5 h-3.5' />
+          Share
+        </button>
+      )}
 
       <ShareModal isOpen={isOpen} onClose={closeModal} title='Share Moon Phase'>
         <SharePreview

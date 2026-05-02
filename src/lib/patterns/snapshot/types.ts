@@ -18,6 +18,7 @@ export interface LifeThemeSnapshot {
     id: string; // 'healing', 'transformation', 'seeking', 'creation', etc.
     name: string; // 'Healing & Restoration', 'Deep Transformation', etc.
     score: number; // Scoring from the engine (higher = stronger match)
+    confidence: number; // 0-1 confidence from the life themes engine
     shortSummary: string; // Brief description of the theme
     sources: {
       journalEntries: number; // Count of journal entries analyzed
@@ -47,6 +48,8 @@ export interface TarotSeasonSnapshot {
     count: number;
   }>;
   period: number; // days analyzed (7, 30, 90, etc.)
+  totalReadings: number;
+  totalCardsDrawn: number;
   timestamp: string;
 }
 

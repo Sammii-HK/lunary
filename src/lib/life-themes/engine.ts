@@ -27,6 +27,7 @@ export interface LifeThemeResult {
   guidanceBullets: string[];
   relatedTags: string[];
   score: number;
+  confidence: number;
 }
 
 export interface LifeThemeInput {
@@ -153,6 +154,8 @@ export function analyzeLifeThemes(
     (t) => t.score >= minScoreThreshold,
   );
 
+  const maxScore = qualifyingThemes[0]?.score || 1;
+
   return qualifyingThemes.slice(0, maxThemes).map((theme) => ({
     id: theme.id,
     name: theme.name,
@@ -161,6 +164,7 @@ export function analyzeLifeThemes(
     guidanceBullets: theme.guidanceBullets,
     relatedTags: theme.relatedTags,
     score: theme.score,
+    confidence: Math.min(theme.score / maxScore, 1),
   }));
 }
 

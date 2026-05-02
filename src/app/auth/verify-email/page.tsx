@@ -46,9 +46,9 @@ export default function VerifyEmailPage() {
           );
 
           // If the user came from a quiz, claim their pending result and
-          // redirect to the full reading page instead of /profile. This
-          // snapshot's the cookie's birth data into sessionStorage so
-          // /full's "email this to me" button has what to post.
+          // redirect to the full reading page instead of /profile. This stores
+          // the cookie birth data in sessionStorage so /full can later post
+          // "email this to me" without making the user retake the quiz.
           let redirectedToQuiz = false;
           if (
             typeof document !== 'undefined' &&
@@ -77,7 +77,7 @@ export default function VerifyEmailPage() {
                       JSON.stringify(data.result),
                     );
                   } catch {
-                    // Non-fatal — /full will fall back to re-claiming.
+                    // Non-fatal, /full will fall back to re-claiming.
                   }
                   const slug = data.result.quizSlug;
                   setTimeout(() => {
@@ -87,7 +87,7 @@ export default function VerifyEmailPage() {
                 }
               }
             } catch {
-              // Graceful degrade — fall through to /profile redirect below.
+              // Graceful degrade, fall through to /profile redirect below.
             }
           }
 

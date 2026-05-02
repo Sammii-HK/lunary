@@ -278,6 +278,141 @@ function parsePlacements(raw: string | null): BirthChartData[] {
   }
 }
 
+const ZODIAC_SIGNS = [
+  'Aries',
+  'Taurus',
+  'Gemini',
+  'Cancer',
+  'Leo',
+  'Virgo',
+  'Libra',
+  'Scorpio',
+  'Sagittarius',
+  'Capricorn',
+  'Aquarius',
+  'Pisces',
+] as const;
+
+function capitalize(s: string) {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
+function signFromLongitude(longitude: number): string {
+  const norm = ((longitude % 360) + 360) % 360;
+  return ZODIAC_SIGNS[Math.floor(norm / 30)];
+}
+
+/**
+ * Time-machine helper: when a `date` param is supplied (and no inline
+ * placements), pull planetary positions for that date from our v1 endpoint
+ * and shape them into BirthChartData. Returns an empty array on any failure
+ * so the OG renderer falls back to the generic layout.
+ */
+async function fetchPlacementsForDate(
+  request: Request,
+  dateIso: string,
+): Promise<BirthChartData[]> {
+  try {
+    const fetchUrl = new URL(
+      `/api/v1/astrology/planetary-positions?date=${encodeURIComponent(dateIso)}`,
+      request.url,
+    );
+    const res = await fetch(fetchUrl, { cache: 'no-store' });
+    if (!res.ok) return [];
+    const json = (await res.json()) as {
+      ok?: boolean;
+      data?: {
+        planets?: Array<{
+          planet: string;
+          longitude: number;
+          sign?: string;
+          degree?: number;
+          minutes?: number;
+          retrograde?: boolean;
+        }>;
+      };
+    };
+    const planets = json?.data?.planets ?? [];
+    return planets
+      .map((p) => {
+        const longitude = Number(p.longitude);
+        if (!Number.isFinite(longitude)) return null;
+        const sign = p.sign ?? signFromLongitude(longitude);
+        return {
+          body: capitalize(p.planet),
+          sign,
+          degree: Number(p.degree ?? Math.floor(longitude % 30)),
+          minute: Number(p.minutes ?? 0),
+          eclipticLongitude: ((longitude % 360) + 360) % 360,
+          retrograde: Boolean(p.retrograde),
+        } as BirthChartData;
+      })
+      .filter((p): p is BirthChartData => Boolean(p));
+  } catch (err) {
+    console.error('[BirthChartOG] failed to fetch positions for date', err);
+    return [];
+  }
+}
+
+function formatDateLabel(iso: string): string {
+  // Avoid Intl edge variations; format manually as "Aug 12, 2018"
+  const parts = iso.split('-');
+  if (parts.length < 3) return iso;
+  const [y, m, d] = parts.map((x) => Number(x));
+  if (!y || !m || !d) return iso;
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  const mm = months[(m - 1 + 12) % 12];
+  return `${mm} ${d}, ${y}`;
+}
+
+/**
+ * Top aspect blurb for time-machine OG header. Computed from placements when
+ * available; falls back to undefined.
+ */
+function dominantAspectLabel(placements: BirthChartData[]): string | undefined {
+  if (!placements.length) return undefined;
+  const MAJOR = [
+    { name: 'Conjunction', angle: 0, orb: 6 },
+    { name: 'Opposition', angle: 180, orb: 6 },
+    { name: 'Trine', angle: 120, orb: 5 },
+    { name: 'Square', angle: 90, orb: 5 },
+    { name: 'Sextile', angle: 60, orb: 3 },
+  ];
+  let best: { p1: string; p2: string; type: string; orb: number } | null = null;
+  for (let i = 0; i < placements.length; i += 1) {
+    for (let j = i + 1; j < placements.length; j += 1) {
+      const a = placements[i];
+      const b = placements[j];
+      let diff = Math.abs(a.eclipticLongitude - b.eclipticLongitude);
+      if (diff > 180) diff = 360 - diff;
+      for (const m of MAJOR) {
+        const orb = Math.abs(diff - m.angle);
+        if (orb <= m.orb) {
+          if (!best || orb < best.orb) {
+            best = { p1: a.body, p2: b.body, type: m.name, orb };
+          }
+          break;
+        }
+      }
+    }
+  }
+  if (!best) return undefined;
+  return `${best.p1} ${best.type.toLowerCase()} ${best.p2}`;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -300,8 +435,39 @@ export async function GET(request: NextRequest) {
     const insight =
       shareRecord?.insight ?? sanitize(searchParams.get('insight'), 170);
 
-    const placements = parsePlacements(searchParams.get('placements'));
-    const birthChart = shareRecord?.placements ?? placements;
+    // Time-machine extension: ?date=YYYY-MM-DD, ?event=Label, ?time, ?lat, ?lon.
+    // When `date` is provided and there are no inline placements (and no
+    // share record), we fetch planetary positions for that date and use those
+    // as the chart placements. This preserves the default behaviour when no
+    // `date` is supplied.
+    const dateParam = sanitize(searchParams.get('date'), 32);
+    const eventLabel = sanitize(searchParams.get('event'), 60);
+    // `time`, `lat`, `lon` reserved for future precision (not used by the
+    // current edge-safe positions endpoint, which only consumes ?date=).
+    void searchParams.get('time');
+    void searchParams.get('lat');
+    void searchParams.get('lon');
+
+    const inlinePlacements = parsePlacements(searchParams.get('placements'));
+    let timeMachinePlacements: BirthChartData[] = [];
+    if (
+      dateParam &&
+      !shareRecord &&
+      inlinePlacements.length === 0 &&
+      /^\d{4}-\d{2}-\d{2}/.test(dateParam)
+    ) {
+      timeMachinePlacements = await fetchPlacementsForDate(request, dateParam);
+    }
+    const birthChart =
+      shareRecord?.placements ??
+      (inlinePlacements.length > 0 ? inlinePlacements : timeMachinePlacements);
+
+    const isTimeMachine =
+      Boolean(dateParam) && timeMachinePlacements.length > 0;
+    const dateLabel = dateParam ? formatDateLabel(dateParam) : undefined;
+    const dominantAspect = isTimeMachine
+      ? dominantAspectLabel(birthChart)
+      : undefined;
 
     const theme =
       (element && gradientsByElement[element]) || gradientsByElement.default;
@@ -383,6 +549,74 @@ export async function GET(request: NextRequest) {
       { glyph: astroPointSymbols.ascendant, value: rising, label: 'Rising' },
     ];
 
+    // Time-machine event banner (rendered at the top of either layout when
+    // an `event` label is present, or when a `date` was supplied).
+    const showEventBanner = Boolean(eventLabel || (isTimeMachine && dateLabel));
+    const eventBannerJsx = showEventBanner ? (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 4,
+          padding: '8px 16px',
+          marginBottom: 12,
+          borderRadius: 999,
+          border: '1px solid rgba(255,255,255,0.18)',
+          background: 'rgba(0,0,0,0.35)',
+          alignSelf: 'center',
+          maxWidth: '92%',
+        }}
+      >
+        <span
+          style={{
+            fontSize: 11,
+            letterSpacing: 4,
+            textTransform: 'uppercase',
+            opacity: 0.7,
+            display: 'flex',
+          }}
+        >
+          The sky on
+        </span>
+        <span
+          style={{
+            display: 'flex',
+            fontSize: isLandscape ? 22 : isStory ? 36 : 26,
+            fontWeight: 600,
+            textAlign: 'center',
+            textShadow: SHARE_TITLE_GLOW,
+          }}
+        >
+          {eventLabel ? eventLabel : dateLabel}
+        </span>
+        {eventLabel && dateLabel ? (
+          <span
+            style={{
+              fontSize: 13,
+              opacity: 0.7,
+              display: 'flex',
+            }}
+          >
+            {dateLabel}
+          </span>
+        ) : null}
+        {dominantAspect ? (
+          <span
+            style={{
+              fontSize: 12,
+              opacity: 0.65,
+              display: 'flex',
+              fontStyle: 'italic',
+              color: '#A78BFA',
+            }}
+          >
+            {dominantAspect}
+          </span>
+        ) : null}
+      </div>
+    ) : null;
+
     // Generate unique starfield based on shareId
     const starfieldId = shareId || 'default-birth-chart';
     const stars = generateStarfield(starfieldId, getStarCount(format));
@@ -456,6 +690,7 @@ export async function GET(request: NextRequest) {
             marginBottom: 20,
           }}
         >
+          {eventBannerJsx}
           <div
             style={{
               display: 'flex',
@@ -465,7 +700,7 @@ export async function GET(request: NextRequest) {
               opacity: 0.6,
             }}
           >
-            {archetypeSubtitle}
+            {showEventBanner ? 'A moment in the sky' : archetypeSubtitle}
           </div>
           <div
             style={{
@@ -476,9 +711,13 @@ export async function GET(request: NextRequest) {
               textShadow: SHARE_TITLE_GLOW,
             }}
           >
-            {name ? `${name}'s birth chart` : 'Birth chart highlights'}
+            {showEventBanner
+              ? 'The sky that day'
+              : name
+                ? `${name}'s birth chart`
+                : 'Birth chart highlights'}
           </div>
-          {archetypeTagline && (
+          {!showEventBanner && archetypeTagline && (
             <div
               style={{
                 display: 'flex',
@@ -701,6 +940,7 @@ export async function GET(request: NextRequest) {
               textAlign: 'center',
             }}
           >
+            {eventBannerJsx}
             <div
               style={{
                 display: 'flex',
@@ -710,7 +950,7 @@ export async function GET(request: NextRequest) {
                 opacity: 0.6,
               }}
             >
-              {archetypeSubtitle}
+              {showEventBanner ? 'A moment in the sky' : archetypeSubtitle}
             </div>
             <div
               style={{
@@ -721,9 +961,13 @@ export async function GET(request: NextRequest) {
                 textShadow: SHARE_TITLE_GLOW,
               }}
             >
-              {name ? `${name}'s birth chart` : 'Birth chart highlights'}
+              {showEventBanner
+                ? 'The sky that day'
+                : name
+                  ? `${name}'s birth chart`
+                  : 'Birth chart highlights'}
             </div>
-            {archetypeTagline && (
+            {!showEventBanner && archetypeTagline && (
               <div
                 style={{
                   display: 'flex',

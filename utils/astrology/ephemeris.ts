@@ -44,15 +44,6 @@ export interface SunMoonData {
   dayLength: number;
 }
 
-export interface EphemerisData {
-  location: LocationData;
-  date: Date;
-  sunMoon: SunMoonData;
-  planets: PlanetEphemeris[];
-  stars: StarData[];
-  twilight: TwilightData;
-}
-
 export interface StarData {
   name: string;
   riseSet: RiseSetData;
@@ -66,6 +57,74 @@ export interface TwilightData {
   nauticalDusk: Date | null;
   astronomicalDawn: Date | null;
   astronomicalDusk: Date | null;
+}
+
+const getTimeZoneParts = (date: Date, timezone: string) => {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(date);
+
+  const value = (type: string) =>
+    Number(parts.find((part) => part.type === type)?.value);
+
+  return {
+    year: value('year'),
+    month: value('month'),
+    day: value('day'),
+    hour: value('hour'),
+    minute: value('minute'),
+    second: value('second'),
+  };
+};
+
+const getTimeZoneOffsetMs = (date: Date, timezone: string): number => {
+  const parts = getTimeZoneParts(date, timezone);
+  const asUtc = Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour,
+    parts.minute,
+    parts.second,
+  );
+  return asUtc - date.getTime();
+};
+
+const startOfDayForTimeZone = (date: Date, timezone?: string): Date => {
+  if (!timezone) {
+    const localStart = new Date(date);
+    localStart.setHours(0, 0, 0, 0);
+    return localStart;
+  }
+
+  try {
+    const parts = getTimeZoneParts(date, timezone);
+    const utcMidnight = new Date(
+      Date.UTC(parts.year, parts.month - 1, parts.day, 0, 0, 0, 0),
+    );
+    const offset = getTimeZoneOffsetMs(utcMidnight, timezone);
+    return new Date(utcMidnight.getTime() - offset);
+  } catch {
+    const localStart = new Date(date);
+    localStart.setHours(0, 0, 0, 0);
+    return localStart;
+  }
+};
+
+export interface EphemerisData {
+  location: LocationData;
+  date: Date;
+  sunMoon: SunMoonData;
+  planets: PlanetEphemeris[];
+  stars: StarData[];
+  twilight: TwilightData;
 }
 
 const PLANETS = [
@@ -153,14 +212,15 @@ export const calculateRiseSet = (
 export const calculateSunMoon = (
   observer: Observer,
   date: Date = new Date(),
+  timezone?: string,
 ): SunMoonData => {
-  const astroTime = new AstroTime(date);
+  const astroTime = new AstroTime(startOfDayForTimeZone(date, timezone));
 
-  const sunRise = SearchRiseSet(Body.Sun, observer, +1, astroTime, 1);
-  const sunSet = SearchRiseSet(Body.Sun, observer, -1, astroTime, 1);
+  const sunRise = SearchRiseSet(Body.Sun, observer, +1, astroTime, 1.25);
+  const sunSet = SearchRiseSet(Body.Sun, observer, -1, astroTime, 1.25);
 
-  const moonRise = SearchRiseSet(Body.Moon, observer, +1, astroTime, 1);
-  const moonSet = SearchRiseSet(Body.Moon, observer, -1, astroTime, 1);
+  const moonRise = SearchRiseSet(Body.Moon, observer, +1, astroTime, 1.25);
+  const moonSet = SearchRiseSet(Body.Moon, observer, -1, astroTime, 1.25);
 
   const moonIllumination = Illumination(Body.Moon, astroTime);
   const moonPhaseAngle = moonIllumination.phase_angle;
@@ -287,7 +347,7 @@ export const calculateFullEphemeris = (
 ): EphemerisData => {
   const observer = new Observer(location.latitude, location.longitude, 0);
 
-  const sunMoon = calculateSunMoon(observer, date);
+  const sunMoon = calculateSunMoon(observer, date, location.timezone);
   const planets = calculatePlanetEphemeris(observer, date);
   const stars = calculateStarEphemeris(observer, date);
   const twilight = calculateTwilight(observer, date);
@@ -309,12 +369,14 @@ export const formatTime = (date: Date | null, timezone?: string): string => {
     return date.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
+      hourCycle: 'h23',
       timeZone: timezone,
     });
   } catch {
     return date.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
+      hourCycle: 'h23',
     });
   }
 };

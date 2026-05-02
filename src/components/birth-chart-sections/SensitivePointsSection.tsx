@@ -5,6 +5,7 @@ import {
   zodiacSymbol,
   astrologicalPoints,
 } from '../../../utils/zodiac/zodiac';
+import { SectionGuide } from './SectionGuide';
 
 interface SensitivePointsSectionProps {
   birthChartData: BirthChartData[];
@@ -61,11 +62,15 @@ export function SensitivePointsSection({
 
   return (
     <CollapsibleSection
-      title='Sensitive Points'
+      title='Pro layer: Sensitive Points'
       defaultCollapsed={true}
       persistState={true}
     >
       <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+        <SectionGuide label='Pro layer' variant='pro'>
+          These points refine the chart edges: vocation, roots, relationships,
+          turning points, and symbolic growth paths.
+        </SectionGuide>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           {midheaven && (
             <div className='border-l-2 border-lunary-highlight pl-3'>

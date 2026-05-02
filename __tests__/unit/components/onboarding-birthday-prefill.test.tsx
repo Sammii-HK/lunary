@@ -81,7 +81,7 @@ describe('OnboardingFlow birthday pre-fill', () => {
     render(<OnboardingFlow forceOpen />);
 
     // Navigate from welcome to birthday step
-    const getStarted = screen.getByRole('button', { name: 'Get Started' });
+    const getStarted = screen.getByRole('button', { name: 'Show me my Big 3' });
     await userEvent.click(getStarted);
 
     expect(screen.getByText('Refine Your Birth Chart')).toBeInTheDocument();
@@ -102,7 +102,7 @@ describe('OnboardingFlow birthday pre-fill', () => {
     render(<OnboardingFlow forceOpen />);
 
     // Navigate from welcome to birthday step
-    const getStarted = screen.getByRole('button', { name: 'Get Started' });
+    const getStarted = screen.getByRole('button', { name: 'Show me my Big 3' });
     await userEvent.click(getStarted);
 
     // The optional details section should be auto-expanded when birthday exists

@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
+import Link from 'next/link';
 import {
+  BookOpen,
+  CalendarDays,
+  CheckCircle2,
   Loader2,
   Lock as LockIcon,
   Sparkles,
@@ -20,6 +24,7 @@ import {
 } from '@/constants/tarotSpreads';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { TarotTransitConnection } from './TarotTransitConnection';
+import { getTarotSuitAccent, TarotSuitIcon } from './TarotSuitIcon';
 import type { BirthChartPlacement } from '@/context/UserContext';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { isInDemoMode } from '@/lib/demo-mode';
@@ -33,25 +38,6 @@ export type SubscriptionStatus =
   | 'active'
   | 'cancelled'
   | 'past_due';
-
-export interface TarotSpreadExperienceProps {
-  userId?: string;
-  userName?: string;
-  userBirthday?: string;
-  birthChart?: BirthChartPlacement[];
-  userBirthLocation?: string;
-  subscriptionPlan: {
-    plan: TarotPlan;
-    status: SubscriptionStatus;
-  };
-  onRequireUpgrade?: (requiredPlan: TarotPlan) => void;
-  onCardPreview?: (card: {
-    name: string;
-    keywords: string[];
-    information: string;
-  }) => void;
-  onShareReading?: (reading: SpreadReadingRecord) => void;
-}
 
 type SpreadReadingCard = {
   positionId: string;
@@ -82,6 +68,25 @@ export type SpreadReadingRecord = {
   createdAt: string;
   updatedAt: string;
 };
+
+export interface TarotSpreadExperienceProps {
+  userId?: string;
+  userName?: string;
+  userBirthday?: string;
+  birthChart?: BirthChartPlacement[];
+  userBirthLocation?: string;
+  subscriptionPlan: {
+    plan: TarotPlan;
+    status: SubscriptionStatus;
+  };
+  onRequireUpgrade?: (requiredPlan: TarotPlan) => void;
+  onCardPreview?: (card: {
+    name: string;
+    keywords: string[];
+    information: string;
+  }) => void;
+  onShareReading?: (reading: SpreadReadingRecord) => void;
+}
 
 type UsageSnapshot = {
   plan: TarotPlan;
@@ -186,6 +191,9 @@ export function TarotSpreadExperience({
     useState<number>(0);
   const [isSavingNotes, setIsSavingNotes] = useState<boolean>(false);
   const [lastSavedNotes, setLastSavedNotes] = useState<string>('');
+  const [journalSaveState, setJournalSaveState] = useState<
+    'idle' | 'saving' | 'saved' | 'error'
+  >('idle');
   const [error, setError] = useState<string | null>(null);
 
   const selectedSpread = selectedSpreadSlug
@@ -355,6 +363,7 @@ export function TarotSpreadExperience({
     if (!currentReading) return;
     setNotesDraft(currentReading.notes || '');
     setLastSavedNotes(currentReading.notes || '');
+    setJournalSaveState('idle');
     setExpandedTransitCardIndex(0); // Reset to first card when reading changes
   }, [currentReading]);
 
@@ -500,6 +509,59 @@ export function TarotSpreadExperience({
       );
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleSaveReflectionToJournal = async () => {
+    if (!currentReading || !userId || journalSaveState === 'saving') return;
+
+    const cardLines = currentReading.cards
+      .map(
+        (card) => `- ${card.positionLabel}: ${card.card.name}, ${card.insight}`,
+      )
+      .join('\n');
+    const promptLines = currentReading.journalingPrompts
+      .slice(0, 3)
+      .map((prompt) => `- ${prompt}`)
+      .join('\n');
+    const notes = notesDraft.trim();
+    const content = [
+      `Tarot reflection: ${currentReading.spreadName}`,
+      '',
+      currentReading.summary,
+      '',
+      'Cards:',
+      cardLines,
+      promptLines ? '\nPrompts:\n' + promptLines : '',
+      notes ? '\nMy notes:\n' + notes : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    setJournalSaveState('saving');
+    try {
+      const response = await fetch('/api/journal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          content,
+          category: 'journal',
+          source: 'tarot',
+          sourceMessageId: currentReading.id,
+          moodTags: ['tarot', 'reflection', currentReading.spreadSlug],
+          cardReferences: currentReading.cards.map((card) => card.card.name),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save reflection');
+      }
+
+      setJournalSaveState('saved');
+    } catch (err) {
+      console.error('[TarotSpreadExperience] Failed to save journal:', err);
+      setJournalSaveState('error');
     }
   };
 
@@ -793,6 +855,20 @@ export function TarotSpreadExperience({
                     </h3>
                   </div>
                   <div className='flex items-center gap-2'>
+                    {currentReading?.createdAt && (
+                      <Link
+                        href={`/app/time-machine?${new URLSearchParams({
+                          date: new Date(currentReading.createdAt)
+                            .toISOString()
+                            .slice(0, 10),
+                          label: `Tarot: ${currentReading.spreadName}`,
+                        }).toString()}`}
+                        className='inline-flex items-center gap-2 rounded-md border border-stroke-subtle bg-surface-elevated/40 px-3 py-1 text-xs font-medium text-content-secondary transition-colors hover:border-lunary-primary/40 hover:text-content-primary'
+                      >
+                        <CalendarDays className='h-4 w-4' />
+                        Sky that day
+                      </Link>
+                    )}
                     {onShareReading && currentReading && (
                       <button
                         type='button'
@@ -829,54 +905,76 @@ export function TarotSpreadExperience({
                 {currentReading?.cards?.map((card, cardIndex) => {
                   const isTransitExpanded =
                     expandedTransitCardIndex === cardIndex;
+                  const cardAccent = getTarotSuitAccent({
+                    cardName: card.card.name,
+                    suit: card.card.suit,
+                    arcana: card.card.arcana,
+                  });
                   return (
                     <div
                       key={card.positionId}
                       data-testid={`spread-card-${cardIndex}`}
-                      className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/40 p-4'
+                      className='rounded-xl border border-stroke-subtle/50 bg-gradient-to-br from-surface-elevated/65 to-layer-base/35 p-3 shadow-[0_16px_55px_rgba(0,0,0,0.16)] sm:p-4'
                     >
                       {/* Card header - clickable to preview */}
                       <button
                         type='button'
                         onClick={() => handleCardPreview(card.card)}
-                        className='w-full flex flex-col items-start gap-2 text-left transition-colors hover:opacity-80'
+                        className='w-full flex items-start gap-3 text-left transition-colors hover:opacity-90'
                       >
-                        <div className='flex w-full items-center justify-between'>
-                          <div>
-                            <p className='text-xs uppercase tracking-wide text-content-muted'>
-                              {card.positionLabel}
-                            </p>
-                            <p className='text-xs text-content-muted'>
-                              {card.positionPrompt}
-                            </p>
-                          </div>
-                          <span className='text-[10px] uppercase tracking-[0.2em] text-content-muted'>
-                            {card.card.arcana === 'major' ? 'Major' : 'Minor'}
-                          </span>
+                        <div
+                          className={clsx(
+                            'flex h-16 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-gradient-to-br text-content-primary shadow-inner shadow-black/25 sm:h-20 sm:w-14 sm:rounded-xl',
+                            cardAccent,
+                          )}
+                        >
+                          <TarotSuitIcon
+                            cardName={card.card.name}
+                            suit={card.card.suit}
+                            arcana={card.card.arcana}
+                            className='h-6 w-6 text-content-primary sm:h-7 sm:w-7'
+                          />
                         </div>
-                        <p className='text-base sm:text-lg font-semibold text-content-primary'>
-                          {card.card.name}
-                        </p>
-                        <p className='text-sm text-content-secondary leading-relaxed'>
-                          "{card.insight}"
-                        </p>
-                        <div className='flex flex-wrap gap-1'>
-                          {card.card.keywords.slice(0, 4).map((keyword) => (
-                            <span
-                              key={`${card.positionId}-${keyword}`}
-                              className='text-xs px-2 py-0.5 rounded text-content-primary bg-surface-elevated border border-stroke-subtle'
-                            >
-                              {keyword}
+                        <div className='flex min-w-0 flex-1 flex-col items-start gap-2'>
+                          <div className='flex w-full items-start justify-between gap-3'>
+                            <div>
+                              <p className='text-xs uppercase tracking-wide text-content-muted'>
+                                {card.positionLabel}
+                              </p>
+                              <p className='text-xs text-content-muted'>
+                                {card.positionPrompt}
+                              </p>
+                            </div>
+                            <span className='rounded-full border border-stroke-subtle/60 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-content-muted'>
+                              {card.card.arcana === 'major'
+                                ? 'Major'
+                                : card.card.suit || 'Minor'}
                             </span>
-                          ))}
+                          </div>
+                          <p className='text-base sm:text-lg font-semibold text-content-primary'>
+                            {card.card.name}
+                          </p>
+                          <p className='text-sm text-content-secondary leading-relaxed'>
+                            "{card.insight}"
+                          </p>
+                          <div className='flex flex-wrap gap-1'>
+                            {card.card.keywords.slice(0, 4).map((keyword) => (
+                              <span
+                                key={`${card.positionId}-${keyword}`}
+                                className='text-xs px-2 py-0.5 rounded text-content-primary bg-surface-elevated border border-stroke-subtle'
+                              >
+                                {keyword}
+                              </span>
+                            ))}
+                          </div>
+                          <p className='text-xs text-content-brand'>
+                            Tap to explore the full meaning
+                          </p>
                         </div>
-                        <p className='text-xs text-content-brand'>
-                          Tap to explore the full meaning
-                        </p>
                       </button>
 
                       {/* In Your Chart - collapsible per card transit insights */}
-                      <div className='mt-4'>
+                      <div className='mt-3 sm:mt-4'>
                         <button
                           type='button'
                           data-testid={`spread-transit-toggle-${cardIndex}`}
@@ -885,7 +983,7 @@ export function TarotSpreadExperience({
                               isTransitExpanded ? -1 : cardIndex,
                             )
                           }
-                          className='w-full flex items-center justify-between px-4 py-3 rounded-lg border border-lunary-primary-800/30 bg-layer-deep/20 hover:bg-layer-deep/30 transition-colors'
+                          className='w-full flex items-center justify-between px-3 py-2 rounded-lg border border-lunary-primary-800/30 bg-layer-deep/20 hover:bg-layer-deep/30 transition-colors sm:px-4 sm:py-3'
                         >
                           <span className='text-sm font-medium text-content-brand-accent'>
                             In Your Chart
@@ -934,7 +1032,7 @@ export function TarotSpreadExperience({
                     Reflection Notes
                   </p>
                   <span className='text-xs text-content-muted'>
-                    {isSavingNotes ? 'Saving…' : 'Auto-saved'}
+                    {isSavingNotes ? 'Saving...' : 'Auto-saved'}
                   </span>
                 </div>
                 <textarea
@@ -944,6 +1042,31 @@ export function TarotSpreadExperience({
                   placeholder='Capture rituals, emotions, and how the message landed today.'
                   className='w-full rounded-lg border border-stroke-subtle/60 bg-surface-base/70 p-3 text-sm text-content-primary placeholder:text-content-muted focus:border-lunary-primary-600 focus:outline-none focus:ring-1 focus:ring-lunary-primary-600'
                 />
+                <div className='flex flex-wrap items-center justify-between gap-2 rounded-lg border border-stroke-subtle/45 bg-surface-elevated/35 px-3 py-2'>
+                  <p className='text-xs text-content-muted'>
+                    Save this spread into your journal so it can feed long-term
+                    patterns.
+                  </p>
+                  <button
+                    type='button'
+                    onClick={handleSaveReflectionToJournal}
+                    disabled={journalSaveState === 'saving'}
+                    className='inline-flex items-center gap-1.5 rounded-full border border-lunary-primary/35 bg-lunary-primary/10 px-3 py-1.5 text-xs font-medium text-content-brand transition-colors hover:bg-lunary-primary/20 disabled:opacity-60'
+                  >
+                    {journalSaveState === 'saving' ? (
+                      <Loader2 className='h-3.5 w-3.5 animate-spin' />
+                    ) : journalSaveState === 'saved' ? (
+                      <CheckCircle2 className='h-3.5 w-3.5' />
+                    ) : (
+                      <BookOpen className='h-3.5 w-3.5' />
+                    )}
+                    {journalSaveState === 'saved'
+                      ? 'Saved to journal'
+                      : journalSaveState === 'error'
+                        ? 'Try again'
+                        : 'Save to journal'}
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -971,22 +1094,30 @@ export function TarotSpreadExperience({
                 <div
                   key={reading.id}
                   className={clsx(
-                    'group flex items-start justify-between gap-3 rounded-md border px-3 py-2',
+                    'group flex items-start justify-between gap-3 rounded-xl border px-3 py-3 transition-colors',
                     currentReading?.id === reading.id
-                      ? 'border-lunary-primary-600 bg-layer-deep'
-                      : 'border-stroke-subtle/40 bg-surface-elevated/40 hover:border-lunary-primary-700',
+                      ? 'border-lunary-primary-500 bg-gradient-to-br from-lunary-primary/15 to-layer-deep ring-1 ring-lunary-primary/25'
+                      : 'border-stroke-subtle/40 bg-gradient-to-br from-surface-elevated/45 to-layer-base/20 hover:border-lunary-primary-700',
                   )}
                 >
                   <button
                     onClick={() => setCurrentReading(reading)}
-                    className='flex-1 text-left'
+                    className='flex flex-1 items-start gap-3 text-left'
                   >
-                    <p className='text-sm font-medium text-content-primary'>
-                      {reading.spreadName}
-                    </p>
-                    <p className='text-xs text-content-muted'>
-                      {new Date(reading.createdAt).toLocaleDateString()}
-                    </p>
+                    <div className='flex h-10 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-layer-deep text-[10px] font-semibold tracking-[0.16em] text-content-brand-accent'>
+                      {reading.cards.length}
+                    </div>
+                    <div className='min-w-0 flex-1'>
+                      <p className='truncate text-sm font-medium text-content-primary'>
+                        {reading.spreadName}
+                      </p>
+                      <p className='text-xs text-content-muted'>
+                        {new Date(reading.createdAt).toLocaleDateString()}
+                      </p>
+                      <p className='mt-1 line-clamp-2 text-xs leading-relaxed text-content-secondary'>
+                        {reading.summary}
+                      </p>
+                    </div>
                   </button>
                   <button
                     onClick={() => handleArchive(reading.id)}

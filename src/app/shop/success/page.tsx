@@ -5,6 +5,7 @@ import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 import { NewsletterCapture } from '@/components/shop/NewsletterCapture';
 
 interface PurchaseDetails {
@@ -128,14 +129,7 @@ export default function ShopSuccessPage() {
   };
 
   if (loading) {
-    return (
-      <div className='min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-lunary-primary-400 mx-auto mb-4' />
-          <p className='text-slate-300'>Processing your purchase...</p>
-        </div>
-      </div>
-    );
+    return <BrandedPageLoader message='Processing your purchase…' />;
   }
 
   if (error) {

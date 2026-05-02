@@ -15,7 +15,15 @@ import {
 } from '@/lib/copy/transit-copy';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
-import { Check, Circle, Orbit, ArrowRight, Lock } from 'lucide-react';
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Circle,
+  Orbit,
+  ArrowRight,
+  Lock,
+} from 'lucide-react';
 import { mutate } from 'swr';
 import Link from 'next/link';
 import { recordCheckIn, type StreakRecord } from '@/lib/streak/check-in';
@@ -62,6 +70,21 @@ const SLOW_PLANET_SCORE: Record<string, number> = {
 };
 const getTodayString = () => new Date().toISOString().split('T')[0];
 
+const hasUsableBirthChart = (chart: unknown): chart is any[] =>
+  Array.isArray(chart) && chart.length > 0;
+
+const sanitiseUnavailableChartCopy = (text: string | null | undefined) => {
+  if (!text) return '';
+  if (
+    /birth chart data is not available|birth chart isn't available|birth chart is not available|while your birth chart isn't available|while your birth chart is not available/i.test(
+      text,
+    )
+  ) {
+    return "Today's wider sky is still moving with you. Notice what feels ready to begin, then choose the smallest next step.";
+  }
+  return text;
+};
+
 // Use sessionStorage in demo mode so each visitor gets a fresh view
 const getStorage = () => {
   if (typeof window === 'undefined') return null;
@@ -78,11 +101,15 @@ export const PersonalizedHoroscopePreview = () => {
     subscription.plan,
     'personalized_horoscope',
   );
+  const usableBirthChart = useMemo(
+    () => (hasUsableBirthChart(user?.birthChart) ? user.birthChart : null),
+    [user?.birthChart],
+  );
   const canAccessPersonalized =
     authStatus.isAuthenticated &&
     hasPersonalizedAccess &&
     user?.birthday &&
-    user?.birthChart;
+    usableBirthChart;
 
   const { currentAstrologicalChart } = usePlanetaryChart();
   const router = useRouter();
@@ -93,13 +120,21 @@ export const PersonalizedHoroscopePreview = () => {
   const [streakInfo, setStreakInfo] = useState<StreakRecord | null>(null);
   const [horoscope, setHoroscope] = useState<CachedHoroscope | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Compact mobile mode: only headline + tiny ritual action by default.
+  // Tap to reveal overview, focus areas, house chips. Auto-expanded on desktop.
+  const [mobileExpanded, setMobileExpanded] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+    if (isDesktop) setMobileExpanded(true);
+  }, []);
   const todayString = getTodayString();
 
-  // Top 2-3 transit aspects ranked by significance — paid user digest
+  // Top 2-3 transit aspects ranked by significance, paid user digest
   const topTransitAspects = useMemo(() => {
-    if (!user?.birthChart || !currentAstrologicalChart?.length) return [];
+    if (!usableBirthChart || !currentAstrologicalChart?.length) return [];
     const aspects = calculateTransitAspects(
-      user.birthChart as Parameters<typeof calculateTransitAspects>[0],
+      usableBirthChart as Parameters<typeof calculateTransitAspects>[0],
       currentAstrologicalChart,
     );
     return aspects
@@ -110,12 +145,12 @@ export const PersonalizedHoroscopePreview = () => {
       }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 2);
-  }, [user?.birthChart, currentAstrologicalChart]);
+  }, [usableBirthChart, currentAstrologicalChart]);
 
-  // House placement chips for free users — real chart data, interpretation locked
+  // House placement chips for free users, real chart data, interpretation locked
   const freePlanetTeases = useMemo(() => {
-    if (!user?.birthChart || !currentAstrologicalChart?.length) return [];
-    const birthChart = user.birthChart as Array<{
+    if (!usableBirthChart || !currentAstrologicalChart?.length) return [];
+    const birthChart = usableBirthChart as Array<{
       body: string;
       eclipticLongitude: number;
     }>;
@@ -136,7 +171,7 @@ export const PersonalizedHoroscopePreview = () => {
       })
       .filter((x): x is { planet: string; house: number } => x !== null)
       .slice(0, 3);
-  }, [user?.birthChart, currentAstrologicalChart]);
+  }, [usableBirthChart, currentAstrologicalChart]);
   const variant = useFeatureFlagVariant('paywall_preview_style_v1');
   const ctaCopy = useCTACopy();
 
@@ -187,10 +222,9 @@ export const PersonalizedHoroscopePreview = () => {
     if (!authStatus.isAuthenticated || !user?.birthday) return;
     let active = true;
     setIsLoading(true);
-    const profile =
-      user?.birthChart && typeof user.birthChart === 'object'
-        ? { birthChart: user.birthChart }
-        : undefined;
+    const profile = usableBirthChart
+      ? { birthChart: usableBirthChart }
+      : undefined;
 
     const fetchHoroscope = async () => {
       try {
@@ -198,7 +232,11 @@ export const PersonalizedHoroscopePreview = () => {
         if (response.ok) {
           const data = (await response.json()) as CachedHoroscope;
           if (active) {
-            setHoroscope(data);
+            setHoroscope({
+              ...data,
+              overview: sanitiseUnavailableChartCopy(data.overview),
+              dailyGuidance: sanitiseUnavailableChartCopy(data.dailyGuidance),
+            });
             setIsLoading(false);
           }
           return;
@@ -216,7 +254,11 @@ export const PersonalizedHoroscopePreview = () => {
         profile,
       );
       if (active) {
-        setHoroscope(fallback);
+        setHoroscope({
+          ...fallback,
+          overview: sanitiseUnavailableChartCopy(fallback.overview),
+          dailyGuidance: sanitiseUnavailableChartCopy(fallback.dailyGuidance),
+        });
         setIsLoading(false);
       }
     };
@@ -229,7 +271,7 @@ export const PersonalizedHoroscopePreview = () => {
     authStatus.isAuthenticated,
     user?.birthday,
     user?.name,
-    user?.birthChart,
+    usableBirthChart,
   ]);
 
   // Don't show at all for unauthenticated users or users without birthday
@@ -289,7 +331,9 @@ export const PersonalizedHoroscopePreview = () => {
 
   const focusText = ritualComplete
     ? "You honoured today's focus."
-    : horoscope?.overview || horoscope?.dailyGuidance || '';
+    : sanitiseUnavailableChartCopy(
+        horoscope?.overview || horoscope?.dailyGuidance || '',
+      );
   const anchorCopy = ritualComplete
     ? 'Ritual complete for today.'
     : horoscope?.tinyAction ||
@@ -305,7 +349,9 @@ export const PersonalizedHoroscopePreview = () => {
   const renderPreview = () => {
     // For free users, show PERSONALIZED horoscope preview (what they're missing)
     // Use the horoscope that was already fetched (personalized for authenticated users)
-    const content = horoscope?.overview || horoscope?.dailyGuidance || '';
+    const content = sanitiseUnavailableChartCopy(
+      horoscope?.overview || horoscope?.dailyGuidance || '',
+    );
     const ritualText = horoscope?.tinyAction || 'Honor one grounded ritual';
 
     if (!content) return null;
@@ -384,11 +430,28 @@ export const PersonalizedHoroscopePreview = () => {
         }}
       >
         <div className='space-y-3'>
-          <div>
+          <div className='flex items-start justify-between gap-2'>
             <h3 className='text-sm leading-snug text-content-primary flex items-center'>
               <Orbit className='mr-2 w-4 h-4 text-content-brand-accent' />
               Today's Cosmic Energy
             </h3>
+            <button
+              type='button'
+              aria-expanded={mobileExpanded}
+              aria-label={mobileExpanded ? 'Hide details' : 'Show details'}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setMobileExpanded((open) => !open);
+              }}
+              className='md:hidden inline-flex h-6 w-6 items-center justify-center rounded-full text-content-muted hover:text-content-primary'
+            >
+              {mobileExpanded ? (
+                <ChevronUp className='h-4 w-4' />
+              ) : (
+                <ChevronDown className='h-4 w-4' />
+              )}
+            </button>
           </div>
 
           {isLoading ? (
@@ -397,6 +460,16 @@ export const PersonalizedHoroscopePreview = () => {
               <div className='h-3 bg-surface-card rounded animate-pulse w-5/6' />
               <div className='h-3 bg-surface-card rounded animate-pulse w-4/6' />
             </div>
+          ) : !mobileExpanded ? (
+            <>
+              <p className='text-xs text-content-muted leading-snug'>
+                {ctaCopy.horoscope}
+              </p>
+              <span className='flex items-center gap-1.5 text-xs text-content-secondary'>
+                <span>Tap to reveal today's reading</span>
+                <ArrowRight className='w-4 h-4' />
+              </span>
+            </>
           ) : (
             <>
               {freePlanetTeases.length > 0 ? (
@@ -487,12 +560,31 @@ export const PersonalizedHoroscopePreview = () => {
     >
       <div className='space-y-3'>
         <div className='flex items-center justify-between gap-3'>
-          <div>
+          <div className='min-w-0 flex-1'>
             <h3 className='text-sm leading-snug text-content-primary flex'>
-              <Orbit className='mr-2 w-4 h-4 text-content-brand-accent' />
-              {horoscope?.headline || 'Personalized review'}
+              <Orbit className='mr-2 w-4 h-4 text-content-brand-accent shrink-0' />
+              <span className='truncate'>
+                {horoscope?.headline || 'Personalized review'}
+              </span>
             </h3>
           </div>
+          <button
+            type='button'
+            aria-expanded={mobileExpanded}
+            aria-label={mobileExpanded ? 'Hide details' : 'Show details'}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              setMobileExpanded((open) => !open);
+            }}
+            className='md:hidden inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-content-muted hover:text-content-primary'
+          >
+            {mobileExpanded ? (
+              <ChevronUp className='h-4 w-4' />
+            ) : (
+              <ChevronDown className='h-4 w-4' />
+            )}
+          </button>
         </div>
 
         {isLoading ? (
@@ -500,6 +592,18 @@ export const PersonalizedHoroscopePreview = () => {
             <div className='h-3 bg-surface-card rounded animate-pulse' />
             <div className='h-3 bg-surface-card rounded animate-pulse w-5/6' />
             <div className='h-3 bg-surface-card rounded animate-pulse w-4/6' />
+          </div>
+        ) : !mobileExpanded ? (
+          <div className='rounded-xl border border-stroke-subtle/60 bg-surface-elevated/60 px-3 py-2'>
+            <p className='text-xs text-content-secondary leading-snug line-clamp-2'>
+              {focusText || horoscope?.dailyGuidance}
+            </p>
+            {topTransitAspects.length > 0 && (
+              <p className='mt-1 text-[0.65rem] text-content-muted'>
+                {topTransitAspects.length} personal transit
+                {topTransitAspects.length === 1 ? '' : 's'} active
+              </p>
+            )}
           </div>
         ) : (
           <>

@@ -33,13 +33,17 @@ export interface PersonalCard {
 }
 
 export interface UserLocation {
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
   city?: string;
   country?: string;
   timezone?: string;
   birthTime?: string;
   birthLocation?: string;
+  birthCoordinates?: {
+    latitude: number;
+    longitude: number;
+  };
   birthTimezone?: string;
 }
 

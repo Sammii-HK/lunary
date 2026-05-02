@@ -3,6 +3,8 @@
 import { BirthChartData } from '../../../utils/astrology/birthChart';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { bodiesSymbols } from '../../../utils/zodiac/zodiac';
+import { AutoLinkText } from '@/components/glossary/AutoLinkText';
+import { SectionGuide } from './SectionGuide';
 
 interface PersonalPlanetsSectionProps {
   birthChartData: BirthChartData[];
@@ -70,6 +72,10 @@ export function PersonalPlanetsSection({
       persistState={true}
     >
       <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+        <SectionGuide label='Beginner focus' variant='start'>
+          Read these after your Big Three. They describe how your mind, desire,
+          affection, and drive tend to express themselves.
+        </SectionGuide>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           {personalPlanets.map((planet) => {
             const interpretation = getPlanetaryInterpretation(planet);
@@ -99,9 +105,12 @@ export function PersonalPlanetsSection({
                   )}
                   {dignityStatus && getDignityBadge(dignityStatus)}
                 </h5>
-                <p className='text-xs text-content-secondary mt-1'>
+                <AutoLinkText
+                  as='p'
+                  className='text-xs text-content-secondary mt-1'
+                >
                   {interpretation}
-                </p>
+                </AutoLinkText>
               </div>
             );
           })}

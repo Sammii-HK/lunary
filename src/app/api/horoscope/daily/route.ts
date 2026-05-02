@@ -4,13 +4,16 @@ import { revalidateTag } from 'next/cache';
 import { requireUser } from '@/lib/ai/auth';
 import { decrypt } from '@/lib/encryption';
 import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
-import { getDailyCacheHeaders } from '@/lib/cache-utils';
 import { CURRENT_BIRTH_CHART_VERSION } from '../../../../../utils/astrology/chart-version';
 import { decryptLocation } from '@/lib/location-encryption';
 
 export const dynamic = 'force-dynamic';
 
 export const runtime = 'nodejs';
+
+const PRIVATE_DAILY_HEADERS = {
+  'Cache-Control': 'private, no-store, max-age=0, must-revalidate',
+};
 
 interface UserProfile {
   name?: string;
@@ -70,6 +73,55 @@ interface CachedHoroscope {
   dailyAffirmation: string;
   generatedAt: string;
   birthChartVersion?: number;
+}
+
+function sanitiseUnavailableChartCopy(text: string | undefined): string {
+  if (!text) return '';
+  if (hasUnavailableChartCopy(text)) {
+    return "Today's wider sky is still moving with you. Notice what feels ready to begin, then choose the smallest next step.";
+  }
+  return text;
+}
+
+function hasUnavailableChartCopy(text: string | undefined): boolean {
+  if (!text) return false;
+  return /birth chart data is not available|birth chart isn't available|birth chart is not available|while your birth chart isn't available|while your birth chart is not available/i.test(
+    text,
+  );
+}
+
+function hasGenericFallbackCopy(text: string | undefined): boolean {
+  if (!text) return false;
+  return /today's wider sky|notice what feels ready to begin|universal day \d+ brings/i.test(
+    text,
+  );
+}
+
+function hasUsableBirthChart(chart: unknown): boolean {
+  return Array.isArray(chart) && chart.length > 0;
+}
+
+function cachedMentionsMissingChart(data: CachedHoroscope | null): boolean {
+  if (!data) return false;
+  return [
+    data.headline,
+    data.overview,
+    data.dailyGuidance,
+    data.personalInsight,
+    data.cosmicHighlight,
+  ].some(
+    (text) => hasUnavailableChartCopy(text) || hasGenericFallbackCopy(text),
+  );
+}
+
+function sanitiseHoroscopeCopy<T extends CachedHoroscope>(data: T): T {
+  return {
+    ...data,
+    headline: sanitiseUnavailableChartCopy(data.headline),
+    overview: sanitiseUnavailableChartCopy(data.overview),
+    dailyGuidance: sanitiseUnavailableChartCopy(data.dailyGuidance),
+    personalInsight: sanitiseUnavailableChartCopy(data.personalInsight),
+  };
 }
 
 // Get cached horoscope from database
@@ -197,7 +249,7 @@ export async function GET(request: NextRequest) {
             today,
           );
 
-          const horoscopeData = {
+          const horoscopeData = sanitiseHoroscopeCopy({
             userId: 'demo-fallback',
             date: today.toISOString().split('T')[0],
             sunSign: horoscope.sunSign,
@@ -212,7 +264,7 @@ export async function GET(request: NextRequest) {
             cosmicHighlight: horoscope.cosmicHighlight,
             dailyAffirmation: horoscope.dailyAffirmation,
             generatedAt: new Date().toISOString(),
-          };
+          });
 
           const response = NextResponse.json(
             {
@@ -220,7 +272,7 @@ export async function GET(request: NextRequest) {
               cached: false,
             },
             {
-              headers: getDailyCacheHeaders(),
+              headers: PRIVATE_DAILY_HEADERS,
             },
           );
 
@@ -266,18 +318,23 @@ export async function GET(request: NextRequest) {
     // Fetch profile to check birth chart version before serving from cache
     const profile = cached ? await getUserProfile(userId) : null;
     const currentChartVersion = profile?.birthChartVersion ?? null;
+    const profileHasBirthChart = hasUsableBirthChart(profile?.birthChart);
     const cacheIsStale =
-      currentChartVersion !== null &&
-      cached?.birthChartVersion !== undefined &&
-      cached.birthChartVersion !== currentChartVersion;
+      (currentChartVersion !== null &&
+        cached?.birthChartVersion !== undefined &&
+        cached.birthChartVersion !== currentChartVersion) ||
+      (profileHasBirthChart &&
+        (cached?.birthChartVersion === undefined ||
+          cachedMentionsMissingChart(cached)));
     if (cached && isCacheComplete && !cacheIsStale) {
+      const safeCached = sanitiseHoroscopeCopy(cached);
       const response = NextResponse.json(
         {
-          ...cached,
+          ...safeCached,
           cached: true,
         },
         {
-          headers: getDailyCacheHeaders(), // Resets at midnight London time
+          headers: PRIVATE_DAILY_HEADERS,
         },
       );
 
@@ -324,7 +381,7 @@ export async function GET(request: NextRequest) {
       today,
     );
 
-    const horoscopeData: CachedHoroscope = {
+    const horoscopeData: CachedHoroscope = sanitiseHoroscopeCopy({
       userId,
       date: dateStr,
       sunSign: horoscope.sunSign,
@@ -340,7 +397,7 @@ export async function GET(request: NextRequest) {
       dailyAffirmation: horoscope.dailyAffirmation,
       generatedAt: new Date().toISOString(),
       birthChartVersion,
-    };
+    });
 
     // Save to cache (fire and forget)
     saveHoroscope(userId, dateStr, horoscopeData).catch((err) =>
@@ -353,7 +410,7 @@ export async function GET(request: NextRequest) {
         cached: false,
       },
       {
-        headers: getDailyCacheHeaders(), // Resets at midnight London time
+        headers: PRIVATE_DAILY_HEADERS,
       },
     );
   } catch (error: any) {
@@ -394,7 +451,7 @@ export async function POST(request: NextRequest) {
       today,
     );
 
-    const horoscopeData: CachedHoroscope = {
+    const horoscopeData: CachedHoroscope = sanitiseHoroscopeCopy({
       userId,
       date: dateStr,
       sunSign: horoscope.sunSign,
@@ -410,16 +467,21 @@ export async function POST(request: NextRequest) {
       dailyAffirmation: horoscope.dailyAffirmation,
       generatedAt: new Date().toISOString(),
       birthChartVersion,
-    };
+    });
 
     // Save to cache
     await saveHoroscope(userId, dateStr, horoscopeData);
 
-    return NextResponse.json({
-      ...horoscopeData,
-      cached: false,
-      refreshed: true,
-    });
+    return NextResponse.json(
+      {
+        ...horoscopeData,
+        cached: false,
+        refreshed: true,
+      },
+      {
+        headers: PRIVATE_DAILY_HEADERS,
+      },
+    );
   } catch (error: any) {
     if (error.name === 'UnauthorizedError') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

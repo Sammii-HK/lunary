@@ -22,6 +22,7 @@ import { TourTrigger } from '@/components/feature-tour/tour-trigger';
 import { useMilestones } from '@/hooks/useMilestones';
 import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 import { ReferralOnboardingModal } from '@/components/referrals/ReferralOnboardingModal';
+import { MoonPhaseIcon } from '@/components/MoonPhaseIcon';
 
 const DateWidget = dynamic(
   () =>
@@ -213,6 +214,17 @@ const WeeklyChallengeCard = dynamic(
   },
 );
 
+const WebPushContextualPrompt = dynamic(
+  () =>
+    import('@/components/WebPushContextualPrompt').then((m) => ({
+      default: m.WebPushContextualPrompt,
+    })),
+  {
+    ssr: false,
+    loading: () => null,
+  },
+);
+
 export default function AppDashboardClient() {
   const { user } = useUser();
   const authState = useAuthStatus();
@@ -245,9 +257,11 @@ export default function AppDashboardClient() {
   const [moonExpanded, setMoonExpanded] = useState<boolean>(false);
   const [skyNowExpanded, setSkyNowExpanded] = useState<boolean>(false);
   const [showEveningRitual, setShowEveningRitual] = useState(false);
+  const [showExploreMore, setShowExploreMore] = useState(false);
   const isEvening = new Date().getHours() >= 18;
   const { uncelebrated: uncelebratedMilestone, celebrate: celebrateMilestone } =
     useMilestones();
+  const showDashboardExtras = isDemoMode || showExploreMore;
 
   // Defer heavy components for faster initial render
   const [showHoroscope, setShowHoroscope] = useState(false);
@@ -429,6 +443,8 @@ export default function AppDashboardClient() {
 
         <PostTrialMessaging />
 
+        {authState.isAuthenticated && <WebPushContextualPrompt />}
+
         <header>
           <div className='flex items-center justify-between mb-2'>
             <div className='w-16' />
@@ -462,81 +478,165 @@ export default function AppDashboardClient() {
           </div>
         </header>
 
-        {/* Zodiac Season Banner */}
-        <ShareZodiacSeason />
+        <div className='flex flex-col gap-4'>
+          <CosmicScore />
 
-        <CosmicScore />
-
-        {authState.isAuthenticated && isEvening && (
-          <button
-            onClick={() => setShowEveningRitual(true)}
-            className='w-full ritual-card-gradient border border-stroke-subtle rounded-xl p-3 flex items-center gap-3 hover:border-stroke-default transition-colors'
-          >
-            <span className='text-lg'>🌙</span>
-            <div className='text-left flex-1'>
-              <p className='text-sm text-content-primary font-medium'>
-                Evening Ritual
-              </p>
-              <p className='text-xs text-content-muted'>
-                Reflect on your day with a quick mood check-in
-              </p>
-            </div>
-          </button>
-        )}
-
-        {showHoroscope && <PersonalizedHoroscopePreview />}
-
-        <div
-          id='dashboard-main-grid'
-          className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}
-        >
-          <div id='moon-phase' className='scroll-mt-20'>
-            <MoonPreview
-              isExpanded={moonExpanded}
-              onToggle={handleMoonToggle}
-            />
-          </div>
-          <div id='sky-now' className='scroll-mt-20'>
-            <SkyNowCard
-              isExpanded={skyNowExpanded}
-              onToggle={(expanded) => setSkyNowExpanded(expanded)}
-            />
-          </div>
-          <DailyInsightCard />
-          <div className='flex flex-col gap-3'>
-            <DailyCardPreview />
-            <div id='transit-of-day' className='scroll-mt-20'>
-              <TransitOfTheDay />
-            </div>
-          </div>
-
-          <div
-            className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'} ${isDemoMode ? '' : 'md:col-span-2'}`}
-          >
-            <CrystalPreview />
-            <DailyRunePreview />
-          </div>
-
-          {authState.isAuthenticated && <WeeklyChallengeCard />}
-
-          <div className={isDemoMode ? '' : 'md:col-span-2'}>
-            <ConditionalWheel />
-          </div>
+          {/* Zodiac Season Banner */}
+          <ShareZodiacSeason />
         </div>
-        {authState.isAuthenticated && <ReferralShareCTA compact />}
 
-        {authState.isAuthenticated && (
-          <p className='text-xs text-content-muted text-center mt-4'>
-            {focusHonoured
-              ? "You've honoured today's focus."
-              : "You've checked in with today's sky."}
-          </p>
-        )}
-        {authState.isAuthenticated && focusHonoured && (
-          <p className='text-[0.65rem] text-content-muted text-center'>
-            Tomorrow feels calm, steady light.
-          </p>
-        )}
+        <div className='flex flex-col gap-4'>
+          {authState.isAuthenticated && isEvening && (
+            <button
+              onClick={() => setShowEveningRitual(true)}
+              className='w-full ritual-card-gradient border border-stroke-subtle rounded-xl p-3 flex items-center gap-3 hover:border-stroke-default transition-colors'
+            >
+              <span className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-lunary-secondary-700/35 bg-surface-card/45'>
+                <MoonPhaseIcon
+                  phase='waningCrescent'
+                  size={22}
+                  className='h-[22px] w-[22px] object-contain'
+                />
+              </span>
+              <div className='text-left flex-1'>
+                <p className='text-sm text-content-primary font-medium'>
+                  Evening Ritual
+                </p>
+                <p className='text-xs text-content-muted'>
+                  Reflect on your day with a quick mood check-in
+                </p>
+              </div>
+            </button>
+          )}
+
+          {showHoroscope && <PersonalizedHoroscopePreview />}
+        </div>
+
+        <div id='dashboard-main-grid' className='flex flex-col gap-4'>
+          <section aria-labelledby='today-sky-heading' className='space-y-2'>
+            <h2
+              id='today-sky-heading'
+              className='px-1 text-[11px] font-medium uppercase text-content-muted'
+            >
+              Today&apos;s sky
+            </h2>
+            <div
+              className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}
+            >
+              <div id='moon-phase' className='scroll-mt-20'>
+                <MoonPreview
+                  isExpanded={moonExpanded}
+                  onToggle={handleMoonToggle}
+                />
+              </div>
+              <div id='sky-now' className='scroll-mt-20'>
+                <SkyNowCard
+                  isExpanded={skyNowExpanded}
+                  onToggle={(expanded) => setSkyNowExpanded(expanded)}
+                />
+              </div>
+              <div id='transit-of-day' className='scroll-mt-20'>
+                <TransitOfTheDay />
+              </div>
+              <DailyInsightCard />
+            </div>
+          </section>
+
+          <section aria-labelledby='daily-pulls-heading' className='space-y-2'>
+            <h2
+              id='daily-pulls-heading'
+              className='px-1 text-[11px] font-medium uppercase text-content-muted'
+            >
+              Daily pulls
+            </h2>
+            <div
+              className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}
+            >
+              <DailyCardPreview />
+              <CrystalPreview />
+              <DailyRunePreview />
+            </div>
+          </section>
+
+          <div>
+            <button
+              type='button'
+              onClick={() => setShowExploreMore((open) => !open)}
+              className='w-full rounded-xl border border-stroke-subtle bg-surface-elevated/45 px-4 py-3 text-left transition-colors hover:border-stroke-default'
+              aria-expanded={showDashboardExtras}
+            >
+              <span className='flex items-center justify-between gap-3'>
+                <span>
+                  <span className='block text-sm font-medium text-content-primary'>
+                    More tools
+                  </span>
+                  <span className='block text-xs text-content-muted'>
+                    Weekly challenges and Wheel of the Year notes live here when
+                    you want a deeper session.
+                  </span>
+                </span>
+                <span className='text-sm text-content-brand'>
+                  {showDashboardExtras ? 'Hide' : 'Open'}
+                </span>
+              </span>
+            </button>
+          </div>
+
+          {showDashboardExtras && (
+            <>
+              {authState.isAuthenticated && <WeeklyChallengeCard />}
+
+              <ConditionalWheel />
+            </>
+          )}
+        </div>
+        <div className='flex flex-col gap-4'>
+          {authState.isAuthenticated &&
+            (() => {
+              // Surface Year in Stars retrospective near the year boundary
+              // (mid-November through end of January).
+              const month = new Date().getMonth(); // 0-indexed
+              const showYearInStars = month >= 10 || month === 0;
+              if (!showYearInStars) return null;
+              return (
+                <Link
+                  href='/year-in-stars'
+                  className='block w-full rounded-xl border border-lunary-accent-700/50 bg-gradient-to-r from-lunary-accent-950/40 to-lunary-primary-950/40 p-4 hover:border-lunary-accent-500 transition-colors'
+                >
+                  <div className='flex items-center gap-3'>
+                    <span className='text-2xl' aria-hidden>
+                      ✨
+                    </span>
+                    <div className='flex-1'>
+                      <p className='text-sm font-medium text-content-primary'>
+                        Your Year in Stars is ready
+                      </p>
+                      <p className='text-xs text-content-muted'>
+                        A swipeable retrospective of your transits, moods, and
+                        reflections.
+                      </p>
+                    </div>
+                    <span className='text-content-brand-accent text-sm'>→</span>
+                  </div>
+                </Link>
+              );
+            })()}
+
+          {authState.isAuthenticated && <ReferralShareCTA compact />}
+
+          {authState.isAuthenticated && (
+            <p className='text-xs text-content-muted text-center mt-4'>
+              {focusHonoured
+                ? "You've honoured today's focus."
+                : "You've checked in with today's sky."}
+            </p>
+          )}
+          {authState.isAuthenticated && focusHonoured && (
+            <p className='text-[0.65rem] text-content-muted text-center'>
+              Tomorrow feels calm, steady light.
+            </p>
+          )}
+        </div>
       </div>
 
       {authState.isAuthenticated && (

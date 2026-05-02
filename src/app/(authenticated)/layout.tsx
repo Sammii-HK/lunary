@@ -11,6 +11,7 @@ import { TourProvider } from '@/context/TourContext';
 import { AnnouncementProvider } from '@/components/feature-announcements/AnnouncementProvider';
 import { nativePushService } from '@/services/native';
 import { configureIAP } from '@/hooks/useIAPSubscription';
+import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
 
 function OfflineBanner() {
   const [isOffline, setIsOffline] = useState(false);
@@ -165,6 +166,7 @@ export default function AuthenticatedLayout({
   return (
     <TourProvider>
       <AnnouncementProvider>
+        <OfflineIndicator />
         <OfflineBanner />
         <SessionTracker />
         {children}

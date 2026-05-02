@@ -4,7 +4,12 @@ export type { TrialLevel } from '@/lib/stripe/subscription-utils';
 
 export type { PlanId } from './stripe-prices';
 
-export type PlanKey = 'free' | PlanId;
+type ConsumerPlanId = Exclude<
+  PlanId,
+  'api_starter' | 'api_developer' | 'api_business'
+>;
+
+export type PlanKey = 'free' | ConsumerPlanId;
 
 export type PricingPlan = {
   id: PlanKey;
@@ -77,6 +82,8 @@ const FEATURE_ACCESS_BASE = {
     'cosmic_patterns', // Basic cosmic patterns (moon phase correlations)
     'keyword_mood_detection', // Free keyword-based mood tagging (70% coverage)
     'friend_connections', // Friend invites, synastry analysis (basic tier)
+    'group_sky', // Multi-friend group synastry / transit composite chart
+    'voice_narration', // Premium voice narration (paid TTS)
     'cosmic_score_detailed', // Full cosmic score categories + best window
     'community_spaces', // Community posting in sign spaces, Saturn Return, retrogrades
     'intentions', // Unlimited active intentions
@@ -128,6 +135,8 @@ const FEATURE_ACCESS_BASE = {
     'ai_mood_detection', // AI-enhanced mood tagging (smart fallback for complex emotions)
     'enhanced_pattern_analysis', // Moon phase, transit, and house activation patterns
     'friend_connections', // Friend invites, synastry analysis
+    'group_sky', // Multi-friend group synastry / transit composite chart
+    'voice_narration', // Premium voice narration (paid TTS)
     'relationship_timing', // Best Times to Connect - Pro only
     'shared_cosmic_events', // Shared Cosmic Events - Pro only
     'cosmic_score_detailed', // Full cosmic score categories + best window
@@ -167,6 +176,8 @@ const FEATURE_ACCESS_BASE = {
     'cosmic_patterns',
     'keyword_mood_detection',
     'friend_connections',
+    'group_sky', // Multi-friend group synastry / transit composite chart
+    'voice_narration', // Premium voice narration (paid TTS)
     'cosmic_score_detailed',
     'community_spaces',
     'intentions',
@@ -226,6 +237,8 @@ const FEATURE_ACCESS_BASE = {
     'ai_mood_detection', // AI-enhanced mood tagging (smart fallback for complex emotions)
     'enhanced_pattern_analysis', // Moon phase, transit, and house activation patterns
     'friend_connections', // Friend invites, synastry analysis
+    'group_sky', // Multi-friend group synastry / transit composite chart
+    'voice_narration', // Premium voice narration (paid TTS)
     'relationship_timing', // Best Times to Connect - Pro only
     'shared_cosmic_events', // Shared Cosmic Events - Pro only
     'cosmic_score_detailed', // Full cosmic score categories + best window
@@ -374,7 +387,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     trialDays: FREE_TRIAL_DAYS.yearly,
     features: [
       'Everything in Lunary+',
-      'Billed annually — equivalent to 10 months',
+      'Billed annually, equivalent to 10 months',
     ],
   },
   {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
   Plus,
   Heart,
@@ -15,6 +16,7 @@ import {
   Check,
   UserPlus,
   Lock,
+  Globe2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BirthdayInput } from '@/components/ui/birthday-input';
@@ -22,6 +24,7 @@ import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { CircleLeaderboard } from '@/components/CircleLeaderboard';
 import { CircleInviteCTA } from '@/components/CircleInviteCTA';
 import { FriendActivityFeed } from '@/components/friends/FriendActivityFeed';
+import { CosmicSpinner } from '@/components/states/CosmicSpinner';
 
 type Friend = {
   id: string;
@@ -288,7 +291,7 @@ export function CircleTab() {
   if (loading) {
     return (
       <div className='w-full max-w-3xl flex justify-center py-12'>
-        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-lunary-primary' />
+        <CosmicSpinner size='lg' />
       </div>
     );
   }
@@ -550,7 +553,7 @@ export function CircleTab() {
         <p className='text-sm text-content-muted mb-3'>
           Connect with friends or add birth data manually
         </p>
-        <div className='flex gap-2'>
+        <div className='flex gap-2 flex-wrap'>
           <Button
             onClick={() => setShowInviteSection(!showInviteSection)}
             variant='outline'
@@ -569,6 +572,13 @@ export function CircleTab() {
             <Plus className='w-4 h-4' />
             Add Manual
           </Button>
+          <Link
+            href='/app/group-sky'
+            className='inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border border-stroke-default text-content-secondary hover:text-content-primary hover:border-lunary-primary-600 transition-colors'
+          >
+            <Globe2 className='w-4 h-4' />
+            Group Sky
+          </Link>
         </div>
       </div>
 
@@ -867,7 +877,7 @@ function SynastryPanel({
     <div className='border-t border-stroke-default/50 p-4'>
       {loading ? (
         <div className='flex items-center gap-3 text-sm text-content-muted'>
-          <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-lunary-primary' />
+          <CosmicSpinner size='sm' />
           Calculating cosmic compatibility...
         </div>
       ) : error ? (

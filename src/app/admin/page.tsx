@@ -45,6 +45,9 @@ import {
   MessageCircle,
   TrendingUp,
 } from 'lucide-react';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
+import { CosmicSpinner } from '@/components/states/CosmicSpinner';
+import { EmptyState } from '@/components/states/EmptyState';
 
 interface AdminTool {
   title: string;
@@ -443,14 +446,7 @@ export default function AdminDashboard() {
 
   // Show loading state while checking authorization
   if (isAuthorized === null) {
-    return (
-      <div className='min-h-screen bg-surface-base text-content-primary flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-lunary-primary-400 mx-auto mb-4'></div>
-          <p className='text-content-muted'>Checking authorization...</p>
-        </div>
-      </div>
-    );
+    return <BrandedPageLoader message='Checking authorization...' />;
   }
 
   // Show access denied message
@@ -1544,18 +1540,16 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             {activityLoading ? (
-              <div className='text-center py-6 md:py-8 lg:py-10 text-content-muted'>
-                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-lunary-primary-400 mx-auto mb-4'></div>
+              <div className='flex flex-col items-center justify-center gap-3 py-6 md:py-8 lg:py-10 text-content-muted'>
+                <CosmicSpinner size='md' />
                 <p className='text-sm md:text-base'>Loading activity...</p>
               </div>
             ) : recentActivity.length === 0 ? (
-              <div className='text-center py-6 md:py-8 lg:py-10 text-content-muted'>
-                <Activity className='h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 opacity-50' />
-                <p className='text-sm md:text-base'>No activity yet</p>
-                <p className='text-xs md:text-sm mt-2'>
-                  Activity will appear here as automation runs
-                </p>
-              </div>
+              <EmptyState
+                icon={<Activity className='h-10 w-10 opacity-70' />}
+                title='No activity yet'
+                description='Activity will appear here as automation runs.'
+              />
             ) : (
               <div className='space-y-3'>
                 {recentActivity.map((activity: any) => {

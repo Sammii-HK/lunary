@@ -89,7 +89,7 @@ describe('OnboardingFlow: birthday-only users (age gate signup)', () => {
 
     // Navigate from welcome step
     const getStarted = await screen.findByRole('button', {
-      name: 'Get Started',
+      name: 'Show me my Big 3',
     });
     await userEvent.click(getStarted);
 
@@ -114,7 +114,7 @@ describe('OnboardingFlow: birthday-only users (age gate signup)', () => {
     render(<OnboardingFlow forceOpen />);
 
     const getStarted = await screen.findByRole('button', {
-      name: 'Get Started',
+      name: 'Show me my Big 3',
     });
     await userEvent.click(getStarted);
 

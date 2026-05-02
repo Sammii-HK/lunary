@@ -124,7 +124,10 @@ export async function GET(request: NextRequest) {
 
     // Get timeFrame from query params (default 30 days)
     const searchParams = request.nextUrl.searchParams;
-    const timeFrameDays = parseInt(searchParams.get('days') || '30', 10);
+    const requestedDays = parseInt(searchParams.get('days') || '30', 10);
+    const timeFrameDays = Number.isFinite(requestedDays)
+      ? Math.min(Math.max(requestedDays, 1), 365)
+      : 30;
 
     // Calculate start date
     const startDate = new Date();
@@ -133,7 +136,7 @@ export async function GET(request: NextRequest) {
 
     // Query all readings including single-card daily pulls
     const result = await sql`
-      SELECT cards, created_at, spread_slug
+      SELECT id, cards, created_at, spread_slug
       FROM tarot_readings
       WHERE user_id = ${userId}
         AND created_at >= ${startDateStr}::date
@@ -141,8 +144,8 @@ export async function GET(request: NextRequest) {
       ORDER BY created_at DESC
     `;
 
-    // Extract individual cards from spreads, each with cosmic context
-    // Consumers expect flat card objects: { name, keywords, information, createdAt, moonPhase, aspects }
+    // Extract individual card appearances from spreads, each with cosmic context.
+    // Keep reading-level metadata so consumers can count readings and cards separately.
     const readingArrays = await Promise.all(
       result.rows.map(async (row) => {
         try {
@@ -164,14 +167,19 @@ export async function GET(request: NextRequest) {
 
             // Flatten: emit one item per card, each carrying the spread's context
             // Cards can be stored as { card: { name, ... } } or directly as { name, ... }
-            return cardsData
+            const cards = cardsData
               .map((cd: any) => cd.card ?? cd)
               .filter((c: any) => c?.name)
-              .map((c: any) => ({
+              .map((c: any, index: number) => ({
+                readingId: row.id,
+                readingCardCount: cardsData.length,
+                positionIndex: index,
                 name: c.name,
                 keywords: (c.keywords || []).slice(0, 4),
                 information: c.information || c.description || '',
                 createdAt: row.created_at,
+                spreadSlug: row.spread_slug || null,
+                source: 'observed',
                 moonPhase: {
                   phase: moonPhaseKey,
                   emoji: moonPhaseEmoji,
@@ -179,6 +187,8 @@ export async function GET(request: NextRequest) {
                 },
                 aspects: aspects.length > 0 ? aspects : undefined,
               }));
+
+            return cards;
           }
           return [];
         } catch (error) {
@@ -193,8 +203,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       readings,
-      count: readings.length,
+      count: result.rows.length,
+      readingCount: result.rows.length,
+      cardCount: readings.length,
       timeFrameDays,
+      source: 'observed',
     });
   } catch (error) {
     console.error('Error fetching user readings:', error);

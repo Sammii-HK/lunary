@@ -1,4 +1,5 @@
 import { Observer } from 'astronomy-engine';
+import tzLookup from 'tz-lookup';
 
 export interface LocationData {
   latitude: number;
@@ -7,6 +8,13 @@ export interface LocationData {
   country?: string;
   timezone?: string;
   accuracy?: number;
+}
+
+export interface ProfileLocationData extends Partial<LocationData> {
+  currentLocation?: Partial<LocationData>;
+  birthLocation?: string | Partial<LocationData>;
+  birthCoordinates?: Pick<LocationData, 'latitude' | 'longitude'>;
+  birthTimezone?: string;
 }
 
 export interface LocationState {
@@ -203,10 +211,10 @@ export const geocodeLocation = async (
   return null;
 };
 
-const reverseGeocode = async (
+async function reverseGeocode(
   lat: number,
   lng: number,
-): Promise<Partial<LocationData>> => {
+): Promise<Partial<LocationData>> {
   try {
     const response = await fetch(`/api/location/reverse?lat=${lat}&lon=${lng}`);
 
@@ -231,10 +239,161 @@ const reverseGeocode = async (
   } catch {
     return {};
   }
+}
+
+const getTimezoneForCoordinates = async (
+  latitude: number,
+  longitude: number,
+): Promise<string | undefined> => {
+  try {
+    return tzLookup(latitude, longitude);
+  } catch {
+    // Fall back to reverse geocoding below
+  }
+
+  try {
+    const response = await fetch(
+      `/api/location/reverse?lat=${latitude}&lon=${longitude}`,
+    );
+
+    if (response.ok) {
+      const data = (await response.json()) as { timezone?: string | null };
+      return data.timezone || undefined;
+    }
+  } catch {
+    // Fall back below
+  }
+
+  return undefined;
+};
+
+export const resolveCoordinateTimezone = async (
+  location: LocationData,
+): Promise<LocationData> => {
+  const timezone = await getTimezoneForCoordinates(
+    location.latitude,
+    location.longitude,
+  );
+
+  return timezone && timezone !== location.timezone
+    ? { ...location, timezone }
+    : location;
 };
 
 export const locationToObserver = (location: LocationData): Observer =>
   new Observer(location.latitude, location.longitude, 0);
+
+const hasValidCoordinates = (
+  location:
+    | Pick<Partial<LocationData>, 'latitude' | 'longitude'>
+    | null
+    | undefined,
+): location is Partial<LocationData> &
+  Pick<LocationData, 'latitude' | 'longitude'> =>
+  typeof location?.latitude === 'number' &&
+  Number.isFinite(location.latitude) &&
+  typeof location?.longitude === 'number' &&
+  Number.isFinite(location.longitude);
+
+export const isDefaultLocation = (
+  location:
+    | Pick<
+        Partial<LocationData>,
+        'latitude' | 'longitude' | 'city' | 'country' | 'timezone' | 'accuracy'
+      >
+    | null
+    | undefined,
+): boolean =>
+  Boolean(
+    location &&
+    location.latitude === DEFAULT_LOCATION.latitude &&
+    location.longitude === DEFAULT_LOCATION.longitude &&
+    typeof location.accuracy !== 'number' &&
+    (location.city === DEFAULT_LOCATION.city ||
+      location.timezone === DEFAULT_LOCATION.timezone),
+  );
+
+export const normalizeKnownLocation = (
+  input?: Partial<LocationData> | null,
+  timezone?: string,
+  fallbackToBrowserTimezone = true,
+): LocationData | null => {
+  if (!hasValidCoordinates(input)) return null;
+
+  const browserTimezone =
+    fallbackToBrowserTimezone && typeof Intl !== 'undefined'
+      ? Intl.DateTimeFormat().resolvedOptions().timeZone
+      : undefined;
+
+  return {
+    latitude: input.latitude,
+    longitude: input.longitude,
+    city: input.city,
+    country: input.country,
+    timezone: input.timezone ?? timezone ?? browserTimezone,
+    accuracy: input.accuracy,
+  };
+};
+
+export const getBirthLocationFallback = async (
+  profileLocation?: ProfileLocationData | null,
+): Promise<LocationData | null> => {
+  if (!profileLocation) return null;
+
+  const birthTimezone = profileLocation.birthTimezone;
+
+  const coordinateSources = [
+    profileLocation.birthCoordinates,
+    typeof profileLocation.birthLocation === 'object'
+      ? profileLocation.birthLocation
+      : null,
+  ];
+
+  for (const source of coordinateSources) {
+    const normalized = normalizeKnownLocation(source, birthTimezone, false);
+    if (normalized) {
+      const timezone =
+        normalized.timezone ??
+        (await getTimezoneForCoordinates(
+          normalized.latitude,
+          normalized.longitude,
+        ));
+      return {
+        ...normalized,
+        timezone,
+        city:
+          typeof profileLocation.birthLocation === 'string'
+            ? profileLocation.birthLocation
+            : normalized.city,
+      };
+    }
+  }
+
+  if (typeof profileLocation.birthLocation !== 'string') return null;
+
+  const coords = await geocodeLocation(profileLocation.birthLocation);
+  const normalized = normalizeKnownLocation(
+    coords
+      ? {
+          ...coords,
+          city: profileLocation.birthLocation,
+        }
+      : null,
+    birthTimezone,
+    false,
+  );
+  if (!normalized) return null;
+
+  return {
+    ...normalized,
+    timezone:
+      normalized.timezone ??
+      (await getTimezoneForCoordinates(
+        normalized.latitude,
+        normalized.longitude,
+      )),
+  };
+};
 
 export const getStoredLocation = (): LocationData | null => {
   if (typeof window === 'undefined') return null;

@@ -64,9 +64,9 @@ export const Navbar = () => {
   return (
     <nav
       className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stroke-subtle bg-surface-base/95 backdrop-blur'
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
-      <div className='flex w-full items-center justify-around px-2 py-1 text-content-primary max-w-2xl'>
+      <div className='flex w-full h-14 items-center justify-around px-2 text-content-primary max-w-2xl'>
         <NavLink
           href='/app'
           icon={Home}
@@ -131,6 +131,10 @@ const isActive = (pathname: string | null, href: string) => {
       '/forecast',
       '/cosmic-report-generator',
       '/community',
+      '/app/timing',
+      '/app/couple',
+      '/app/group-sky',
+      '/app/time-machine',
     ];
     return explorePages.some(
       (page) => pathname === page || pathname.startsWith(`${page}/`),
@@ -148,14 +152,14 @@ type NavLinkProps = {
   dataNav?: string;
 };
 
-const NavLink = ({
+function NavLink({
   href,
   icon: Icon,
   label,
   activePath,
   showBadge,
   dataNav,
-}: NavLinkProps) => {
+}: NavLinkProps) {
   const active = isActive(activePath, href);
 
   const handleClick = () => {
@@ -184,4 +188,4 @@ const NavLink = ({
       <span className='text-[10px] tracking-wide'>{label}</span>
     </Link>
   );
-};
+}

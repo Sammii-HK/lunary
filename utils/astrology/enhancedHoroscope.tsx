@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 import dayjs from 'dayjs';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import { getAstrologicalChart, AstroChartInformation } from './astrology';
@@ -700,7 +701,7 @@ const generateEnhancedPersonalInsight = (
 ): string => {
   if (!natalChart || natalChart.length === 0) {
     const seasonalInsight = getSeasonalInsight(today);
-    return `While your birth chart isn't available, ${seasonalInsight} Trust in the natural cycles and your inner wisdom.`;
+    return `Today's wider sky carries ${seasonalInsight} Notice what feels ready to begin, then choose the smallest next step.`;
   }
 
   const transits: any[] = [];
@@ -1612,26 +1613,17 @@ export const getEnhancedPersonalizedHoroscope = (
   // Get current astrological chart
   const currentChart = getAstrologicalChart(today.toDate(), observer);
 
-  // Determine sun sign from birthday (simple, deterministic, reliable)
-  const sunSign = birthDate
-    ? getSunSign(birthDate.month() + 1, birthDate.date())
-    : 'Unknown';
-
-  // Get birth chart from profile — but discard it if it disagrees with the
-  // birthday-derived sun sign. The birthday is the most reliable signal we
-  // have; a mis-computed or stale-cached natal chart that says Sun is in
-  // Gemini when the user is actually a Capricorn has cascading effects
-  // across every downstream horoscope string (spirit line, natal Moon
-  // commentary, Venus aspects, etc). Degrading to "no birth chart" is far
-  // better than surfacing wrong identity text everywhere.
+  // Get birth chart from profile. The calculated natal Sun is authoritative,
+  // especially on cusp dates where a date-only helper can be wrong without
+  // birth time and location.
   const rawBirthChart = getBirthChartFromProfile(profile);
   const natalSunFromChart = rawBirthChart?.find((p: any) => p.body === 'Sun');
-  const birthChartMatchesBirthday =
-    !rawBirthChart ||
-    !natalSunFromChart ||
-    sunSign === 'Unknown' ||
-    natalSunFromChart.sign === sunSign;
-  const birthChart = birthChartMatchesBirthday ? rawBirthChart : null;
+  const sunSign =
+    natalSunFromChart?.sign ??
+    (birthDate
+      ? getSunSign(birthDate.month() + 1, birthDate.date())
+      : 'Unknown');
+  const birthChart = rawBirthChart;
 
   // Get detailed moon phase
   const moonPhase = getDetailedMoonPhase(today.toDate());

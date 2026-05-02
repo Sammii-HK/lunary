@@ -49,9 +49,37 @@ const keySource = process.env.LUNARY_ADMIN_KEY
   : fallback.LUNARY_ADMIN_KEY
     ? '.env file'
     : 'MISSING';
-console.error(
-  `[lunary-mcp] BASE_URL=${BASE_URL} ADMIN_KEY=${ADMIN_KEY ? ADMIN_KEY.slice(0, 8) + '...(len=' + ADMIN_KEY.length + ')' : 'EMPTY'} (source: ${keySource})`,
-);
+
+const DEBUG = process.env.LUNARY_MCP_DEBUG === '1';
+
+if (DEBUG && !ADMIN_KEY) {
+  console.error('[lunary-mcp] Missing LUNARY_ADMIN_KEY');
+} else if (DEBUG) {
+  console.error(`[lunary-mcp] BASE_URL=${BASE_URL} keySource=${keySource}`);
+}
+
+function categoriseStatus(status: number) {
+  if (status === 401 || status === 403) return 'auth';
+  if (status === 404) return 'not_found';
+  if (status === 429) return 'rate_limited';
+  if (status >= 500) return 'server';
+  return 'request';
+}
+
+export class LunaryApiError extends Error {
+  constructor(
+    message: string,
+    public readonly details: {
+      method: string;
+      path: string;
+      status: number;
+      category: string;
+    },
+  ) {
+    super(message);
+    this.name = 'LunaryApiError';
+  }
+}
 
 export async function lunary<T = unknown>(
   path: string,
@@ -82,12 +110,15 @@ export async function lunary<T = unknown>(
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    console.error(
-      `[lunary-mcp] FAILED ${method} ${url.toString()} → ${res.status} | key=${ADMIN_KEY ? ADMIN_KEY.slice(0, 8) + '...' : 'EMPTY'}`,
-    );
-    throw new Error(
-      `Lunary API ${method} ${path}: ${res.status} ${text.slice(0, 300)}`,
+    const category = categoriseStatus(res.status);
+    if (DEBUG) {
+      console.error(
+        `[lunary-mcp] ${method} ${path} failed with ${res.status} (${category})`,
+      );
+    }
+    throw new LunaryApiError(
+      `Lunary API ${method} ${path} failed with ${res.status} (${category})`,
+      { method, path, status: res.status, category },
     );
   }
 

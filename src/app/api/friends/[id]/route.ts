@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { z } from 'zod';
 import { requireUser } from '@/lib/ai/auth';
 import { calculateSynastry } from '@/lib/astrology/synastry';
 import { hasFeatureAccess } from '../../../../../utils/pricing';
@@ -7,6 +8,15 @@ import { decrypt } from '@/lib/encryption';
 import type { BirthChartData } from '../../../../../utils/astrology/birthChart';
 
 export const dynamic = 'force-dynamic';
+
+const patchFriendSchema = z
+  .object({
+    nickname: z.string().trim().max(64).nullable().optional(),
+    relationshipType: z.string().trim().max(64).nullable().optional(),
+  })
+  .refine((v) => v.nickname !== undefined || v.relationshipType !== undefined, {
+    message: 'At least one of nickname or relationshipType is required',
+  });
 
 /**
  * GET /api/friends/[id]
@@ -21,7 +31,10 @@ export async function GET(
     const user = await requireUser(request);
     const { id } = await params;
 
-    // Check subscription access
+    // Check subscription access. Free users with `friend_connections_basic`
+    // get a stripped profile (compatibility % + summary + key placements);
+    // only paid `friend_connections` unlocks the bi-wheel chart, full aspect
+    // list, and the CompatibilityBreakdown payload.
     const subscriptionResult = await sql`
       SELECT status FROM subscriptions
       WHERE user_id = ${user.id}
@@ -30,9 +43,18 @@ export async function GET(
     `;
     const subscriptionStatus = subscriptionResult.rows[0]?.status || 'free';
 
-    if (
-      !hasFeatureAccess(subscriptionStatus, user.plan, 'friend_connections')
-    ) {
+    const hasFullAccess = hasFeatureAccess(
+      subscriptionStatus,
+      user.plan,
+      'friend_connections',
+    );
+    const hasBasicAccess = hasFeatureAccess(
+      subscriptionStatus,
+      user.plan,
+      'friend_connections_basic',
+    );
+
+    if (!hasFullAccess && !hasBasicAccess) {
       return NextResponse.json(
         {
           error: 'Friend profiles require a Lunary+ subscription',
@@ -140,16 +162,13 @@ export async function GET(
       sunSign = getSunSign(date.getMonth() + 1, date.getDate());
     }
 
-    return NextResponse.json({
-      id: connection.id,
-      friendId: connection.friend_id,
-      name: connection.nickname || friendProfile.name || 'Friend',
-      avatar: friendProfile.avatar,
-      sunSign,
-      relationshipType: connection.relationship_type,
-      hasBirthChart: !!friendBirthChart,
-      birthChart: friendBirthChart || undefined,
-      synastry: synastry
+    // Strip premium-only fields for free (basic) users: keep compatibility %
+    // and summary, drop aspect list, element/modality breakdowns, and the
+    // friend's birth chart (which would let them re-render the bi-wheel
+    // client-side). The UI also gates these views, but server-side stripping
+    // is the source of truth for revenue protection.
+    const synastryPayload = synastry
+      ? hasFullAccess
         ? {
             compatibilityScore: synastry.compatibilityScore,
             summary: synastry.summary,
@@ -157,7 +176,30 @@ export async function GET(
             elementBalance: synastry.elementBalance,
             modalityBalance: synastry.modalityBalance,
           }
-        : null,
+        : {
+            compatibilityScore: synastry.compatibilityScore,
+            summary: synastry.summary,
+            // Free tier: no aspects, no element/modality detail.
+            aspects: [],
+            elementBalance: synastry.elementBalance,
+            modalityBalance: synastry.modalityBalance,
+          }
+      : null;
+
+    return NextResponse.json({
+      id: connection.id,
+      friendId: connection.friend_id,
+      name: connection.nickname || friendProfile.name || 'Friend',
+      avatar: friendProfile.avatar,
+      sunSign,
+      birthday: friendProfile.birthday ?? null,
+      relationshipType: connection.relationship_type,
+      hasBirthChart: !!friendBirthChart,
+      // Only paid users receive the friend's birth chart. Free users can't
+      // re-render the synastry bi-wheel without it.
+      birthChart: hasFullAccess ? friendBirthChart || undefined : undefined,
+      synastry: synastryPayload,
+      tier: hasFullAccess ? 'full' : 'basic',
     });
   } catch (error) {
     console.error('[Friends] Error fetching friend:', error);
@@ -195,6 +237,100 @@ export async function PUT(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('[Friends] Error updating friend:', error);
+    return NextResponse.json(
+      { error: 'Failed to update friend' },
+      { status: 500 },
+    );
+  }
+}
+
+/**
+ * PATCH /api/friends/[id]
+ * Body: { nickname?, relationshipType? }
+ * Partially update friend connection metadata. Only the connection
+ * owner (user_id) can patch.
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const user = await requireUser(request);
+    const { id } = await params;
+
+    let parsed;
+    try {
+      parsed = patchFriendSchema.parse(await request.json());
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return NextResponse.json(
+          { error: 'Invalid request body', issues: err.issues },
+          { status: 400 },
+        );
+      }
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+
+    const { nickname, relationshipType } = parsed;
+
+    // Verify ownership before updating
+    const existing = await sql`
+      SELECT id FROM friend_connections
+      WHERE id = ${id}::uuid AND user_id = ${user.id}
+      LIMIT 1
+    `;
+    if (existing.rows.length === 0) {
+      return NextResponse.json(
+        { error: 'Friend connection not found' },
+        { status: 404 },
+      );
+    }
+
+    // Use COALESCE-on-NULL pattern: if a field is undefined in the body,
+    // pass NULL to keep the existing value. If null is explicitly sent,
+    // we still want to clear it, handle that by using a sentinel.
+    const updateNickname = nickname !== undefined;
+    const updateRelType = relationshipType !== undefined;
+
+    if (updateNickname && updateRelType) {
+      await sql`
+        UPDATE friend_connections
+        SET nickname = ${nickname ?? null},
+            relationship_type = ${relationshipType ?? null},
+            updated_at = NOW()
+        WHERE id = ${id}::uuid AND user_id = ${user.id}
+      `;
+    } else if (updateNickname) {
+      await sql`
+        UPDATE friend_connections
+        SET nickname = ${nickname ?? null},
+            updated_at = NOW()
+        WHERE id = ${id}::uuid AND user_id = ${user.id}
+      `;
+    } else if (updateRelType) {
+      await sql`
+        UPDATE friend_connections
+        SET relationship_type = ${relationshipType ?? null},
+            updated_at = NOW()
+        WHERE id = ${id}::uuid AND user_id = ${user.id}
+      `;
+    }
+
+    const result = await sql`
+      SELECT id, friend_id, nickname, relationship_type, updated_at
+      FROM friend_connections
+      WHERE id = ${id}::uuid AND user_id = ${user.id}
+    `;
+    const row = result.rows[0];
+    return NextResponse.json({
+      id: row.id,
+      friendId: row.friend_id,
+      nickname: row.nickname,
+      relationshipType: row.relationship_type,
+      updatedAt: row.updated_at,
+    });
+  } catch (error) {
+    console.error('[Friends] Error patching friend:', error);
     return NextResponse.json(
       { error: 'Failed to update friend' },
       { status: 500 },

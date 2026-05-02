@@ -14,6 +14,7 @@ const withBundleAnalyzer =
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  outputFileTracingRoot: __dirname,
   webpack: (config, { isServer, nextRuntime, dev }) => {
     // Allow webpack to use multiple cores (Turbo plan: 30 vCPUs, 60GB)
     config.parallelism = 100;

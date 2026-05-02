@@ -1,10 +1,11 @@
 'use client';
 
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useRouter } from 'next/navigation';
-import { X, ArrowRight, Sparkles, BookOpen } from 'lucide-react';
+import { ArrowRight, Sparkles, BookOpen } from 'lucide-react';
+import { InfoBottomSheet } from '../ui/InfoBottomSheet';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
 import { useCosmicDate } from '../../context/AstronomyContext';
@@ -98,15 +99,6 @@ export const DailyRunePreview = () => {
   }, [canAccessPersonalized, userName, userBirthday, currentDate]);
 
   const closeModal = useCallback(() => setIsModalOpen(false), []);
-
-  useEffect(() => {
-    if (!isModalOpen) return;
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeModal();
-    };
-    document.addEventListener('keydown', handleEsc);
-    return () => document.removeEventListener('keydown', handleEsc);
-  }, [isModalOpen, closeModal]);
 
   const { rune, isReversed } = dailyRune;
 
@@ -272,166 +264,152 @@ export const DailyRunePreview = () => {
         </div>
       </div>
 
-      {isModalOpen && (
-        <div
-          className='fixed inset-0 bg-surface-base/70 backdrop-blur-sm flex items-center justify-center p-4 z-50'
-          onClick={closeModal}
-          data-testid='rune-modal'
-        >
-          <div
-            className='bg-surface-elevated border border-stroke-default rounded-xl p-6 max-w-md w-full relative max-h-[85vh] overflow-y-auto'
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={closeModal}
-              className='absolute top-4 right-4 text-content-muted hover:text-content-primary transition-colors'
-            >
-              <X className='w-5 h-5' />
-            </button>
-
-            <div className='text-center mb-6'>
-              <div className='w-20 h-20 bg-layer-base rounded-full flex items-center justify-center mx-auto mb-4'>
-                <span className='text-4xl' aria-hidden='true'>
-                  {rune.symbol}
-                </span>
-              </div>
-              <h2 className='text-xl font-semibold text-content-primary mb-1'>
-                {rune.name}
-              </h2>
-              <p className='text-sm text-content-muted'>
-                {rune.meaning} · {rune.pronunciation}
-              </p>
-              {dailyRune.isPersonalized && (
-                <p className='text-xs text-lunary-accent mt-1'>
+      <InfoBottomSheet
+        open={isModalOpen}
+        onClose={closeModal}
+        title={rune.name}
+        subtitle={`${rune.meaning} · ${rune.pronunciation}`}
+        accentColor='text-lunary-accent'
+        leading={
+          <span className='text-3xl leading-none' aria-hidden='true'>
+            {rune.symbol}
+          </span>
+        }
+      >
+        <div className='space-y-4' data-testid='rune-modal'>
+          <div className='flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-content-muted'>
+            <span>{isReversed ? 'Reversed' : 'Upright'}</span>
+            <span aria-hidden='true'>·</span>
+            <span>{rune.element}</span>
+            <span aria-hidden='true'>·</span>
+            <span>{rune.aett} Aett</span>
+            {dailyRune.isPersonalized && (
+              <>
+                <span aria-hidden='true'>·</span>
+                <span className='text-lunary-accent'>
                   Drawn from your chart
-                </p>
-              )}
-              <p className='text-xs text-content-muted mt-1'>
-                {isReversed ? 'Reversed' : 'Upright'} · {rune.element} ·{' '}
-                {rune.aett} Aett
-              </p>
-            </div>
-
-            <div className='space-y-4'>
-              {/* Keywords */}
-              <div className='flex flex-wrap gap-1.5'>
-                {rune.keywords.map((keyword) => (
-                  <span
-                    key={keyword}
-                    className='text-xs bg-surface-card text-content-secondary px-2 py-0.5 rounded'
-                  >
-                    {keyword}
-                  </span>
-                ))}
-              </div>
-
-              {/* Meaning */}
-              <div>
-                <h3 className='text-xs text-content-muted uppercase tracking-wide mb-2'>
-                  {isReversed ? 'Reversed meaning' : 'Upright meaning'}
-                </h3>
-                <p className='text-sm text-content-secondary leading-relaxed'>
-                  {isReversed ? rune.reversedMeaning : rune.uprightMeaning}
-                </p>
-              </div>
-
-              {/* Intention */}
-              <div>
-                <h3 className='text-xs text-content-muted uppercase tracking-wide mb-1'>
-                  Affirmation
-                </h3>
-                <p className='text-sm text-content-secondary italic'>
-                  &ldquo;{rune.affirmation}&rdquo;
-                </p>
-              </div>
-
-              {/* Upgrade CTA for free users */}
-              {!canAccessPersonalized && (
-                <Button
-                  variant='lunary-soft'
-                  onClick={navigateToUpgrade}
-                  className='text-xs'
-                >
-                  <Sparkles className='w-4 h-4' />
-                  Get your personal rune with Lunary+
-                </Button>
-              )}
-
-              {/* Journal prompt */}
-              {authStatus.isAuthenticated && (
-                <div className='bg-surface-card/50 rounded-lg p-3'>
-                  <h3 className='text-xs text-content-muted uppercase tracking-wide mb-1'>
-                    Journal prompt
-                  </h3>
-                  <p className='text-sm text-content-secondary'>
-                    {isReversed
-                      ? `${rune.name} reversed asks where you might be blocked. What area of your life feels stuck around ${rune.keywords[0]?.toLowerCase()}?`
-                      : `${rune.name} invites you to reflect on ${rune.keywords[0]?.toLowerCase()}. Where do you see this energy showing up today?`}
-                  </p>
-                  <span
-                    role='button'
-                    tabIndex={0}
-                    onClick={() => {
-                      router.push('/book-of-shadows/journal');
-                      setIsModalOpen(false);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        router.push('/book-of-shadows/journal');
-                        setIsModalOpen(false);
-                      }
-                    }}
-                    className='inline-flex items-center gap-1 text-xs text-lunary-accent hover:text-content-brand-accent transition-colors mt-2 cursor-pointer'
-                  >
-                    <BookOpen className='w-3 h-3' />
-                    Write in Book of Shadows
-                  </span>
-                </div>
-              )}
-
-              {/* Grimoire link */}
-              {isInDemoMode() ? (
-                <button
-                  onClick={() => {
-                    window.dispatchEvent(
-                      new CustomEvent('demo-action-blocked', {
-                        detail: { action: 'Viewing Grimoire pages' },
-                      }),
-                    );
-                  }}
-                  className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-content-brand-accent transition-colors cursor-pointer'
-                >
-                  Explore all runes
-                </button>
-              ) : (
-                <span
-                  role='button'
-                  tabIndex={0}
-                  onClick={() => {
-                    router.push(
-                      `/grimoire/runes/${stringToKebabCase(dailyRune.key)}`,
-                    );
-                    setIsModalOpen(false);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      router.push(
-                        `/grimoire/runes/${stringToKebabCase(dailyRune.key)}`,
-                      );
-                      setIsModalOpen(false);
-                    }
-                  }}
-                  className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-content-brand-accent transition-colors cursor-pointer'
-                >
-                  Explore all runes
                 </span>
-              )}
-            </div>
+              </>
+            )}
           </div>
+
+          {/* Keywords */}
+          <div className='flex flex-wrap gap-1.5'>
+            {rune.keywords.map((keyword) => (
+              <span
+                key={keyword}
+                className='text-xs bg-surface-card text-content-secondary px-2 py-0.5 rounded'
+              >
+                {keyword}
+              </span>
+            ))}
+          </div>
+
+          {/* Meaning */}
+          <div>
+            <h3 className='text-xs text-content-muted uppercase tracking-wide mb-2'>
+              {isReversed ? 'Reversed meaning' : 'Upright meaning'}
+            </h3>
+            <p className='text-sm text-content-secondary leading-relaxed'>
+              {isReversed ? rune.reversedMeaning : rune.uprightMeaning}
+            </p>
+          </div>
+
+          {/* Intention */}
+          <div>
+            <h3 className='text-xs text-content-muted uppercase tracking-wide mb-1'>
+              Affirmation
+            </h3>
+            <p className='text-sm text-content-secondary italic'>
+              &ldquo;{rune.affirmation}&rdquo;
+            </p>
+          </div>
+
+          {/* Upgrade CTA for free users */}
+          {!canAccessPersonalized && (
+            <Button
+              variant='lunary-soft'
+              onClick={navigateToUpgrade}
+              className='text-xs'
+            >
+              <Sparkles className='w-4 h-4' />
+              Get your personal rune with Lunary+
+            </Button>
+          )}
+
+          {/* Journal prompt */}
+          {authStatus.isAuthenticated && (
+            <div className='bg-surface-card/50 rounded-lg p-3'>
+              <h3 className='text-xs text-content-muted uppercase tracking-wide mb-1'>
+                Journal prompt
+              </h3>
+              <p className='text-sm text-content-secondary'>
+                {isReversed
+                  ? `${rune.name} reversed asks where you might be blocked. What area of your life feels stuck around ${rune.keywords[0]?.toLowerCase()}?`
+                  : `${rune.name} invites you to reflect on ${rune.keywords[0]?.toLowerCase()}. Where do you see this energy showing up today?`}
+              </p>
+              <span
+                role='button'
+                tabIndex={0}
+                onClick={() => {
+                  router.push('/book-of-shadows/journal');
+                  setIsModalOpen(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    router.push('/book-of-shadows/journal');
+                    setIsModalOpen(false);
+                  }
+                }}
+                className='inline-flex items-center gap-1 text-xs text-lunary-accent hover:text-content-brand-accent transition-colors mt-2 cursor-pointer'
+              >
+                <BookOpen className='w-3 h-3' />
+                Write in Book of Shadows
+              </span>
+            </div>
+          )}
+
+          {/* Grimoire link */}
+          {isInDemoMode() ? (
+            <button
+              onClick={() => {
+                window.dispatchEvent(
+                  new CustomEvent('demo-action-blocked', {
+                    detail: { action: 'Viewing Grimoire pages' },
+                  }),
+                );
+              }}
+              className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-content-brand-accent transition-colors cursor-pointer'
+            >
+              Explore all runes
+            </button>
+          ) : (
+            <span
+              role='button'
+              tabIndex={0}
+              onClick={() => {
+                router.push(
+                  `/grimoire/runes/${stringToKebabCase(dailyRune.key)}`,
+                );
+                setIsModalOpen(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  router.push(
+                    `/grimoire/runes/${stringToKebabCase(dailyRune.key)}`,
+                  );
+                  setIsModalOpen(false);
+                }
+              }}
+              className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-content-brand-accent transition-colors cursor-pointer'
+            >
+              Explore all runes
+            </span>
+          )}
         </div>
-      )}
+      </InfoBottomSheet>
     </>
   );
 };

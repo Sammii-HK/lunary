@@ -4,10 +4,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import {
   LocationData,
+  ProfileLocationData,
+  clearStoredLocation,
+  getBirthLocationFallback,
   requestLocation,
   getStoredLocation,
   storeLocation,
-  getDefaultLocation,
+  isDefaultLocation,
+  normalizeKnownLocation,
+  resolveCoordinateTimezone,
 } from '../../utils/location';
 
 interface LocationState {
@@ -19,26 +24,6 @@ interface LocationState {
 
 export const useLocation = () => {
   const { user, refetch } = useUser();
-  const normalizeLocation = useCallback((input?: LocationData | null) => {
-    const fallback = getDefaultLocation();
-    const latitude =
-      typeof input?.latitude === 'number' && Number.isFinite(input.latitude)
-        ? input.latitude
-        : fallback.latitude;
-    const longitude =
-      typeof input?.longitude === 'number' && Number.isFinite(input.longitude)
-        ? input.longitude
-        : fallback.longitude;
-    return {
-      latitude,
-      longitude,
-      city: input?.city ?? fallback.city,
-      country: input?.country ?? fallback.country,
-      timezone: input?.timezone ?? fallback.timezone,
-      accuracy: input?.accuracy,
-    };
-  }, []);
-
   const [state, setState] = useState<LocationState>({
     location: null,
     loading: true,
@@ -47,47 +32,81 @@ export const useLocation = () => {
   });
 
   useEffect(() => {
-    if (user?.location) {
-      const locationData = normalizeLocation({
-        latitude: user.location.latitude,
-        longitude: user.location.longitude,
-        city: user.location.city,
-        country: user.location.country,
-        timezone: user.location.timezone,
-      });
+    let cancelled = false;
+
+    const resolveLocation = async () => {
+      const profileLocation = user?.location as ProfileLocationData | undefined;
+      const profileCurrentLocation = normalizeKnownLocation(profileLocation);
+
+      if (profileCurrentLocation && isDefaultLocation(profileCurrentLocation)) {
+        clearStoredLocation();
+      } else if (profileCurrentLocation) {
+        const resolvedLocation = await resolveCoordinateTimezone(
+          profileCurrentLocation,
+        );
+        if (cancelled) return;
+        setState({
+          location: resolvedLocation,
+          loading: false,
+          error: null,
+          hasPermission: true,
+        });
+        storeLocation(resolvedLocation);
+        return;
+      }
+
+      const storedLocation = getStoredLocation();
+      if (storedLocation && isDefaultLocation(storedLocation)) {
+        clearStoredLocation();
+      } else {
+        const normalizedStoredLocation = normalizeKnownLocation(storedLocation);
+        if (normalizedStoredLocation) {
+          const resolvedLocation = await resolveCoordinateTimezone(
+            normalizedStoredLocation,
+          );
+          if (cancelled) return;
+          setState({
+            location: resolvedLocation,
+            loading: false,
+            error: null,
+            hasPermission: true,
+          });
+          storeLocation(resolvedLocation);
+          return;
+        }
+      }
+
+      const birthLocation = await getBirthLocationFallback(profileLocation);
+      if (birthLocation) {
+        if (cancelled) return;
+        setState({
+          location: birthLocation,
+          loading: false,
+          error: null,
+          hasPermission: true,
+        });
+        return;
+      }
+
+      if (cancelled) return;
       setState({
-        location: locationData,
+        location: null,
         loading: false,
         error: null,
-        hasPermission: true,
+        hasPermission: false,
       });
-      storeLocation(locationData);
-      return;
-    }
+    };
 
-    const storedLocation = getStoredLocation();
-    if (
-      storedLocation &&
-      Number.isFinite(storedLocation.latitude) &&
-      Number.isFinite(storedLocation.longitude)
-    ) {
-      const normalizedLocation = normalizeLocation(storedLocation);
-      setState({
-        location: normalizedLocation,
-        loading: false,
-        error: null,
-        hasPermission: true,
-      });
-      return;
-    }
+    resolveLocation();
 
-    setState({
-      location: normalizeLocation(getDefaultLocation()),
-      loading: false,
-      error: null,
-      hasPermission: false,
-    });
-  }, [user?.location, normalizeLocation]);
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.location]);
+
+  const normalizeCurrentLocation = useCallback((input: LocationData) => {
+    return normalizeKnownLocation(input) ?? input;
+  }, []);
 
   const saveLocationToProfile = useCallback(
     async (location: LocationData) => {
@@ -125,7 +144,9 @@ export const useLocation = () => {
 
     try {
       const location = await requestLocation();
-      const normalizedLocation = normalizeLocation(location);
+      const normalizedLocation = await resolveCoordinateTimezone(
+        normalizeCurrentLocation(location),
+      );
       saveLocationToProfile(normalizedLocation);
       setState({
         location: normalizedLocation,
@@ -134,19 +155,24 @@ export const useLocation = () => {
         hasPermission: true,
       });
     } catch (error) {
+      const birthLocation = await getBirthLocationFallback(
+        user?.location as ProfileLocationData | undefined,
+      );
       setState({
-        location: normalizeLocation(getDefaultLocation()),
+        location: birthLocation,
         loading: false,
         error:
           error instanceof Error ? error.message : 'Location request failed',
-        hasPermission: false,
+        hasPermission: Boolean(birthLocation),
       });
     }
-  }, [saveLocationToProfile, normalizeLocation]);
+  }, [saveLocationToProfile, normalizeCurrentLocation, user?.location]);
 
   const updateLocation = useCallback(
-    (newLocation: LocationData) => {
-      const normalizedLocation = normalizeLocation(newLocation);
+    async (newLocation: LocationData) => {
+      const normalizedLocation = await resolveCoordinateTimezone(
+        normalizeCurrentLocation(newLocation),
+      );
       saveLocationToProfile(normalizedLocation);
       setState({
         location: normalizedLocation,
@@ -155,7 +181,7 @@ export const useLocation = () => {
         hasPermission: true,
       });
     },
-    [saveLocationToProfile, normalizeLocation],
+    [saveLocationToProfile, normalizeCurrentLocation],
   );
 
   return {

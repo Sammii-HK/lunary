@@ -1,6 +1,6 @@
 'use client';
 
-import { Sparkles, Moon, TrendingUp } from 'lucide-react';
+import { Sparkles, Moon } from 'lucide-react';
 import { PatternCard } from './PatternCard';
 import { RecurringThemesCard } from '../RecurringThemesCard';
 import { FrequentCardsSection } from './FrequentCardsSection';
@@ -32,11 +32,6 @@ export function TarotPatternsHub({
   onUpgradeClick,
 }: TarotPatternsHubProps) {
   // Feature access checks
-  const hasAdvancedPatterns = hasFeatureAccess(
-    subscriptionStatus,
-    userTier,
-    'tarot_patterns_advanced',
-  );
   const hasDrillDown = hasFeatureAccess(
     subscriptionStatus,
     userTier,
@@ -53,6 +48,7 @@ export function TarotPatternsHub({
     'lunary_plus_ai',
     'lunary_plus_ai_annual',
   ].includes(userTier);
+  const isObserved = patterns.dataSource === 'observed';
 
   const timeFrameDays = Math.ceil(
     (new Date(patterns.dateRange.end).getTime() -
@@ -62,22 +58,37 @@ export function TarotPatternsHub({
 
   return (
     <div className='space-y-4'>
+      {!isObserved && (
+        <div className='rounded-xl border border-stroke-subtle bg-surface-card/30 px-4 py-3 text-xs text-content-muted'>
+          Preview based on generated daily cards. Saved readings will replace
+          this once you have recorded tarot activity.
+        </div>
+      )}
+
       {/* Dominant Themes - Enhanced RecurringThemesCard */}
       {patterns.dominantThemes.length > 0 && (
         <RecurringThemesCard
-          title='Dominant Themes'
-          subtitle={`Patterns from the last ${timeFrameDays} days`}
+          title={isObserved ? 'Dominant Themes' : 'Theme Preview'}
+          subtitle={
+            isObserved
+              ? `${patterns.totalReadings} readings across ${timeFrameDays} days`
+              : `${timeFrameDays}-day generated preview`
+          }
           items={patterns.dominantThemes}
           showTrendIndicators={showTrendIndicators}
         />
       )}
 
       {/* Visualization Grid */}
-      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
+      <div className='grid gap-4 md:grid-cols-2'>
         {/* Suit Distribution */}
         <PatternCard
           title='Suit Distribution'
-          subtitle='Element balance in your readings'
+          subtitle={
+            isObserved
+              ? `Minor arcana mix from ${patterns.totalCardsDrawn} cards`
+              : 'Minor arcana mix in this preview'
+          }
           color='primary'
           icon={<Sparkles className='w-4 h-4' />}
           locked={!hasBasicPatterns}
@@ -91,7 +102,11 @@ export function TarotPatternsHub({
         {/* Arcana Balance */}
         <PatternCard
           title='Arcana Balance'
-          subtitle='Major vs Minor arcana'
+          subtitle={
+            isObserved
+              ? 'Major vs Minor cards drawn'
+              : 'Major vs Minor preview cards'
+          }
           color='secondary'
           icon={<Moon className='w-4 h-4' />}
           locked={!hasBasicPatterns}
@@ -104,22 +119,6 @@ export function TarotPatternsHub({
             minorCount={patterns.arcanaBalance.minor}
           />
         </PatternCard>
-
-        {/* Placeholder for Timeline (Pro Monthly+) */}
-        {hasAdvancedPatterns && (
-          <PatternCard
-            title='Reading Frequency'
-            subtitle='Your practice over time'
-            color='accent'
-            icon={<TrendingUp className='w-4 h-4' />}
-            collapsible={true}
-            defaultCollapsed={true}
-          >
-            <div className='flex items-center justify-center h-[250px] text-sm text-content-muted'>
-              Timeline visualization coming soon
-            </div>
-          </PatternCard>
-        )}
       </div>
 
       {/* Frequent Cards with Drill-Down */}

@@ -7,8 +7,17 @@
 import type { BirthChartPlacement } from '@/context/UserContext';
 import type { MoonSnapshot } from '@/lib/ai/types';
 import { getDailyCardSeed, seedToIndex } from './chart-seeding';
-import { getTarotCard } from '../../../utils/tarot/tarot';
 import { TAROT_DECK, type TarotDeckCard } from '@/utils/tarot/deck';
+
+function simpleHash(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash &= hash;
+  }
+  return Math.abs(hash);
+}
 
 /**
  * Convert BirthChartPlacement[] to BirthChartSnapshot
@@ -86,6 +95,13 @@ export function getPersonalizedTarotCard(
     }
   }
 
-  // Fallback to original method (name + birthday)
-  return getTarotCard(`daily-${currentDate}`, userName, userBirthday);
+  // Fallback to name + birthday seeding without loading the legacy tarot module
+  // into the app-level astronomy provider bundle.
+  const seed = simpleHash(
+    ['daily', currentDate, userName?.trim(), userBirthday?.trim()]
+      .filter(Boolean)
+      .join('|'),
+  );
+  const index = seedToIndex(seed, TAROT_DECK.length);
+  return TAROT_DECK[index];
 }

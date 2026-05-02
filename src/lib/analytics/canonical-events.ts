@@ -253,7 +253,7 @@ function canonicaliseEventType(raw: unknown): {
     return { eventType: 'astral_chat_used', legacyEventType: value };
   }
   if (value === 'tarot_viewed') {
-    return { eventType: 'tarot_drawn', legacyEventType: value };
+    return { eventType: 'page_viewed', legacyEventType: value };
   }
   if (value === 'ritual_view') {
     return { eventType: 'ritual_started', legacyEventType: value };

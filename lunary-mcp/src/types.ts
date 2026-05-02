@@ -1,6 +1,12 @@
 import { z } from 'zod';
 
+type ErrorDetails = Record<
+  string,
+  string | number | boolean | null | undefined
+>;
+
 export type ToolResult = {
+  isError?: boolean;
   content: Array<{ type: 'text'; text: string }>;
 };
 
@@ -10,10 +16,73 @@ export function jsonResult(data: unknown): ToolResult {
   };
 }
 
+export function statusCategory(status: number) {
+  if (status === 401 || status === 403) return 'auth';
+  if (status === 404) return 'not_found';
+  if (status === 429) return 'rate_limited';
+  if (status >= 500) return 'server';
+  return 'request';
+}
+
+export class ToolApiError extends Error {
+  constructor(
+    message: string,
+    public readonly details: ErrorDetails,
+  ) {
+    super(message);
+    this.name = 'ToolApiError';
+  }
+}
+
+function redactSensitive(value: string) {
+  return value
+    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]+/gi, 'Bearer [redacted]')
+    .replace(
+      /([?&](?:api[_-]?key|token|secret|key|password)=)[^&\s]+/gi,
+      '$1[redacted]',
+    )
+    .replace(
+      /\b(?:api[_-]?key|token|secret|authorization|password)\b\s*[:=]\s*["']?[^"',\s}]+["']?/gi,
+      (match) => match.replace(/[:=].*$/, ': [redacted]'),
+    );
+}
+
 export function errorResult(error: unknown): ToolResult {
-  const message = error instanceof Error ? error.message : String(error);
+  const message = redactSensitive(
+    error instanceof Error ? error.message : String(error),
+  );
+  const details =
+    error &&
+    typeof error === 'object' &&
+    'details' in error &&
+    error.details &&
+    typeof error.details === 'object'
+      ? error.details
+      : undefined;
+  const service =
+    details &&
+    'service' in details &&
+    typeof details.service === 'string' &&
+    details.service
+      ? details.service
+      : 'lunary';
   return {
-    content: [{ type: 'text' as const, text: `Error: ${message}` }],
+    isError: true,
+    content: [
+      {
+        type: 'text' as const,
+        text: JSON.stringify(
+          {
+            ok: false,
+            service,
+            message,
+            ...(details ? { details } : {}),
+          },
+          null,
+          2,
+        ),
+      },
+    ],
   };
 }
 

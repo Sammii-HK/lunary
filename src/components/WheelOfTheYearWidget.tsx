@@ -58,32 +58,26 @@ export const WheelOfTheYearWidget = () => {
   const _isApproaching = false;
 
   return (
-    <div className='bg-gradient-to-br from-lunary-secondary-900/20 to-lunary-accent-900/20 rounded-lg p-4 border border-lunary-secondary-700'>
+    <div className='rounded-lg border border-[#e7d7fb] bg-gradient-to-br from-[#fff8ed] via-[#f7efff] to-[#eefcff] p-4 shadow-sm'>
       <div className='flex items-center justify-between mb-1'>
-        <h3 className='text-md text-content-brand-secondary'>
-          Wheel of the Year
-        </h3>
+        <h3 className='text-md text-[#4b2a78]'>Wheel of the Year</h3>
       </div>
 
       <div className='space-y-3'>
         <div>
           <div className='flex items-center gap-2 justify-between align-middle mb-2'>
             <div className='flex items-center gap-2'>
-              <h4 className='text-content-brand-secondary'>Current Season</h4>
-              <span className='text-sm text-lunary-secondary'>
-                {displaySabbat}
-              </span>
+              <h4 className='text-[#5c3a87]'>Current Season</h4>
+              <span className='text-sm text-[#7b4fc4]'>{displaySabbat}</span>
             </div>
             {sabbatInfo && (
-              <p className='text-sm text-content-brand-secondary'>
-                {sabbatInfo.date}
-              </p>
+              <p className='text-sm text-[#5c3a87]'>{sabbatInfo.date}</p>
             )}
           </div>
 
           {sabbatInfo && (
             <>
-              <p className='text-xs text-content-brand-secondary leading-relaxed'>
+              <p className='text-xs leading-relaxed text-[#6b5878]'>
                 {sabbatInfo.description}
               </p>
             </>

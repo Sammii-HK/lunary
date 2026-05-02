@@ -3,6 +3,7 @@
 import { BirthChartData } from '../../../utils/astrology/birthChart';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { astroPointSymbols } from '../../../utils/zodiac/zodiac';
+import { SectionGuide } from './SectionGuide';
 
 interface AsteroidsSectionProps {
   birthChartData: BirthChartData[];
@@ -23,7 +24,7 @@ const ASTEROID_INTERPRETATIONS: Record<string, string> = {
   Ceres:
     'Represents nurturing, motherhood, and how you care for others. Shows your relationship with food, nature, and the cycles of growth and loss.',
   Pallas:
-    'Symbolizes wisdom, strategy, and creative intelligence. Reflects your ability to see patterns, solve problems, and bring justice to situations.',
+    'Symbolises wisdom, strategy, and creative intelligence. Reflects your ability to see patterns, solve problems, and bring justice to situations.',
   Juno: 'Governs partnership, marriage, and committed relationships. Reveals what you need in a long-term partner and how you approach commitment.',
   Vesta:
     'Represents sacred dedication, focus, and where you direct your devotional energy. Shows what you hold sacred and your capacity for concentrated work.',
@@ -32,7 +33,7 @@ const ASTEROID_INTERPRETATIONS: Record<string, string> = {
   Pholus:
     'Represents catalysts and turning points. Small actions that lead to big consequences. Shows where small causes create major effects in your life.',
   Psyche:
-    'Symbolizes the soul, mental essence, and psychological growth. Represents your journey toward self-awareness and soul-level connections.',
+    'Symbolises the soul, mental essence, and psychological growth. Represents your journey toward self-awareness and soul-level connections.',
   Eros: 'Governs erotic love, passion, and creative life force. Shows what turns you on at a soul level and where you experience deep desire.',
 };
 
@@ -45,11 +46,15 @@ export function AsteroidsSection({ birthChartData }: AsteroidsSectionProps) {
 
   return (
     <CollapsibleSection
-      title='Asteroids'
+      title='Pro layer: Asteroids'
       defaultCollapsed={true}
       persistState={true}
     >
       <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+        <SectionGuide label='Pro layer' variant='pro'>
+          Asteroids add nuance once the main planets make sense. Treat them as
+          supporting details, not the first thing to decode.
+        </SectionGuide>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           {asteroidsData.map((asteroid) => {
             const symbol =
