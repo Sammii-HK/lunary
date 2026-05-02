@@ -2,18 +2,20 @@ import { generateAllHouseParams } from '@/constants/seo/houses';
 
 export async function GET(): Promise<Response> {
   const baseUrl = 'https://lunary.app';
+  const currentYear = new Date().getFullYear();
+  const stableMonthStamp = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`;
   const houses = generateAllHouseParams();
 
   const urls = [
     {
       loc: `${baseUrl}/grimoire/houses`,
-      lastmod: new Date().toISOString().split('T')[0],
+      lastmod: stableMonthStamp,
       changefreq: 'monthly',
       priority: '0.8',
     },
     ...houses.map((h) => ({
       loc: `${baseUrl}/grimoire/houses/${h.planet}/${h.house}`,
-      lastmod: new Date().toISOString().split('T')[0],
+      lastmod: stableMonthStamp,
       changefreq: 'yearly',
       priority: '0.6',
     })),
