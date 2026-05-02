@@ -230,7 +230,11 @@ export async function POST(request: NextRequest) {
           verificationUrl,
           subscriber.email,
           {
-            sign: captureContext.sign,
+            sign:
+              captureContext.sign ||
+              (captureContext.userSunSign
+                ? String(captureContext.userSunSign).toLowerCase()
+                : undefined),
             proposition: captureContext.proposition,
             upsellVariant: captureContext.upsellVariant,
           },
@@ -239,7 +243,11 @@ export async function POST(request: NextRequest) {
           verificationUrl,
           subscriber.email,
           {
-            sign: captureContext.sign,
+            sign:
+              captureContext.sign ||
+              (captureContext.userSunSign
+                ? String(captureContext.userSunSign).toLowerCase()
+                : undefined),
             proposition: captureContext.proposition,
             upsellVariant: captureContext.upsellVariant,
           },
