@@ -650,9 +650,13 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
+      url: `https://lunary.app/grimoire/moon/2026/${moonPhase}`,
       images: [
         `/api/og/cosmic?title=${encodeURIComponent(data.type === 'full' ? data.name || '' : `New Moon in ${data.sign}`)}`,
       ],
+    },
+    alternates: {
+      canonical: `https://lunary.app/grimoire/moon/2026/${moonPhase}`,
     },
   };
 }
