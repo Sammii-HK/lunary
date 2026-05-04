@@ -25,7 +25,12 @@ import { buildMonthlyForecast } from '@/lib/horoscope/monthly-forecast';
 export const revalidate = 2592000;
 export const dynamicParams = false;
 
-const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
+const CURRENT_YEAR = new Date().getFullYear();
+const AVAILABLE_YEARS = [
+  Math.max(2025, CURRENT_YEAR - 1),
+  CURRENT_YEAR,
+  CURRENT_YEAR + 1,
+];
 
 function resolveOgImageUrl(value: unknown): string | undefined {
   if (!value) return undefined;

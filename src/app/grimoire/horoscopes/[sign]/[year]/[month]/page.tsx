@@ -52,13 +52,19 @@ function validateParams(params: PageParams): {
 
   if (!ZODIAC_SIGNS.includes(sign)) return null;
   if (!MONTHS.includes(month)) return null;
-  if (year < 2025 || year > 2030) return null;
+  const maxYear = new Date().getFullYear() + 1;
+  if (year < 2025 || year > maxYear) return null;
 
   const monthNumber = MONTHS.indexOf(month) + 1;
   return { sign, year, month, monthNumber };
 }
 
-const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
+const CURRENT_YEAR = new Date().getFullYear();
+const AVAILABLE_YEARS = [
+  Math.max(2025, CURRENT_YEAR - 1),
+  CURRENT_YEAR,
+  CURRENT_YEAR + 1,
+];
 
 export function generateStaticParams() {
   return ZODIAC_SIGNS.flatMap((sign) =>

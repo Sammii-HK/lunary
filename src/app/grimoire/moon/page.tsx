@@ -124,7 +124,7 @@ export default async function MoonPage() {
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
   );
 
-  const moonYears = [2025, 2026, 2027, 2028, 2029, 2030];
+  const moonYears = [Math.max(2025, currentYear - 1), currentYear, nextYear];
   const cosmicSections = [
     ...getCosmicConnections('hub-moon', 'moon'),
     {

@@ -6,6 +6,8 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+const CURRENT_YEAR = new Date().getFullYear();
+const MAX_YEAR = CURRENT_YEAR + 1;
 interface PageParams {
   year: string;
   season: string;
@@ -23,7 +25,7 @@ export async function generateMetadata({
   const yearNum = parseInt(year);
   const seasonData = ZODIAC_SEASONS.find((s) => s.sign === season);
 
-  if (!seasonData || yearNum < 2024 || yearNum > 2030) {
+  if (!seasonData || yearNum < 2024 || yearNum > MAX_YEAR) {
     return { title: 'Season Not Found | Lunary' };
   }
 
@@ -65,7 +67,7 @@ export default async function ZodiacSeasonPage({
   const yearNum = parseInt(year);
   const seasonData = ZODIAC_SEASONS.find((s) => s.sign === season);
 
-  if (!seasonData || yearNum < 2024 || yearNum > 2030) {
+  if (!seasonData || yearNum < 2024 || yearNum > MAX_YEAR) {
     notFound();
   }
 

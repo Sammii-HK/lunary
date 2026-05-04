@@ -16,7 +16,7 @@ const nextYear = currentYear + 1;
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `Monthly Horoscopes ${currentYear} & ${nextYear}: All Zodiac Signs`,
-    description: `Free monthly horoscopes for all 12 zodiac signs. Get detailed predictions for love, career, health & more. Updated monthly for ${currentYear}-${nextYear + 4}.`,
+    description: `Free monthly horoscopes for all 12 zodiac signs. Get detailed predictions for love, career, health & more. Updated monthly for ${currentYear}-${nextYear}.`,
     keywords: [
       'monthly horoscope',
       'free horoscope',
@@ -67,7 +67,7 @@ const currentMonth = currentDate
   .toLocaleString('en-US', { month: 'long' })
   .toLowerCase();
 
-const AVAILABLE_YEARS = [2026, 2027, 2028, 2029, 2030, 2031];
+const AVAILABLE_YEARS = [currentYear, nextYear];
 
 export default function GrimoireHoroscopesPage() {
   return (
@@ -101,11 +101,11 @@ export default function GrimoireHoroscopesPage() {
       additionalSchemas={[structuredData]}
       whatIs={{
         question: 'What are monthly horoscopes?',
-        answer: `Monthly horoscopes provide detailed astrological predictions for each zodiac sign covering an entire month. They forecast trends in love, career, health, and personal growth based on planetary movements and astrological transits. Our monthly horoscopes are updated regularly for ${currentYear} through ${nextYear + 4}, giving you comprehensive insights for long-range planning.`,
+        answer: `Monthly horoscopes provide detailed astrological predictions for each zodiac sign covering an entire month. They forecast trends in love, career, health, and personal growth based on planetary movements and astrological transits. Our monthly horoscopes are updated regularly for ${currentYear} and ${nextYear}, giving you near-term planning grounded in current sky movements.`,
       }}
       intro={`Welcome to your complete monthly horoscope guide. Discover what the stars have in store for your zodiac sign with detailed predictions covering love, career, health, and personal growth.
 
-Our monthly horoscopes are updated regularly and provide personalized insights based on current planetary movements and astrological transits. We publish forecasts from ${currentYear} through ${nextYear + 4}, giving you unprecedented long-range insight into your cosmic journey.
+Our monthly horoscopes are updated regularly and provide personalized insights based on current planetary movements and astrological transits. We publish forecasts for ${currentYear} and ${nextYear}, keeping the focus on the time windows people are actually living through now.
 
 Select your zodiac sign below to explore detailed monthly predictions.`}
       breadcrumbs={[

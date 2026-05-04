@@ -20,7 +20,8 @@ export async function generateMetadata({
   const { year } = await params;
   const yearNum = parseInt(year);
 
-  if (isNaN(yearNum) || yearNum < 2025 || yearNum > 2030) {
+  const maxYear = new Date().getFullYear() + 1;
+  if (isNaN(yearNum) || yearNum < 2025 || yearNum > maxYear) {
     return {
       title: 'Moon Calendar Not Found | Lunary',
     };
@@ -58,7 +59,8 @@ export default async function MoonYearPage({
   const { year } = await params;
   const yearNum = parseInt(year);
 
-  if (isNaN(yearNum) || yearNum < 2025 || yearNum > 2030) {
+  const maxYear = new Date().getFullYear() + 1;
+  if (isNaN(yearNum) || yearNum < 2025 || yearNum > maxYear) {
     notFound();
   }
 
@@ -70,7 +72,8 @@ export default async function MoonYearPage({
 
 Understanding the moon's phases helps you align your spiritual practice, rituals, and personal growth with cosmic rhythms. Each lunar event provides an opportunity to work with specific energies for manifestation, release, and transformation.`;
 
-  const moonYears = [2025, 2026, 2027, 2028, 2029, 2030];
+  const currentYear = new Date().getFullYear();
+  const moonYears = [Math.max(2025, currentYear - 1), currentYear, currentYear + 1];
   const cosmicSections = [
     ...getCosmicConnections('hub-moon', 'moon'),
     {

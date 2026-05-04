@@ -13,16 +13,22 @@ import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+const currentYear = new Date().getFullYear();
+const minTransitYear = Math.max(2025, currentYear - 1);
+const maxTransitYear = currentYear + 1;
+const recoveryTransitYearsLabel =
+  minTransitYear === maxTransitYear
+    ? `${minTransitYear}`
+    : `${minTransitYear}-${maxTransitYear}`;
 export const metadata: Metadata = {
-  title:
-    'Major Astrological Transits 2025-2030: Saturn, Jupiter & Key Dates | Lunary',
+  title: `Major Astrological Transits ${recoveryTransitYearsLabel}: Saturn, Jupiter & Key Dates | Lunary`,
   description:
-    'Complete transit calendar with exact dates: Saturn enters Taurus 2028, Jupiter movements, and all major planetary transits 2025-2030. Track cosmic shifts that matter.',
+    `Complete transit calendar with exact dates, Jupiter movements, and the major planetary transits for ${recoveryTransitYearsLabel}. Track the cosmic shifts that matter now.`,
   keywords: [
-    'major astrological transits 2027',
-    'major astrological transits 2028',
-    'major astrological transits 2030',
-    'saturn enters taurus 2028 date',
+    `major astrological transits ${currentYear}`,
+    `major astrological transits ${currentYear + 1}`,
+    `astrological transits ${currentYear}`,
+    `jupiter transits ${currentYear}`,
     'astrological transits',
     'planetary transits',
     'saturn return meaning',
@@ -30,26 +36,24 @@ export const metadata: Metadata = {
     'neptune enters aries',
   ],
   openGraph: {
-    title:
-      'Major Astrological Transits 2025-2030: Saturn, Jupiter & Key Dates | Lunary',
+    title: `Major Astrological Transits ${recoveryTransitYearsLabel}: Saturn, Jupiter & Key Dates | Lunary`,
     description:
-      'Complete transit calendar with exact dates: Saturn enters Taurus 2028, Jupiter movements, and all major planetary transits 2025-2030.',
+      `Complete transit calendar with exact dates, Jupiter movements, and the major planetary transits for ${recoveryTransitYearsLabel}.`,
     url: 'https://lunary.app/grimoire/transits',
     images: [
       {
         url: '/api/og/grimoire/transits',
         width: 1200,
         height: 630,
-        alt: 'Major Astrological Transits 2025-2030',
+        alt: `Major Astrological Transits ${recoveryTransitYearsLabel}`,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title:
-      'Major Astrological Transits 2025-2030: Saturn, Jupiter & Key Dates | Lunary',
+    title: `Major Astrological Transits ${recoveryTransitYearsLabel}: Saturn, Jupiter & Key Dates | Lunary`,
     description:
-      'Complete transit calendar with exact dates: Saturn enters Taurus 2028, Jupiter movements, and all major transits 2025-2030.',
+      `Complete transit calendar with exact dates, Jupiter movements, and the major planetary transits for ${recoveryTransitYearsLabel}.`,
     images: ['/api/og/grimoire/transits'],
   },
   alternates: { canonical: 'https://lunary.app/grimoire/transits' },
@@ -66,9 +70,10 @@ export const metadata: Metadata = {
   },
 };
 
-const currentYear = new Date().getFullYear();
 const transitYears = YEARLY_TRANSITS.map((transit) => transit.year);
-const years = [...new Set(transitYears)].sort((a, b) => a - b);
+const years = [...new Set(transitYears)]
+  .filter((year) => year >= minTransitYear && year <= maxTransitYear)
+  .sort((a, b) => a - b);
 const cosmicSections = [
   ...getCosmicConnections('hub-transits', 'transits'),
   {
@@ -107,7 +112,7 @@ const SATURN_CYCLE_STEPS = [
   },
   {
     label: 'Saturn Return (Conjunction)',
-    years: '2025–2030',
+    years: recoveryTransitYearsLabel.replace('-', '–'),
     ages: '28–34',
     birthYears: '1995–2002',
     notes:
@@ -116,7 +121,6 @@ const SATURN_CYCLE_STEPS = [
 ];
 
 export default function TransitsIndexPage() {
-  const currentYear = new Date().getFullYear();
   const transitsListSchema = createItemListSchema({
     name: 'Astrological transits meaning & timing',
     description:

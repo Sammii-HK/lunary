@@ -13,8 +13,9 @@ const formatKeywords = (...terms: string[]) =>
     .filter(Boolean);
 
 export const signMeta = (signName: string, slug: string): Metadata => {
-  const title = `${signName} Horoscope 2025–2030: Monthly & Yearly Forecasts`;
-  const description = `${signName} horoscopes for every month from 2025 to 2030. Personalised love, career, health and finance forecasts for ${signName} — updated monthly.`;
+  const endYear = new Date().getFullYear() + 1;
+  const title = `${signName} Horoscope 2025–${endYear}: Monthly & Yearly Forecasts`;
+  const description = `${signName} horoscopes for every month from 2025 to ${endYear}. Personalised love, career, health and finance forecasts for ${signName} — updated monthly.`;
   const image = `${OG_BASE}?sign=${encode(signName)}`;
 
   return {

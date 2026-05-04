@@ -11,8 +11,12 @@ import {
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 const MIN_YEAR = 2025;
-const MAX_YEAR = 2030;
-const SUPPORTED_YEARS = [2025, 2027, 2028, 2029, 2030];
+const MAX_YEAR = new Date().getFullYear() + 1;
+const SUPPORTED_YEARS = [
+  Math.max(2025, new Date().getFullYear() - 1),
+  new Date().getFullYear(),
+  new Date().getFullYear() + 1,
+];
 
 function parseMoonPhaseSlug(moonPhase: string) {
   if (moonPhase.startsWith('full-moon-')) {
