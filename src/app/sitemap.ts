@@ -315,8 +315,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       'src/app/grimoire/guides/moon-phases-guide/page.tsx',
     ],
     'grimoire/glossary': ['src/app/grimoire/glossary/page.tsx'],
-    transits: ['src/app/transits/page.tsx'],
-    'moon-calendar': ['src/app/moon-calendar/page.tsx'],
     'about/sammii': ['src/app/about/sammii/page.tsx'],
     'about/editorial-guidelines': [
       'src/app/about/editorial-guidelines/page.tsx',
@@ -548,12 +546,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     { path: 'grimoire/glossary', changeFrequency: 'monthly', priority: 0.7 },
-    { path: 'transits', changeFrequency: 'weekly', priority: 0.8 },
-    {
-      path: 'moon-calendar',
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
     {
       path: 'about/sammii',
       changeFrequency: 'monthly',
