@@ -118,7 +118,7 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
     links: [
       { label: 'Birth Chart Calculator', href: '/birth-chart' },
       { label: 'Daily Tarot', href: '/tarot' },
-      { label: 'Moon Phase Today', href: '/moon' },
+      { label: 'Moon Phase Today', href: '/grimoire/moon' },
       { label: 'Book of Shadows', href: '/book-of-shadows' },
     ],
   },

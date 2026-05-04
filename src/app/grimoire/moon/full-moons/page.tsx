@@ -209,7 +209,7 @@ Each named moon carries specific energy for your practice. Align your rituals wi
             },
           ]}
           internalLinks={[
-            { text: 'Moon Calendar', href: '/moon' },
+            { text: 'Moon Calendar', href: '/grimoire/moon' },
             { text: 'Moon Phases', href: '/grimoire/moon/phases' },
             { text: 'Moon Rituals', href: '/grimoire/moon/rituals' },
             { text: 'Sabbats', href: '/grimoire/wheel-of-the-year' },

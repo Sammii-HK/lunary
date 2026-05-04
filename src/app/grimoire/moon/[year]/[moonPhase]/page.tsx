@@ -297,7 +297,7 @@ export default async function MoonPhaseYearPage({
           },
         ]}
         internalLinks={[
-          { text: 'Moon Calendar Hub', href: '/moon-calendar' },
+          { text: 'Moon Calendar Hub', href: '/grimoire/moon' },
           { text: 'All Moon Phases', href: '/grimoire/moon/phases' },
           { text: 'Moon Rituals', href: '/grimoire/moon/rituals' },
           { text: 'Grimoire Home', href: '/grimoire' },

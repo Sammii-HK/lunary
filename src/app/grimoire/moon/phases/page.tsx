@@ -194,8 +194,8 @@ As the moon waxes, lean into building, attracting, and grateful manifestation wo
             },
           ]}
           internalLinks={[
-            { text: 'Full Moon Calendar', href: '/moon' },
-            { text: 'Current Moon Phase', href: '/moon' },
+            { text: 'Full Moon Calendar', href: '/grimoire/moon' },
+            { text: 'Current Moon Phase', href: '/grimoire/moon' },
             { text: 'Moon in Zodiac Signs', href: '/grimoire/moon-in' },
             { text: 'Moon Rituals', href: '/grimoire/moon/rituals' },
           ]}
