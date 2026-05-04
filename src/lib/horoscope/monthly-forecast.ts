@@ -77,7 +77,13 @@ const TRANSIT_BODIES = new Set([
   'Pluto',
 ]);
 
-const SLOW_MOVING_BODIES = new Set(['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto']);
+const SLOW_MOVING_BODIES = new Set([
+  'Jupiter',
+  'Saturn',
+  'Uranus',
+  'Neptune',
+  'Pluto',
+]);
 
 const ZODIAC_ORDER = [
   'Aries',
@@ -120,9 +126,12 @@ const PLANET_THEMES: Record<string, string> = {
   Mars: 'drive, conflict tolerance, physical energy, and timing',
   Jupiter: 'growth, generosity, openings, and where life wants to widen',
   Saturn: 'responsibility, boundaries, discipline, and what needs to mature',
-  Uranus: 'disruption, liberation, reinvention, and the part of life that refuses stale rules',
-  Neptune: 'dreams, intuition, blurred edges, devotion, and where clarity must be earned slowly',
-  Pluto: 'power, endings, obsession, and deep structural change that does not negotiate',
+  Uranus:
+    'disruption, liberation, reinvention, and the part of life that refuses stale rules',
+  Neptune:
+    'dreams, intuition, blurred edges, devotion, and where clarity must be earned slowly',
+  Pluto:
+    'power, endings, obsession, and deep structural change that does not negotiate',
 };
 
 const ASPECT_VERBS: Record<AspectType, string> = {
@@ -398,9 +407,7 @@ function buildThemePill(
   return `${label}: ${influence.planet} ${influence.aspect}`;
 }
 
-function getDecanFromDegreeString(
-  degreeString?: string,
-): 1 | 2 | 3 | null {
+function getDecanFromDegreeString(degreeString?: string): 1 | 2 | 3 | null {
   if (!degreeString) return null;
   const degree = Number.parseInt(degreeString, 10);
   if (!Number.isFinite(degree)) return null;
@@ -421,10 +428,8 @@ function getSlowMovingNarrative(
 
   if (slowMovers.length === 0) {
     return {
-      slowMoving:
-        `${signName} is working with shorter-cycle sky weather this month more than one dominant outer-planet story.`,
-      decanFocus:
-        `Use the month by breaking it into early, middle, and late pacing rather than waiting for one massive outer-planet event to explain everything.`,
+      slowMoving: `${signName} is working with shorter-cycle sky weather this month more than one dominant outer-planet story.`,
+      decanFocus: `Use the month by breaking it into early, middle, and late pacing rather than waiting for one massive outer-planet event to explain everything.`,
     };
   }
 

@@ -74,6 +74,26 @@ const SIGN_SEASON_MONTHS: Record<ZodiacSign, string[]> = {
   pisces: ['February', 'March'],
 };
 
+type YearCheckpoint = {
+  label: string;
+  month: (typeof MONTHS)[number];
+};
+
+const YEAR_CHECKPOINTS: YearCheckpoint[] = [
+  { label: 'Opening stretch', month: 'january' },
+  { label: 'Spring pivot', month: 'april' },
+  { label: 'Summer expansion', month: 'july' },
+  { label: 'Autumn integration', month: 'october' },
+];
+
+function cleanForecastSentence(value: string): string {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
+function uniqueNonEmpty(values: Array<string | undefined>): string[] {
+  return [...new Set(values.map((value) => value?.trim()).filter(Boolean))];
+}
+
 export function generateStaticParams() {
   return ZODIAC_SIGNS.flatMap((sign) =>
     AVAILABLE_YEARS.map((year) => ({
@@ -132,16 +152,43 @@ export default async function YearHoroscopePage({
   const seasonText =
     seasonMonths.length > 0 ? seasonMonths.join(' and ') : 'your solar season';
 
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonthSlug = MONTHS[now.getMonth()];
+
+  const meta = yearMeta(signName, sign, year);
+  const checkpointForecasts = YEAR_CHECKPOINTS.map((checkpoint) => ({
+    ...checkpoint,
+    forecast: buildMonthlyForecast(signKey, yearNum, checkpoint.month),
+  }));
+  const [januaryForecast, aprilForecast, julyForecast, octoberForecast] =
+    checkpointForecasts.map((entry) => entry.forecast);
+  const yearlySlowMoving = uniqueNonEmpty(
+    checkpointForecasts.map((entry) => entry.forecast.slowMoving),
+  );
+  const yearlyDecanFocus = uniqueNonEmpty(
+    checkpointForecasts.map((entry) => entry.forecast.decanFocus),
+  );
+  const yearlyChallenge = uniqueNonEmpty(
+    checkpointForecasts.map((entry) => entry.forecast.challenge),
+  ).slice(0, 2);
+  const yearlyOpportunity = uniqueNonEmpty(
+    checkpointForecasts.map((entry) => entry.forecast.opportunity),
+  ).slice(0, 2);
+  const yearlyTiming = checkpointForecasts
+    .map(
+      (entry) =>
+        `**${entry.label} (${MONTH_DISPLAY_NAMES[entry.month]})**: ${cleanForecastSentence(entry.forecast.timing)}`,
+    )
+    .join('\n');
   const faqItems = [
     {
       question: `What does the ${signName} horoscope ${year} cover?`,
-      answer:
-        'It summarizes month-by-month themes with a focus on love, career, and personal growth.',
+      answer: `It maps the year in two layers: the slow-moving planets shaping the long story for ${signName}, and the monthly checkpoints that show when love, work, energy, and relationships move fastest.`,
     },
     {
       question: `How should I use the ${year} ${signName} horoscope?`,
-      answer:
-        'Use it as a planning guide to spot timing, themes, and priorities across the year.',
+      answer: `Use it as a timing map. Start with the long-range current, then use the quarterly pivots and monthly forecasts to decide when to push, when to adjust, and when to let a transit finish revealing its terms.`,
     },
     {
       question: `Is this ${signName} horoscope personalized?`,
@@ -154,26 +201,18 @@ export default async function YearHoroscopePage({
     },
     {
       question: `Which months bring the strongest love energy for ${signName} in ${year}?`,
-      answer: `Your sign season (${seasonText}) naturally lifts the heart, and the month before and after your solar return tends to be the most magnetic. Use that energy as a starting point to initiate new connections or deepen existing ones.`,
+      answer: `Your sign season (${seasonText}) still matters, but the better guide is the months when your supportive transits are easiest to use. Right now the clearest growth current is: ${yearlyOpportunity[0] ?? januaryForecast.love}`,
     },
     {
       question: `What love and career priorities should ${signName} keep in mind this year?`,
-      answer: `Lean into your element (${element}) and the steady rulership of ${ruler}. Love grows when you stay emotionally present; career momentum needs disciplined pursuit and visible consistency.`,
+      answer: `Lead with your ${element.toLowerCase()} strengths, but let the sky set the pace. The main opening this year is ${yearlyOpportunity[0] ?? julyForecast.career} The main pressure point is ${yearlyChallenge[0] ?? octoberForecast.career}`,
     },
     {
       question: `What key transits should ${signName} track in ${year}?`,
-      answer: `Watch how ${ruler} and the outer planets (Jupiter, Saturn, and the slower generational bodies) move through your opposite signs. Those transits cue growth windows, so mark them in your calendar alongside the months when the Sun and Venus light up your sign.`,
+      answer:
+        `${yearlySlowMoving[0] ?? januaryForecast.slowMoving} ${yearlySlowMoving[1] ?? ''}`.trim(),
     },
   ];
-
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonthSlug = MONTHS[now.getMonth()];
-
-  const meta = yearMeta(signName, sign, year);
-  const januaryForecast = buildMonthlyForecast(signKey, yearNum, 'january');
-  const juneForecast = buildMonthlyForecast(signKey, yearNum, 'june');
-  const octoberForecast = buildMonthlyForecast(signKey, yearNum, 'october');
   const canonicalValue =
     meta.alternates?.canonical ?? `/grimoire/horoscopes/${sign}/${year}`;
   const canonicalUrl = resolveCanonicalUrl(
@@ -223,23 +262,42 @@ export default async function YearHoroscopePage({
       transitSignDisplay={signName}
       whatIs={{
         question: `What does the ${signName} horoscope for ${year} include?`,
-        answer: `The ${signName} horoscope for ${year} provides complete monthly forecasts covering love, career, health, and personal growth. ${signName} is a ${element} sign with rulership ${rulership}, so this guide tracks how those themes play out across the year. This guide includes all 12 monthly predictions, key transits, and practical guidance for the year ahead.`,
+        answer: `The ${signName} horoscope for ${year} provides a transit-led yearly overview and complete monthly forecasts for love, career, health, and personal growth. ${signName} is a ${element} sign with rulership ${rulership}, so this guide tracks how outer-planet shifts, supportive aspects, and pressure points build across the year. It includes all 12 monthly predictions, key timing pivots, and practical guidance for the year ahead.`,
       }}
-      intro={`Dive into every month of ${year} with forecasts for ${signName} that weave together the Moon, planetary transits, and practical rituals so you can plan ahead.`}
+      intro={`Track ${signName} through ${year} with a grounded yearly forecast built from real planetary movement: the slow movers setting the long arc, the sharper monthly pivots, and the months when your sign gets the clearest openings or the hardest pressure tests.`}
       meaning={`## What to Expect for ${signName} in ${year}
 
-${year} brings important themes for ${signName}. This comprehensive guide covers all 12 months with detailed predictions for:
+${year} brings important themes for ${signName}, but this is not one long generic mood board. The story comes from the planets actually shaping your sign across the year.
 
-- **Love & Relationships:** Building deeper connections through ${element.toLowerCase()} consistency
-- **Career & Finance:** Long-term momentum guided by ${rulership}
-- **Health & Wellness:** Honoring your ${element.toLowerCase()} nature
-- **Personal Growth:** Aligning monthly choices with your bigger vision
+### The long-range current
 
-The year emphasizes steady progress and visible wins. Your element (${element}) and rulership (${rulership}) provide the framework for growth.
+${yearlySlowMoving[0] ?? januaryForecast.slowMoving}
 
-Select any month below for your detailed forecast.
+${yearlySlowMoving[1] ?? ''}
 
-This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate planning infused with ${element.toLowerCase()} energy and the guidance of ${rulership} to own visible progress throughout the year.`}
+### Where the year wants growth
+
+${yearlyOpportunity[0] ?? januaryForecast.opportunity}
+
+${yearlyOpportunity[1] ?? ''}
+
+### Where the year applies pressure
+
+${yearlyChallenge[0] ?? aprilForecast.challenge}
+
+${yearlyChallenge[1] ?? ''}
+
+### Timing pivots
+
+${yearlyTiming}
+
+### Decan timing for ${signName}
+
+${yearlyDecanFocus[0] ?? januaryForecast.decanFocus}
+
+${yearlyDecanFocus[1] ?? ''}
+
+Select any month below for the detailed version of how those transits land in real time. Your element (${element}) and rulership (${rulership}) still matter, but the strongest story this year comes from how the slow movers and exact sign-to-sign aspects keep leaning on your chart.`}
       additionalSchemas={[monthsItemListSchema]}
       heroContent={heroContent}
       breadcrumbs={[
@@ -259,7 +317,7 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
       }
       components={null}
       faqs={faqItems}
-      tldr={`${year} keeps ${signName} rooted in ${element.toLowerCase()} consistency while ${rulership} shapes the longer story of your choices.`}
+      tldr={`${year} asks ${signName} to work with the long-range planets, not just the monthly weather: follow the strongest growth windows, respect the pressure points, and time your bigger moves around the clearest seasonal pivots.`}
       ctaText='See your full birth-chart horoscope in the app'
       ctaHref='/horoscope'
       childrenPosition='after-description'
@@ -287,23 +345,73 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
       <section className='mb-12 grid gap-4 md:grid-cols-3'>
         <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
           <h2 className='text-lg font-medium text-content-primary mb-2'>
-            Love
-          </h2>
-          <p className='text-sm text-content-muted'>{januaryForecast.love}</p>
-        </div>
-        <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
-          <h2 className='text-lg font-medium text-content-primary mb-2'>
-            Career
-          </h2>
-          <p className='text-sm text-content-muted'>{juneForecast.career}</p>
-        </div>
-        <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
-          <h2 className='text-lg font-medium text-content-primary mb-2'>
-            Year
+            Long-range current
           </h2>
           <p className='text-sm text-content-muted'>
-            {octoberForecast.summary}
+            {yearlySlowMoving[0] ?? januaryForecast.slowMoving}
           </p>
+        </div>
+        <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
+          <h2 className='text-lg font-medium text-content-primary mb-2'>
+            Main opportunity
+          </h2>
+          <p className='text-sm text-content-muted'>
+            {yearlyOpportunity[0] ?? julyForecast.opportunity}
+          </p>
+        </div>
+        <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
+          <h2 className='text-lg font-medium text-content-primary mb-2'>
+            Main pressure point
+          </h2>
+          <p className='text-sm text-content-muted'>
+            {yearlyChallenge[0] ?? octoberForecast.challenge}
+          </p>
+        </div>
+      </section>
+
+      <section className='mb-12'>
+        <h2 className='text-2xl font-medium text-content-primary mb-6'>
+          Yearly checkpoints
+        </h2>
+        <div className='grid gap-4 md:grid-cols-2'>
+          {checkpointForecasts.map(({ label, month, forecast }) => (
+            <div
+              key={month}
+              className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'
+            >
+              <div className='mb-2 flex items-center justify-between gap-3'>
+                <h3 className='text-lg font-medium text-content-primary'>
+                  {label}
+                </h3>
+                <span className='text-xs uppercase tracking-[0.2em] text-content-muted'>
+                  {MONTH_DISPLAY_NAMES[month]}
+                </span>
+              </div>
+              <p className='mb-3 text-sm text-content-muted'>
+                {forecast.summary}
+              </p>
+              <ul className='space-y-2 text-sm text-content-muted'>
+                <li>
+                  <span className='font-medium text-content-primary'>
+                    Focus:
+                  </span>{' '}
+                  {forecast.focus}
+                </li>
+                <li>
+                  <span className='font-medium text-content-primary'>
+                    Pressure:
+                  </span>{' '}
+                  {forecast.challenge}
+                </li>
+                <li>
+                  <span className='font-medium text-content-primary'>
+                    Opening:
+                  </span>{' '}
+                  {forecast.opportunity}
+                </li>
+              </ul>
+            </div>
+          ))}
         </div>
       </section>
 
