@@ -42,7 +42,7 @@ import { activeAppPolicySlugs } from '@/data/app-policy-pages';
 
 dayjs.extend(isoWeek);
 import { getAllSynastryAspectSlugs } from '@/constants/seo/synastry-aspects';
-import { getAllCompatibilitySlugs } from '@/constants/seo/compatibility-content';
+import { getCuratedCompatibilitySlugs } from '@/constants/seo/compatibility-content';
 import {
   signDescriptions,
   planetDescriptions,
@@ -397,7 +397,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
-    { path: 'grimoire/birthday', changeFrequency: 'monthly', priority: 0.7 },
     {
       path: 'grimoire/chinese-zodiac',
       changeFrequency: 'monthly',
@@ -1237,14 +1236,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Add synastry generator page
-  const synastryGeneratorRoute = {
-    url: `${baseUrl}/grimoire/synastry/generate`,
-    lastModified: date,
-    changeFrequency: 'monthly' as const,
-    priority: 0.7,
-  };
-
   // Add synastry aspects index and individual pages
   const synastryAspectSlugs = getAllSynastryAspectSlugs();
   const synastryAspectsIndexRoute = {
@@ -1260,8 +1251,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // Add zodiac compatibility pages (all 78 unique pairs + 12 same-sign)
-  const compatibilitySlugs = getAllCompatibilitySlugs();
+  // Add curated compatibility pages only; generated long-tail stays live but
+  // should not be advertised as recovery-priority discovery.
+  const compatibilitySlugs = getCuratedCompatibilitySlugs();
   const compatibilityRoutes = compatibilitySlugs.map((slug) => ({
     url: `${baseUrl}/grimoire/compatibility/${slug}`,
     lastModified: date,
@@ -1543,7 +1535,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...expressionRoutes,
     ...soulUrgeRoutes,
     ...karmicDebtRoutes,
-    synastryGeneratorRoute,
     synastryAspectsIndexRoute,
     ...synastryAspectRoutes,
     ...compatibilityRoutes,
