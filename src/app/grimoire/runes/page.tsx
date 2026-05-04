@@ -36,6 +36,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://lunary.app/grimoire/runes',
   },
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 const faqs = [

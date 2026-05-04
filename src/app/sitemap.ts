@@ -379,8 +379,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: 'grimoire/lunar-nodes', changeFrequency: 'monthly', priority: 0.8 },
     { path: 'grimoire/transits', changeFrequency: 'monthly', priority: 0.8 },
     { path: 'grimoire/moon', changeFrequency: 'monthly', priority: 0.8 },
-    { path: 'grimoire/crystals', changeFrequency: 'monthly', priority: 0.8 },
-    { path: 'grimoire/runes', changeFrequency: 'monthly', priority: 0.8 },
     {
       path: 'grimoire/candle-magic',
       changeFrequency: 'monthly',

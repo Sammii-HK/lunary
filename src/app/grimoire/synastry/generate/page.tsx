@@ -29,6 +29,10 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: {
       canonical: 'https://lunary.app/grimoire/synastry/generate',
     },
+    robots: {
+      index: false,
+      follow: true,
+    },
   };
 }
 
