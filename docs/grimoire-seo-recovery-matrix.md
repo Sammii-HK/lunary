@@ -15,6 +15,7 @@ The goal is not to get everything indexed at once. The goal is to re-earn trust 
 ## Family decisions
 
 ### Horoscopes
+
 - Monthly sign pages: `Keep indexed + improve`
 - Yearly sign pages: `Keep indexed + improve`
 - Sign root pages: `Noindex root / tool` (already done)
@@ -23,6 +24,7 @@ The goal is not to get everything indexed at once. The goal is to re-earn trust 
 - Far-future year/month inventory: `Remove from sitemap` and constrain route discovery (in progress, largely done)
 
 ### Transits
+
 - Main hub: `Keep indexed + improve`
 - Individual transit pages: `Keep indexed + improve`
 - Year pages: `Keep indexed + improve`, but only near-term
@@ -30,6 +32,7 @@ The goal is not to get everything indexed at once. The goal is to re-earn trust 
 - App duplicate `/transits`: `Remove from sitemap` (done)
 
 ### Moon
+
 - Main hub: `Keep indexed + improve`
 - Year pages: `Keep indexed + improve`, but only near-term
 - Dated moon event pages: `Keep indexed + improve`
@@ -38,6 +41,7 @@ The goal is not to get everything indexed at once. The goal is to re-earn trust 
 - 2026 moon canonicals: fixed (done)
 
 ### Numerology
+
 - Main hub: `Keep indexed + improve`
 - Strong evergreen leaves: `Keep indexed + improve`
 - Year pages: `Keep indexed + improve`, but only near-term
@@ -45,45 +49,56 @@ The goal is not to get everything indexed at once. The goal is to re-earn trust 
 - Angel number leaves: `Keep indexed + improve` selectively based on demand
 
 ### Synastry
+
 - Main synastry guide: `Keep indexed + improve`
 - Synastry aspect leaves: `Keep indexed + improve`
 - Synastry generator: `Noindex root / tool` (done)
 
 ### Birthday
+
 - Birthday hub: `Keep live, deprioritize`
+- Birthday hub removed from birthday sitemap (done)
 - Birthday leaves: `Keep indexed + improve` selectively; likely large template family that needs later pruning
 - Treat as high-risk for template duplication
 
 ### Compatibility
+
 - Root hub: `Noindex root / tool` (done)
 - Pair pages: `Keep live, deprioritize` until stronger evidence they deserve recovery priority
+- Compatibility sitemap restricted to curated pairs only (done)
 
 ### Zodiac
+
 - Root hub: `Noindex root / tool` (done)
 - Sign pages: `Keep live, deprioritize`
 
 ### Crystals
+
 - Root hub: `Noindex root / tool` (done)
 - Root removed from main sitemap and crystals sitemap (done)
 - Leaf pages: `Keep live, deprioritize`
 
 ### Runes
+
 - Root hub: `Noindex root / tool` (done)
 - Root removed from main sitemap (done)
 - Leaf pages: `Keep live, deprioritize`
 
 ### Spells
+
 - Main hub: `Keep live, deprioritize`
 - Spell leaves: `Keep live, deprioritize`
 - Paginated archive pages: `Noindex root / tool` and canonicalize to root (done)
 
 ### Tarot
+
 - Main hub: `Keep live, deprioritize`
 - Strong card pages: `Keep indexed + improve`
 - Spreads hub: `Keep live, deprioritize`
 - Utility yes/no pages: `Keep live, deprioritize`
 
 ### Events
+
 - Main hub: `Keep live, deprioritize`
 - Year/event pages: `Keep indexed + improve` only for near-term years
 - Far-future years: `Remove from sitemap` and route discovery

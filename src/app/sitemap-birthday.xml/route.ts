@@ -6,20 +6,12 @@ export async function GET(): Promise<Response> {
   const stableMonthStamp = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`;
   const dates = generateAllBirthdates();
 
-  const urls = [
-    {
-      loc: `${baseUrl}/grimoire/birthday`,
-      lastmod: stableMonthStamp,
-      changefreq: 'monthly',
-      priority: '0.8',
-    },
-    ...dates.map((date) => ({
-      loc: `${baseUrl}/grimoire/birthday/${date}`,
-      lastmod: stableMonthStamp,
-      changefreq: 'yearly',
-      priority: '0.6',
-    })),
-  ];
+  const urls = dates.map((date) => ({
+    loc: `${baseUrl}/grimoire/birthday/${date}`,
+    lastmod: stableMonthStamp,
+    changefreq: 'yearly',
+    priority: '0.5',
+  }));
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
