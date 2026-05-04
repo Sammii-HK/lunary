@@ -11,6 +11,7 @@ import {
   getAstrologicalChart,
   type AstroChartInformation,
 } from '../../../utils/astrology/astrology';
+import { getDecanData } from '@/constants/seo/decans';
 
 type AspectType = 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile';
 
@@ -44,6 +45,8 @@ export type MonthlyForecast = {
   challenge: string;
   opportunity: string;
   timing: string;
+  slowMoving: string;
+  decanFocus: string;
   love: string;
   career: string;
   wellbeing: string;
@@ -69,7 +72,12 @@ const TRANSIT_BODIES = new Set([
   'Mars',
   'Jupiter',
   'Saturn',
+  'Uranus',
+  'Neptune',
+  'Pluto',
 ]);
+
+const SLOW_MOVING_BODIES = new Set(['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto']);
 
 const ZODIAC_ORDER = [
   'Aries',
@@ -112,6 +120,9 @@ const PLANET_THEMES: Record<string, string> = {
   Mars: 'drive, conflict tolerance, physical energy, and timing',
   Jupiter: 'growth, generosity, openings, and where life wants to widen',
   Saturn: 'responsibility, boundaries, discipline, and what needs to mature',
+  Uranus: 'disruption, liberation, reinvention, and the part of life that refuses stale rules',
+  Neptune: 'dreams, intuition, blurred edges, devotion, and where clarity must be earned slowly',
+  Pluto: 'power, endings, obsession, and deep structural change that does not negotiate',
 };
 
 const ASPECT_VERBS: Record<AspectType, string> = {
@@ -387,6 +398,59 @@ function buildThemePill(
   return `${label}: ${influence.planet} ${influence.aspect}`;
 }
 
+function getDecanFromDegreeString(
+  degreeString?: string,
+): 1 | 2 | 3 | null {
+  if (!degreeString) return null;
+  const degree = Number.parseInt(degreeString, 10);
+  if (!Number.isFinite(degree)) return null;
+  if (degree < 10) return 1;
+  if (degree < 20) return 2;
+  return 3;
+}
+
+function getSlowMovingNarrative(
+  sign: ZodiacSign,
+  date: Date,
+): { slowMoving: string; decanFocus: string } {
+  const signName = SIGN_DISPLAY_NAMES[sign];
+  const slowMovers = getSignTransitsForDate(sign, date)
+    .filter((item) => SLOW_MOVING_BODIES.has(item.planet))
+    .sort((a, b) => ASPECT_WEIGHTS[b.aspect] - ASPECT_WEIGHTS[a.aspect])
+    .slice(0, 2);
+
+  if (slowMovers.length === 0) {
+    return {
+      slowMoving:
+        `${signName} is working with shorter-cycle sky weather this month more than one dominant outer-planet story.`,
+      decanFocus:
+        `Use the month by breaking it into early, middle, and late pacing rather than waiting for one massive outer-planet event to explain everything.`,
+    };
+  }
+
+  const slowMoving = slowMovers
+    .map((item) => {
+      const retrogradeNote = item.retrograde ? ' and is retrograde' : '';
+      return `${item.planet} ${ASPECT_VERBS[item.aspect]} from ${item.transitSign}${retrogradeNote}, so ${PLANET_THEMES[item.planet]} are not background noise for ${signName}; they are part of the structural story of the month.`;
+    })
+    .join(' ');
+
+  const decanLines = slowMovers.map((item) => {
+    const transitDecan = getDecanFromDegreeString(item.degree);
+    if (!transitDecan) {
+      return `${item.planet} is worth tracking by degrees this month because the exact slice of the sign it occupies tells you whether the first, second, or third decan feels the pressure first.`;
+    }
+
+    const decan = getDecanData(sign, transitDecan);
+    return `${item.planet} is moving through the ${transitDecan === 1 ? 'first' : transitDecan === 2 ? 'second' : 'third'} decan of ${item.transitSign}, so ${signName} placements in the ${decan.degrees} band (${decan.dateRange}) tend to register this ${item.aspect} first. In practice that means the ${decan.subruler} tone of your sign is the part to watch most closely.`;
+  });
+
+  return {
+    slowMoving,
+    decanFocus: decanLines.join(' '),
+  };
+}
+
 export function buildMonthlyForecast(
   sign: ZodiacSign,
   year: number,
@@ -415,6 +479,13 @@ export function buildMonthlyForecast(
   const midpointMoonSign =
     midpointSky.find((body) => String(body.body) === 'Moon')?.sign ??
     'unknown sign';
+  const midpointSlowMovers = getSignTransitsForDate(sign, monthMidpoint).filter(
+    (item) => SLOW_MOVING_BODIES.has(item.planet),
+  );
+  const { slowMoving, decanFocus } = getSlowMovingNarrative(
+    sign,
+    monthMidpoint,
+  );
 
   const focus = supportive
     ? `${supportive.planet} is the cleanest helper for ${signName} this month. Because it ${ASPECT_VERBS[supportive.aspect]} from ${supportive.transitSign}, ${PLANET_THEMES[supportive.planet]} are where you get traction fastest.`
@@ -494,6 +565,8 @@ export function buildMonthlyForecast(
     challenge,
     opportunity,
     timing,
+    slowMoving,
+    decanFocus,
     love,
     career,
     wellbeing,
@@ -514,6 +587,9 @@ export function buildMonthlyForecast(
     emotionalThemes: [
       buildThemePill('Support', supportive),
       buildThemePill('Pressure', challenging),
+      midpointSlowMovers.length > 0
+        ? `Outer planets: ${midpointSlowMovers.map((item) => item.planet).join(', ')}`
+        : 'Outer planets: quieter month',
       `Moon pivot: ${midpointMoon.name}`,
       `Timing: ${monthName} wants response, not autopilot`,
     ],

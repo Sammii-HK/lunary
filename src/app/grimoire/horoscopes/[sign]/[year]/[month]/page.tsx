@@ -205,6 +205,14 @@ ${forecast.opportunity}
 
 ${forecast.timing}
 
+### Slow-Moving Planets
+
+${forecast.slowMoving}
+
+### Decan Timing
+
+${forecast.decanFocus}
+
 ### Love
 
 ${forecast.love}
