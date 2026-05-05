@@ -43,7 +43,7 @@ export function createOrganizationSchema() {
     name: 'Lunary',
     alternateName: 'Lunary App',
     description:
-      'The definitive knowledge authority for astrology, tarot, rituals, and symbolic meaning-making. Personalized cosmic guidance based on real astronomical data.',
+      'Astrology education and chart-reading guidance grounded in real astronomical calculations, natal chart structure, planetary transits, moon phases, houses, aspects, and decans.',
     url: BASE_URL,
     logo: {
       '@type': 'ImageObject',
@@ -72,15 +72,18 @@ export function createOrganizationSchema() {
     },
     areaServed: 'Worldwide',
     knowsAbout: [
-      'Astrology',
-      'Tarot',
+      'Astrology Education',
       'Birth Charts',
+      'Natal Chart Interpretation',
+      'Chart Reading',
+      'Astrological Houses',
+      'Astrological Aspects',
+      'Planetary Placements',
+      'Decans',
       'Moon Phases',
       'Zodiac Signs',
       'Planetary Transits',
-      'Crystals',
-      'Rituals',
-      'Spiritual Practices',
+      'Astronomical Calculations',
     ],
   };
 }
@@ -93,7 +96,7 @@ export function createWebSiteSchema() {
     url: BASE_URL,
     name: 'Lunary',
     description:
-      'The definitive knowledge authority for astrology, tarot, rituals, and symbolic meaning-making. Personalized cosmic guidance based on real astronomical data.',
+      'Astrology education and chart-reading guidance grounded in real astronomical calculations, natal chart structure, planetary transits, moon phases, houses, aspects, and decans.',
     publisher: {
       '@id': `${BASE_URL}/#organization`,
     },
@@ -129,8 +132,10 @@ export function createWebApplicationSchema() {
     },
     featureList: [
       'Birth chart analysis',
+      'Chart reading education',
+      'Planetary placement interpretation',
+      'House and aspect interpretation',
       'Personalized daily horoscopes',
-      'Tarot readings',
       'Moon phase tracking',
       'Push notifications',
       'Offline support',

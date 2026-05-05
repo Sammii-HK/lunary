@@ -196,14 +196,14 @@ const GRIMOIRE_FULL_STRUCTURE = [
     icon: <Star className='w-5 h-5' />,
     items: [
       {
-        title: "Beginner's Guide",
-        href: '/grimoire/beginners',
-        description: 'Start your spiritual journey',
+        title: 'Learn to Read a Birth Chart',
+        href: '/grimoire/guides/learn-birth-chart',
+        description: 'Step-by-step chart reading',
       },
       {
         title: 'All Guides',
         href: '/grimoire/guides',
-        description: 'In-depth pillar content',
+        description: 'Astrology learning paths',
       },
       {
         title: 'Birth Chart Guide',
@@ -211,24 +211,9 @@ const GRIMOIRE_FULL_STRUCTURE = [
         description: 'Master natal astrology',
       },
       {
-        title: 'Tarot Guide',
-        href: '/grimoire/guides/tarot-complete-guide',
-        description: 'All 78 cards explained',
-      },
-      {
         title: 'Moon Phases Guide',
         href: '/grimoire/guides/moon-phases-guide',
-        description: 'Lunar cycles & rituals',
-      },
-      {
-        title: 'Crystal Healing Guide',
-        href: '/grimoire/guides/crystal-healing-guide',
-        description: 'Properties & practices',
-      },
-      {
-        title: 'Archetypes Guide',
-        href: '/grimoire/archetypes',
-        description: 'Inner patterns & shadow work',
+        description: 'Lunar cycles & timing',
       },
     ],
   },
@@ -721,16 +706,16 @@ function GrimoireIndexPage() {
         <div className='text-center mb-12 md:mb-16'>
           <Notebook className='w-16 h-16 md:w-20 md:h-20 text-lunary-primary-400 mx-auto mb-6' />
           <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-4'>
-            Welcome to the Grimoire
+            Astrology Learning Grimoire
           </h1>
           <p className='text-base md:text-lg text-content-muted leading-relaxed max-w-2xl mx-auto mb-8'>
-            Explore mystical knowledge, cosmic wisdom, and ancient practices to
-            deepen your spiritual journey.
+            Learn birth charts, planets, houses, aspects, decans, moon phases,
+            and transit timing through structured chart-reading guides.
           </p>
 
           {/* Search */}
           <div className='max-w-xl mx-auto'>
-            <GrimoireSearch placeholder='Search tarot, crystals, zodiac...' />
+            <GrimoireSearch placeholder='Search birth charts, houses, aspects...' />
           </div>
         </div>
 
@@ -766,7 +751,14 @@ function GrimoireIndexPage() {
           className='space-y-12 md:space-y-16'
           data-testid='grimoire-categories'
         >
-          {GRIMOIRE_FULL_STRUCTURE.map((category) => (
+          {GRIMOIRE_FULL_STRUCTURE.filter(
+            (category) =>
+              ![
+                'Tarot & Divination',
+                'Crystals',
+                'Witchcraft & Practices',
+              ].includes(category.name),
+          ).map((category) => (
             <section key={category.name}>
               {/* Category Header */}
               <div className='flex items-center gap-3 mb-6'>

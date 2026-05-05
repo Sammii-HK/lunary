@@ -207,6 +207,10 @@ export default async function MonthlyHoroscopePage({
 
 ${forecast.summary} As a ${element} sign guided by ${ruler}, ${signName} does best this month by following the real timing of the sky instead of forcing a generic “monthly vibe.”
 
+### How This Forecast Is Calculated
+
+${forecast.methodology}
+
 ### Main Focus
 
 ${forecast.focus}

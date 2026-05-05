@@ -40,6 +40,7 @@ type MonthlyEvent = {
 export type MonthlyForecast = {
   summary: string;
   tldr: string;
+  methodology: string;
   whatToExpect: string;
   focus: string;
   challenge: string;
@@ -239,6 +240,25 @@ function summariseInfluence(influence: InfluenceSummary): string {
       ? ` and spends part of the month retrograde`
       : '';
   return `${influence.planet} ${ASPECT_VERBS[influence.aspect]} from ${influence.transitSign}, so ${PLANET_THEMES[influence.planet]} stay active for roughly ${influence.days} days${retrogradeBit}.`;
+}
+
+function buildMethodologyNote(
+  sign: ZodiacSign,
+  year: number,
+  month: Month,
+  influences: InfluenceSummary[],
+): string {
+  const signName = SIGN_DISPLAY_NAMES[sign];
+  const monthName = MONTH_DISPLAY_NAMES[month];
+  const strongest = influences
+    .slice(0, 3)
+    .map(
+      (item) =>
+        `${item.planet} ${item.aspect} from ${item.transitSign} for ${item.days} days`,
+    )
+    .join('; ');
+
+  return `This ${signName} forecast is calculated from daily noon UTC planetary positions for every day of ${monthName} ${year}. Lunary maps each transit planet by sign, checks whether it forms a conjunction, sextile, square, trine, or opposition to ${signName}, weights longer-lasting and harder aspects more heavily, then layers lunar phase timing and slow-moving planet decans on top. The strongest measured patterns this month are: ${strongest || 'no single transit dominates the month'}.`;
 }
 
 function findTopInfluences(
@@ -493,6 +513,7 @@ export function buildMonthlyForecast(
   const midpointSlowMovers = getSignTransitsForDate(sign, monthMidpoint).filter(
     (item) => SLOW_MOVING_BODIES.has(item.planet),
   );
+  const methodology = buildMethodologyNote(sign, year, month, influences);
   const { slowMoving, decanFocus } = getSlowMovingNarrative(
     sign,
     monthMidpoint,
@@ -550,6 +571,10 @@ export function buildMonthlyForecast(
 
   const tableRows: string[][] = [
     [
+      'Calculation method',
+      `Daily noon UTC planetary positions; sign-based aspect checks; duration-weighted transit scoring; lunar phase and decan review.`,
+    ],
+    [
       'Strongest support',
       supportive
         ? summariseInfluence(supportive)
@@ -571,6 +596,7 @@ export function buildMonthlyForecast(
   return {
     summary,
     tldr,
+    methodology,
     whatToExpect,
     focus,
     challenge,

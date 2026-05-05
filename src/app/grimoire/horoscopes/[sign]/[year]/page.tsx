@@ -173,6 +173,7 @@ export default async function YearHoroscopePage({
   const yearlyThroughline = quarterSnapshots
     .map((snapshot) => `${snapshot.label}: ${snapshot.summary}`)
     .join(' ');
+  const yearlyMethodology = `This ${signName} ${year} horoscope is assembled from four transit windows: Q1, Q2, Q3, and Q4. Each window samples real planetary positions across the quarter, maps transit signs back to ${signName} by conjunction, sextile, square, trine, or opposition, then separates support, pressure, opportunity, and lunar tone. That gives the yearly page a calculated timing spine before the interpretation layer is written.`;
 
   const faqItems = [
     {
@@ -276,6 +277,10 @@ ${year} brings important themes for ${signName}. This comprehensive guide covers
 
 The year emphasizes steady progress and visible wins. Your element (${element}) and rulership (${rulership}) provide the framework for growth.
 
+### How This Year Forecast Is Calculated
+
+${yearlyMethodology}
+
 ### Quarterly Timing Pivots
 
 ${quarterSnapshots.map((snapshot) => `- **${snapshot.label}:** ${snapshot.focus} ${snapshot.challenge} ${snapshot.opportunity}`).join('\n')}
@@ -303,6 +308,27 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
       components={null}
       faqs={faqItems}
       tldr={`${year} keeps ${signName} rooted in ${element.toLowerCase()} consistency while ${rulership} shapes the longer story of your choices. ${quarterSnapshots[0]?.summary ?? ''}`}
+      tables={[
+        {
+          title: `${signName} ${year} Forecast Method`,
+          headers: ['Layer', 'How Lunary Uses It'],
+          rows: [
+            ['Quarter windows', 'Q1, Q2, Q3, and Q4 are sampled separately.'],
+            [
+              'Transit scoring',
+              'Planetary positions are mapped to sign-based aspects and weighted by support or pressure.',
+            ],
+            [
+              'Lunar tone',
+              'The Moon phase and Moon sign at each window start are used as timing context.',
+            ],
+            [
+              'Interpretation layer',
+              'The calculated transit spine is interpreted through sign element, rulership, and practical chart-reading context.',
+            ],
+          ],
+        },
+      ]}
       ctaText='See your full birth-chart horoscope in the app'
       ctaHref='/horoscope'
       sources={[
