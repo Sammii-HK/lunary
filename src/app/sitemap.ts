@@ -195,6 +195,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority,
   });
 
+  const deprioritizedMainSitemapSections = new Set([
+    'zodiac',
+    'birthday',
+    'compatibility',
+    'crystals',
+    'runes',
+  ]);
+
   const staticPageSources: Record<string, string[]> = {
     '': ['src/app/page.tsx'],
     pricing: ['src/app/pricing/page.tsx'],
@@ -623,7 +631,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // Add all grimoire sections
-  const grimoireItems = Object.keys(grimoire);
+  const grimoireItems = Object.keys(grimoire).filter(
+    (item) => !deprioritizedMainSitemapSections.has(sectionToSlug(item)),
+  );
   const grimoireRoutes = grimoireItems.map((item) => ({
     url: `${baseUrl}/grimoire/${sectionToSlug(item)}`,
     lastModified: date,
