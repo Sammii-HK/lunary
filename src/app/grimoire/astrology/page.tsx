@@ -7,6 +7,11 @@ import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 const astrologyItems = [
   {
+    name: 'Learn Birth Chart',
+    href: '/grimoire/guides/learn-birth-chart',
+    description: 'A step-by-step path for learning chart reading.',
+  },
+  {
     name: 'Birth Chart',
     href: '/grimoire/birth-chart',
     description: 'Your natal chart and how to read it.',
@@ -79,6 +84,7 @@ const astrologyGroups = [
     description:
       'Start with the birth chart, then deepen your understanding through houses, aspects, and placements.',
     items: [
+      'Learn Birth Chart',
       'Birth Chart',
       'Astrological Houses',
       'Aspects',

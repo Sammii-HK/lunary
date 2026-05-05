@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 export const metadata: Metadata = {
-  title: 'Astrology & Witchcraft Guides: Learn the Basics - Lunary',
+  title:
+    'Astrology Learning Guides: Birth Charts, Tarot & Moon Phases | Lunary',
   description:
-    'In-depth guides to astrology, tarot, crystals, and moon phases. Comprehensive pillar content for beginners and advanced practitioners. Your complete reference library.',
+    'In-depth astrology learning paths and complete guides. Learn birth chart reading, houses, aspects, tarot, crystals, and moon phases with structured reference pages.',
   keywords: [
     'astrology guides',
     'tarot guide',
@@ -20,9 +21,9 @@ export const metadata: Metadata = {
     'spiritual guides',
   ],
   openGraph: {
-    title: 'Astrology & Witchcraft Guides: Learn the Basics - Lunary',
+    title: 'Astrology Learning Guides: Birth Charts, Tarot & Moon Phases',
     description:
-      'In-depth guides to astrology, tarot, crystals, and moon phases.',
+      'Structured learning paths and complete references for astrology, tarot, crystals, and moon phases.',
     url: 'https://lunary.app/grimoire/guides',
     images: [
       {
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Astrology & Witchcraft Guides: Learn the Basics - Lunary',
     description:
-      'In-depth guides to astrology, tarot, crystals, and moon phases. Comprehensive pillar content for beginners and advanced practitioners.',
+      'Structured astrology learning paths plus complete tarot, crystal, and moon phase references.',
     images: ['/api/og/grimoire/guides'],
   },
   alternates: {
@@ -46,6 +47,20 @@ export const metadata: Metadata = {
 };
 
 const GUIDES = [
+  {
+    title: 'Learn to Read a Birth Chart',
+    slug: 'learn-birth-chart',
+    description:
+      'A step-by-step astrology learning path: calculate your chart, read the Big Three, chart ruler, houses, aspects, decans, transits, and synthesis.',
+    icon: '◎',
+    wordCount: '4,000+',
+    topics: [
+      'Chart reading order',
+      'Chart ruler',
+      'Houses and aspects',
+      'Synthesis method',
+    ],
+  },
   {
     title: 'Birth Chart: The Complete Guide',
     slug: 'birth-chart-complete-guide',
@@ -120,9 +135,9 @@ const GUIDES = [
 
 export default function GuidesIndexPage() {
   const guidesListSchema = createItemListSchema({
-    name: 'Astrology & Witchcraft Guides: Learn the Basics',
+    name: 'Astrology Learning Guides',
     description:
-      'In-depth pillar content covering astrology, tarot, crystals, and moon phases for beginners to advanced practitioners.',
+      'Structured astrology learning paths and in-depth pillar content covering birth charts, tarot, crystals, and moon phases.',
     url: 'https://lunary.app/grimoire/guides',
     items: GUIDES.map((guide) => ({
       name: guide.title,
@@ -137,7 +152,7 @@ export default function GuidesIndexPage() {
       <SEOContentTemplate
         title='Astrology & Witchcraft Guides: Learn the Basics'
         h1='Complete Guides'
-        description='In-depth pillar content covering the essential topics in astrology and spiritual practice. Each guide is designed to take you from beginner to confident practitioner.'
+        description='Structured learning paths and in-depth pillar content covering birth charts, astrology, tarot, crystals, and moon phases. Each guide is designed to take you from beginner to confident practitioner.'
         keywords={[
           'astrology guides',
           'tarot guide',
@@ -151,7 +166,7 @@ export default function GuidesIndexPage() {
           answer:
             'Our complete guides are comprehensive, in-depth resources covering major topics in astrology and spiritual practice. Each guide is 5,000-8,000+ words of thoroughly researched content, covering everything from fundamentals to advanced concepts. They serve as your go-to reference for mastering each subject.',
         }}
-        tldr='Five comprehensive guides covering the essentials: Birth Chart (read your cosmic blueprint), Tarot (master all 78 cards), Crystal Healing (properties and uses), and Moon Phases (lunar cycles and rituals). Each 5,000-8,000+ words, beginner to advanced.'
+        tldr='Start with the Learn to Read a Birth Chart path, then use the complete guides for deeper references: Birth Chart, Tarot, Crystal Healing, Moon Phases, and archetypes.'
         faqs={[
           {
             question: 'Are these guides suitable for beginners?',
@@ -170,6 +185,11 @@ export default function GuidesIndexPage() {
           },
         ]}
         relatedItems={[
+          {
+            name: 'Learn to Read a Birth Chart',
+            href: '/grimoire/guides/learn-birth-chart',
+            type: 'learning path',
+          },
           {
             name: 'Birth Chart Calculator',
             href: '/birth-chart',

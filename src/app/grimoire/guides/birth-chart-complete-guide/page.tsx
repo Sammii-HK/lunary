@@ -173,6 +173,11 @@ export default function BirthChartCompleteGuidePage() {
           <Button asChild variant='outline' size='lg'>
             <Link href='#what-is-birth-chart'>Start Reading</Link>
           </Button>
+          <Button asChild variant='outline' size='lg'>
+            <Link href='/grimoire/guides/learn-birth-chart'>
+              Follow the Learning Path
+            </Link>
+          </Button>
         </div>
       </header>
 

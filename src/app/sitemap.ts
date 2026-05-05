@@ -312,6 +312,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'grimoire/guides/birth-chart-complete-guide': [
       'src/app/grimoire/guides/birth-chart-complete-guide/page.tsx',
     ],
+    'grimoire/guides/learn-birth-chart': [
+      'src/app/grimoire/guides/learn-birth-chart/page.tsx',
+    ],
     'grimoire/guides/tarot-complete-guide': [
       'src/app/grimoire/guides/tarot-complete-guide/page.tsx',
     ],
@@ -482,6 +485,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       path: 'grimoire/guides/birth-chart-complete-guide',
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
+      path: 'grimoire/guides/learn-birth-chart',
       changeFrequency: 'monthly',
       priority: 0.9,
     },

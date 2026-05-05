@@ -130,6 +130,10 @@ Lunary reads a chart in layers rather than isolated placements. Start with the c
         'Build your reading from the chart structure first, then add intuition and symbolism',
       ]}
       internalLinks={[
+        {
+          text: 'Learn to Read a Birth Chart',
+          href: '/grimoire/guides/learn-birth-chart',
+        },
         { text: 'Rising Sign Guide', href: '/grimoire/rising' },
         { text: '1st House Meaning', href: '/grimoire/houses/1st-house' },
         { text: 'Decans Guide', href: '/grimoire/decans' },
