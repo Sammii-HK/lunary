@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         matchType: 'none',
         suggestions: resolution.suggestions ?? [],
         links: [],
-        ctaUrl: 'https://lunary.app/grimoire/search?from=gpt_grimoire_bridge',
+        ctaUrl: 'https://lunary.app/grimoire/search',
         ctaText: 'Explore the complete Lunary Grimoire',
         source: 'Lunary.app - Digital Grimoire with 500+ pages',
       });

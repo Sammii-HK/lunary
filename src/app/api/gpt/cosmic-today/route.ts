@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
       },
       sunSign,
       keyTransits,
-      ctaUrl: 'https://lunary.app/welcome?from=gpt_cosmic_today',
+      ctaUrl: 'https://lunary.app/welcome',
       ctaText: 'Get personalized cosmic insights for your birth chart',
       source: 'Lunary.app - Real astronomical data from NASA-grade ephemeris',
     };

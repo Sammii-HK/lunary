@@ -249,7 +249,7 @@ export async function GET(request: NextRequest) {
         score >= 70
           ? 'Focus on maintaining your natural connection through quality time together.'
           : 'Communication and patience are key. Embrace your differences as opportunities for growth.',
-      ctaUrl: `https://lunary.app/grimoire/compatibility/${compatibilitySlug}?from=gpt_compatibility`,
+      ctaUrl: `https://lunary.app/grimoire/compatibility/${compatibilitySlug}`,
       ctaText: 'Get a detailed compatibility reading with synastry analysis',
       source: 'Lunary.app - Astrological compatibility analysis',
     };

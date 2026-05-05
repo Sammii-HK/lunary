@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
             'No personalized insights',
             'Astral Guide limited to 3 messages/day',
           ],
-          ctaUrl: 'https://lunary.app/welcome?from=gpt_pricing_free',
+          ctaUrl: 'https://lunary.app/welcome',
           ctaLabel: 'Get Started Free',
         },
         {
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
             'Tarot readings with patterns',
           ],
           limitations: ['Astral Guide limited to 50 messages/day'],
-          ctaUrl: 'https://lunary.app/pricing?from=gpt_pricing_plus',
+          ctaUrl: 'https://lunary.app/pricing',
           ctaLabel: 'Start free trial',
         },
         {
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
             'Priority support',
           ],
           limitations: [],
-          ctaUrl: 'https://lunary.app/pricing?from=gpt_pricing_ai',
+          ctaUrl: 'https://lunary.app/pricing',
           ctaLabel: 'Start free trial',
         },
         {
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
             'All features unlocked',
           ],
           limitations: [],
-          ctaUrl: 'https://lunary.app/pricing?from=gpt_pricing_annual',
+          ctaUrl: 'https://lunary.app/pricing',
           ctaLabel: 'Get Best Value',
         },
       ],
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
         note: 'Monthly plans include a 7-day trial; annual plans include a 14-day trial. Cancel anytime.',
       },
       lastUpdated: new Date().toISOString().split('T')[0],
-      ctaUrl: 'https://lunary.app/pricing?from=gpt_pricing_summary',
+      ctaUrl: 'https://lunary.app/pricing',
       ctaText: 'Compare all plans and features',
     };
 
