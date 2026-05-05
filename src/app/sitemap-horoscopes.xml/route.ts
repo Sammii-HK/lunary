@@ -8,12 +8,8 @@ export async function GET(): Promise<Response> {
   const horoscopes = generateAllHoroscopeParams();
   const currentYear = new Date().getFullYear();
   const minYear = Math.max(2025, currentYear - 1);
-  const maxYear = currentYear + 1;
-  const yearlyHoroscopeYears = [
-    minYear,
-    currentYear,
-    maxYear,
-  ];
+  const maxYear = currentYear + 2;
+  const yearlyHoroscopeYears = [minYear, currentYear, maxYear];
   const currentMonthStamp = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`;
 
   const urls = [
@@ -34,11 +30,11 @@ export async function GET(): Promise<Response> {
     ...horoscopes
       .filter((h) => h.year >= minYear && h.year <= maxYear)
       .map((h) => ({
-      loc: `${baseUrl}/grimoire/horoscopes/${h.sign}/${h.year}/${h.month}`,
-      lastmod: `${h.year}-${String(new Date(`${h.month} 1, ${h.year}`).getMonth() + 1).padStart(2, '0')}-01`,
-      changefreq: 'monthly',
-      priority: '0.9',
-    })),
+        loc: `${baseUrl}/grimoire/horoscopes/${h.sign}/${h.year}/${h.month}`,
+        lastmod: `${h.year}-${String(new Date(`${h.month} 1, ${h.year}`).getMonth() + 1).padStart(2, '0')}-01`,
+        changefreq: 'monthly',
+        priority: '0.9',
+      })),
   ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

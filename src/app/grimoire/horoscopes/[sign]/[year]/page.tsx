@@ -30,6 +30,7 @@ const AVAILABLE_YEARS = [
   Math.max(2025, CURRENT_YEAR - 1),
   CURRENT_YEAR,
   CURRENT_YEAR + 1,
+  CURRENT_YEAR + 2,
 ];
 
 function resolveOgImageUrl(value: unknown): string | undefined {
