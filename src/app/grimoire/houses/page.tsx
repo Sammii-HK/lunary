@@ -100,6 +100,19 @@ export default function HousesIndexPage() {
           and identity to spirituality and the unconscious. Each house is a
           stage where planets perform their roles.
         </p>
+        <div className='max-w-3xl space-y-3 text-content-muted mb-10'>
+          <p>
+            Houses tell you where a placement lands in lived experience. A Venus
+            placement describes love style and values; the house tells you
+            whether that plays out through career, friendships, home, money, or
+            partnership. Without the houses, chart interpretation gets vague
+            very fast.
+          </p>
+          <p className='text-sm'>
+            Sources: Lunary house interpretation framework, traditional house
+            doctrine, Astronomy Engine chart-angle calculations.
+          </p>
+        </div>
 
         <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12'>
           {HOUSES.map((house) => {
@@ -145,6 +158,22 @@ export default function HousesIndexPage() {
           ))}
         </div>
 
+        <div className='mb-12 p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/40'>
+          <h2 className='text-xl font-medium mb-3'>How to use the houses</h2>
+          <ul className='list-disc pl-5 space-y-2 text-content-secondary'>
+            <li>
+              Start with the house topic: self, money, siblings, home, and so
+              on.
+            </li>
+            <li>Then judge the sign on that house cusp and its ruler.</li>
+            <li>Add any planet placed in the house.</li>
+            <li>
+              Only after that should you interpret the aspects involving those
+              planets.
+            </li>
+          </ul>
+        </div>
+
         <div className='p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
           <h2 className='text-xl font-medium text-content-brand mb-2'>
             Discover Your House Placements
@@ -158,6 +187,26 @@ export default function HousesIndexPage() {
           >
             View Your Birth Chart
           </Link>
+          <div className='mt-4 flex flex-wrap gap-3 text-sm'>
+            <Link
+              href='/grimoire/rising'
+              className='text-content-muted hover:text-content-secondary'
+            >
+              Rising Signs
+            </Link>
+            <Link
+              href='/grimoire/placements'
+              className='text-content-muted hover:text-content-secondary'
+            >
+              Placements
+            </Link>
+            <Link
+              href='/grimoire/birth-chart'
+              className='text-content-muted hover:text-content-secondary'
+            >
+              Birth Chart Guide
+            </Link>
+          </div>
         </div>
 
         <ExploreGrimoire />

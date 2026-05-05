@@ -84,6 +84,14 @@ export default function RisingSignsPage() {
           the eastern horizon at the moment of your birth. It shapes your first
           impressions, physical appearance, and how others perceive you.
         </p>
+        <p className='text-content-muted mt-4 max-w-3xl'>
+          The useful way to read an Ascendant is not just “what vibe do I give
+          off?” Your rising sign sets the first house and the whole house
+          sequence of the chart. That means the sign itself matters, but so does
+          the ruler of that sign, the house that ruler lands in, and the aspects
+          it makes. Lunary treats the Ascendant as the structural key to the
+          chart, not a cosmetic extra.
+        </p>
       </div>
 
       {/* What is a Rising Sign */}
@@ -103,6 +111,13 @@ export default function RisingSignsPage() {
             knowing your exact birth time is essential for determining it. It
             sets the stage for your entire birth chart, determining which houses
             the planets fall into.
+          </p>
+          <p>
+            If you want to read a rising sign properly, use this order: identify
+            the Ascendant sign, find its ruler, locate that ruler by house and
+            sign, then check the ruler&apos;s strongest aspects. That tells you
+            how the outer style, first instinct, and chart direction actually
+            work in practice.
           </p>
           <div className='grid md:grid-cols-3 gap-4 mt-6'>
             <div className='p-4 rounded-lg bg-surface-card/50'>
@@ -196,6 +211,33 @@ export default function RisingSignsPage() {
         </section>
       ))}
 
+      <section className='mb-12 p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/40'>
+        <Heading as='h2' variant='h3'>
+          How Lunary Reads Rising Signs
+        </Heading>
+        <div className='mt-4 space-y-4 text-content-secondary'>
+          <p>
+            Lunary combines astronomical chart-angle calculation with
+            traditional Ascendant doctrine. The sign on the Ascendant describes
+            the entry point into life. The chart ruler shows how that sign
+            actually behaves. The first house describes the body and immediate
+            orientation to the world. Decans then refine the tone further when
+            you need more precision.
+          </p>
+          <ul className='list-disc pl-5 space-y-2'>
+            <li>Ascendant sign: outer style, approach, first reaction</li>
+            <li>Chart ruler: the operating system behind the Ascendant</li>
+            <li>First house: embodiment, instinct, and visibility</li>
+            <li>Decans: nuance inside the sign once the basics are clear</li>
+          </ul>
+          <p className='text-sm text-content-muted'>
+            Sources: Lunary Ascendant interpretation framework, Astronomy Engine
+            chart-angle calculations, traditional Ascendant and chart-ruler
+            doctrine.
+          </p>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className='mt-12 p-6 rounded-lg border border-lunary-primary-700 bg-layer-deep/30 text-center'>
         <Heading as='h2' variant='h3'>
@@ -211,6 +253,26 @@ export default function RisingSignsPage() {
         >
           Calculate Your Birth Chart
         </NavParamLink>
+        <div className='mt-4 flex flex-wrap items-center justify-center gap-3 text-sm'>
+          <NavParamLink
+            href='/grimoire/houses/1st-house'
+            className='text-content-muted hover:text-content-secondary'
+          >
+            Read the 1st House
+          </NavParamLink>
+          <NavParamLink
+            href='/grimoire/decans'
+            className='text-content-muted hover:text-content-secondary'
+          >
+            Learn Decans
+          </NavParamLink>
+          <NavParamLink
+            href='/grimoire/guides/birth-chart-complete-guide'
+            className='text-content-muted hover:text-content-secondary'
+          >
+            Full Birth Chart Guide
+          </NavParamLink>
+        </div>
       </section>
     </main>
   );

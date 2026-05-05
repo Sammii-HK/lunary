@@ -124,6 +124,12 @@ ${rising.lifeApproach}
 
 ${rising.howOthersSeeYou}
 
+### How To Read ${rising.sign} Rising In A Birth Chart
+
+Your rising sign is not just style or appearance. It sets the entire chart by defining the Ascendant and the first house. To read ${rising.sign} Rising properly, start with the Ascendant sign itself, then judge its ruler (${rising.ruler}), the house that ruler falls in, and any tight aspects it makes. That tells you how ${rising.sign} Rising actually operates in real life rather than stopping at a vibe-based description.
+
+When ${rising.sign} is rising, ${rising.element.toLowerCase()} energy shapes first reactions, pacing, and the way a person enters new situations. ${rising.modality} modality describes how that person begins things: cardinal signs initiate, fixed signs stabilize, and mutable signs adapt. This is why two people with the same Sun sign can still feel completely different once the Ascendant changes.
+
 ### Compatibility with Other Rising Signs
 
 ${rising.compatibility}`;
@@ -175,28 +181,46 @@ ${rising.compatibility}`;
       meaning={meaningContent}
       howToWorkWith={[
         `Embrace your ${rising.sign} Rising by leaning into your natural ${rising.coreTraits[0].toLowerCase()}.`,
-        `Be aware of how your ${rising.element.toLowerCase()} energy affects first impressions.`,
-        `Use your rising sign strengths consciously in new situations.`,
+        `Study ${rising.ruler} in your chart, because the chart ruler tells you how your Ascendant actually behaves.`,
+        `Be aware of how your ${rising.element.toLowerCase()} energy affects first impressions and the pace you bring into new rooms.`,
+        `Use your rising sign strengths consciously in new situations instead of defaulting to them unconsciously.`,
+      ]}
+      sources={[
+        {
+          name: 'Lunary Ascendant interpretation framework',
+          url: 'https://lunary.app/developers',
+        },
+        {
+          name: 'Astronomy Engine Ascendant and chart angle calculations',
+          url: 'https://github.com/cosinekitty/astronomy',
+        },
+        {
+          name: 'Traditional Ascendant and chart-ruler doctrine',
+        },
       ]}
       faqs={faqs}
       internalLinks={[
         {
-          text: `${rising.sign} Sun Sign`,
+          text: 'Birth Chart Guide',
+          href: '/grimoire/birth-chart',
+        },
+        {
+          text: '1st House Meaning',
+          href: '/grimoire/houses/1st-house',
+        },
+        {
+          text: `${rising.sign} Zodiac Sign`,
           href: `/grimoire/zodiac/${rising.sign.toLowerCase()}`,
+        },
+        {
+          text: `${rising.sign} Decans`,
+          href: `/grimoire/decans/${rising.sign.toLowerCase()}`,
         },
         {
           text: `Moon in ${rising.sign}`,
           href: `/grimoire/moon-in/${rising.sign.toLowerCase()}`,
         },
-        {
-          text: `${rising.sign} Horoscopes`,
-          href: `/grimoire/horoscopes/${rising.sign.toLowerCase()}`,
-        },
         { text: 'All Rising Signs', href: '/grimoire/rising' },
-        {
-          text: 'Birth Chart Guide',
-          href: '/grimoire/guides/birth-chart-complete-guide',
-        },
       ]}
       ctaText='Discover Your Rising Sign'
       ctaHref='/birth-chart'
