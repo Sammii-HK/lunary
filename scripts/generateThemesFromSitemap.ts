@@ -451,6 +451,7 @@ const SUBTHEME_STRATEGIES: Record<string, SubthemeStrategy> = {
 };
 
 const YEAR_SEGMENT_REGEX = /^20\d{2}$/;
+const EMBEDDED_YEAR_REGEX = /(?:^|-)(20\d{2})(?:-|$)/;
 
 const SPELL_INTENT_GROUPS = [
   {
@@ -920,6 +921,18 @@ function formatRangeLabel(label: string) {
   return label.replace(/-/g, '–');
 }
 
+function extractSegmentYear(segment: string): number | null {
+  if (YEAR_SEGMENT_REGEX.test(segment)) {
+    return Number(segment);
+  }
+
+  const match = segment.match(EMBEDDED_YEAR_REGEX);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  return Number.isInteger(year) ? year : null;
+}
+
 function bucketNonRootSlugCount(
   subthemes: ThemeBucket['subthemes'],
   bucket: string,
@@ -976,11 +989,26 @@ export function buildThemesFromLocs(locs: string[], slugDataMap?: SlugDataMap) {
     if (segments[1] && YEAR_SEGMENT_REGEX.test(segments[1])) {
       continue;
     }
+
+    const segmentYears = segments
+      .map((segment) => extractSegmentYear(segment))
+      .filter((year): year is number => year !== null);
+
     if (bucket === 'numerology' && segments[1] === 'year' && segments[2]) {
       const year = Number(segments[2]);
       if (
         Number.isInteger(year) &&
         (year < recoveryYearMin || year > recoveryYearMax)
+      ) {
+        continue;
+      }
+    }
+    if (bucket === 'transits') {
+      const transitsRecoveryMax = currentYear + 1;
+      if (
+        segmentYears.some(
+          (year) => year < recoveryYearMin || year > transitsRecoveryMax,
+        )
       ) {
         continue;
       }
