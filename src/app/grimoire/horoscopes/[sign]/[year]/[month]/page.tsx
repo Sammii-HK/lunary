@@ -235,6 +235,7 @@ ${forecast.wellbeing}
         },
       ]}
       components={null}
+      intro={`This ${monthName} ${year} horoscope for ${signName} is built from the actual sky story: the dominant transit pressure, the clearest opening, the slow-moving background current, and the exact dates when the tone shifts during the month.`}
       cosmicConnections={
         <HoroscopeCosmicConnections
           variant='monthly-sign'
@@ -314,18 +315,25 @@ ${forecast.wellbeing}
 
       <div className='mt-8 p-5 bg-surface-elevated/50 border border-stroke-subtle/50 rounded-xl'>
         <h3 className='text-lg font-medium text-content-primary mb-3'>
-          Explore {signName} placements
+          Explore the chart context for {signName}
         </h3>
         <p className='text-sm text-content-muted mb-4'>
-          Your horoscope depends on where {signName} falls in your chart.
-          Explore each placement for deeper insight.
+          This monthly forecast gets sharper when you compare it with the wider
+          yearly map and your Moon or rising sign. Use the stronger sign pages
+          below instead of generic sun-sign browsing.
         </p>
         <div className='flex flex-wrap gap-3'>
           <Link
-            href={`/grimoire/zodiac/${sign}`}
+            href={`/grimoire/horoscopes/${sign}/${year}`}
             className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
           >
-            {signName} Sun sign &rarr;
+            {signName} in {year} &rarr;
+          </Link>
+          <Link
+            href={`/grimoire/transits/year/${year}`}
+            className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
+          >
+            {year} major transits &rarr;
           </Link>
           <Link
             href={`/grimoire/moon-in/${sign}`}

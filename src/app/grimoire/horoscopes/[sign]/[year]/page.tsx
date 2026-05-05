@@ -458,10 +458,9 @@ Select any month below for the detailed version of how those transits land in re
             Explore the chart context for {signName}
           </h2>
           <p className='text-sm text-content-muted mb-4'>
-            Your {year} horoscope lands differently depending on your chart.
-            Use the stronger sign-specific pages below to see how this yearly
-            story connects to current transits, your Moon sign, and your rising
-            sign.
+            Your {year} horoscope lands differently depending on your chart. Use
+            the stronger sign-specific pages below to see how this yearly story
+            connects to current transits, your Moon sign, and your rising sign.
           </p>
           <div className='flex flex-wrap gap-3'>
             <Link
