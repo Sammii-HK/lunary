@@ -455,18 +455,26 @@ Select any month below for the detailed version of how those transits land in re
       <section className='mb-12'>
         <div className='p-5 bg-surface-elevated/50 border border-stroke-subtle/50 rounded-xl'>
           <h2 className='text-lg font-medium text-content-primary mb-3'>
-            Explore {signName} placements
+            Explore the chart context for {signName}
           </h2>
           <p className='text-sm text-content-muted mb-4'>
-            Your {year} horoscope shifts depending on where {signName} sits in
-            your chart. Explore each placement for deeper insight.
+            Your {year} horoscope lands differently depending on your chart.
+            Use the stronger sign-specific pages below to see how this yearly
+            story connects to current transits, your Moon sign, and your rising
+            sign.
           </p>
           <div className='flex flex-wrap gap-3'>
             <Link
-              href={`/grimoire/zodiac/${sign}`}
+              href={`/grimoire/horoscopes/${sign}/${year}/${currentMonthSlug}`}
               className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
             >
-              {signName} Sun sign &rarr;
+              {signName} this month &rarr;
+            </Link>
+            <Link
+              href={`/grimoire/transits/year/${year}`}
+              className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
+            >
+              {year} major transits &rarr;
             </Link>
             <Link
               href={`/grimoire/moon-in/${sign}`}
