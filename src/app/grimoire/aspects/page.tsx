@@ -38,6 +38,16 @@ const ASPECT_COLOR: Record<
   },
 };
 
+const ASPECT_TYPE_SLUGS: Record<(typeof ASPECTS)[number], string> = {
+  conjunct: 'conjunction',
+  sextile: 'sextile',
+  square: 'square',
+  trine: 'trine',
+  opposite: 'opposition',
+  quincunx: 'quincunx',
+  semisextile: 'semisextile',
+};
+
 export const metadata: Metadata = {
   title:
     'Astrological Aspects: Meanings of Conjunction, Trine, Square and More | Lunary',
@@ -96,7 +106,7 @@ export default function AspectsIndexPage() {
     url: 'https://lunary.app/grimoire/aspects',
     items: ASPECTS.map((aspect) => ({
       name: ASPECT_DATA[aspect].displayName,
-      url: `https://lunary.app/grimoire/aspects/types/${aspect}`,
+      url: `https://lunary.app/grimoire/aspects/types/${ASPECT_TYPE_SLUGS[aspect]}`,
       description: `${ASPECT_DATA[aspect].degrees}° - ${ASPECT_DATA[aspect].keywords.join(', ')}`,
     })),
   });
@@ -138,7 +148,7 @@ export default function AspectsIndexPage() {
           </p>
         </div>
 
-        <h2 className='text-2xl font-light mb-6'>The Five Major Aspects</h2>
+        <h2 className='text-2xl font-light mb-6'>Aspect Degrees</h2>
         <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12'>
           {ASPECTS.map((aspect) => {
             const data = ASPECT_DATA[aspect];
@@ -208,7 +218,7 @@ export default function AspectsIndexPage() {
           {PLANETS.slice(0, 6).map((planet) => (
             <Link
               key={planet}
-              href={`/grimoire/aspects/${planet}/conjunct/${PLANETS.find((p) => p !== planet) || 'moon'}`}
+              href={`/grimoire/aspects/${planet}`}
               className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
             >
               <div className='text-3xl mb-2'>{PLANET_SYMBOLS[planet]}</div>

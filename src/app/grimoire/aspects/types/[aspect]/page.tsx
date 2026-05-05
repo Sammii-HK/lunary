@@ -8,9 +8,11 @@ import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 const aspectKeys = Object.keys(astrologicalAspects);
+export const dynamicParams = false;
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return aspectKeys.map((aspect) => ({ aspect: stringToKebabCase(aspect) }));
+}
 
 export async function generateMetadata({
   params,
@@ -218,7 +220,7 @@ Nature: ${aspectData.nature}`}
         sources={[
           {
             name: 'Lunary aspect interpretation framework',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           {
             name: 'Traditional aspect doctrine',

@@ -281,7 +281,7 @@ Numerology does not replace astrology here; it adds a second symbolic pattern. A
       sources={[
         {
           name: 'Lunary birthday zodiac and decan mapping',
-          url: 'https://lunary.app/developers',
+          url: 'https://lunary.app/about/methodology',
         },
         { name: 'Traditional Western astrology' },
         { name: 'Pythagorean numerology reduction method' },

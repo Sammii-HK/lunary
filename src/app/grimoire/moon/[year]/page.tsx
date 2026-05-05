@@ -137,7 +137,7 @@ Understanding the moon's phases helps you align your spiritual practice, rituals
       sources={[
         {
           name: 'Lunary lunar calendar methodology',
-          url: 'https://lunary.app/developers',
+          url: 'https://lunary.app/about/methodology',
         },
         {
           name: 'Astronomy Engine moon phase calculations',

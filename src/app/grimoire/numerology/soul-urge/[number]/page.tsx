@@ -173,7 +173,7 @@ Lunary calculates the Soul Urge Number from the vowels in the birth name only. T
         sources={[
           {
             name: 'Lunary numerology calculation method',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           {
             name: 'Pythagorean numerology tradition',

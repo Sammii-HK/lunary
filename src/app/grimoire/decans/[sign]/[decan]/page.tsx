@@ -206,7 +206,7 @@ This becomes most useful when reading a Sun, Moon, Rising, or chart ruler in ${s
       sources={[
         {
           name: 'Lunary decan interpretation framework',
-          url: 'https://lunary.app/developers',
+          url: 'https://lunary.app/about/methodology',
         },
         {
           name: 'Traditional decan doctrine',

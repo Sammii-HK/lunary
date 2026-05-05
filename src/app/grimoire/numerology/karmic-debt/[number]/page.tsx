@@ -163,14 +163,14 @@ Lunary treats karmic debt numbers as a chart pattern, not a doom label. The numb
         sources={[
           {
             name: 'Lunary numerology calculation method',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           {
             name: 'Pythagorean numerology tradition',
           },
           {
             name: 'Lunary karmic pattern interpretation framework',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
         ]}
         ctaText='Want personalized numerology insights?'

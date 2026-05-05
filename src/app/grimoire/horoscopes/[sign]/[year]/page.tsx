@@ -308,7 +308,7 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
       sources={[
         {
           name: 'Lunary yearly transit methodology',
-          url: 'https://lunary.app/developers',
+          url: 'https://lunary.app/about/methodology',
         },
         {
           name: 'Astronomy Engine planetary calculations',

@@ -304,7 +304,7 @@ Tarot Card: ${signData.tarotCard}`}
         sources={[
           {
             name: 'Lunary zodiac interpretation framework',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           {
             name: 'Traditional zodiac sign and rulership doctrine',

@@ -196,7 +196,7 @@ For chart reading, the Moon matters in two distinct ways. Your natal Moon sign d
       sources={[
         {
           name: 'Lunary lunar cycle interpretation framework',
-          url: 'https://lunary.app/developers',
+          url: 'https://lunary.app/about/methodology',
         },
         {
           name: 'Astronomy Engine moon phase calculations',

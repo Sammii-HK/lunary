@@ -193,7 +193,7 @@ export default function TransitsIndexPage() {
       sources={[
         {
           name: 'Lunary transit interpretation framework',
-          url: 'https://lunary.app/developers',
+          url: 'https://lunary.app/about/methodology',
         },
         {
           name: 'Astronomy Engine planetary calculations',

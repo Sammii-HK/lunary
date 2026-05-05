@@ -350,7 +350,7 @@ For ${pageTitle}, that means we are not treating ${content.planet} in ${content.
       sources={[
         {
           name: 'Lunary placement interpretation framework',
-          url: 'https://lunary.app/developers',
+          url: 'https://lunary.app/about/methodology',
         },
         {
           name: 'Astronomy Engine planetary calculations',

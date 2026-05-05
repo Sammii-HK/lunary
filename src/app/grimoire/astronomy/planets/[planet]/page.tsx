@@ -304,7 +304,7 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
         sources={[
           {
             name: 'Lunary planetary interpretation framework',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           {
             name: 'Astronomy Engine planetary calculations',

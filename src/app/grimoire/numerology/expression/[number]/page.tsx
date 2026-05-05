@@ -175,7 +175,7 @@ Lunary calculates the Expression Number from the full birth name by converting l
         sources={[
           {
             name: 'Lunary numerology calculation method',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           {
             name: 'Pythagorean numerology tradition',

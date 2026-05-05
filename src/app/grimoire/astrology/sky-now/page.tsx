@@ -262,7 +262,7 @@ The wheel on this page is intentionally a clean current chart rather than a hype
       sources={[
         {
           name: 'Lunary transit interpretation framework',
-          url: 'https://lunary.app/developers',
+          url: 'https://lunary.app/about/methodology',
         },
         {
           name: 'Astronomy Engine planetary calculations',

@@ -291,7 +291,7 @@ During the ${phaseName} Moon, the energy is focused on ${phaseData.keywords
         sources={[
           {
             name: 'Lunary lunar phase interpretation framework',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           {
             name: 'Astronomy Engine moon phase calculations',

@@ -179,7 +179,7 @@ Use the universal year as a timing framework, not a fortune-cookie answer. It he
       sources={[
         {
           name: 'Lunary numerology calculation method',
-          url: 'https://lunary.app/developers',
+          url: 'https://lunary.app/about/methodology',
         },
         { name: 'Pythagorean numerology tradition' },
         { name: 'Universal year reduction method' },

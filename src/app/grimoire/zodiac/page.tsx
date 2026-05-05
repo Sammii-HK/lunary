@@ -144,7 +144,7 @@ Lunary uses the zodiac as one layer in a bigger method: planet first, sign secon
         sources={[
           {
             name: 'Lunary zodiac interpretation framework',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           {
             name: 'Traditional zodiac sign and rulership doctrine',

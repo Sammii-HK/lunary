@@ -72,8 +72,28 @@ We support three zodiac systems: Tropical (season-based, standard in Western ast
 4. Calculate house cusps using the selected system (Placidus, Whole Sign, Koch, Porphyry, or Alcabitius)
 5. Compute aspects between planets within standard orbs
 6. Identify planetary dignity/debility states
+7. Calculate decans by dividing each 30° zodiac sign into three 10° sections
+8. Detect retrograde motion from apparent geocentric longitude changes
 
 Each calculation is performed in real-time, ensuring you always see accurate current sky positions.`,
+  },
+  {
+    title: 'Interpretation Framework',
+    content: `Lunary separates calculation from interpretation.
+
+The calculation layer answers: where is the planet, which sign is it in, which house does it occupy, what aspects does it make, is it direct or retrograde, and how tight is the orb?
+
+The interpretation layer then reads those facts in context:
+
+• Planet: the function being expressed
+• Sign: the style of expression
+• House: the life area affected
+• Aspect: the relationship between two chart functions
+• Ruler: the planet responsible for a sign or house topic
+• Decan: the 10° subdivision that adds nuance inside a sign
+• Transit: the current sky activating natal chart material
+
+This prevents isolated keyword readings. A Moon placement, for example, is not interpreted from sign alone; it is read through house placement, ruler condition, aspects, sect, and timing.`,
   },
   {
     title: 'Traditional Hellenistic Approach',
@@ -100,6 +120,14 @@ All calculated points are cross-referenced against established astronomical sour
 • Monitoring retrograde periods and shadow phases
 
 Transit data updates continuously throughout the day.`,
+  },
+  {
+    title: 'Moon, Horoscope, and Numerology Pages',
+    content: `Moon phase pages are based on calculated Sun-Moon angular relationships, including New Moon, First Quarter, Full Moon, and Last Quarter phase geometry.
+
+Horoscope pages use the same transit layer, then apply those transits to zodiac sign themes, rulers, modalities, elements, and longer-range outer-planet movement. Future horoscope pages are written as forecast education, not as claims that every person with the same sign will experience the same event.
+
+Numerology pages use transparent arithmetic reductions and symbolic interpretation. For example, life path and personal year numbers are reduced from birth dates or calendar years before interpretation is added. Angel number pages are symbolic reference pages rather than astronomical calculations.`,
   },
   {
     title: 'Accuracy Philosophy',

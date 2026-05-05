@@ -278,7 +278,7 @@ ${forecast.keyEvents.map((event) => `- **${event.dateLabel}: ${event.title}** â€
       sources={[
         {
           name: 'Lunary monthly transit methodology',
-          url: 'https://lunary.app/developers',
+          url: 'https://lunary.app/about/methodology',
         },
         {
           name: 'Astronomy Engine planetary calculations',

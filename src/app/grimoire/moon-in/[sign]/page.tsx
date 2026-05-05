@@ -246,7 +246,7 @@ Emotional Expression: ${signData.element.toLowerCase()}`}
         sources={[
           {
             name: 'Lunary lunar transit interpretation framework',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           {
             name: 'Astronomy Engine moon transit calculations',

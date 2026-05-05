@@ -142,7 +142,7 @@ Lunary reads a chart in layers rather than isolated placements. Start with the c
       sources={[
         {
           name: 'Lunary natal chart calculation methodology',
-          url: 'https://lunary.app/developers',
+          url: 'https://lunary.app/about/methodology',
         },
         {
           name: 'Astronomy Engine planetary calculations',

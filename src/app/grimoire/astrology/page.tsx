@@ -66,6 +66,11 @@ const astrologyItems = [
     href: '/grimoire/astronomy-vs-astrology',
     description: 'How the two disciplines relate.',
   },
+  {
+    name: 'Methodology',
+    href: '/about/methodology',
+    description: 'How Lunary calculates and interprets charts.',
+  },
 ];
 
 const astrologyGroups = [
@@ -96,7 +101,7 @@ const astrologyGroups = [
     title: 'Context & Method',
     description:
       'Understand the celestial mechanics and how astrology differs from astronomy.',
-    items: ['Astronomy', 'Astronomy vs Astrology'],
+    items: ['Astronomy', 'Astronomy vs Astrology', 'Methodology'],
   },
 ];
 

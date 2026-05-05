@@ -326,7 +326,7 @@ export default async function MoonPhaseYearPage({
         sources={[
           {
             name: 'Lunary moon phase interpretation framework',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           {
             name: 'Astronomy Engine moon phase calculations',

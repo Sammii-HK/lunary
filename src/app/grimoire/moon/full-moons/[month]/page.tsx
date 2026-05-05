@@ -190,7 +190,7 @@ Understanding the ${moonData.name}'s energy helps you plan meaningful rituals an
         sources={[
           {
             name: 'Lunary full moon interpretation framework',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           {
             name: 'Traditional full moon naming traditions',

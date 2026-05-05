@@ -262,7 +262,7 @@ ${interp.inSynastry}
       sources={[
         {
           name: 'Lunary aspect interpretation framework',
-          url: 'https://lunary.app/developers',
+          url: 'https://lunary.app/about/methodology',
         },
         { name: 'Traditional Western aspect doctrine' },
       ]}

@@ -165,7 +165,7 @@ The ${ordinal} House is naturally associated with ${houseData.naturalSign} and r
       sources={[
         {
           name: 'Lunary house placement interpretation framework',
-          url: 'https://lunary.app/developers',
+          url: 'https://lunary.app/about/methodology',
         },
         { name: 'Traditional house meanings' },
       ]}

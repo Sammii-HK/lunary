@@ -168,7 +168,7 @@ Keywords: ${data.keywords.join(', ')}`}
         sources={[
           {
             name: 'Lunary numerology calculation method',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           { name: 'Pythagorean numerology tradition' },
           { name: 'Lunary angel number interpretation framework' },

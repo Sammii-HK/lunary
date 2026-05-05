@@ -187,7 +187,7 @@ For Lunary, the useful bridge between astronomy and astrology is chart reading. 
         sources={[
           {
             name: 'Lunary chart-reading methodology',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           {
             name: 'Astronomy Engine planetary calculations',

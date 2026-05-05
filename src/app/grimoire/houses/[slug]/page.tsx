@@ -385,7 +385,7 @@ That is why the ${ordinal} House matters: it shows where experience gathers, whe
         sources={[
           {
             name: 'Lunary house interpretation framework',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           {
             name: 'Traditional Western house doctrine',

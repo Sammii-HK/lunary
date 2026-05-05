@@ -156,7 +156,7 @@ Each sign has optimal magical uses. Check the current Moon sign before important
         sources={[
           {
             name: 'Lunary lunar sign interpretation framework',
-            url: 'https://lunary.app/developers',
+            url: 'https://lunary.app/about/methodology',
           },
           {
             name: 'Astronomy Engine moon transit calculations',
