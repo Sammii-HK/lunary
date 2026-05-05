@@ -6,15 +6,12 @@ export async function GET() {
 
   const sitemaps = [
     'sitemap.xml',
-    'sitemap-zodiac.xml',
     'sitemap-planets.xml',
     'sitemap-tarot.xml',
-    'sitemap-crystals.xml',
     'sitemap-rituals.xml',
     'sitemap-transits.xml',
     'sitemap-placements.xml',
     'sitemap-compatibility.xml',
-    'sitemap-birthday.xml',
     'sitemap-horoscopes.xml',
     'sitemap-chinese-zodiac.xml',
     'sitemap-seasons.xml',
