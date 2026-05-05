@@ -420,6 +420,8 @@ const CONJUNCTION_PAIRS: Array<{
   },
 ];
 
+export const DEFAULT_OBSERVER = new Observer(51.4769, 0.0005, 0);
+
 /**
  * Calculate major planetary conjunctions for a year
  * Scans day-by-day to find when slow planets are within 5° of each other
@@ -842,8 +844,6 @@ function getIngressThemes(planet: string, sign: string): string[] {
     6,
   );
 }
-
-export const DEFAULT_OBSERVER = new Observer(51.4769, 0.0005, 0);
 
 function getEclipseDescriptionBySign(sign: string, isSolar: boolean): string {
   const signLower = sign.toLowerCase();

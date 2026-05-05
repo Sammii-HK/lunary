@@ -51,6 +51,13 @@ export type TransitBrief = {
   sign?: string;
 };
 
+export type NoveltyContext = {
+  recentTexts?: string[];
+  recentOpenings?: string[];
+  avoidBigrams?: string[];
+  dayLabel?: string;
+};
+
 export type SourcePack = {
   topic: string;
   theme: string;
@@ -90,13 +97,6 @@ export type SocialCopyResult = {
   hashtags: string[];
   title?: string;
   safetyChecks?: string[];
-};
-
-export type NoveltyContext = {
-  recentTexts?: string[];
-  recentOpenings?: string[];
-  avoidBigrams?: string[];
-  dayLabel?: string;
 };
 
 export type OpeningIntent =
