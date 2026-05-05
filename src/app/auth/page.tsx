@@ -55,7 +55,9 @@ export default function AuthPage() {
     if (!authState.loading && authState.isAuthenticated) {
       redirectExecuted.current = true;
 
-      const defaultDestination = getSafeAuthRedirectPath(window.location.search);
+      const defaultDestination = getSafeAuthRedirectPath(
+        window.location.search,
+      );
 
       const redirectTo = (destination: string) => {
         if (Capacitor.isNativePlatform()) {
