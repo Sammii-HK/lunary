@@ -1,7 +1,11 @@
 import { Metadata } from 'next';
 import { NavParamLink } from '@/components/NavParamLink';
 import { Heading } from '@/components/ui/Heading';
-import { getAllRisingSigns } from '@/lib/rising-signs/getRisingSign';
+import {
+  getAllRisingSigns,
+  getPublicRisingSignSlug,
+} from '@/lib/rising-signs/getRisingSign';
+import { elementAstro, zodiacSymbol } from '@/constants/symbols';
 
 export const revalidate = 2592000; // 30 days
 
@@ -38,11 +42,11 @@ const elementColors: Record<string, string> = {
   Water: 'border-blue-700 bg-blue-950/30',
 };
 
-const elementEmoji: Record<string, string> = {
-  Fire: '🔥',
-  Earth: '🌍',
-  Air: '💨',
-  Water: '💧',
+const elementGlyphs: Record<'Fire' | 'Earth' | 'Air' | 'Water', string> = {
+  Fire: elementAstro.fire,
+  Earth: elementAstro.earth,
+  Air: elementAstro.air,
+  Water: elementAstro.water,
 };
 
 export default function RisingSignsPage() {
@@ -133,7 +137,9 @@ export default function RisingSignsPage() {
       {(['Fire', 'Earth', 'Air', 'Water'] as const).map((element) => (
         <section key={element} className='mb-10'>
           <Heading as='h2' variant='h3'>
-            <span className='mr-2'>{elementEmoji[element]}</span>
+            <span className='font-astro mr-2 text-lunary-primary-400 leading-none'>
+              {elementGlyphs[element]}
+            </span>
             {element} Rising Signs
           </Heading>
           <p className='text-content-muted mt-2 mb-4'>
@@ -147,35 +153,45 @@ export default function RisingSignsPage() {
               'Intuitive, emotional, and deeply perceptive.'}
           </p>
           <div className='grid md:grid-cols-2 gap-4'>
-            {byElement[element]?.map((rising) => (
-              <NavParamLink
-                key={rising.slug}
-                href={`/grimoire/rising/${rising.slug}`}
-                className={`p-5 rounded-lg border ${elementColors[element]} hover:border-lunary-primary-600 transition-all`}
-              >
-                <div className='flex items-center justify-between mb-2'>
-                  <span className='text-lg font-medium text-content-primary'>
-                    {rising.sign} Rising
-                  </span>
-                  <span className='text-xs text-content-muted'>
-                    Ruled by {rising.ruler}
-                  </span>
-                </div>
-                <p className='text-sm text-content-muted mb-3'>
-                  {rising.firstImpression.slice(0, 120)}...
-                </p>
-                <div className='flex flex-wrap gap-2'>
-                  {rising.coreTraits.slice(0, 2).map((trait) => (
-                    <span
-                      key={trait}
-                      className='text-xs px-2 py-1 rounded bg-surface-card text-content-muted'
-                    >
-                      {trait}
+            {byElement[element]?.map((rising) => {
+              const signSlug = getPublicRisingSignSlug(rising.slug);
+              const glyph = zodiacSymbol[signSlug as keyof typeof zodiacSymbol];
+
+              return (
+                <NavParamLink
+                  key={rising.slug}
+                  href={`/grimoire/rising/${signSlug}`}
+                  className={`p-5 rounded-lg border ${elementColors[element]} hover:border-lunary-primary-600 transition-all`}
+                >
+                  <div className='flex items-center justify-between gap-3 mb-2'>
+                    <span className='flex items-center gap-3 text-lg font-medium text-content-primary'>
+                      {glyph && (
+                        <span className='font-astro text-2xl text-lunary-primary-400 leading-none'>
+                          {glyph}
+                        </span>
+                      )}
+                      {rising.sign} Rising
                     </span>
-                  ))}
-                </div>
-              </NavParamLink>
-            ))}
+                    <span className='text-xs text-content-muted'>
+                      Ruled by {rising.ruler}
+                    </span>
+                  </div>
+                  <p className='text-sm text-content-muted mb-3'>
+                    {rising.firstImpression.slice(0, 120)}...
+                  </p>
+                  <div className='flex flex-wrap gap-2'>
+                    {rising.coreTraits.slice(0, 2).map((trait) => (
+                      <span
+                        key={trait}
+                        className='text-xs px-2 py-1 rounded bg-surface-card text-content-muted'
+                      >
+                        {trait}
+                      </span>
+                    ))}
+                  </div>
+                </NavParamLink>
+              );
+            })}
           </div>
         </section>
       ))}

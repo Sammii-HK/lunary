@@ -61,6 +61,17 @@
     "aquarius": "♒",
     "pisces": "♓"
   },
+  "elements": {
+    "fire": "1",
+    "earth": "2",
+    "air": "3",
+    "water": "4"
+  },
+  "modalities": {
+    "cardinal": "5",
+    "fixed": "6",
+    "mutable": "7"
+  },
   "points": {
     "ascendant": "a",
     "descendant": "f",

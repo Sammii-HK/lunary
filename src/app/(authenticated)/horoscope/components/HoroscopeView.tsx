@@ -373,7 +373,6 @@ export function HoroscopeView({
                 sunSign={horoscope.sunSign}
                 headline={horoscope.headline}
                 overview={horoscope.overview}
-                numerologyNumber={personalDay?.number || universalDay.number}
               />
             ) : (
               <button

@@ -5,7 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { betterAuthClient } from '@/lib/auth-client';
-import { useAuthStatus, invalidateAuthCache } from './AuthStatus';
+import {
+  useAuthStatus,
+  invalidateAuthCache,
+  primeAuthenticatedAuthCache,
+} from './AuthStatus';
 import { SignOutButton } from './SignOutButton';
 import { conversionTracking } from '@/lib/analytics';
 import {
@@ -15,6 +19,8 @@ import {
 import { captureEvent } from '@/lib/posthog-client';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { BirthdayInput } from '@/components/ui/birthday-input';
+import { getSafeAuthRedirectPath } from '@/lib/auth-redirect';
+import { replaceBrowserLocation } from '@/lib/browser-redirect';
 
 interface AuthFormData {
   email: string;
@@ -288,6 +294,14 @@ export function AuthComponent({
           throw new Error('Sign in failed - no data returned');
         }
 
+        const signedInUser =
+          (result.data as any)?.user ?? (result.data as any)?.session?.user;
+        if (signedInUser) {
+          primeAuthenticatedAuthCache(signedInUser);
+        } else {
+          invalidateAuthCache();
+        }
+
         // If on admin subdomain, redirect immediately after successful sign-in
         if (
           typeof window !== 'undefined' &&
@@ -307,34 +321,9 @@ export function AuthComponent({
           window.location.pathname === '/auth'
         ) {
           setSuccess('Signed in successfully! Redirecting...');
-          invalidateAuthCache();
-          // URLSearchParams.get already decodes; treat as raw path and validate.
-          const rawReturnTo = new URLSearchParams(window.location.search).get(
-            'returnTo',
+          replaceBrowserLocation(
+            getSafeAuthRedirectPath(window.location.search),
           );
-          const requestedPath =
-            typeof rawReturnTo === 'string' && rawReturnTo.length > 0
-              ? rawReturnTo
-              : null;
-          // Only allow same-site relative paths — reject anything with a host,
-          // and further restrict to a small set of allowed prefixes.
-          const allowedReturnToPrefixes = ['/app'];
-          const isRelativePath =
-            typeof requestedPath === 'string' &&
-            requestedPath.startsWith('/') &&
-            !requestedPath.startsWith('//');
-          const isAllowedPath =
-            isRelativePath &&
-            allowedReturnToPrefixes.some((prefix) =>
-              requestedPath.startsWith(prefix),
-            );
-          const safePath = isAllowedPath ? requestedPath : '/app';
-          // Normalize against current origin to ensure we stay on the same site.
-          const destinationUrl = new URL(safePath, window.location.origin);
-          const destination = destinationUrl.pathname + destinationUrl.search;
-          setTimeout(() => {
-            window.location.href = destination;
-          }, 500);
           return;
         }
 

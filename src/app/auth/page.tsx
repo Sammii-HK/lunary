@@ -9,6 +9,8 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { MarketingFooter } from '@/components/MarketingFooter';
 import { Logo } from '@/components/Logo';
 import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
+import { getSafeAuthRedirectPath } from '@/lib/auth-redirect';
+import { replaceBrowserLocation } from '@/lib/browser-redirect';
 
 // Skip auth redirects ONLY in Playwright e2e tests (NOT Jest unit tests)
 function isTestMode(): boolean {
@@ -24,6 +26,11 @@ function isTestMode(): boolean {
   );
 }
 
+function isAuthenticatedTestMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  return (window as any).__PLAYWRIGHT_AUTHENTICATED__ === true;
+}
+
 export default function AuthPage() {
   const authState = useAuthStatus();
   const router = useRouter();
@@ -37,8 +44,9 @@ export default function AuthPage() {
   }, []);
 
   useEffect(() => {
-    // Skip redirect logic in Playwright e2e test mode
-    if (isTestMode()) return;
+    // Keep unauthenticated Playwright smoke tests on /auth, but still exercise
+    // the critical authenticated redirect path.
+    if (isTestMode() && !isAuthenticatedTestMode()) return;
 
     if (typeof window === 'undefined') return;
     if (!window.location.pathname.includes('/auth')) return;
@@ -47,12 +55,18 @@ export default function AuthPage() {
     if (!authState.loading && authState.isAuthenticated) {
       redirectExecuted.current = true;
 
-      const goToApp = () => {
+      const defaultDestination = getSafeAuthRedirectPath(window.location.search);
+
+      const redirectTo = (destination: string) => {
         if (Capacitor.isNativePlatform()) {
-          router.replace('/app');
+          router.replace(destination);
         } else {
-          window.location.replace('/app');
+          replaceBrowserLocation(destination);
         }
+      };
+
+      const goToApp = () => {
+        redirectTo(defaultDestination);
       };
 
       // If the user came in from a quiz (cookie set on the quiz result page),
@@ -93,7 +107,7 @@ export default function AuthPage() {
                 return;
               }
               const slug = data.result.quizSlug;
-              window.location.replace(
+              redirectTo(
                 `/quiz/beyond-your-sun-sign/${encodeURIComponent(slug)}/full`,
               );
               return;
