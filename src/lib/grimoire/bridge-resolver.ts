@@ -271,7 +271,7 @@ export function resolveGrimoireBridgeWithMeta({
       typesRequested,
       resultCount: links.length,
       links,
-      ctaUrl: 'https://lunary.app/grimoire/search?from=gpt_grimoire_bridge',
+      ctaUrl: 'https://lunary.app/grimoire/search',
       ctaText: 'Explore the complete Lunary Grimoire',
       source: 'Lunary.app - Digital Grimoire with 500+ pages',
     },

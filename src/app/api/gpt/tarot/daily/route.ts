@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       message: generateMessage(selectedCard, focus, mood),
       spreadType: 'single_daily',
       interpretation: generateInterpretation(selectedCard, upright),
-      ctaUrl: 'https://lunary.app/tarot?from=gpt_tarot_daily',
+      ctaUrl: 'https://lunary.app/tarot',
       ctaText: 'Get a full personalized tarot reading with pattern analysis',
       source: 'Lunary.app - Tarot readings with cross-session pattern analysis',
     };

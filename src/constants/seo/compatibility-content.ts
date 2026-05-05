@@ -242,3 +242,8 @@ export function getAllCompatibilitySlugs(): string[] {
 
   return slugs;
 }
+
+export function getCuratedCompatibilitySlugs(): string[] {
+  const pairs = curatedPairsData.pairs as Record<string, CuratedPair>;
+  return Object.keys(pairs).sort();
+}

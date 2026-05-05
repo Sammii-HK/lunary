@@ -177,6 +177,8 @@ const GrimoireContent = {
     <Crystals
       categories={EMPTY_CRYSTAL_CATEGORIES}
       totalCount={EMPTY_CRYSTAL_TOTAL_COUNT}
+      allCrystals={[]}
+      allCategoryNames={[]}
     />
   ),
   birthChart: <BirthChart />,

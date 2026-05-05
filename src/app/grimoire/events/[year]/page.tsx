@@ -13,11 +13,10 @@ import { Heading } from '@/components/ui/Heading';
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 
-// Dynamic year range: current year to 10 years in advance
-// Keep historical years indexed (starting from 2025) and extend 10 years into the future
+// Recovery-mode year range: keep discovery near-term only.
 const START_YEAR = 2025;
 const CURRENT_YEAR = new Date().getFullYear();
-const END_YEAR = Math.max(CURRENT_YEAR + 10, START_YEAR + 10);
+const END_YEAR = CURRENT_YEAR + 1;
 const AVAILABLE_YEARS = Array.from(
   { length: END_YEAR - START_YEAR + 1 },
   (_, i) => START_YEAR + i,

@@ -3,17 +3,15 @@ import { Heading } from '@/components/ui/Heading';
 
 const GRIMOIRE_LINKS = [
   { href: '/grimoire/horoscopes', label: 'Horoscopes' },
-  { href: '/grimoire/events', label: 'Astrological Events' },
-  { href: '/grimoire/moon', label: 'Lunar Events' },
   { href: '/grimoire/transits', label: 'Transits' },
+  { href: '/grimoire/aspects', label: 'Aspects' },
+  { href: '/grimoire/numerology', label: 'Numerology' },
   { href: '/grimoire/birth-chart', label: 'Birth Chart' },
-  { href: '/grimoire/zodiac', label: 'Zodiac Signs' },
-  { href: '/grimoire/astronomy/planets', label: 'Planets' },
+  { href: '/grimoire/moon', label: 'Moon' },
   { href: '/grimoire/tarot', label: 'Tarot' },
-  { href: '/grimoire/crystals', label: 'Crystals' },
+  { href: '/grimoire/events', label: 'Astrological Events' },
   { href: '/grimoire/guides/moon-phases-guide', label: 'Moon Phases' },
-  { href: '/grimoire/houses', label: 'Astrological Houses' },
-  { href: '/grimoire/spells', label: 'Spells' },
+  { href: '/grimoire/astronomy/planets', label: 'Planets' },
 ];
 
 export function ExploreGrimoire() {

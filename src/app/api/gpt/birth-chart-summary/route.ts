@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
       themes: generateThemes(sunSign, moonSign),
       limitationsNote:
         'This is a brief flavour based on your Big Three. A full birth chart includes all planets, houses, and aspects.',
-      ctaUrl: 'https://lunary.app/welcome?from=gpt_birth_flavour',
+      ctaUrl: 'https://lunary.app/welcome',
       ctaText:
         'Get your complete personalized birth chart with full interpretations',
       source:

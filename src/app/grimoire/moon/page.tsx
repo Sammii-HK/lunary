@@ -100,9 +100,10 @@ function getMoonTypeDescription(type: MoonEvent['type']): string {
 export default async function MoonPage() {
   // Fetch special moon events for current and next year
   const currentYear = new Date().getFullYear();
+  const nextYear = currentYear + 1;
   const [currentYearForecast, nextYearForecast] = await Promise.all([
     generateYearlyForecast(currentYear),
-    generateYearlyForecast(currentYear + 1),
+    generateYearlyForecast(nextYear),
   ]);
 
   // Combine and filter for special moons (supermoon, blue moon, etc.)
@@ -124,7 +125,7 @@ export default async function MoonPage() {
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
   );
 
-  const moonYears = [2025, 2026, 2027, 2028, 2029, 2030];
+  const moonYears = [Math.max(2025, currentYear - 1), currentYear, nextYear];
   const cosmicSections = [
     ...getCosmicConnections('hub-moon', 'moon'),
     {

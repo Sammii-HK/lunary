@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         resultCount: 0,
         suggestions: [],
         results: [],
-        ctaUrl: 'https://lunary.app/grimoire/search?from=gpt_grimoire_search',
+        ctaUrl: 'https://lunary.app/grimoire/search',
         ctaText: 'Explore the complete Lunary Grimoire',
         source: 'Lunary.app - Digital Grimoire with 500+ pages',
       });
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
         url: `https://lunary.app/grimoire/${entry.slug}`,
         category: entry.category,
       })),
-      ctaUrl: 'https://lunary.app/grimoire/search?from=gpt_grimoire_search',
+      ctaUrl: 'https://lunary.app/grimoire/search',
       ctaText: 'Explore the complete Lunary Grimoire',
       source: 'Lunary.app - Digital Grimoire with 500+ pages',
     };

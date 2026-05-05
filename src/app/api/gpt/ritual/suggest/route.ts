@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
       tools: ritual.tools,
       ...(ritual.moonPhaseIdeal && { bestMoonPhases: ritual.moonPhaseIdeal }),
       intent,
-      ctaUrl: 'https://lunary.app/grimoire/practices?from=gpt_ritual_suggest',
+      ctaUrl: 'https://lunary.app/grimoire/practices',
       ctaText: 'Explore more rituals and spells in the Lunary Grimoire',
       source:
         'Lunary.app - Digital Grimoire with 500+ pages of magical knowledge',

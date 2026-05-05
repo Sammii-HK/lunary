@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
       combinations: crystal.combinations,
       correspondences: crystal.correspondences,
       url: `https://lunary.app/grimoire/crystals/${crystal.id}`,
-      ctaUrl: `https://lunary.app/grimoire/crystals/${crystal.id}?from=gpt_crystal`,
+      ctaUrl: `https://lunary.app/grimoire/crystals/${crystal.id}`,
       ctaText: `Learn more about ${crystal.name} in the Lunary Grimoire`,
       source: 'Lunary.app - Crystal healing database with 100+ crystals',
     };

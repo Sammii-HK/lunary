@@ -3,6 +3,8 @@ import { crystalDatabase } from '@/constants/grimoire/crystals';
 const baseUrl = 'https://lunary.app';
 
 export async function GET() {
+  const currentDate = new Date();
+  const stableMonthStamp = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-01`;
   const now = stableMonthStamp;
 
   const crystalUrls = crystalDatabase
@@ -19,12 +21,6 @@ export async function GET() {
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${baseUrl}/grimoire/crystals</loc>
-    <lastmod>${now}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
   ${crystalUrls}
 </urlset>`;
 

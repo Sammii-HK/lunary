@@ -111,6 +111,7 @@ function ScoreBar({
 export default async function SynastryAspectPage({ params }: PageProps) {
   const { slug } = await params;
   const aspect = getSynastryAspect(slug);
+  const currentYear = new Date().getFullYear();
 
   if (!aspect) {
     notFound();
@@ -180,7 +181,10 @@ ${aspect.growthPotential}`;
           text: 'Generate Synastry Chart',
           href: '/grimoire/synastry/generate',
         },
-        { text: 'Zodiac Compatibility', href: '/grimoire/compatibility' },
+        {
+          text: `${currentYear} Major Transits`,
+          href: `/grimoire/transits/year/${currentYear}`,
+        },
       ]}
       ctaText='Generate Your Synastry Chart'
       ctaHref='/grimoire/synastry/generate'

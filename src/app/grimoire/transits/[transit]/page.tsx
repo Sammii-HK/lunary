@@ -473,6 +473,8 @@ export default async function TransitPage({
     answer: `Your rising sign, house placements, and natal aspects determine how this transit plays out. A personalised reading shows timing and impact.`,
   });
 
+  const intro = `${transit.title} is a timing page first. It tells you when the shift begins, which signs feel it most directly, what themes are being activated, and what to do with the energy instead of treating the transit like vague cosmic weather.`;
+
   return (
     <SEOContentTemplate
       title={transit.title}
@@ -483,6 +485,7 @@ export default async function TransitPage({
       datePublished='2025-01-01'
       dateModified={new Date().toISOString().split('T')[0]}
       articleSection='Yearly Transits'
+      intro={intro}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
         { label: 'Transits', href: '/grimoire/transits' },
@@ -518,10 +521,15 @@ export default async function TransitPage({
           href: `/grimoire/astronomy/planets/${transit.planet.toLowerCase()}`,
           type: 'Planet',
         },
+        {
+          name: `${transit.year} Transits`,
+          href: `/grimoire/transits/year/${transit.year}`,
+          type: 'Guide',
+        },
         ...transit.signs.slice(0, 2).map((s) => ({
-          name: s,
-          href: `/grimoire/zodiac/${s.toLowerCase()}`,
-          type: 'Zodiac' as const,
+          name: `${s} ${transit.year} Horoscope`,
+          href: `/grimoire/horoscopes/${s.toLowerCase()}/${transit.year}`,
+          type: 'Horoscope' as const,
         })),
       ]}
       ctaText={`See how ${transit.title} affects your chart, timing, and next steps`}

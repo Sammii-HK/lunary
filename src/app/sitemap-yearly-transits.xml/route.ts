@@ -6,7 +6,7 @@ import {
 // Must match the range in grimoire/transits/year/[year]/page.tsx
 const START_YEAR = 2025;
 const CURRENT_YEAR = new Date().getFullYear();
-const END_YEAR = CURRENT_YEAR + 2;
+const END_YEAR = CURRENT_YEAR + 1;
 
 export async function GET(): Promise<Response> {
   const baseUrl = 'https://lunary.app';

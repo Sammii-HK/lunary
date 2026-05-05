@@ -35,11 +35,6 @@ export const metadata: Metadata = {
 
 const grimoireCategories = [
   {
-    name: 'Zodiac Signs',
-    url: 'https://lunary.app/grimoire/zodiac',
-    description: 'Explore all 12 zodiac signs and their meanings',
-  },
-  {
     name: 'Astrology',
     url: 'https://lunary.app/grimoire/astrology',
     description: 'Birth charts, houses, aspects, and timing',
@@ -48,11 +43,6 @@ const grimoireCategories = [
     name: 'Tarot Cards',
     url: 'https://lunary.app/grimoire/tarot',
     description: 'Complete guide to all 78 tarot cards',
-  },
-  {
-    name: 'Crystals',
-    url: 'https://lunary.app/grimoire/crystals',
-    description: 'Crystal meanings, properties, and healing uses',
   },
   {
     name: 'Moon Phases',
@@ -90,11 +80,6 @@ const grimoireCategories = [
     url: 'https://lunary.app/grimoire/practices',
     description:
       'Complete guide to spells, meditation, divination, shadow work, and more',
-  },
-  {
-    name: 'Spells',
-    url: 'https://lunary.app/grimoire/spells',
-    description: 'Protection, love, prosperity, and healing spells',
   },
 ];
 

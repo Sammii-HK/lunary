@@ -15,10 +15,9 @@ const PAGE_SIZE = 10;
  * 3. Static generation would require generating all possible filter combinations
  * 4. The route is dynamic and handles filtering server-side
  *
- * The route is still SEO-friendly with:
- * - Proper canonical URLs
- * - Robots meta tags (index: true, follow: true)
- * - Proper metadata for each page
+ * Recovery note:
+ * - Paginated/filterable archive pages are kept crawlable but not indexable
+ * - The main /grimoire/spells page carries the canonical search surface
  */
 
 function toClientSpell(spell: any) {
@@ -84,14 +83,12 @@ export async function generateMetadata({
     return { alternates: { canonical: 'https://lunary.app/grimoire/spells' } };
   }
 
-  const canonical = `https://lunary.app/grimoire/spells/page/${pageNum}`;
-
   return {
     title: `Spells & Rituals Library (Page ${pageNum}) - Lunary`,
     description:
       'Browse Lunary’s spell library: protection, love, prosperity, healing, cleansing, divination, manifestation, banishing, and more.',
-    alternates: { canonical },
-    robots: { index: true, follow: true },
+    alternates: { canonical: 'https://lunary.app/grimoire/spells' },
+    robots: { index: false, follow: true },
   };
 }
 
@@ -146,7 +143,7 @@ export default async function SpellsPaginatedPage({
       title='Spells & Rituals Library'
       h1='Spells & Rituals'
       description='A complete collection of spells and rituals with instructions, timing, correspondences, and guidance for safe practice.'
-      canonicalUrl={`https://lunary.app/grimoire/spells/page/${currentPage}`}
+      canonicalUrl='https://lunary.app/grimoire/spells'
       relatedItems={[
         {
           name: 'Spellcraft Fundamentals',

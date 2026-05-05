@@ -47,14 +47,14 @@ const termMappings: Record<string, string> = {
   'twelfth house': '/grimoire/houses/12th-house',
 
   // Moon phases
-  'new moon': '/grimoire/moon-phases/new-moon',
-  'waxing crescent': '/grimoire/moon-phases/waxing-crescent',
-  'first quarter': '/grimoire/moon-phases/first-quarter',
-  'waxing gibbous': '/grimoire/moon-phases/waxing-gibbous',
-  'full moon': '/grimoire/moon-phases/full-moon',
-  'waning gibbous': '/grimoire/moon-phases/waning-gibbous',
-  'last quarter': '/grimoire/moon-phases/last-quarter',
-  'waning crescent': '/grimoire/moon-phases/waning-crescent',
+  'new moon': '/grimoire/moon/phases/new-moon',
+  'waxing crescent': '/grimoire/moon/phases/waxing-crescent',
+  'first quarter': '/grimoire/moon/phases/first-quarter',
+  'waxing gibbous': '/grimoire/moon/phases/waxing-gibbous',
+  'full moon': '/grimoire/moon/phases/full-moon',
+  'waning gibbous': '/grimoire/moon/phases/waning-gibbous',
+  'last quarter': '/grimoire/moon/phases/last-quarter',
+  'waning crescent': '/grimoire/moon/phases/waning-crescent',
 
   // Moon in sign
   'moon in aries': '/grimoire/moon-in/aries',

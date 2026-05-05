@@ -11,8 +11,12 @@ import {
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 const MIN_YEAR = 2025;
-const MAX_YEAR = 2030;
-const SUPPORTED_YEARS = [2025, 2027, 2028, 2029, 2030];
+const MAX_YEAR = new Date().getFullYear() + 1;
+const SUPPORTED_YEARS = [
+  Math.max(2025, new Date().getFullYear() - 1),
+  new Date().getFullYear(),
+  new Date().getFullYear() + 1,
+];
 
 function parseMoonPhaseSlug(moonPhase: string) {
   if (moonPhase.startsWith('full-moon-')) {
@@ -293,7 +297,7 @@ export default async function MoonPhaseYearPage({
           },
         ]}
         internalLinks={[
-          { text: 'Moon Calendar Hub', href: '/moon-calendar' },
+          { text: 'Moon Calendar Hub', href: '/grimoire/moon' },
           { text: 'All Moon Phases', href: '/grimoire/moon/phases' },
           { text: 'Moon Rituals', href: '/grimoire/moon/rituals' },
           { text: 'Grimoire Home', href: '/grimoire' },

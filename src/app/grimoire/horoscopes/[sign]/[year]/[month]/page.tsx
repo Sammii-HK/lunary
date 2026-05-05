@@ -52,13 +52,19 @@ function validateParams(params: PageParams): {
 
   if (!ZODIAC_SIGNS.includes(sign)) return null;
   if (!MONTHS.includes(month)) return null;
-  if (year < 2025 || year > 2030) return null;
+  const maxYear = new Date().getFullYear() + 1;
+  if (year < 2025 || year > maxYear) return null;
 
   const monthNumber = MONTHS.indexOf(month) + 1;
   return { sign, year, month, monthNumber };
 }
 
-const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
+const CURRENT_YEAR = new Date().getFullYear();
+const AVAILABLE_YEARS = [
+  Math.max(2025, CURRENT_YEAR - 1),
+  CURRENT_YEAR,
+  CURRENT_YEAR + 1,
+];
 
 export function generateStaticParams() {
   return ZODIAC_SIGNS.flatMap((sign) =>
@@ -199,6 +205,14 @@ ${forecast.opportunity}
 
 ${forecast.timing}
 
+### Slow-Moving Planets
+
+${forecast.slowMoving}
+
+### Decan Timing
+
+${forecast.decanFocus}
+
 ### Love
 
 ${forecast.love}
@@ -221,6 +235,7 @@ ${forecast.wellbeing}
         },
       ]}
       components={null}
+      intro={`This ${monthName} ${year} horoscope for ${signName} is built from the actual sky story: the dominant transit pressure, the clearest opening, the slow-moving background current, and the exact dates when the tone shifts during the month.`}
       cosmicConnections={
         <HoroscopeCosmicConnections
           variant='monthly-sign'
@@ -300,18 +315,25 @@ ${forecast.wellbeing}
 
       <div className='mt-8 p-5 bg-surface-elevated/50 border border-stroke-subtle/50 rounded-xl'>
         <h3 className='text-lg font-medium text-content-primary mb-3'>
-          Explore {signName} placements
+          Explore the chart context for {signName}
         </h3>
         <p className='text-sm text-content-muted mb-4'>
-          Your horoscope depends on where {signName} falls in your chart.
-          Explore each placement for deeper insight.
+          This monthly forecast gets sharper when you compare it with the wider
+          yearly map and your Moon or rising sign. Use the stronger sign pages
+          below instead of generic sun-sign browsing.
         </p>
         <div className='flex flex-wrap gap-3'>
           <Link
-            href={`/grimoire/zodiac/${sign}`}
+            href={`/grimoire/horoscopes/${sign}/${year}`}
             className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
           >
-            {signName} Sun sign &rarr;
+            {signName} in {year} &rarr;
+          </Link>
+          <Link
+            href={`/grimoire/transits/year/${year}`}
+            className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
+          >
+            {year} major transits &rarr;
           </Link>
           <Link
             href={`/grimoire/moon-in/${sign}`}

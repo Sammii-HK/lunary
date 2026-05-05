@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
           : activeRetrogrades.length >= 1
             ? 'Some areas benefit from review. Check specific planets for guidance.'
             : 'Clear skies for forward momentum. Act on your plans.',
-      ctaUrl: 'https://lunary.app/cosmic-state?from=gpt_retrograde',
+      ctaUrl: 'https://lunary.app/cosmic-state',
       ctaText: 'See full planetary positions and transits',
       source: 'Lunary.app - Real-time astronomical calculations',
     };

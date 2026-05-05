@@ -7,12 +7,9 @@ export async function GET(): Promise<Response> {
   const baseUrl = 'https://lunary.app';
   const horoscopes = generateAllHoroscopeParams();
   const currentYear = new Date().getFullYear();
-  const yearlyHoroscopeYears = [
-    Math.max(2025, currentYear - 1),
-    currentYear,
-    currentYear + 1,
-    currentYear + 2,
-  ];
+  const minYear = Math.max(2025, currentYear - 1);
+  const maxYear = currentYear + 2;
+  const yearlyHoroscopeYears = [minYear, currentYear, maxYear];
   const currentMonthStamp = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`;
 
   const urls = [
@@ -30,12 +27,17 @@ export async function GET(): Promise<Response> {
         priority: '0.8',
       })),
     ]),
-    ...horoscopes.map((h) => ({
-      loc: `${baseUrl}/grimoire/horoscopes/${h.sign}/${h.year}/${h.month}`,
-      lastmod: `${h.year}-${String(new Date(`${h.month} 1, ${h.year}`).getMonth() + 1).padStart(2, '0')}-01`,
-      changefreq: 'monthly',
-      priority: '0.9',
-    })),
+    ...horoscopes
+      .filter((h) => {
+        const year = Number(h.year);
+        return year >= minYear && year <= maxYear;
+      })
+      .map((h) => ({
+        loc: `${baseUrl}/grimoire/horoscopes/${h.sign}/${h.year}/${h.month}`,
+        lastmod: `${h.year}-${String(new Date(`${h.month} 1, ${h.year}`).getMonth() + 1).padStart(2, '0')}-01`,
+        changefreq: 'monthly',
+        priority: '0.9',
+      })),
   ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

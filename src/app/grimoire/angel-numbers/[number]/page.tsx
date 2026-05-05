@@ -48,6 +48,7 @@ export default async function AngelNumberPage({
 }) {
   const { number } = await params;
   const data = getAngelNumber(number);
+  const currentYear = new Date().getFullYear();
 
   if (!data) {
     notFound();
@@ -139,8 +140,14 @@ Keywords: ${data.keywords.join(', ')}`}
         internalLinks={[
           { text: 'All Angel Numbers', href: '/grimoire/angel-numbers' },
           { text: 'Numerology Guide', href: '/grimoire/numerology' },
-          { text: "View Today's Horoscope", href: '/horoscope' },
-          { text: 'Calculate Birth Chart', href: '/birth-chart' },
+          {
+            text: `${currentYear} Universal Year`,
+            href: `/grimoire/numerology/year/${currentYear}`,
+          },
+          {
+            text: `${currentYear} Major Transits`,
+            href: `/grimoire/transits/year/${currentYear}`,
+          },
         ]}
         ctaText='Want personalized numerology insights for your life?'
         ctaHref='/pricing'

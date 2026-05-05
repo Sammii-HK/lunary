@@ -32,6 +32,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://lunary.app/grimoire/birthday',
   },
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 const structuredData = {
@@ -44,11 +48,12 @@ const structuredData = {
     '@type': 'ListItem',
     position: index + 1,
     name: `${zodiac.sign} (${MONTH_NAMES[zodiac.startMonth - 1]} ${zodiac.startDay} - ${MONTH_NAMES[zodiac.endMonth - 1]} ${zodiac.endDay})`,
-    url: `https://lunary.app/grimoire/zodiac/${zodiac.sign.toLowerCase()}`,
+    url: `https://lunary.app/grimoire/horoscopes/${zodiac.sign.toLowerCase()}/${new Date().getFullYear()}`,
   })),
 };
 
 export default function BirthdayIndexPage() {
+  const currentYear = new Date().getFullYear();
   const months = MONTH_NAMES.map((name, index) => {
     const month = index + 1;
     const daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][index];
@@ -88,7 +93,7 @@ export default function BirthdayIndexPage() {
               {ZODIAC_DATE_RANGES.map((zodiac) => (
                 <Link
                   key={zodiac.sign}
-                  href={`/grimoire/zodiac/${zodiac.sign.toLowerCase()}`}
+                  href={`/grimoire/horoscopes/${zodiac.sign.toLowerCase()}/${currentYear}`}
                   className='flex items-center gap-3 p-3 rounded-lg hover:bg-surface-card/50 transition-colors'
                 >
                   <span className='text-2xl'>

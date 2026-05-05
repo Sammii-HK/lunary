@@ -547,7 +547,7 @@ export default function MoonPhasesGuidePage() {
           {FULL_MOON_NAMES.map((moon) => (
             <Link
               key={moon.month}
-              href={`/grimoire/moon/full-moon-names#${moon.month.toLowerCase()}`}
+              href='/grimoire/moon/full-moons'
               className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4 hover:border-lunary-primary transition-colors'
             >
               <h4 className='text-content-primary font-medium'>{moon.name}</h4>

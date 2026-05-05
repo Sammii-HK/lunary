@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       careerMeaning: data.careerMeaning,
       keywords: data.keywords,
       url: `https://lunary.app/grimoire/angel-numbers/${number}`,
-      ctaUrl: `https://lunary.app/grimoire/angel-numbers/${number}?from=gpt_angel`,
+      ctaUrl: `https://lunary.app/grimoire/angel-numbers/${number}`,
       ctaText: `Explore the complete meaning of ${number} in the Lunary Grimoire`,
       source: 'Lunary.app - Angel number meanings and spiritual guidance',
     };

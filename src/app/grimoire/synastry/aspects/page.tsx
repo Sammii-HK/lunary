@@ -54,6 +54,7 @@ function ScoreDisplay({ score, label }: { score: number; label: string }) {
 }
 
 export default function SynastryAspectsPage() {
+  const currentYear = new Date().getFullYear();
   const itemListSchema = createItemListSchema({
     name: 'Synastry Aspects Guide',
     description:
@@ -139,8 +140,11 @@ No single aspect defines a relationship. A healthy relationship usually has a mi
             text: 'Generate Synastry Chart',
             href: '/grimoire/synastry/generate',
           },
-          { text: 'Zodiac Compatibility', href: '/grimoire/compatibility' },
           { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
+          {
+            text: `${currentYear} Major Transits`,
+            href: `/grimoire/transits/year/${currentYear}`,
+          },
         ]}
         ctaText='Generate Your Synastry Chart'
         ctaHref='/grimoire/synastry/generate'

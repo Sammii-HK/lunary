@@ -110,6 +110,7 @@ const numberTeasers: Record<string, string> = {
 };
 
 export default function AngelNumbersIndexPage() {
+  const currentYear = new Date().getFullYear();
   const allNumbers = getAllAngelNumbers();
   const numbers = allNumbers
     .map((n) => n.number)
@@ -242,8 +243,14 @@ export default function AngelNumbersIndexPage() {
         internalLinks={[
           { text: 'Numerology Overview', href: '/grimoire/numerology' },
           { text: 'Life Path Calculator', href: '/grimoire/life-path' },
-          { text: 'Daily Horoscope', href: '/horoscope' },
-          { text: 'Tarot Reading', href: '/tarot' },
+          {
+            text: `${currentYear} Universal Year`,
+            href: `/grimoire/numerology/year/${currentYear}`,
+          },
+          {
+            text: `${currentYear} Major Transits`,
+            href: `/grimoire/transits/year/${currentYear}`,
+          },
         ]}
         ctaText='Want personalized spiritual insights for your journey?'
         ctaHref='/pricing'

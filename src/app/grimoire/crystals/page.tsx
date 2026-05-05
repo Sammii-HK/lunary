@@ -45,6 +45,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://lunary.app/grimoire/crystals',
   },
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 const faqs = [

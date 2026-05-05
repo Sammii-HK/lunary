@@ -22,6 +22,11 @@ interface BirthdayData {
   dateString: string;
 }
 
+interface BirthdayLinkData {
+  slug: string;
+  label: string;
+}
+
 function parseDateSlug(slug: string): BirthdayData | null {
   const parts = slug.toLowerCase().split('-');
   if (parts.length !== 2) return null;
@@ -50,6 +55,32 @@ function getOrdinalSuffix(n: number): string {
   const s = ['th', 'st', 'nd', 'rd'];
   const v = n % 100;
   return s[(v - 20) % 10] || s[v] || s[0];
+}
+
+function formatBirthdaySlug(date: Date): BirthdayLinkData {
+  const monthName = MONTH_NAMES[date.getUTCMonth()];
+  const day = date.getUTCDate();
+  return {
+    slug: `${monthName.toLowerCase()}-${day}`,
+    label: `${monthName} ${day}`,
+  };
+}
+
+function getAdjacentBirthdayLinks(
+  month: number,
+  day: number,
+): { prev: BirthdayLinkData; next: BirthdayLinkData } {
+  const current = new Date(Date.UTC(2024, month - 1, day, 12, 0, 0));
+  const prev = new Date(current);
+  const next = new Date(current);
+
+  prev.setUTCDate(prev.getUTCDate() - 1);
+  next.setUTCDate(next.getUTCDate() + 1);
+
+  return {
+    prev: formatBirthdaySlug(prev),
+    next: formatBirthdaySlug(next),
+  };
 }
 
 // Removed generateStaticParams - using pure ISR for faster builds
@@ -120,15 +151,12 @@ export default async function BirthdayZodiacPage({
   const numerology = getNumerologyNumber(birthday.month, birthday.day);
   const primaryRuler = getPrimaryRuler(zodiac.sign);
   const rulership = formatRulershipValue(zodiac.sign);
+  const currentYear = new Date().getFullYear();
 
-  const prevDay =
-    birthday.day > 1
-      ? `${birthday.monthName.toLowerCase()}-${birthday.day - 1}`
-      : null;
-  const nextDay =
-    birthday.day < 31
-      ? `${birthday.monthName.toLowerCase()}-${birthday.day + 1}`
-      : null;
+  const { prev: prevDay, next: nextDay } = getAdjacentBirthdayLinks(
+    birthday.month,
+    birthday.day,
+  );
 
   return (
     <SEOContentTemplate
@@ -192,18 +220,26 @@ Your numerology life path number is ${numerology}, which brings ${numerology ===
       ]}
       relatedItems={[
         {
-          name: `${zodiac.sign} Zodiac Sign`,
-          href: `/grimoire/zodiac/${zodiac.sign.toLowerCase()}`,
-          type: 'Zodiac',
+          name: `${zodiac.sign} ${currentYear} Horoscope`,
+          href: `/grimoire/horoscopes/${zodiac.sign.toLowerCase()}/${currentYear}`,
+          type: 'Horoscope',
         },
         {
           name: `${primaryRuler} in Astrology`,
           href: `/grimoire/astronomy/planets/${primaryRuler.toLowerCase()}`,
           type: 'Planet',
         },
+        {
+          name: `${currentYear} Major Transits`,
+          href: `/grimoire/transits/year/${currentYear}`,
+          type: 'Guide',
+        },
         ...zodiac.compatibleSigns.slice(0, 2).map((sign) => ({
           name: `${sign} Compatibility`,
-          href: `/grimoire/compatibility/${zodiac.sign.toLowerCase()}-${sign.toLowerCase()}`,
+          href:
+            zodiac.sign.toLowerCase() <= sign.toLowerCase()
+              ? `/grimoire/compatibility/${zodiac.sign.toLowerCase()}-and-${sign.toLowerCase()}`
+              : `/grimoire/compatibility/${sign.toLowerCase()}-and-${zodiac.sign.toLowerCase()}`,
           type: 'Compatibility' as const,
         })),
       ]}
@@ -218,22 +254,20 @@ Your numerology life path number is ${numerology}, which brings ${numerology ===
       <div className='mt-8 flex justify-between text-sm'>
         {prevDay ? (
           <Link
-            href={`/grimoire/birthday/${prevDay}`}
+            href={`/grimoire/birthday/${prevDay.slug}`}
             className='text-lunary-primary-400 hover:text-content-brand'
           >
-            ← {birthday.monthName} {birthday.day - 1}
+            ← {prevDay.label}
           </Link>
         ) : (
           <span />
         )}
-        {nextDay && (
-          <Link
-            href={`/grimoire/birthday/${nextDay}`}
-            className='text-lunary-primary-400 hover:text-content-brand'
-          >
-            {birthday.monthName} {birthday.day + 1} →
-          </Link>
-        )}
+        <Link
+          href={`/grimoire/birthday/${nextDay.slug}`}
+          className='text-lunary-primary-400 hover:text-content-brand'
+        >
+          {nextDay.label} →
+        </Link>
       </div>
     </SEOContentTemplate>
   );

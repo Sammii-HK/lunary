@@ -38,11 +38,10 @@ export async function generateMetadata() {
   };
 }
 
-const otherYears = [2025, 2027, 2028, 2029, 2030];
-
 export default function EventsIndexPage() {
   const currentYear = new Date().getFullYear();
   const nextYear = currentYear + 1;
+  const otherYears = [Math.max(2025, currentYear - 1), nextYear];
   const hubSections = getCosmicConnections('hub-events', 'events');
   const yearLinks = Array.from(new Set([currentYear, ...otherYears]).values())
     .sort()
