@@ -22,6 +22,64 @@ interface PageParams {
   planet2: string;
 }
 
+const PLANET_THEME_MAP: Record<Planet, string> = {
+  sun: 'identity, vitality, and conscious direction',
+  moon: 'emotional needs, instinct, and security',
+  mercury: 'thinking, speech, and interpretation',
+  venus: 'love, desire, values, and receptivity',
+  mars: 'drive, conflict, libido, and initiative',
+  jupiter: 'growth, belief, luck, and expansion',
+  saturn: 'pressure, discipline, maturity, and timing',
+  uranus: 'change, breakthrough, rebellion, and surprise',
+  neptune: 'imagination, faith, fantasy, and surrender',
+  pluto: 'power, transformation, fear, and rebirth',
+};
+
+const ASPECT_FOCUS_MAP: Record<
+  Aspect,
+  { pressure: string; gift: string; advice: string }
+> = {
+  conjunct: {
+    pressure: 'intensity and over-identification',
+    gift: 'focus, concentration, and raw potency',
+    advice: 'watch for overwhelm and give the combined energy a clear outlet',
+  },
+  sextile: {
+    pressure: 'untapped potential through passivity',
+    gift: 'useful opportunities and easy cooperation',
+    advice:
+      'take action, because sextiles help most when you actually engage them',
+  },
+  square: {
+    pressure: 'friction, urgency, and unresolved conflict',
+    gift: 'growth through action and honest adjustment',
+    advice:
+      'name the tension early and work with it instead of trying to bypass it',
+  },
+  trine: {
+    pressure: 'coasting or underusing natural gifts',
+    gift: 'flow, fluency, and effortless support',
+    advice: 'treat the ease as a resource to develop, not something to waste',
+  },
+  opposite: {
+    pressure: 'projection, polarity, and either-or thinking',
+    gift: 'awareness through contrast and relationship',
+    advice:
+      'look for balance rather than choosing one side and rejecting the other',
+  },
+  quincunx: {
+    pressure: 'irritation, mismatch, and awkward adaptation',
+    gift: 'fine-tuning and unusual integration',
+    advice: 'make small repeated adjustments instead of forcing a perfect fix',
+  },
+  semisextile: {
+    pressure: 'subtle disconnect or overlooked growth',
+    gift: 'small openings that compound over time',
+    advice:
+      'pay attention to the quiet signal because this aspect works through gradual development',
+  },
+};
+
 // Removed generateStaticParams - using pure ISR for faster builds
 // Pages are generated on-demand and cached with 30-day revalidation
 
@@ -90,6 +148,24 @@ export default async function AspectPage({
 
   const interp = getAspectInterpretation(p1, asp, p2);
   const aspectData = ASPECT_DATA[asp];
+  const p1Theme = PLANET_THEME_MAP[p1];
+  const p2Theme = PLANET_THEME_MAP[p2];
+  const aspectFocus = ASPECT_FOCUS_MAP[asp];
+  const intro = `${PLANET_DISPLAY[p1]} ${aspectData.displayName.toLowerCase()} ${PLANET_DISPLAY[p2]} describes how ${p1Theme} interacts with ${p2Theme}. This page breaks down what the aspect means in a natal chart, what it does in transits, and how it behaves in synastry so the interpretation is specific instead of hand-wavy.`;
+  const faqs = [
+    {
+      question: `Is ${PLANET_DISPLAY[p1]} ${aspectData.displayName.toLowerCase()} ${PLANET_DISPLAY[p2]} good or bad?`,
+      answer: `${interp.title} is not simply good or bad. It is a ${aspectData.nature} aspect, which means its gift is ${aspectFocus.gift} and its pressure point is ${aspectFocus.pressure}.`,
+    },
+    {
+      question: `How does ${interp.title} show up in a natal chart?`,
+      answer: interp.inNatal,
+    },
+    {
+      question: `How does ${interp.title} work in transits or synastry?`,
+      answer: `${interp.inTransit} ${interp.inSynastry}`,
+    },
+  ];
 
   return (
     <SEOContentTemplate
@@ -101,15 +177,22 @@ export default async function AspectPage({
       datePublished='2025-01-01'
       dateModified={new Date().toISOString().split('T')[0]}
       articleSection='Astrological Aspects'
+      intro={intro}
       whatIs={{
         question: `What does ${PLANET_DISPLAY[p1]} ${aspectData.displayName.toLowerCase()} ${PLANET_DISPLAY[p2]} mean?`,
-        answer: interp.summary,
+        answer: `${interp.summary} In practice, it blends ${p1Theme} with ${p2Theme}, so the real question is whether you are using the aspect consciously or letting it run on autopilot.`,
       }}
-      tldr={`${interp.title} is a ${aspectData.nature} aspect at ${aspectData.degrees}°. Nature: ${aspectData.nature}. Keywords: ${aspectData.keywords.join(', ')}.`}
+      tldr={`${interp.title} is a ${aspectData.nature} aspect at ${aspectData.degrees}° between ${PLANET_DISPLAY[p1]} (${p1Theme}) and ${PLANET_DISPLAY[p2]} (${p2Theme}). Main gift: ${aspectFocus.gift}. Main pressure point: ${aspectFocus.pressure}.`}
       meaning={`
 ## Understanding ${interp.title}
 
-${aspectData.description}
+${aspectData.description} In real chart work, this aspect is about how ${PLANET_DISPLAY[p1].toLowerCase()} handles ${p1Theme} when it meets ${PLANET_DISPLAY[p2].toLowerCase()} themes of ${p2Theme}.
+
+### Core dynamic
+
+- **Main gift:** ${aspectFocus.gift}
+- **Main pressure point:** ${aspectFocus.pressure}
+- **Best way to work with it:** ${aspectFocus.advice}
 
 ### In the Natal Chart
 
@@ -123,10 +206,16 @@ ${interp.inTransit}
 
 ${interp.inSynastry}
       `}
+      faqs={faqs}
       emotionalThemes={aspectData.keywords.map(
         (k) => k.charAt(0).toUpperCase() + k.slice(1),
       )}
       signsMostAffected={['All Signs']}
+      rituals={[
+        `Journal where ${PLANET_DISPLAY[p1].toLowerCase()} themes and ${PLANET_DISPLAY[p2].toLowerCase()} themes already support each other.`,
+        `Notice where this aspect tends to produce ${aspectFocus.pressure} and name the trigger before reacting.`,
+        `Use the aspect's strongest gift — ${aspectFocus.gift} — as the conscious practice point.`,
+      ]}
       tables={[
         {
           title: 'Aspect Overview',
@@ -140,6 +229,8 @@ ${interp.inSynastry}
                 aspectData.nature.slice(1),
             ],
             ['Planets', `${PLANET_DISPLAY[p1]} & ${PLANET_DISPLAY[p2]}`],
+            ['Main Gift', aspectFocus.gift],
+            ['Pressure Point', aspectFocus.pressure],
           ],
         },
       ]}
