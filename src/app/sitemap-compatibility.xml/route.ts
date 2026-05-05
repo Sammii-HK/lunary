@@ -14,7 +14,7 @@ export async function GET() {
       <loc>${baseUrl}/grimoire/compatibility/${slug}</loc>
       <lastmod>${stableMonthStamp}</lastmod>
       <changefreq>monthly</changefreq>
-      <priority>0.5</priority>
+      <priority>0.4</priority>
     </url>`,
     )
     .join('');
