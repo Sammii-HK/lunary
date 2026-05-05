@@ -173,8 +173,36 @@ export default function TransitsIndexPage() {
       ]}
       meaning={`
             Each transit marks a planetary shift that gently reshapes the cosmic weather; observing it keeps you aligned with the sky rather than trying to force an outcome.
-            We pair these notes with timing guidance so you can choose when to act and when to wait, depending on how your birth chart interacts with the current planetary dance.
+
+            The useful way to read a transit is simple: identify the transit planet, the sign it is moving through, the natal placement or house it is contacting, and the aspect being formed. That tells you what is moving, what style it is moving in, where it lands, and whether it feels like support, friction, pressure, or opportunity.
+
+            We pair these notes with timing guidance so you can choose when to act and when to wait, depending on how your birth chart interacts with the current planetary dance. The point is not to memorize transit keywords. The point is to learn how to read the relationship between the live sky and your own chart.
           `}
+      howToWorkWith={[
+        'Start with the transit planet: what theme is moving right now?',
+        'Check the sign it is moving through to understand the style of expression.',
+        'Map that transit onto the natal house or placement it touches in your own chart.',
+        'Use the aspect to judge whether the transit feels supportive, tense, catalytic, or integrating.',
+      ]}
+      internalLinks={[
+        { text: 'Sky Now current chart', href: '/grimoire/astrology/sky-now' },
+        { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
+        { text: 'Houses Guide', href: '/grimoire/houses' },
+        { text: 'Planetary Placements', href: '/grimoire/placements' },
+      ]}
+      sources={[
+        {
+          name: 'Lunary transit interpretation framework',
+          url: 'https://lunary.app/developers',
+        },
+        {
+          name: 'Astronomy Engine planetary calculations',
+          url: 'https://github.com/cosinekitty/astronomy',
+        },
+        {
+          name: 'Traditional transit and aspect doctrine',
+        },
+      ]}
       cosmicConnections={
         <CosmicConnections
           entityType='hub-transits'
