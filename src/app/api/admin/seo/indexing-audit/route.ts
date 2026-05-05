@@ -123,9 +123,7 @@ interface AuditResponse {
  * - limit: Number of URLs to check (default: all)
  * - urls: Comma-separated list of specific URLs to check
  */
-export async function GET(
-  request: Request,
-): Promise<NextResponse<AuditResponse | { error: string }>> {
+export async function GET(request: Request): Promise<NextResponse> {
   try {
     const authResult = await requireAdminAuth(request);
     if (authResult instanceof NextResponse) return authResult;
@@ -207,9 +205,7 @@ export async function GET(
  *
  * Audit specific URLs provided in the request body.
  */
-export async function POST(
-  request: Request,
-): Promise<NextResponse<AuditResponse | { error: string }>> {
+export async function POST(request: Request): Promise<NextResponse> {
   try {
     const authResult = await requireAdminAuth(request);
     if (authResult instanceof NextResponse) return authResult;
