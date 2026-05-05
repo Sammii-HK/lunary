@@ -5,8 +5,6 @@ import { execFileSync } from 'node:child_process';
 import { grimoire } from '@/constants/grimoire';
 import { sectionToSlug } from '@/utils/grimoire';
 import spellsJson from '@/data/spells.json';
-import { crystalDatabase } from '@/constants/grimoire/crystals';
-import { runesList } from '@/constants/runes';
 import { chakras } from '@/constants/chakras';
 import { tarotCards } from '../../utils/tarot/tarot-cards';
 import { tarotSpreads } from '@/constants/tarot';
@@ -636,22 +634,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Add all spell pages
   const spellRoutes = spellsJson.map((spell) => ({
     url: `${baseUrl}/grimoire/spells/${spell.id}`,
-    lastModified: date,
-    changeFrequency: 'monthly' as const,
-    priority: 0.6,
-  }));
-
-  // Add all crystal pages
-  const crystalRoutes = crystalDatabase.map((crystal) => ({
-    url: `${baseUrl}/grimoire/crystals/${crystal.id}`,
-    lastModified: date,
-    changeFrequency: 'monthly' as const,
-    priority: 0.6,
-  }));
-
-  // Add all rune pages
-  const runeRoutes = Object.keys(runesList).map((runeId) => ({
-    url: `${baseUrl}/grimoire/runes/${runeId}`,
     lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
@@ -1484,14 +1466,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...blogPaginationRoutes,
     ...grimoireRoutes,
     ...spellRoutes,
-    ...crystalRoutes,
-    ...runeRoutes,
     ...chakraRoutes,
     ...majorArcanaRoutes,
     ...minorArcanaRoutes,
     ...moonPhaseRoutes,
     ...fullMoonRoutes,
-    ...zodiacRoutes,
     ...planetRoutes,
     ...sabbatRoutes,
     ...tarotSpreadRoutes,
