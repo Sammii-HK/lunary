@@ -230,7 +230,10 @@ Your numerology life path number is ${numerology}, which brings ${numerology ===
         },
         ...zodiac.compatibleSigns.slice(0, 2).map((sign) => ({
           name: `${sign} Compatibility`,
-          href: `/grimoire/compatibility/${zodiac.sign.toLowerCase()}-${sign.toLowerCase()}`,
+          href:
+            zodiac.sign.toLowerCase() <= sign.toLowerCase()
+              ? `/grimoire/compatibility/${zodiac.sign.toLowerCase()}-and-${sign.toLowerCase()}`
+              : `/grimoire/compatibility/${sign.toLowerCase()}-and-${zodiac.sign.toLowerCase()}`,
           type: 'Compatibility' as const,
         })),
       ]}
