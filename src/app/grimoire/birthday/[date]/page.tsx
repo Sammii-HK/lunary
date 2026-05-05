@@ -151,6 +151,7 @@ export default async function BirthdayZodiacPage({
   const numerology = getNumerologyNumber(birthday.month, birthday.day);
   const primaryRuler = getPrimaryRuler(zodiac.sign);
   const rulership = formatRulershipValue(zodiac.sign);
+  const currentYear = new Date().getFullYear();
 
   const { prev: prevDay, next: nextDay } = getAdjacentBirthdayLinks(
     birthday.month,
@@ -219,14 +220,19 @@ Your numerology life path number is ${numerology}, which brings ${numerology ===
       ]}
       relatedItems={[
         {
-          name: `${zodiac.sign} Zodiac Sign`,
-          href: `/grimoire/zodiac/${zodiac.sign.toLowerCase()}`,
-          type: 'Zodiac',
+          name: `${zodiac.sign} ${currentYear} Horoscope`,
+          href: `/grimoire/horoscopes/${zodiac.sign.toLowerCase()}/${currentYear}`,
+          type: 'Horoscope',
         },
         {
           name: `${primaryRuler} in Astrology`,
           href: `/grimoire/astronomy/planets/${primaryRuler.toLowerCase()}`,
           type: 'Planet',
+        },
+        {
+          name: `${currentYear} Major Transits`,
+          href: `/grimoire/transits/year/${currentYear}`,
+          type: 'Guide',
         },
         ...zodiac.compatibleSigns.slice(0, 2).map((sign) => ({
           name: `${sign} Compatibility`,
