@@ -17,7 +17,7 @@ export async function GET(): Promise<Response> {
   const baseUrl = 'https://lunary.app';
   const currentYear = new Date().getFullYear();
   const years = getYearRange().filter(
-    (year) => year >= currentYear - 1 && year <= currentYear + 1,
+    (year) => year >= currentYear - 1 && year <= currentYear + 2,
   );
   const stableMonthStamp = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`;
 

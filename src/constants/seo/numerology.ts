@@ -355,5 +355,10 @@ export function getUniversalYear(year: number): number {
 
 export function getYearRange(): number[] {
   const currentYear = new Date().getFullYear();
-  return Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
+  const startYear = Math.max(2025, currentYear - 1);
+  const endYear = currentYear + 2;
+  return Array.from(
+    { length: endYear - startYear + 1 },
+    (_, i) => startYear + i,
+  );
 }
