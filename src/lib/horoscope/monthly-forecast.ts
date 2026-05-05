@@ -207,24 +207,30 @@ function getAspectForSign(
 function getSignTransitsForDate(sign: ZodiacSign, date: Date): SignTransit[] {
   const targetSign = SIGN_DISPLAY_NAMES[sign];
   const currentSky = getAstrologicalChart(date, DEFAULT_OBSERVER);
+  const transits: SignTransit[] = [];
 
-  return currentSky
-    .filter((body) => TRANSIT_BODIES.has(String(body.body)))
-    .map((body) => {
-      const aspect = getAspectForSign(targetSign, body.sign);
-      if (!aspect) return null;
+  for (const body of currentSky) {
+    if (!TRANSIT_BODIES.has(String(body.body))) {
+      continue;
+    }
 
-      return {
-        planet: String(body.body),
-        transitSign: body.sign,
-        aspect,
-        retrograde: body.retrograde,
-        degree: body.formattedDegree
-          ? `${body.formattedDegree.degree}°${String(body.formattedDegree.minute).padStart(2, '0')}`
-          : undefined,
-      };
-    })
-    .filter((item): item is SignTransit => Boolean(item));
+    const aspect = getAspectForSign(targetSign, body.sign);
+    if (!aspect) {
+      continue;
+    }
+
+    transits.push({
+      planet: String(body.body),
+      transitSign: body.sign,
+      aspect,
+      retrograde: body.retrograde,
+      degree: body.formattedDegree
+        ? `${body.formattedDegree.degree}°${String(body.formattedDegree.minute).padStart(2, '0')}`
+        : undefined,
+    });
+  }
+
+  return transits;
 }
 
 function summariseInfluence(influence: InfluenceSummary): string {

@@ -100,9 +100,10 @@ function getMoonTypeDescription(type: MoonEvent['type']): string {
 export default async function MoonPage() {
   // Fetch special moon events for current and next year
   const currentYear = new Date().getFullYear();
+  const nextYear = currentYear + 1;
   const [currentYearForecast, nextYearForecast] = await Promise.all([
     generateYearlyForecast(currentYear),
-    generateYearlyForecast(currentYear + 1),
+    generateYearlyForecast(nextYear),
   ]);
 
   // Combine and filter for special moons (supermoon, blue moon, etc.)

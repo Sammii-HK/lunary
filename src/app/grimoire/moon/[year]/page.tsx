@@ -73,7 +73,11 @@ export default async function MoonYearPage({
 Understanding the moon's phases helps you align your spiritual practice, rituals, and personal growth with cosmic rhythms. Each lunar event provides an opportunity to work with specific energies for manifestation, release, and transformation.`;
 
   const currentYear = new Date().getFullYear();
-  const moonYears = [Math.max(2025, currentYear - 1), currentYear, currentYear + 1];
+  const moonYears = [
+    Math.max(2025, currentYear - 1),
+    currentYear,
+    currentYear + 1,
+  ];
   const cosmicSections = [
     ...getCosmicConnections('hub-moon', 'moon'),
     {

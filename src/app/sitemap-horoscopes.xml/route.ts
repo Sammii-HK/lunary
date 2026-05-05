@@ -28,7 +28,10 @@ export async function GET(): Promise<Response> {
       })),
     ]),
     ...horoscopes
-      .filter((h) => h.year >= minYear && h.year <= maxYear)
+      .filter((h) => {
+        const year = Number(h.year);
+        return year >= minYear && year <= maxYear;
+      })
       .map((h) => ({
         loc: `${baseUrl}/grimoire/horoscopes/${h.sign}/${h.year}/${h.month}`,
         lastmod: `${h.year}-${String(new Date(`${h.month} 1, ${h.year}`).getMonth() + 1).padStart(2, '0')}-01`,

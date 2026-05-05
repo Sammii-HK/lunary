@@ -22,8 +22,7 @@ const recoveryTransitYearsLabel =
     : `${minTransitYear}-${maxTransitYear}`;
 export const metadata: Metadata = {
   title: `Major Astrological Transits ${recoveryTransitYearsLabel}: Saturn, Jupiter & Key Dates | Lunary`,
-  description:
-    `Complete transit calendar with exact dates, Jupiter movements, and the major planetary transits for ${recoveryTransitYearsLabel}. Track the cosmic shifts that matter now.`,
+  description: `Complete transit calendar with exact dates, Jupiter movements, and the major planetary transits for ${recoveryTransitYearsLabel}. Track the cosmic shifts that matter now.`,
   keywords: [
     `major astrological transits ${currentYear}`,
     `major astrological transits ${currentYear + 1}`,
@@ -37,8 +36,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: `Major Astrological Transits ${recoveryTransitYearsLabel}: Saturn, Jupiter & Key Dates | Lunary`,
-    description:
-      `Complete transit calendar with exact dates, Jupiter movements, and the major planetary transits for ${recoveryTransitYearsLabel}.`,
+    description: `Complete transit calendar with exact dates, Jupiter movements, and the major planetary transits for ${recoveryTransitYearsLabel}.`,
     url: 'https://lunary.app/grimoire/transits',
     images: [
       {
@@ -52,8 +50,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: `Major Astrological Transits ${recoveryTransitYearsLabel}: Saturn, Jupiter & Key Dates | Lunary`,
-    description:
-      `Complete transit calendar with exact dates, Jupiter movements, and the major planetary transits for ${recoveryTransitYearsLabel}.`,
+    description: `Complete transit calendar with exact dates, Jupiter movements, and the major planetary transits for ${recoveryTransitYearsLabel}.`,
     images: ['/api/og/grimoire/transits'],
   },
   alternates: { canonical: 'https://lunary.app/grimoire/transits' },

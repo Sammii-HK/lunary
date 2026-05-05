@@ -6,6 +6,8 @@ import { stringToKebabCase } from '../../../utils/string';
 const baseUrl = 'https://lunary.app';
 
 export async function GET() {
+  const now = new Date();
+  const stableMonthStamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
   const today = stableMonthStamp;
 
   const retrogradeUrls = Object.entries(retrogradeInfo)
