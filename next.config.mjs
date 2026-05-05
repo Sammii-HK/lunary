@@ -3,6 +3,8 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const isConstrainedBuild =
+  process.env.VERCEL === '1' || process.env.CI === 'true';
 
 // Bundle analyzer (only enabled when ANALYZE env var is set)
 const withBundleAnalyzer =
@@ -19,7 +21,7 @@ const nextConfig = {
     // Preview builds run on smaller Vercel workers than local/Turbo builds.
     // Keep webpack concurrency lower there so larger SSG/content batches do not
     // OOM before Next can write routes-manifest.json.
-    config.parallelism = process.env.VERCEL === '1' ? 24 : 100;
+    config.parallelism = isConstrainedBuild ? 24 : 100;
 
     // Exclude Playwright and ffmpeg-static from bundling (server-only, Node.js runtime)
     if (isServer) {
@@ -267,6 +269,8 @@ const nextConfig = {
 
   // Experimental optimizations for faster builds
   experimental: {
+    staticGenerationMaxConcurrency: isConstrainedBuild ? 4 : 8,
+    staticGenerationMinPagesPerWorker: isConstrainedBuild ? 16 : 25,
     // Optimize package imports (tree-shake unused exports)
     optimizePackageImports: [
       'lucide-react',

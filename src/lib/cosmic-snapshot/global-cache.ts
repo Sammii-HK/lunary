@@ -157,7 +157,16 @@ export async function getGlobalCosmicData(
     },
   );
 
-  const data = await cached();
+  let data: GlobalCosmicData;
+  try {
+    data = await cached();
+  } catch (error) {
+    console.warn(
+      '[cosmic-snapshot] Falling back to calculated cosmic data',
+      error,
+    );
+    data = await buildGlobalCosmicData(date);
+  }
 
   // Freshen fast-moving planet positions with current time — but ONLY for
   // today's data. For future dates (e.g. tomorrow in detectUpcomingSignChanges)
