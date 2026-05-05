@@ -108,6 +108,34 @@ export default function GrimoireHoroscopesPage() {
 Our monthly horoscopes are updated regularly and provide personalized insights based on current planetary movements and astrological transits. We publish forecasts for ${currentYear} and ${nextYear}, keeping the archive focused on what people are actually searching for right now.
 
 Select your zodiac sign below to explore detailed monthly predictions.`}
+      meaning={`A useful horoscope is not just mood-writing for a sign. It is a forecast built from actual sky conditions. Lunary monthly horoscopes start with the major transits of the period, then translate those movements sign by sign. That means the point is not “what adjective fits Aries this month?” It is “which planets are moving, what signs are they in, what aspects are forming, and how would that land for this sign?”
+
+That is also why monthly forecasts work better than generic evergreen sign pages. They are grounded in timing. The strongest forecast pages tell you what is active now, what pressure is building, what support is available, and which signs feel a transit directly versus by trine, square, opposition, or sextile.`}
+      howToWorkWith={[
+        'Read the monthly forecast as a transit summary for your sign, not a fixed identity statement.',
+        'Check the yearly forecast alongside the monthly page to separate long themes from short ones.',
+        'Notice which transits hit your sign directly and which work through trines, squares, or oppositions.',
+        'Compare the forecast with your natal chart if you know your Rising sign and chart ruler.',
+      ]}
+      internalLinks={[
+        { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
+        { text: 'Transits Guide', href: '/grimoire/transits' },
+        { text: 'Sky Now current chart', href: '/grimoire/astrology/sky-now' },
+        { text: 'Zodiac Signs', href: '/grimoire/zodiac' },
+      ]}
+      sources={[
+        {
+          name: 'Lunary monthly transit methodology',
+          url: 'https://lunary.app/developers',
+        },
+        {
+          name: 'Astronomy Engine planetary calculations',
+          url: 'https://github.com/cosinekitty/astronomy',
+        },
+        {
+          name: 'Traditional transit and sign doctrine',
+        },
+      ]}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
         { label: 'Horoscopes' },
@@ -144,6 +172,27 @@ Select your zodiac sign below to explore detailed monthly predictions.`}
           ))}
         </div>
       </div>
+
+      <section className='mb-12 p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/40'>
+        <h2 className='text-xl font-medium text-content-primary mb-4'>
+          How to read a monthly horoscope properly
+        </h2>
+        <ul className='list-disc pl-5 space-y-2 text-sm text-content-muted'>
+          <li>
+            Start with the major transit of the month, not the sign adjectives.
+          </li>
+          <li>
+            Ask whether the sky is hitting your sign directly or by aspect.
+          </li>
+          <li>
+            Use the yearly forecast to see whether the month is part of a bigger
+            story.
+          </li>
+          <li>
+            Use your birth chart if you want the forecast to get truly personal.
+          </li>
+        </ul>
+      </section>
     </SEOContentTemplate>
   );
 }
