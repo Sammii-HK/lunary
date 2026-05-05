@@ -80,6 +80,10 @@ export async function generateMetadata({ params }: PageProps) {
 
   return {
     ...metadata,
+    robots: {
+      index: Boolean(content.isCurated),
+      follow: true,
+    },
     alternates: {
       ...metadata.alternates,
       canonical: `https://lunary.app/grimoire/compatibility/${match}`,
