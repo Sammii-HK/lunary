@@ -936,6 +936,9 @@ export function buildThemesFromLocs(locs: string[], slugDataMap?: SlugDataMap) {
   let skippedInvalid = 0;
   let totalGrimoireUrls = 0;
   const unmappedBuckets = new Set<string>();
+  const currentYear = new Date().getFullYear();
+  const recoveryYearMax = currentYear + 2;
+  const recoveryYearMin = Math.max(2025, currentYear - 1);
 
   for (const loc of locs) {
     const normalized = normalizeLoc(loc);
@@ -972,6 +975,15 @@ export function buildThemesFromLocs(locs: string[], slugDataMap?: SlugDataMap) {
     }
     if (segments[1] && YEAR_SEGMENT_REGEX.test(segments[1])) {
       continue;
+    }
+    if (bucket === 'numerology' && segments[1] === 'year' && segments[2]) {
+      const year = Number(segments[2]);
+      if (
+        Number.isInteger(year) &&
+        (year < recoveryYearMin || year > recoveryYearMax)
+      ) {
+        continue;
+      }
     }
     if (BLOCKED_BUCKETS.has(bucket)) {
       continue;
