@@ -180,16 +180,31 @@ Full Moon: Peak power for manifestation, release, and celebration. The moon's en
 
 Waning Moon: Decreasing energy supports banishing, releasing, and letting go. Use for removing obstacles and releasing what no longer serves.
 
-Understanding these phases and aligning your practice with them creates powerful synchronicity between your intentions and natural rhythms."
+Understanding these phases and aligning your practice with them creates powerful synchronicity between your intentions and natural rhythms.
+
+For chart reading, the Moon matters in two distinct ways. Your natal Moon sign describes your emotional baseline, attachment style, and instinctive soothing patterns. The current Moon describes the emotional weather of the day. Lunary treats those as related but different layers, so you can learn the difference between your ongoing lunar nature and the temporary mood of the sky."
       howToWorkWith={[
         'Track moon phases using a lunar calendar',
         'Set intentions during New Moon',
         'Perform manifestation spells during Waxing Moon',
         'Release and banish during Waning Moon',
         'Celebrate and charge tools during Full Moon',
-        'Work with moon signs for daily guidance',
+        'Work with moon signs for daily guidance and compare them to your natal Moon placement',
         'Use full moon names for seasonal magic',
         'Honor eclipses as powerful transformation times',
+      ]}
+      sources={[
+        {
+          name: 'Lunary lunar cycle interpretation framework',
+          url: 'https://lunary.app/developers',
+        },
+        {
+          name: 'Astronomy Engine moon phase calculations',
+          url: 'https://github.com/cosinekitty/astronomy',
+        },
+        {
+          name: 'Traditional lunar cycle doctrine',
+        },
       ]}
       faqs={[
         {
