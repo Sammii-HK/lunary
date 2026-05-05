@@ -1,16 +1,21 @@
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
-import { getAngelNumber } from '@/lib/angel-numbers/getAngelNumber';
+import {
+  getAllAngelNumberSlugs,
+  getAngelNumber,
+} from '@/lib/angel-numbers/getAngelNumber';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 import { Heading } from '@/components/ui/Heading';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+export const dynamicParams = false;
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return getAllAngelNumberSlugs().map((number) => ({ number }));
+}
 
 export async function generateMetadata({
   params,
@@ -61,6 +66,10 @@ export default async function AngelNumberPage({
 
 ${data.whyYouKeepSeeing}
 
+## How Lunary Reads ${data.number}
+
+Lunary treats angel numbers as symbolic timing prompts rather than standalone magic passwords. We start with the repeating sequence itself, reduce it to its root number, and then read the message through the wider numerology theme it points to. That keeps the interpretation anchored in a consistent calculation method instead of turning every repeated number into a completely unrelated meaning.
+
 ## When ${data.number} Usually Appears
 
 ${data.whenItAppears.map((item) => `- ${item}`).join('\n')}
@@ -91,7 +100,11 @@ ${data.career}
 
 ${data.numerologyBreakdown.rootMeaning}
 
-${data.numerologyBreakdown.amplification}`;
+${data.numerologyBreakdown.amplification}
+
+## How to Work With ${data.number} In Practice
+
+Start with the concrete theme, not the fantasy. ${data.number} is most useful when you connect it to a live decision, a repeating emotional pattern, or a timing question you are already inside. If you keep seeing ${data.number}, ask what this message is trying to sharpen: your priorities, your relationships, your pace, or your willingness to act on what you already know.`;
 
   // Entity schema for Knowledge Graph
   const angelNumberSchema = createCosmicEntitySchema({
@@ -152,6 +165,14 @@ Keywords: ${data.keywords.join(', ')}`}
         ctaText='Want personalized numerology insights for your life?'
         ctaHref='/pricing'
         faqs={data.faq}
+        sources={[
+          {
+            name: 'Lunary numerology calculation method',
+            url: 'https://lunary.app/about/methodology',
+          },
+          { name: 'Pythagorean numerology tradition' },
+          { name: 'Lunary angel number interpretation framework' },
+        ]}
       >
         {/* Correspondences Section */}
         <section className='mb-8'>

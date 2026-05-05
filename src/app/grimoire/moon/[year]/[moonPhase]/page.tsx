@@ -38,8 +38,17 @@ function getMoonEventBySlug(
   return list.find((event) => event.slug === moonPhase);
 }
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return SUPPORTED_YEARS.flatMap((year) => {
+    const events = getMoonEventsForYear(year);
+    return [...events.fullMoons, ...events.newMoons].map((event) => ({
+      year: String(year),
+      moonPhase: event.slug,
+    }));
+  });
+}
 
 export async function generateMetadata({
   params,
@@ -315,7 +324,14 @@ export default async function MoonPhaseYearPage({
         ctaHref='/horoscope'
         faqs={faqs}
         sources={[
-          { name: 'Astronomy Engine (moon phase calculations)' },
+          {
+            name: 'Lunary moon phase interpretation framework',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Astronomy Engine moon phase calculations',
+            url: 'https://github.com/cosinekitty/astronomy',
+          },
           { name: 'Traditional lunar correspondences' },
         ]}
       />

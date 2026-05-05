@@ -159,12 +159,24 @@ export default function BirthChartCompleteGuidePage() {
           need to know about reading and interpreting your natal chart—from the
           basics to advanced techniques.
         </p>
+        <p className='text-content-muted leading-relaxed mb-6 max-w-3xl'>
+          The goal here is not to drown you in astrology jargon. It is to teach
+          you a repeatable method: identify the planet, read the sign, locate
+          the house, judge the ruler, and then layer in aspects, decans, and
+          timing. Once you learn that order, birth charts stop feeling mystical
+          and start feeling readable.
+        </p>
         <div className='flex flex-wrap gap-4'>
           <Button asChild variant='lunary-solid' size='lg'>
             <Link href='/birth-chart'>Get Your Birth Chart</Link>
           </Button>
           <Button asChild variant='outline' size='lg'>
             <Link href='#what-is-birth-chart'>Start Reading</Link>
+          </Button>
+          <Button asChild variant='outline' size='lg'>
+            <Link href='/grimoire/guides/learn-birth-chart'>
+              Follow the Learning Path
+            </Link>
           </Button>
         </div>
       </header>
@@ -241,6 +253,23 @@ export default function BirthChartCompleteGuidePage() {
           </li>
         </ol>
       </nav>
+
+      <section className='mb-12 bg-surface-elevated/40 border border-stroke-subtle rounded-xl p-6'>
+        <h2 className='text-2xl font-light text-content-primary mb-4'>
+          Lunary&apos;s chart-reading method
+        </h2>
+        <ol className='list-decimal pl-5 space-y-2 text-content-secondary'>
+          <li>Start with the Big Three and the chart angles.</li>
+          <li>Find the Ascendant ruler and see where it lives.</li>
+          <li>Read planets by sign, then by house.</li>
+          <li>Use aspects to understand tension, support, and emphasis.</li>
+          <li>Refine with decans, dignities, sect, and timing.</li>
+        </ol>
+        <p className='text-sm text-content-muted mt-4'>
+          Sources: Lunary natal chart methodology, Astronomy Engine planetary
+          calculations, traditional Hellenistic house and aspect doctrine.
+        </p>
+      </section>
 
       {/* Section 1: What is a Birth Chart */}
       <section id='what-is-birth-chart' className='mb-16'>

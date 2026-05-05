@@ -8,9 +8,11 @@ import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 const aspectKeys = Object.keys(astrologicalAspects);
+export const dynamicParams = false;
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return aspectKeys.map((aspect) => ({ aspect: stringToKebabCase(aspect) }));
+}
 
 export async function generateMetadata({
   params,
@@ -158,6 +160,8 @@ ${aspectData.description}
 
 ${aspectData.meaning}
 
+To read ${aspectData.name.toLowerCase()} correctly, do not stop at the aspect label. Ask which two planets are involved, what houses they occupy, and which planet has more dignity or weight in the chart. The aspect describes the relationship. The planets and houses tell you what is actually happening in lived experience.
+
 ${aspectData.name} is classified as a ${aspectData.type} aspect with a ${aspectData.nature} nature. ${aspectData.nature === 'harmonious' ? 'Harmonious aspects create ease and flow between planets, bringing natural talents and opportunities.' : aspectData.nature === 'challenging' ? 'Challenging aspects create tension that requires growth and development, leading to strength through overcoming obstacles.' : 'Neutral aspects can be either harmonious or challenging depending on the planets involved.'}
 
 Understanding ${aspectData.name} in your chart helps you understand how these planetary energies work together and what challenges or blessings they bring to your life.`}
@@ -176,10 +180,10 @@ Nature: ${aspectData.nature}`}
           },
         ]}
         howToWorkWith={[
-          `Understand ${aspectData.name} in your birth chart`,
+          `Identify the two planets involved before interpreting the aspect keyword`,
+          `Check the houses involved to see where the aspect plays out in lived experience`,
           `Work with ${aspectData.nature === 'harmonious' ? 'the ease and flow' : aspectData.nature === 'challenging' ? 'the growth opportunities' : 'the energy'} this aspect brings`,
-          `Recognize ${aspectData.name} patterns in your life`,
-          `Use ${aspectData.name} energy consciously`,
+          `Notice repeated aspect patterns instead of judging one symbol in isolation`,
         ]}
         journalPrompts={[
           `What ${aspectData.name} aspects do I have in my chart?`,
@@ -208,9 +212,23 @@ Nature: ${aspectData.nature}`}
           },
         ]}
         internalLinks={[
-          { text: 'Calculate Birth Chart', href: '/birth-chart' },
+          { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
           { text: 'Explore Aspects', href: '/grimoire/aspects' },
-          { text: 'Grimoire Home', href: '/grimoire' },
+          { text: 'Planetary Placements', href: '/grimoire/placements' },
+          { text: 'Houses Guide', href: '/grimoire/houses' },
+        ]}
+        sources={[
+          {
+            name: 'Lunary aspect interpretation framework',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Traditional aspect doctrine',
+          },
+          {
+            name: 'Astronomy Engine planetary calculations',
+            url: 'https://github.com/cosinekitty/astronomy',
+          },
         ]}
         faqs={faqs}
       />

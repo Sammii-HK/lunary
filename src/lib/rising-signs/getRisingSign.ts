@@ -24,6 +24,14 @@ export interface RisingSign {
 
 const risingSigns = risingSignsData.risingSigns as Record<string, RisingSign>;
 
+export function normalizeRisingSignSlug(slug: string): string {
+  return slug.endsWith('-rising') ? slug : `${slug}-rising`;
+}
+
+export function getPublicRisingSignSlug(slug: string): string {
+  return slug.replace(/-rising$/, '');
+}
+
 /**
  * Get all rising sign slugs
  */
@@ -35,7 +43,7 @@ export function getAllRisingSignSlugs(): string[] {
  * Get a specific rising sign by slug
  */
 export function getRisingSign(slug: string): RisingSign | null {
-  return risingSigns[slug] || null;
+  return risingSigns[normalizeRisingSignSlug(slug)] || null;
 }
 
 /**
@@ -52,6 +60,5 @@ export function getAllRisingSigns(): Array<RisingSign & { slug: string }> {
  * Get rising sign by zodiac sign name
  */
 export function getRisingSignByName(signName: string): RisingSign | null {
-  const slug = `${signName.toLowerCase()}-rising`;
-  return risingSigns[slug] || null;
+  return getRisingSign(signName.toLowerCase());
 }

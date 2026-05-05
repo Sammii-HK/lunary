@@ -8,20 +8,33 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-// Grimoire URLs to audit - key pages
+// Recovery canaries: keep this list aligned with the focused astrology sitemap.
 const GRIMOIRE_URLS_TO_AUDIT = [
-  // Main index pages
+  // Primary discovery and trust pages
+  'https://lunary.app/',
   'https://lunary.app/grimoire',
-  'https://lunary.app/grimoire/zodiac',
-  'https://lunary.app/grimoire/tarot',
-  'https://lunary.app/grimoire/crystals',
-  'https://lunary.app/grimoire/planets',
-  'https://lunary.app/grimoire/moon',
-  'https://lunary.app/grimoire/numerology',
+  'https://lunary.app/about/methodology',
+  'https://lunary.app/birth-chart',
+  'https://lunary.app/grimoire/birth-chart',
   'https://lunary.app/grimoire/guides',
-  'https://lunary.app/grimoire/spells',
-  'https://lunary.app/grimoire/practices',
-  'https://lunary.app/grimoire/correspondences',
+  'https://lunary.app/grimoire/guides/learn-birth-chart',
+  'https://lunary.app/grimoire/guides/birth-chart-complete-guide',
+  'https://lunary.app/grimoire/astrology/sky-now',
+
+  // Astrology learning hubs
+  'https://lunary.app/grimoire/planets',
+  'https://lunary.app/grimoire/placements',
+  'https://lunary.app/grimoire/houses',
+  'https://lunary.app/grimoire/aspects',
+  'https://lunary.app/grimoire/aspects/types',
+  'https://lunary.app/grimoire/decans',
+  'https://lunary.app/grimoire/rising',
+  'https://lunary.app/grimoire/rising-sign',
+  'https://lunary.app/grimoire/moon-in',
+  'https://lunary.app/grimoire/zodiac',
+  'https://lunary.app/grimoire/moon',
+  'https://lunary.app/grimoire/transits',
+  'https://lunary.app/grimoire/horoscopes',
 
   // Zodiac signs
   'https://lunary.app/grimoire/zodiac/aries',
@@ -37,35 +50,6 @@ const GRIMOIRE_URLS_TO_AUDIT = [
   'https://lunary.app/grimoire/zodiac/aquarius',
   'https://lunary.app/grimoire/zodiac/pisces',
 
-  // Key guides
-  'https://lunary.app/grimoire/guides/birth-chart-complete-guide',
-  'https://lunary.app/grimoire/guides/tarot-complete-guide',
-  'https://lunary.app/grimoire/guides/crystal-healing-guide',
-  'https://lunary.app/grimoire/guides/moon-phases-guide',
-
-  // Popular tarot cards
-  'https://lunary.app/grimoire/tarot/the-fool',
-  'https://lunary.app/grimoire/tarot/the-magician',
-  'https://lunary.app/grimoire/tarot/the-high-priestess',
-  'https://lunary.app/grimoire/tarot/the-empress',
-  'https://lunary.app/grimoire/tarot/the-emperor',
-  'https://lunary.app/grimoire/tarot/the-lovers',
-  'https://lunary.app/grimoire/tarot/the-chariot',
-  'https://lunary.app/grimoire/tarot/strength',
-  'https://lunary.app/grimoire/tarot/the-hermit',
-  'https://lunary.app/grimoire/tarot/wheel-of-fortune',
-  'https://lunary.app/grimoire/tarot/justice',
-  'https://lunary.app/grimoire/tarot/the-hanged-man',
-  'https://lunary.app/grimoire/tarot/death',
-  'https://lunary.app/grimoire/tarot/temperance',
-  'https://lunary.app/grimoire/tarot/the-devil',
-  'https://lunary.app/grimoire/tarot/the-tower',
-  'https://lunary.app/grimoire/tarot/the-star',
-  'https://lunary.app/grimoire/tarot/the-moon',
-  'https://lunary.app/grimoire/tarot/the-sun',
-  'https://lunary.app/grimoire/tarot/judgement',
-  'https://lunary.app/grimoire/tarot/the-world',
-
   // Planets
   'https://lunary.app/grimoire/planets/sun',
   'https://lunary.app/grimoire/planets/moon',
@@ -78,26 +62,26 @@ const GRIMOIRE_URLS_TO_AUDIT = [
   'https://lunary.app/grimoire/planets/neptune',
   'https://lunary.app/grimoire/planets/pluto',
 
-  // Popular crystals
-  'https://lunary.app/grimoire/crystals/amethyst',
-  'https://lunary.app/grimoire/crystals/rose-quartz',
-  'https://lunary.app/grimoire/crystals/clear-quartz',
-  'https://lunary.app/grimoire/crystals/citrine',
-  'https://lunary.app/grimoire/crystals/black-tourmaline',
-  'https://lunary.app/grimoire/crystals/selenite',
-  'https://lunary.app/grimoire/crystals/labradorite',
-  'https://lunary.app/grimoire/crystals/moonstone',
+  // Chart-reading example pages
+  'https://lunary.app/grimoire/placements/sun-in-aries',
+  'https://lunary.app/grimoire/placements/moon-in-capricorn',
+  'https://lunary.app/grimoire/placements/venus-in-taurus',
+  'https://lunary.app/grimoire/placements/mars-in-leo',
+  'https://lunary.app/grimoire/houses/1st-house',
+  'https://lunary.app/grimoire/houses/7th-house',
+  'https://lunary.app/grimoire/houses/moon/7',
+  'https://lunary.app/grimoire/aspects/moon/square/mars',
+  'https://lunary.app/grimoire/aspects/types/square',
+  'https://lunary.app/grimoire/decans/aquarius/2',
+  'https://lunary.app/grimoire/rising/capricorn-rising',
+  'https://lunary.app/grimoire/moon-in/capricorn',
 
-  // Life path numbers
-  'https://lunary.app/grimoire/life-path/1',
-  'https://lunary.app/grimoire/life-path/2',
-  'https://lunary.app/grimoire/life-path/3',
-  'https://lunary.app/grimoire/life-path/4',
-  'https://lunary.app/grimoire/life-path/5',
-  'https://lunary.app/grimoire/life-path/6',
-  'https://lunary.app/grimoire/life-path/7',
-  'https://lunary.app/grimoire/life-path/8',
-  'https://lunary.app/grimoire/life-path/9',
+  // Query families that were still showing strong positions in tiny tests
+  'https://lunary.app/grimoire/horoscopes/taurus/2027',
+  'https://lunary.app/grimoire/horoscopes/cancer/2026/june',
+  'https://lunary.app/grimoire/horoscopes/scorpio/2026/june',
+  'https://lunary.app/grimoire/transits/year/2027',
+  'https://lunary.app/grimoire/compatibility/aries-and-leo',
 
   // Moon phases
   'https://lunary.app/grimoire/moon/phases/new-moon',
@@ -139,9 +123,7 @@ interface AuditResponse {
  * - limit: Number of URLs to check (default: all)
  * - urls: Comma-separated list of specific URLs to check
  */
-export async function GET(
-  request: Request,
-): Promise<NextResponse<AuditResponse | { error: string }>> {
+export async function GET(request: Request): Promise<NextResponse> {
   try {
     const authResult = await requireAdminAuth(request);
     if (authResult instanceof NextResponse) return authResult;
@@ -223,9 +205,7 @@ export async function GET(
  *
  * Audit specific URLs provided in the request body.
  */
-export async function POST(
-  request: Request,
-): Promise<NextResponse<AuditResponse | { error: string }>> {
+export async function POST(request: Request): Promise<NextResponse> {
   try {
     const authResult = await requireAdminAuth(request);
     if (authResult instanceof NextResponse) return authResult;

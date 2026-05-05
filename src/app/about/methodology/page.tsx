@@ -72,8 +72,28 @@ We support three zodiac systems: Tropical (season-based, standard in Western ast
 4. Calculate house cusps using the selected system (Placidus, Whole Sign, Koch, Porphyry, or Alcabitius)
 5. Compute aspects between planets within standard orbs
 6. Identify planetary dignity/debility states
+7. Calculate decans by dividing each 30° zodiac sign into three 10° sections
+8. Detect retrograde motion from apparent geocentric longitude changes
 
 Each calculation is performed in real-time, ensuring you always see accurate current sky positions.`,
+  },
+  {
+    title: 'Interpretation Framework',
+    content: `Lunary separates calculation from interpretation.
+
+The calculation layer answers: where is the planet, which sign is it in, which house does it occupy, what aspects does it make, is it direct or retrograde, and how tight is the orb?
+
+The interpretation layer then reads those facts in context:
+
+• Planet: the function being expressed
+• Sign: the style of expression
+• House: the life area affected
+• Aspect: the relationship between two chart functions
+• Ruler: the planet responsible for a sign or house topic
+• Decan: the 10° subdivision that adds nuance inside a sign
+• Transit: the current sky activating natal chart material
+
+This prevents isolated keyword readings. A Moon placement, for example, is not interpreted from sign alone; it is read through house placement, ruler condition, aspects, sect, and timing.`,
   },
   {
     title: 'Traditional Hellenistic Approach',
@@ -102,6 +122,14 @@ All calculated points are cross-referenced against established astronomical sour
 Transit data updates continuously throughout the day.`,
   },
   {
+    title: 'Moon, Horoscope, and Numerology Pages',
+    content: `Moon phase pages are based on calculated Sun-Moon angular relationships, including New Moon, First Quarter, Full Moon, and Last Quarter phase geometry.
+
+Horoscope pages use the same transit layer, then apply those transits to zodiac sign themes, rulers, modalities, elements, and longer-range outer-planet movement. Future horoscope pages are written as forecast education, not as claims that every person with the same sign will experience the same event.
+
+Numerology pages use transparent arithmetic reductions and symbolic interpretation. For example, life path and personal year numbers are reduced from birth dates or calendar years before interpretation is added. Angel number pages are symbolic reference pages rather than astronomical calculations.`,
+  },
+  {
     title: 'Accuracy Philosophy',
     content: `We believe accurate astronomy is the foundation of meaningful astrology. Our approach:
 
@@ -124,6 +152,33 @@ The sky positions we show are real. How you interpret them is where the art of a
 • Open standards: Using well-tested, open-source astronomy libraries
 
 We combine technical precision with intuitive interpretation to create the most accurate and accessible astrology platform.`,
+  },
+];
+
+const sourceLinks = [
+  {
+    name: 'Astronomy Engine',
+    href: 'https://github.com/cosinekitty/astronomy',
+    description:
+      'Open-source astronomy library used for planetary positions, lunar phases, eclipses, transits, and coordinate transforms.',
+  },
+  {
+    name: 'JPL Horizons',
+    href: 'https://ssd.jpl.nasa.gov/horizons/',
+    description:
+      'NASA/JPL solar system ephemeris service used by Astronomy Engine for validation.',
+  },
+  {
+    name: 'USNO NOVAS',
+    href: 'https://aa.usno.navy.mil/software/novas_info',
+    description:
+      'U.S. Naval Observatory astrometry software used by Astronomy Engine for validation.',
+  },
+  {
+    name: 'Learn to Read a Birth Chart',
+    href: '/grimoire/guides/learn-birth-chart',
+    description:
+      'Lunary’s reader-facing path for applying the calculation layer to chart interpretation.',
   },
 ];
 
@@ -180,6 +235,28 @@ export default function MethodologyPage() {
 
           <section className='mt-12'>
             <h2 className='text-2xl font-light mb-6'>
+              Sources & Further Reading
+            </h2>
+            <div className='grid gap-4 md:grid-cols-2'>
+              {sourceLinks.map((source) => (
+                <Link
+                  key={source.href}
+                  href={source.href}
+                  className='rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 transition-colors hover:border-lunary-primary-600 hover:bg-surface-elevated/50'
+                >
+                  <h3 className='text-lg font-medium text-content-primary mb-2'>
+                    {source.name}
+                  </h3>
+                  <p className='text-sm text-content-muted'>
+                    {source.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <section className='mt-12'>
+            <h2 className='text-2xl font-light mb-6'>
               Frequently Asked Questions
             </h2>
             <div className='space-y-4'>
@@ -205,12 +282,20 @@ export default function MethodologyPage() {
               Generate your own birth chart and experience our precision-first
               approach to astrology.
             </p>
-            <Link
-              href='/birth-chart'
-              className='inline-flex px-6 py-3 rounded-lg bg-layer-base/30 hover:bg-layer-base/50 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
-            >
-              Calculate Your Birth Chart
-            </Link>
+            <div className='flex flex-wrap gap-3'>
+              <Link
+                href='/birth-chart'
+                className='inline-flex px-6 py-3 rounded-lg bg-layer-base/30 hover:bg-layer-base/50 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
+              >
+                Calculate Your Birth Chart
+              </Link>
+              <Link
+                href='/grimoire/guides/learn-birth-chart'
+                className='inline-flex px-6 py-3 rounded-lg border border-stroke-subtle text-content-secondary hover:border-lunary-primary-600 hover:text-content-brand transition-colors'
+              >
+                Learn Chart Reading
+              </Link>
+            </div>
           </section>
 
           <div className='mt-8 flex gap-4'>

@@ -9,16 +9,14 @@ import type { BirthChartData } from '../../../../../utils/astrology/birthChart';
 import { Heading } from '@/components/ui/Heading';
 import { ASPECT_DATA, Aspect } from '@/constants/seo/aspects';
 
-// Force dynamic — page fetches live DB data, cannot be pre-rendered at build time
-export const dynamic = 'force-dynamic';
+export const revalidate = 7200;
 const CANONICAL_PATH = '/grimoire/astrology/sky-now';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://lunary.app';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title =
-    'Live Astrology Transits Now | How to Read Today’s Planetary Aspects';
+  const title = 'Sky Now: Current Chart & Live Astrology Transits | Lunary';
   const description =
-    'Explore live astrology transits updated every two hours. Learn how to read planetary aspects, understand current sky patterns, and place today’s transits in clear, grounded context.';
+    'Read the current chart with live planetary positions, active aspects, and grounded chart-reading guidance. Learn how today’s sky fits into real astrology, not vague transit wallpaper.';
   const canonical = `${APP_URL}${CANONICAL_PATH}`;
 
   return {
@@ -40,10 +38,10 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
     },
     robots: {
-      index: false,
+      index: true,
       follow: true,
       googleBot: {
-        index: false,
+        index: true,
         follow: true,
         'max-image-preview': 'large',
         'max-snippet': -1,
@@ -173,6 +171,36 @@ export default async function SkyNowPage() {
     });
   }
 
+  const coreBodies = [
+    'Sun',
+    'Moon',
+    'Mercury',
+    'Venus',
+    'Mars',
+    'Jupiter',
+    'Saturn',
+    'Uranus',
+    'Neptune',
+    'Pluto',
+  ];
+
+  const currentChartRows = coreBodies
+    .map((body) => {
+      const placement = positions[body];
+      if (!placement) return null;
+      const positionLabel = `${placement.sign} ${formatDegree(placement.longitude).degree}°${formatDegree(placement.longitude).minute.toString().padStart(2, '0')}'`;
+      return [
+        body,
+        positionLabel,
+        placement.retrograde ? 'Retrograde' : 'Direct',
+      ];
+    })
+    .filter((row): row is string[] => Boolean(row));
+
+  const retrogradeBodies = coreBodies.filter(
+    (body) => positions[body]?.retrograde,
+  );
+
   const pageTitle = 'Sky Now Transit Chart';
 
   const shareDateParam = now.toISOString();
@@ -183,38 +211,66 @@ export default async function SkyNowPage() {
       </div>
       <SkyNowSharePanel dateParam={shareDateParam} />
       <p className='max-w-2xl text-center text-sm text-content-secondary'>
-        The chart above reflects the planetary positions for the current sky now
-        moment. Refresh the page periodically for updated transit geometry and
-        bookmark this page to keep track of how the sky is shifting around you.
+        The wheel above is the current chart: the sky as it stands right now.
+        Use it to track sign placements, retrogrades, and the active aspect
+        weather. Then read those movements against your natal chart to see what
+        gets activated personally.
       </p>
     </div>
   );
 
   return (
     <SEOContentTemplate
-      title='Sky Now'
+      title='Sky Now: Current Chart & Live Astrology Transits'
       h1={pageTitle}
-      subtitle='Current transits, planetary weather, and how to read the live chart'
-      description='See the live transit chart for the current sky, learn how to read the planetary weather, and find evergreen guidance for working with today’s astro-energies.'
+      subtitle='The current chart, live transits, and how to read today’s sky properly'
+      description='See the current chart for the sky right now, track live planetary positions, and learn how to interpret today’s aspects with real chart-reading structure.'
       keywords={[
         'current transits',
         'transit chart',
         'sky now',
+        'current chart astrology',
         'astrology transits',
         'planetary weather',
       ]}
       canonicalUrl={`${APP_URL}${CANONICAL_PATH}`}
-      intro='Tracking the sky now connects you to cycles that affect timing, moods, and momentum. This page combines the live transit chart with evergreen interpretation so you can understand the planetary story even as the sky updates in real time.'
-      tldr='Bookmark this transit chart, note the retrograde pileups, and focus on one or two major aspects at a time to stay aligned with today’s cosmic weather.'
-      meaning='Transits show how the sky interacts with your natal blueprint. When planets form aspects with each other, their energies blend or tension builds. Together they describe the tone of the day, week, or season; every chart is a snapshot of those unfolding rhythms.'
+      intro='Tracking the sky now is how you learn to read astrology as a living system rather than a pile of isolated interpretations. This page shows the current chart, the active transits, and the structure you need to turn the sky into something readable.'
+      tldr='Read the current chart in order: check the sign positions, note any retrogrades, identify the loudest aspects, and then compare that weather to your natal chart.'
+      meaning={`The current chart is a snapshot of where the planets are right now. It is not your natal chart, but it becomes personally meaningful when these live positions activate your own placements by sign, house, and aspect.
+
+Start simple. First, look at where the Sun and Moon are, because they set the basic tone and daily mood. Next, scan Mercury, Venus, and Mars to understand communication, relating, and action. Then check the slower planets and retrogrades, because they describe the longer background story that makes some periods feel heavier, stranger, or more consequential than others.
+
+The wheel on this page is intentionally a clean current chart rather than a hyper-personalized dashboard. Its job is to teach you how to read the sky itself. Once you can identify the sign placements, retrogrades, and strongest aspects, you can compare that live weather to your birth chart and see what part of your life is actually being stirred.`}
       howToWorkWith={[
+        'Start with the current chart itself before reading any interpretation: where are the Sun, Moon, Mercury, Venus, and Mars?',
         'Look for the major transits near the top of the chart; those define today’s headline energies.',
         'Use the glyphs and aspect labels below to name what feels charged—such as “Sun square Pluto” or “Venus trine Neptune.”',
         'Note which retrograde planets are active and allow them extra time to revisit unfinished business.',
+        'Then compare the live chart to your natal chart to see which houses and placements are being activated personally.',
+      ]}
+      tables={[
+        {
+          title: 'Current chart positions',
+          headers: ['Body', 'Position', 'Motion'],
+          rows: currentChartRows,
+        },
       ]}
       rituals={[
-        'Journal the theme of one highlighted transit.',
-        'Choose an action aligned with the chart’s biggest earth or fire placements to anchor the energy.',
+        'Journal the theme of one highlighted transit and where it lands in your own chart.',
+        'Choose one action that matches the current chart instead of fighting it.',
+      ]}
+      sources={[
+        {
+          name: 'Lunary transit interpretation framework',
+          url: 'https://lunary.app/about/methodology',
+        },
+        {
+          name: 'Astronomy Engine planetary calculations',
+          url: 'https://github.com/cosinekitty/astronomy',
+        },
+        {
+          name: 'Traditional aspect doctrine',
+        },
       ]}
       heroContent={heroContent}
       internalLinks={[
@@ -225,6 +281,14 @@ export default async function SkyNowPage() {
         {
           text: 'Transit tracking guide',
           href: '/grimoire/transits',
+        },
+        {
+          text: 'Houses guide',
+          href: '/grimoire/houses',
+        },
+        {
+          text: 'Planetary placements guide',
+          href: '/grimoire/placements',
         },
       ]}
       internalLinksTitle='Related Grimoire guides'
@@ -239,6 +303,52 @@ export default async function SkyNowPage() {
       }
     >
       <section className='mt-12 space-y-6'>
+        <div className='rounded-2xl border border-white/10 bg-surface-base/60 p-5 text-sm text-content-secondary'>
+          <Heading as='h2' variant='h3'>
+            How to read the current chart
+          </Heading>
+          <div className='mt-4 space-y-3'>
+            <p>
+              Think of this page as your daily chart-reading practice. The
+              current chart tells you the weather. Your natal chart tells you
+              where that weather lands.
+            </p>
+            <ol className='list-decimal pl-5 space-y-2'>
+              <li>
+                Read the current positions table and notice the loudest sign
+                clusters.
+              </li>
+              <li>
+                Check which planets are retrograde, because they change the pace
+                and tone.
+              </li>
+              <li>
+                Look at the major aspects below to see where the tension or flow
+                is concentrated.
+              </li>
+              <li>
+                Then map those live positions onto your natal chart by sign,
+                house, and aspect.
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        {retrogradeBodies.length > 0 && (
+          <div className='rounded-2xl border border-white/10 bg-surface-elevated/60 p-5 text-sm text-content-secondary'>
+            <Heading as='h2' variant='h3'>
+              Retrogrades active now
+            </Heading>
+            <p className='mt-3'>
+              {retrogradeBodies.join(', ')}{' '}
+              {retrogradeBodies.length === 1 ? 'is' : 'are'} currently
+              retrograde. In practical terms, that means the current chart is
+              asking for more review, revision, and reorientation in those
+              planetary topics rather than clean linear momentum.
+            </p>
+          </div>
+        )}
+
         <Heading as='h2' variant='h2'>
           Transit highlights
         </Heading>

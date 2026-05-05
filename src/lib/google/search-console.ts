@@ -20,6 +20,28 @@ export interface SearchConsoleData {
   averagePosition: number;
 }
 
+export interface SearchConsoleQueryRequest {
+  startDate: string;
+  endDate: string;
+  siteUrl?: string;
+  dimensions?: string[];
+  rowLimit?: number;
+  startRow?: number;
+  dimensionFilterGroups?: unknown[];
+  aggregationType?: string;
+  dataState?: string;
+  type?: string;
+  searchType?: string;
+}
+
+export interface SearchConsoleQueryRow {
+  keys: string[];
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+}
+
 /**
  * Get authenticated Google Search Console client
  * Supports both Service Account (preferred) and OAuth2 (fallback)
@@ -81,6 +103,26 @@ async function getSearchConsoleClient() {
   });
 }
 
+function resolvePropertyUrl(siteUrl?: string) {
+  let propertyUrl = siteUrl || process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL || '';
+
+  if (!propertyUrl) {
+    throw new Error(
+      'Missing GOOGLE_SEARCH_CONSOLE_SITE_URL. Set the site URL in environment variables.',
+    );
+  }
+
+  if (
+    propertyUrl.startsWith('https://') &&
+    !propertyUrl.startsWith('sc-domain:')
+  ) {
+    const domain = propertyUrl.replace(/^https?:\/\/(www\.)?/, '');
+    propertyUrl = `sc-domain:${domain}`;
+  }
+
+  return propertyUrl;
+}
+
 /**
  * Fetch search performance data from Google Search Console
  */
@@ -90,23 +132,7 @@ export async function getSearchConsoleData(
   siteUrl?: string,
 ): Promise<SearchConsoleData> {
   const searchConsole = await getSearchConsoleClient();
-  let propertyUrl = siteUrl || process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL || '';
-
-  if (!propertyUrl) {
-    throw new Error(
-      'Missing GOOGLE_SEARCH_CONSOLE_SITE_URL. Set the site URL in environment variables.',
-    );
-  }
-
-  // Convert https://domain.com to sc-domain:domain.com if needed
-  // Search Console domain properties use sc-domain: prefix
-  if (
-    propertyUrl.startsWith('https://') &&
-    !propertyUrl.startsWith('sc-domain:')
-  ) {
-    const domain = propertyUrl.replace(/^https?:\/\/(www\.)?/, '');
-    propertyUrl = `sc-domain:${domain}`;
-  }
+  const propertyUrl = resolvePropertyUrl(siteUrl);
 
   try {
     const response = await searchConsole.searchanalytics.query({
@@ -211,22 +237,7 @@ export async function getTopQueries(
   siteUrl?: string,
 ) {
   const searchConsole = await getSearchConsoleClient();
-  let propertyUrl = siteUrl || process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL || '';
-
-  if (!propertyUrl) {
-    throw new Error(
-      'Missing GOOGLE_SEARCH_CONSOLE_SITE_URL. Set the site URL in environment variables.',
-    );
-  }
-
-  // Convert https://domain.com to sc-domain:domain.com if needed
-  if (
-    propertyUrl.startsWith('https://') &&
-    !propertyUrl.startsWith('sc-domain:')
-  ) {
-    const domain = propertyUrl.replace(/^https?:\/\/(www\.)?/, '');
-    propertyUrl = `sc-domain:${domain}`;
-  }
+  const propertyUrl = resolvePropertyUrl(siteUrl);
 
   try {
     const response = await searchConsole.searchanalytics.query({
@@ -278,22 +289,7 @@ export async function getTopPages(
   siteUrl?: string,
 ) {
   const searchConsole = await getSearchConsoleClient();
-  let propertyUrl = siteUrl || process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL || '';
-
-  if (!propertyUrl) {
-    throw new Error(
-      'Missing GOOGLE_SEARCH_CONSOLE_SITE_URL. Set the site URL in environment variables.',
-    );
-  }
-
-  // Convert https://domain.com to sc-domain:domain.com if needed
-  if (
-    propertyUrl.startsWith('https://') &&
-    !propertyUrl.startsWith('sc-domain:')
-  ) {
-    const domain = propertyUrl.replace(/^https?:\/\/(www\.)?/, '');
-    propertyUrl = `sc-domain:${domain}`;
-  }
+  const propertyUrl = resolvePropertyUrl(siteUrl);
 
   try {
     const response = await searchConsole.searchanalytics.query({
@@ -333,6 +329,96 @@ export async function getTopPages(
       `Google Search Console API error (pages): ${googleError.message || 'Unknown error'}`,
     );
   }
+}
+
+/**
+ * Run a native Search Console query with arbitrary dimensions and filters.
+ * This intentionally mirrors the Google Search Console searchanalytics.query
+ * request shape instead of a pre-digested summary.
+ */
+export async function querySearchConsole(
+  request: SearchConsoleQueryRequest,
+): Promise<{
+  startDate: string;
+  endDate: string;
+  siteUrl: string;
+  dimensions: string[];
+  rowLimit: number;
+  startRow: number;
+  aggregationType?: string;
+  dataState?: string;
+  type?: string;
+  rows: SearchConsoleQueryRow[];
+  totals: {
+    clicks: number;
+    impressions: number;
+    ctr: number;
+    position: number;
+  };
+}> {
+  const searchConsole = await getSearchConsoleClient();
+  const propertyUrl = resolvePropertyUrl(request.siteUrl);
+  const dimensions =
+    Array.isArray(request.dimensions) && request.dimensions.length > 0
+      ? request.dimensions
+      : ['query'];
+  const rowLimit =
+    typeof request.rowLimit === 'number' && Number.isFinite(request.rowLimit)
+      ? Math.max(1, Math.min(request.rowLimit, 25000))
+      : 1000;
+  const startRow =
+    typeof request.startRow === 'number' && Number.isFinite(request.startRow)
+      ? Math.max(0, request.startRow)
+      : 0;
+  const type = request.type || request.searchType || 'web';
+
+  const response = await searchConsole.searchanalytics.query({
+    siteUrl: propertyUrl,
+    requestBody: {
+      startDate: request.startDate,
+      endDate: request.endDate,
+      dimensions,
+      rowLimit,
+      startRow,
+      type,
+      aggregationType: request.aggregationType,
+      dataState: request.dataState,
+      dimensionFilterGroups: request.dimensionFilterGroups as any,
+    },
+  });
+
+  const rows = (response.data.rows || []).map((row) => ({
+    keys: row.keys || [],
+    clicks: row.clicks || 0,
+    impressions: row.impressions || 0,
+    ctr: row.ctr || 0,
+    position: row.position || 0,
+  }));
+  const totalsClicks = rows.reduce((sum, row) => sum + row.clicks, 0);
+  const totalsImpressions = rows.reduce((sum, row) => sum + row.impressions, 0);
+  const totalsPosition =
+    rows.length > 0
+      ? rows.reduce((sum, row) => sum + row.position, 0) / rows.length
+      : 0;
+
+  return {
+    startDate: request.startDate,
+    endDate: request.endDate,
+    siteUrl: propertyUrl,
+    dimensions,
+    rowLimit,
+    startRow,
+    aggregationType: request.aggregationType,
+    dataState: request.dataState,
+    type,
+    rows,
+    totals: {
+      clicks: totalsClicks,
+      impressions: totalsImpressions,
+      ctr: totalsImpressions > 0 ? totalsClicks / totalsImpressions : 0,
+      position: totalsPosition,
+    },
+  };
 }
 
 // ============================================

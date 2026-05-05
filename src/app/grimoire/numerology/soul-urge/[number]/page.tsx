@@ -6,8 +6,11 @@ import { soulUrgeNumbers } from '@/constants/grimoire/numerology-extended-data';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return Object.keys(soulUrgeNumbers).map((number) => ({ number }));
+}
 
 export async function generateMetadata({
   params,
@@ -114,7 +117,11 @@ ${numberData.motivations.map((m) => `- ${m}`).join('\n')}
 
 **In Relationships**
 
-${numberData.inRelationships}`}
+${numberData.inRelationships}
+
+### How Lunary Calculates Soul Urge Number ${number}
+
+Lunary calculates the Soul Urge Number from the vowels in the birth name only. Those vowels are converted into numerological values, summed, and reduced unless a master number is preserved. That is why Soul Urge reads differently from Expression Number: it is designed to isolate private motivation rather than public style.`}
         emotionalThemes={numberData.keywords}
         howToWorkWith={[
           `Honor your soul's desire for ${numberData.desires[0].toLowerCase()}`,
@@ -162,6 +169,15 @@ ${numberData.inRelationships}`}
           { text: 'Explore Numerology', href: '/grimoire/numerology' },
           { text: 'Expression Numbers', href: '/grimoire/numerology' },
           { text: 'Grimoire Home', href: '/grimoire' },
+        ]}
+        sources={[
+          {
+            name: 'Lunary numerology calculation method',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Pythagorean numerology tradition',
+          },
         ]}
         ctaText='Want personalized numerology insights?'
         ctaHref='/pricing'

@@ -56,6 +56,17 @@ export function invalidateAuthCache() {
   authPromise = null;
 }
 
+export function primeAuthenticatedAuthCache(user: any) {
+  if (!user) return;
+  cachedAuthState = {
+    isAuthenticated: true,
+    user,
+    profile: user,
+    loading: false,
+  };
+  authPromise = Promise.resolve(cachedAuthState);
+}
+
 interface AuthStatusProviderProps {
   children: ReactNode;
   demoData?: {
@@ -228,7 +239,7 @@ export function AuthStatusProvider({
     return () => {
       isMounted = false;
     };
-  }, [refreshTrigger]);
+  }, [isDemoMode, refreshTrigger]);
 
   return (
     <AuthContext.Provider value={{ ...authState, refreshAuth, signOut }}>

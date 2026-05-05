@@ -231,6 +231,8 @@ ${planetData.properties}
 
 ${planetData.mysticalProperties}
 
+When you read a planet in a chart, start with the planet before the sign. The planet tells you what part of life or psyche is being described. The sign shows how that function behaves. The house shows where it lands in lived experience. The aspects show what helps or pressures it. That means ${planetData.name} should never be read as a floating keyword on its own.
+
 Understanding ${planetData.name}'s influence helps you work with its energy consciously. Whether ${planetData.name} is prominent in your birth chart or you're working with planetary timing, knowing its qualities enhances your astrological practice.
 
 ${planetData.name} rules ${correspondences.day}, making this day ideal for activities aligned with its themes. The planet's energy influences ${correspondences.themes.join(', ').toLowerCase()}, and working with its correspondences can amplify your intentions.
@@ -242,8 +244,8 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
           `Plan ${correspondences.themes[0]?.toLowerCase() || 'related'} activities for ${correspondences.day}`,
           `Use ${correspondences.colors.join(', ')} colors in rituals`,
           `Invoke ${planetData.name} for ${correspondences.themes.join(', ').toLowerCase()}`,
-          `Study ${planetData.name} in your birth chart`,
-          `Track ${planetData.name}'s transits`,
+          `Study ${planetData.name} in your birth chart by sign, house, and aspect`,
+          `Track ${planetData.name}'s transits against your natal chart to see when its themes get activated`,
         ]}
         tables={[
           {
@@ -276,7 +278,11 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
             href: '/grimoire/astronomy',
             type: 'Guide',
           },
-          { name: 'Birth Chart', href: '/birth-chart', type: 'Tool' },
+          {
+            name: 'Birth Chart',
+            href: '/grimoire/birth-chart',
+            type: 'Guide',
+          },
         ]}
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
@@ -287,13 +293,27 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
           },
         ]}
         internalLinks={[
-          { text: 'View Your Birth Chart', href: '/birth-chart' },
+          { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
+          { text: 'Planetary Placements', href: '/grimoire/placements' },
+          { text: 'Houses Guide', href: '/grimoire/houses' },
+          { text: 'Transits Guide', href: '/grimoire/transits' },
           { text: 'Astronomy Guide', href: '/grimoire/astronomy' },
-          { text: 'Zodiac Signs', href: '/grimoire/zodiac' },
-          { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText={`Discover ${planetData.name} in your birth chart`}
-        ctaHref='/pricing'
+        ctaHref='/birth-chart'
+        sources={[
+          {
+            name: 'Lunary planetary interpretation framework',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Astronomy Engine planetary calculations',
+            url: 'https://github.com/cosinekitty/astronomy',
+          },
+          {
+            name: 'Traditional planetary rulership and dignity doctrine',
+          },
+        ]}
         faqs={faqs}
         cosmicConnections={
           <CosmicConnections

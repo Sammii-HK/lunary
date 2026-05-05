@@ -9,18 +9,24 @@ import {
   getOrdinalSuffix,
   HousePlanet,
   House,
+  generateAllHouseParams,
 } from '@/constants/seo/houses';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+export const dynamicParams = false;
 interface PageParams {
   slug: string;
   house: string;
 }
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return generateAllHouseParams().map(({ planet, house }) => ({
+    slug: planet,
+    house,
+  }));
+}
 
 export async function generateMetadata({
   params,
@@ -156,7 +162,13 @@ The ${ordinal} House is naturally associated with ${houseData.naturalSign} and r
       ]}
       ctaText='Find your house placements'
       ctaHref='/birth-chart'
-      sources={[{ name: 'Traditional house meanings' }]}
+      sources={[
+        {
+          name: 'Lunary house placement interpretation framework',
+          url: 'https://lunary.app/about/methodology',
+        },
+        { name: 'Traditional house meanings' },
+      ]}
     >
       <div className='mt-8'>
         <h3 className='text-lg font-medium mb-4'>

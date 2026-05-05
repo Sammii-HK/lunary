@@ -38,6 +38,16 @@ const ASPECT_COLOR: Record<
   },
 };
 
+const ASPECT_TYPE_SLUGS: Record<(typeof ASPECTS)[number], string> = {
+  conjunct: 'conjunction',
+  sextile: 'sextile',
+  square: 'square',
+  trine: 'trine',
+  opposite: 'opposition',
+  quincunx: 'quincunx',
+  semisextile: 'semisextile',
+};
+
 export const metadata: Metadata = {
   title:
     'Astrological Aspects: Meanings of Conjunction, Trine, Square and More | Lunary',
@@ -96,7 +106,7 @@ export default function AspectsIndexPage() {
     url: 'https://lunary.app/grimoire/aspects',
     items: ASPECTS.map((aspect) => ({
       name: ASPECT_DATA[aspect].displayName,
-      url: `https://lunary.app/grimoire/aspects/types/${aspect}`,
+      url: `https://lunary.app/grimoire/aspects/types/${ASPECT_TYPE_SLUGS[aspect]}`,
       description: `${ASPECT_DATA[aspect].degrees}° - ${ASPECT_DATA[aspect].keywords.join(', ')}`,
     })),
   });
@@ -124,8 +134,21 @@ export default function AspectsIndexPage() {
           energies interact. From harmonious trines to challenging squares, each
           aspect tells a unique story.
         </p>
+        <div className='max-w-3xl space-y-3 text-content-muted mb-10'>
+          <p>
+            The mistake people make with aspects is treating the symbol as the
+            whole interpretation. It isn&apos;t. An aspect tells you how two
+            planets relate. The planets tell you what is relating. The houses
+            tell you where it lands. That is why the same square can feel
+            completely different in two charts.
+          </p>
+          <p className='text-sm'>
+            Sources: Lunary aspect interpretation framework, traditional aspect
+            doctrine, Astronomy Engine planetary calculations.
+          </p>
+        </div>
 
-        <h2 className='text-2xl font-light mb-6'>The Five Major Aspects</h2>
+        <h2 className='text-2xl font-light mb-6'>Aspect Degrees</h2>
         <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12'>
           {ASPECTS.map((aspect) => {
             const data = ASPECT_DATA[aspect];
@@ -176,6 +199,18 @@ export default function AspectsIndexPage() {
           })}
         </div>
 
+        <div className='mb-12 p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/40'>
+          <h2 className='text-xl font-medium mb-3'>How to read an aspect</h2>
+          <ul className='list-disc pl-5 space-y-2 text-content-secondary'>
+            <li>Identify the two planets involved.</li>
+            <li>Check which houses those planets occupy.</li>
+            <li>Notice whether the aspect is supportive, tense, or mixed.</li>
+            <li>
+              Judge repetition: one aspect matters, but a pattern matters more.
+            </li>
+          </ul>
+        </div>
+
         <h2 className='text-2xl font-light mb-6'>
           Explore Planet Combinations
         </h2>
@@ -183,7 +218,7 @@ export default function AspectsIndexPage() {
           {PLANETS.slice(0, 6).map((planet) => (
             <Link
               key={planet}
-              href={`/grimoire/aspects/${planet}/conjunct/${PLANETS.find((p) => p !== planet) || 'moon'}`}
+              href={`/grimoire/aspects/${planet}`}
               className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
             >
               <div className='text-3xl mb-2'>{PLANET_SYMBOLS[planet]}</div>
@@ -206,11 +241,31 @@ export default function AspectsIndexPage() {
             planetary energies interact.
           </p>
           <Link
-            href='/birth-chart'
+            href='/grimoire/birth-chart'
             className='inline-flex px-6 py-3 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
           >
             View Your Birth Chart
           </Link>
+          <div className='mt-4 flex flex-wrap gap-3 text-sm'>
+            <Link
+              href='/grimoire/placements'
+              className='text-content-muted hover:text-content-secondary'
+            >
+              Placements
+            </Link>
+            <Link
+              href='/grimoire/houses'
+              className='text-content-muted hover:text-content-secondary'
+            >
+              Houses
+            </Link>
+            <Link
+              href='/grimoire/transits'
+              className='text-content-muted hover:text-content-secondary'
+            >
+              Transits
+            </Link>
+          </div>
         </div>
         <ExploreGrimoire />
       </div>

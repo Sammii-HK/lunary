@@ -31,6 +31,10 @@ export const metadata: Metadata = {
       'Countdown, Product Hunt prep, press kit, and cosmic launch activations in one place.',
     images: ['/api/og/cosmic'],
   },
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 const timeline = [

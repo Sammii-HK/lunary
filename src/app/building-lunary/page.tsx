@@ -12,6 +12,10 @@ export const metadata: Metadata = {
       'Watch the episode list, get BTS notes, and subscribe for new drops.',
     url: 'https://lunary.app/building-lunary',
   },
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 const episodes = [

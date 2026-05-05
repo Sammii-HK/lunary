@@ -1,28 +1,30 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Free Grimoire [500+ Spells, Crystals, Tarot & More] | Lunary',
+  title:
+    'Astrology Grimoire: Birth Charts, Planets, Houses & Transits | Lunary',
   description:
-    'Complete digital grimoire with 78 tarot cards, 50+ crystals, 24 runes, 12 zodiac signs, moon phases, candle magic & correspondences. Free access to centuries of mystical knowledge.',
+    'Learn astrology through birth charts, planets, houses, aspects, decans, moon phases, zodiac signs, and transit timing grounded in astronomical calculations.',
   keywords: [
-    'grimoire',
-    'digital grimoire',
-    'book of shadows',
-    'tarot meanings',
-    'crystal guide',
-    'rune meanings',
+    'astrology grimoire',
+    'birth chart guide',
+    'chart reading',
+    'astrology houses',
+    'astrology aspects',
+    'planetary transits',
+    'decans astrology',
     'moon phases',
-    'candle magic',
-    'magical correspondences',
-    'witchcraft guide',
+    'zodiac signs',
+    'astrology learning',
   ],
   authors: [{ name: 'Lunary' }],
   creator: 'Lunary',
   publisher: 'Lunary',
   openGraph: {
-    title: 'Free Grimoire [500+ Spells, Crystals, Tarot & More] | Lunary',
+    title:
+      'Astrology Grimoire: Birth Charts, Planets, Houses & Transits | Lunary',
     description:
-      'Complete digital grimoire with 78 tarot cards, 50+ crystals, 24 runes, moon phases, candle magic & correspondences. Free access.',
+      'Learn astrology through birth charts, planets, houses, aspects, decans, moon phases, zodiac signs, and transit timing.',
     url: 'https://lunary.app/grimoire',
     siteName: 'Lunary',
     images: [
@@ -30,7 +32,7 @@ export const metadata: Metadata = {
         url: '/api/og/grimoire',
         width: 1200,
         height: 630,
-        alt: 'Lunary Grimoire - 500+ Spells, Crystals, Tarot & More',
+        alt: 'Lunary Astrology Grimoire - Birth Charts, Planets, Houses and Transits',
       },
     ],
     locale: 'en_US',
@@ -38,9 +40,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Grimoire [500+ Spells, Crystals, Tarot & More] | Lunary',
+    title:
+      'Astrology Grimoire: Birth Charts, Planets, Houses & Transits | Lunary',
     description:
-      '78 tarot cards, 50+ crystals, 24 runes, moon phases, candle magic & correspondences. Complete digital grimoire.',
+      'Birth charts, planets, houses, aspects, decans, moon phases, zodiac signs, and transit timing.',
     images: ['/api/og/grimoire'],
   },
   alternates: {

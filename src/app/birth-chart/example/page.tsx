@@ -24,6 +24,17 @@ export const metadata: Metadata = {
     url: 'https://lunary.app/birth-chart/example',
   },
   alternates: { canonical: 'https://lunary.app/birth-chart/example' },
+  robots: {
+    index: false,
+    follow: true,
+    googleBot: {
+      index: false,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 const faqs = [

@@ -214,6 +214,8 @@ ${signData.mysticalProperties}
 
 The ${signData.name} personality is characterized by a ${quality.toLowerCase()} quality, meaning ${qualityDescriptions[quality].toLowerCase()} This influences how ${signData.name} individuals approach life, relationships, and their goals.
 
+In chart reading, a zodiac sign is not a full personality reading on its own. ${signData.name} describes a style of expression. You still need to ask which planet is in ${signData.name}, which house it lands in, what its ruler is doing, and whether decans or major aspects modify the picture. That is why a ${signData.name} Sun, ${signData.name} Moon, and ${signData.name} Rising can all feel different while still sharing the same underlying sign language.
+
 In relationships, ${signData.name} brings ${signData.element === 'Fire' ? 'passion and enthusiasm' : signData.element === 'Earth' ? 'stability and reliability' : signData.element === 'Air' ? 'intellectual connection and communication' : 'emotional depth and intuition'}. They value ${signData.element === 'Fire' ? 'independence and adventure' : signData.element === 'Earth' ? 'security and comfort' : signData.element === 'Air' ? 'freedom and mental stimulation' : 'emotional connection and understanding'}.
 
 In career and life purpose, ${signData.name} individuals excel in areas that allow them to express their ${signData.element.toLowerCase()} nature. They are drawn to ${signData.element === 'Fire' ? 'leadership roles, creative fields, and entrepreneurial ventures' : signData.element === 'Earth' ? 'practical careers, financial management, and hands-on work' : signData.element === 'Air' ? 'communication, technology, and intellectual pursuits' : 'healing, creative arts, and intuitive work'}.
@@ -265,11 +267,6 @@ Tarot Card: ${signData.tarotCard}`}
             href: '/grimoire/birth-chart',
             type: 'Guide',
           },
-          {
-            name: 'Horoscope',
-            href: '/horoscope',
-            type: 'Daily Reading',
-          },
         ]}
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
@@ -281,8 +278,8 @@ Tarot Card: ${signData.tarotCard}`}
         ]}
         internalLinks={[
           {
-            text: `${signData.name} Daily Horoscope`,
-            href: `/grimoire/horoscopes/${signKey.toLowerCase()}`,
+            text: 'Birth Chart Guide',
+            href: '/grimoire/birth-chart',
           },
           {
             text: `${signData.name} Rising Sign`,
@@ -293,17 +290,30 @@ Tarot Card: ${signData.tarotCard}`}
             href: `/grimoire/moon-in/${signKey.toLowerCase()}`,
           },
           {
-            text: `${signData.name} Compatibility`,
-            href: `/grimoire/compatibility/${signKey.toLowerCase()}`,
+            text: `${signData.name} Decans`,
+            href: `/grimoire/decans/${signKey.toLowerCase()}`,
           },
           {
-            text: `${signData.name} Crystals`,
-            href: `/grimoire/crystals?sign=${signKey.toLowerCase()}`,
+            text: `${signData.name} Placements`,
+            href: '/grimoire/placements',
           },
           { text: 'All Zodiac Signs', href: '/grimoire/zodiac' },
         ]}
-        ctaText={`Want personalized insights for your ${signData.name} chart?`}
-        ctaHref='/pricing'
+        ctaText={`Build your ${signData.name} chart properly`}
+        ctaHref='/birth-chart'
+        sources={[
+          {
+            name: 'Lunary zodiac interpretation framework',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Traditional zodiac sign and rulership doctrine',
+          },
+          {
+            name: 'Astronomy Engine planetary calculation library',
+            url: 'https://github.com/cosinekitty/astronomy',
+          },
+        ]}
         faqs={faqs}
         components={<PlacementSelector signName={signData.name} />}
         cosmicConnections={

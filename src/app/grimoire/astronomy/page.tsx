@@ -149,15 +149,15 @@ Planets represent different aspects of life and consciousness. Each planet rules
 
 Zodiac signs represent twelve archetypal energies that influence personality, behavior, and life experiences. Each sign belongs to an element (Fire, Earth, Air, Water) and a quality (Cardinal, Fixed, Mutable), creating a complex system of correspondences that enhances magical work.
 
-Working with planetary and zodiac energies creates powerful alignment between your intentions and cosmic forces, amplifying the effectiveness of your magical practice.'
+Working with planetary and zodiac energies creates powerful alignment between your intentions and cosmic forces, amplifying the effectiveness of your magical practice.
+
+For Lunary, the useful bridge between astronomy and astrology is chart reading. Astronomy gives you the positions. Astrology gives you the interpretive framework. A useful reading asks: what planet is active, what sign styles that energy, what house shows the life area, and what aspects describe the relationship between factors in the chart.'
         howToWorkWith={[
-          'Learn planetary correspondences for timing spells',
-          'Use zodiac signs to understand energy influences',
-          'Align spellwork with planetary days and hours',
-          'Work with planetary retrogrades consciously',
-          'Use zodiac sign correspondences in spell ingredients',
-          'Track planetary transits for optimal timing',
-          'Combine planetary and zodiac energies for power',
+          'Learn planetary correspondences for timing and interpretation, not just keywords',
+          'Use zodiac signs to understand the style of energy expression',
+          'Study houses to see where a planetary theme lands in real life',
+          'Track planetary transits for timing and compare them back to your natal chart',
+          'Use correspondences as support, not a substitute for chart structure',
           'Study your birth chart for personal correspondences',
         ]}
         faqs={[
@@ -179,12 +179,23 @@ Working with planetary and zodiac energies creates powerful alignment between yo
         ]}
         internalLinks={[
           { text: 'Birth Chart', href: '/grimoire/birth-chart' },
+          { text: 'Planetary Placements', href: '/grimoire/placements' },
+          { text: 'Houses Guide', href: '/grimoire/houses' },
+          { text: 'Transits Guide', href: '/grimoire/transits' },
           { text: 'Moon Phases', href: '/grimoire/moon' },
+        ]}
+        sources={[
           {
-            text: 'Magical Correspondences',
-            href: '/grimoire/correspondences',
+            name: 'Lunary chart-reading methodology',
+            url: 'https://lunary.app/about/methodology',
           },
-          { text: 'Spells & Rituals', href: '/grimoire/spells' },
+          {
+            name: 'Astronomy Engine planetary calculations',
+            url: 'https://github.com/cosinekitty/astronomy',
+          },
+          {
+            name: 'Traditional planetary, sign, and house doctrine',
+          },
         ]}
       />
       <div className='max-w-4xl mx-auto p-4'>

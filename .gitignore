@@ -79,6 +79,7 @@ android/key.properties
 
 # Claude
 .claude/plans
+.claude/worktrees/
 .claude/TROUBLESHOOTING.md
 ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
 .temp-sitemaps/

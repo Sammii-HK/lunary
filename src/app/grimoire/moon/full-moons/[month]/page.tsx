@@ -7,9 +7,11 @@ import { annualFullMoons } from '@/constants/moon/annualFullMoons';
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 const monthKeys = Object.keys(annualFullMoons);
+export const dynamicParams = false;
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return monthKeys.map((month) => ({ month: month.toLowerCase() }));
+}
 
 export async function generateMetadata({
   params,
@@ -184,6 +186,15 @@ Understanding the ${moonData.name}'s energy helps you plan meaningful rituals an
           { text: 'All Moon Phases', href: '/grimoire/moon' },
           { text: 'Moon Rituals', href: '/grimoire/moon/rituals' },
           { text: 'Grimoire Home', href: '/grimoire' },
+        ]}
+        sources={[
+          {
+            name: 'Lunary full moon interpretation framework',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Traditional full moon naming traditions',
+          },
         ]}
         ctaText={`Want personalized full moon insights?`}
         ctaHref='/pricing'

@@ -86,6 +86,18 @@ export default function ZodiacIndexPage() {
         }}
         tldr='The zodiac has 12 signs divided by elements (Fire, Earth, Air, Water) and modalities (Cardinal, Fixed, Mutable). Each sign has unique traits, a ruling planet, and represents different life themes. Your Sun sign is determined by your birth date.'
         intro='The zodiac is divided into 12 signs, each with unique personality traits, strengths, and challenges. Signs are grouped by element (Fire, Earth, Air, Water) which describes their core nature, and modality (Cardinal, Fixed, Mutable) which describes how they express energy. Understanding your Sun sign is just the beginning — your full birth chart reveals how all 12 signs influence different areas of your life.'
+        meaning='The zodiac signs are not twelve personality boxes. They are twelve styles of expression. In real chart reading, the sign tells you how a planet behaves, not what the whole person is. That is why the same sign can feel different when it appears as a Sun sign, Moon sign, Rising sign, chart ruler, or house cusp.
+
+Elements describe the basic temperament of a sign: Fire acts, Earth stabilizes, Air thinks, and Water feels. Modalities describe how the sign moves: Cardinal initiates, Fixed sustains, and Mutable adapts. Once you understand those two layers, the signs stop being random trait lists and start becoming a usable interpretation framework.
+
+Lunary uses the zodiac as one layer in a bigger method: planet first, sign second, house third, aspect fourth. That order is what turns astrology from generic sign content into actual chart reading.'
+        howToWorkWith={[
+          'Start with the sign as a style of expression, not the entire reading.',
+          'Pair every sign with the planet occupying it or ruling it.',
+          'Use element and modality first before reaching for generic sign stereotypes.',
+          'Check decans and house placement when you need more precision.',
+          'Compare Sun, Moon, and Rising versions of the same sign to understand how context changes meaning.',
+        ]}
         faqs={[
           {
             question: 'What are the four elements in astrology?',
@@ -104,7 +116,7 @@ export default function ZodiacIndexPage() {
           },
         ]}
         relatedItems={[
-          { name: 'Birth Chart', href: '/birth-chart', type: 'tool' },
+          { name: 'Birth Chart', href: '/grimoire/birth-chart', type: 'guide' },
           {
             name: '2026 Horoscopes',
             href: '/grimoire/horoscopes',
@@ -120,6 +132,26 @@ export default function ZodiacIndexPage() {
             name: 'Compatibility',
             href: '/grimoire/compatibility',
             type: 'topic',
+          },
+        ]}
+        internalLinks={[
+          { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
+          { text: 'Rising Signs', href: '/grimoire/rising' },
+          { text: 'Moon in Signs', href: '/grimoire/moon-in' },
+          { text: 'Decans', href: '/grimoire/decans' },
+          { text: 'Planetary Placements', href: '/grimoire/placements' },
+        ]}
+        sources={[
+          {
+            name: 'Lunary zodiac interpretation framework',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Traditional zodiac sign and rulership doctrine',
+          },
+          {
+            name: 'Astronomy Engine planetary calculations',
+            url: 'https://github.com/cosinekitty/astronomy',
           },
         ]}
       >
@@ -226,9 +258,29 @@ export default function ZodiacIndexPage() {
             </div>
           </section>
 
+          <section className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/40'>
+            <h2 className='text-xl font-medium text-content-primary mb-4'>
+              How to use signs in a real chart
+            </h2>
+            <ul className='list-disc pl-5 space-y-2 text-sm text-content-muted'>
+              <li>
+                Read the planet first, then let the sign describe its style.
+              </li>
+              <li>Use the house to see where that sign expression shows up.</li>
+              <li>
+                Use the ruler of the sign to trace the story elsewhere in the
+                chart.
+              </li>
+              <li>
+                Use decans when two people share a sign but still feel
+                different.
+              </li>
+            </ul>
+          </section>
+
           <section className='text-center'>
             <Link
-              href='/birth-chart'
+              href='/grimoire/birth-chart'
               className='inline-flex px-6 py-3 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
             >
               View Your Birth Chart

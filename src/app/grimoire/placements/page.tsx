@@ -121,6 +121,20 @@ export default function PlacementsIndexPage() {
             combination to learn about its influence on personality, strengths,
             and challenges.
           </p>
+          <div className='mt-4 max-w-3xl space-y-3 text-content-muted'>
+            <p>
+              A placement is never just a sign keyword. The useful reading is:
+              what planet is this, what does that planet govern, how does this
+              sign shape its style, and which house or aspect changes the
+              result? Lunary treats planet-in-sign pages as one layer of a full
+              chart reading, not the whole reading.
+            </p>
+            <p className='text-sm'>
+              Sources: Lunary placement interpretation framework, Astronomy
+              Engine planetary calculations, traditional planetary dignity and
+              sign doctrine.
+            </p>
+          </div>
         </header>
 
         <nav className='mb-8 overflow-x-auto'>
@@ -218,6 +232,20 @@ export default function PlacementsIndexPage() {
           </div>
         </section>
 
+        <section className='mt-12 p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/40'>
+          <h2 className='text-xl font-medium text-content-primary mb-3'>
+            How to read placements properly
+          </h2>
+          <ul className='list-disc pl-5 space-y-2 text-content-secondary'>
+            <li>Planet = what part of life or psyche is being described.</li>
+            <li>Sign = the style, temperament, and strategy of expression.</li>
+            <li>House = where that story shows up in real life.</li>
+            <li>
+              Aspects = what supports, pressures, or complicates the placement.
+            </li>
+          </ul>
+        </section>
+
         <section className='mt-12 mb-12'>
           <h2 className='text-2xl font-light mb-6'>
             Frequently Asked Questions
@@ -248,6 +276,26 @@ export default function PlacementsIndexPage() {
             Generate your complete birth chart to see all your planetary
             placements
           </p>
+          <div className='mt-4 flex flex-wrap items-center justify-center gap-3 text-sm'>
+            <Link
+              href='/grimoire/houses'
+              className='text-content-muted hover:text-content-secondary'
+            >
+              Houses Guide
+            </Link>
+            <Link
+              href='/grimoire/rising'
+              className='text-content-muted hover:text-content-secondary'
+            >
+              Rising Signs
+            </Link>
+            <Link
+              href='/grimoire/decans'
+              className='text-content-muted hover:text-content-secondary'
+            >
+              Decans
+            </Link>
+          </div>
         </section>
 
         <div className='mt-8'>

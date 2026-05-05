@@ -147,6 +147,12 @@ export default function RetrogradesIndexPage() {
             retrograde. Each planet&apos;s retrograde brings opportunities for
             review, reflection, and revision.
           </p>
+          <p className='text-content-muted max-w-3xl mx-auto mt-4'>
+            Retrograde is not a random curse word. It is a timing condition. To
+            read it well, ask which planet is retrograde, what that planet rules
+            in astrology, which sign it is retracing, and where it falls in your
+            chart. That tells you what is being reviewed and why.
+          </p>
         </div>
 
         <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-10'>
@@ -163,6 +169,24 @@ export default function RetrogradesIndexPage() {
             Rather than fearing retrogrades, use them as opportunities to
             revisit, revise, and reflect on the themes each planet represents.
           </p>
+          <p className='text-sm text-content-muted mt-4'>
+            Sources: Lunary transit interpretation framework, Astronomy Engine
+            planetary calculations, traditional retrograde doctrine.
+          </p>
+        </div>
+
+        <div className='mb-12 p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/40'>
+          <h2 className='text-xl font-medium text-content-primary mb-3'>
+            How to read a retrograde in your chart
+          </h2>
+          <ul className='list-disc pl-5 space-y-2 text-content-secondary'>
+            <li>Start with the retrograde planet and what it governs.</li>
+            <li>Check the sign for the style of review or reworking.</li>
+            <li>Map it onto the natal house it is activating.</li>
+            <li>
+              Then look at aspects to your natal planets for the real story.
+            </li>
+          </ul>
         </div>
 
         <section className='mb-12'>
@@ -220,16 +244,16 @@ export default function RetrogradesIndexPage() {
               Astronomy
             </Link>
             <Link
-              href='/grimoire/events'
+              href='/grimoire/astrology/sky-now'
               className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
-              Astrological Events
+              Sky Now
             </Link>
             <Link
-              href='/grimoire/horoscopes'
+              href='/grimoire/birth-chart'
               className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
-              Horoscopes
+              Birth Chart Guide
             </Link>
           </div>
         </div>

@@ -6,13 +6,16 @@ import {
 // Must match the range in grimoire/transits/year/[year]/page.tsx
 const START_YEAR = 2025;
 const CURRENT_YEAR = new Date().getFullYear();
-const END_YEAR = CURRENT_YEAR + 1;
+const END_YEAR = Math.max(CURRENT_YEAR + 2, START_YEAR + 2);
 
 export async function GET(): Promise<Response> {
   const baseUrl = 'https://lunary.app';
-  const currentYear = new Date().getFullYear();
-  const stableMonthStamp = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`;
-  const transits = generateAllTransitParams();
+  const transits = generateAllTransitParams().filter((entry) => {
+    const yearMatch = entry.transit.match(/(\d{4})$/);
+    if (!yearMatch) return false;
+    const year = Number(yearMatch[1]);
+    return year >= START_YEAR && year <= END_YEAR;
+  });
 
   // Filter years to only include those the page actually renders
   // (avoids sitemap entries that return 404/soft-404)
@@ -23,21 +26,21 @@ export async function GET(): Promise<Response> {
   const urls = [
     {
       loc: `${baseUrl}/grimoire/transits`,
-      lastmod: stableMonthStamp,
+      lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'monthly',
       priority: '0.8',
     },
     ...transits.map((t) => ({
       loc: `${baseUrl}/grimoire/transits/${t.transit}`,
-      lastmod: stableMonthStamp,
+      lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'yearly',
-      priority: '0.6',
+      priority: '0.7',
     })),
     ...validYears.map((year) => ({
       loc: `${baseUrl}/grimoire/transits/year/${year}`,
-      lastmod: stableMonthStamp,
+      lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'yearly',
-      priority: '0.6',
+      priority: '0.7',
     })),
   ];
 

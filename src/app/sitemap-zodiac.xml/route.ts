@@ -3,7 +3,10 @@ import { zodiacSigns } from '../../../utils/zodiac/zodiac';
 const baseUrl = 'https://lunary.app';
 
 export async function GET() {
-  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const stableMonthStamp = `${now.getFullYear()}-${String(
+    now.getMonth() + 1,
+  ).padStart(2, '0')}-01`;
 
   const zodiacSignKeys = Object.keys(zodiacSigns);
 
@@ -13,9 +16,9 @@ export async function GET() {
       return `
     <url>
       <loc>${baseUrl}/grimoire/zodiac/${sign.toLowerCase()}</loc>
-      <lastmod>${today}</lastmod>
+      <lastmod>${stableMonthStamp}</lastmod>
       <changefreq>monthly</changefreq>
-      <priority>0.8</priority>
+      <priority>0.6</priority>
     </url>`;
     })
     .join('');

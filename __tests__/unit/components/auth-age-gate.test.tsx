@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event';
 
 const mockSignUp = jest.fn();
 const mockSignIn = jest.fn();
+const mockPrimeAuthenticatedAuthCache = jest.fn();
+const mockReplaceBrowserLocation = jest.fn();
 
 jest.mock('@/lib/auth-client', () => ({
   betterAuthClient: {
@@ -20,6 +22,8 @@ jest.mock('@/components/AuthStatus', () => ({
     refreshAuth: jest.fn(),
   }),
   invalidateAuthCache: jest.fn(),
+  primeAuthenticatedAuthCache: (...args: unknown[]) =>
+    mockPrimeAuthenticatedAuthCache(...args),
 }));
 
 jest.mock('@/components/SignOutButton', () => ({
@@ -39,6 +43,11 @@ jest.mock('@/lib/attribution', () => ({
 
 jest.mock('@/lib/posthog-client', () => ({
   captureEvent: jest.fn(),
+}));
+
+jest.mock('@/lib/browser-redirect', () => ({
+  replaceBrowserLocation: (...args: unknown[]) =>
+    mockReplaceBrowserLocation(...args),
 }));
 
 jest.mock('next/navigation', () => ({
@@ -70,6 +79,7 @@ describe('Auth age gate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setNavigatorLanguage('en-US');
+    window.history.pushState({}, '', '/');
   });
 
   it('shows birthday field on signup form', () => {
@@ -184,6 +194,65 @@ describe('Auth age gate', () => {
 
     await waitFor(() => {
       expect(mockSignUp).toHaveBeenCalled();
+    });
+  });
+
+  it('primes auth cache and redirects to /app after sign-in on the auth page', async () => {
+    const user = { id: 'user-1', email: 'test@example.com', name: 'Test User' };
+    mockSignIn.mockResolvedValue({
+      data: { user },
+      error: null,
+    });
+    window.history.pushState({}, '', '/auth');
+
+    render(<AuthComponent />);
+
+    await clearAndType(
+      screen.getByPlaceholderText('Enter your email'),
+      'test@example.com',
+    );
+    await clearAndType(
+      screen.getByPlaceholderText('Enter your password'),
+      'password123',
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
+
+    await waitFor(() => {
+      expect(mockPrimeAuthenticatedAuthCache).toHaveBeenCalledWith(user);
+      expect(mockReplaceBrowserLocation).toHaveBeenCalledWith('/app');
+    });
+  });
+
+  it('honours safe returnTo paths after sign-in', async () => {
+    const user = { id: 'user-1', email: 'test@example.com', name: 'Test User' };
+    mockSignIn.mockResolvedValue({
+      data: { user },
+      error: null,
+    });
+    window.history.pushState(
+      {},
+      '',
+      '/auth?returnTo=%2Fapp%2Fbirth-chart%3Ftab%3Dplanets',
+    );
+
+    render(<AuthComponent />);
+
+    await clearAndType(
+      screen.getByPlaceholderText('Enter your email'),
+      'test@example.com',
+    );
+    await clearAndType(
+      screen.getByPlaceholderText('Enter your password'),
+      'password123',
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
+
+    await waitFor(() => {
+      expect(mockReplaceBrowserLocation).toHaveBeenCalledWith(
+        '/app/birth-chart?tab=planets',
+      );
     });
   });
 });

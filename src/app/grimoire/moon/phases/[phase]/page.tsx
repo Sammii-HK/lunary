@@ -13,9 +13,13 @@ import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 const phaseKeys = Object.keys(monthlyMoonPhases);
+export const dynamicParams = false;
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return phaseKeys.map((phase) => ({
+    phase: stringToKebabCase(phase),
+  }));
+}
 
 export async function generateMetadata({
   params,
@@ -284,6 +288,19 @@ During the ${phaseName} Moon, the energy is focused on ${phaseData.keywords
         ctaText={`Want personalized moon insights for your chart?`}
         ctaHref='/pricing'
         faqs={faqs}
+        sources={[
+          {
+            name: 'Lunary lunar phase interpretation framework',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Astronomy Engine moon phase calculations',
+            url: 'https://github.com/cosinekitty/astronomy',
+          },
+          {
+            name: 'Traditional lunar cycle doctrine',
+          },
+        ]}
         cosmicConnections={
           <CosmicConnections
             entityType='moon'

@@ -22,12 +22,18 @@ import {
   normalizeQuestionLines,
   hasGrimoireMention,
 } from './validation';
+import {
+  getSocialCopyQualityIssues,
+  getVideoCaptionQualityIssues,
+  normalizeVideoCaptionLines,
+} from './quality';
 import { hasOffDomainKeyword } from '../shared/constants/banned-phrases';
-import { buildCaptionContent, buildFallbackCopy } from './fallback';
+import { buildCaptionContent } from './fallback';
 import {
   generateOpeningVariation,
   applyOpeningVariation,
 } from './opening-variation';
+import { enrichSourcePackWithRetrieval } from './source-pack';
 
 /**
  * Generate social copy for a given source pack
@@ -36,8 +42,18 @@ export async function generateSocialCopy(
   pack: SourcePack,
   retryNote?: string,
 ): Promise<SocialCopyResult> {
+  const enrichedPack = await enrichSourcePackWithRetrieval(pack);
+  const firstLineKeywords = enrichedPack.relatedKeywords.slice(0, 5);
+  const groundingInstruction = firstLineKeywords.length
+    ? `First line must include one of these source keywords: ${firstLineKeywords.join(', ')}.`
+    : 'First line must include one concrete source keyword.';
+  const concreteSceneInstruction =
+    'Use at least one concrete scene anchor such as text, deadline, work, meeting, phone call, mirror, card pull, spending, reply, or message.';
+  const sceneHintInstruction = enrichedPack.sceneHints?.length
+    ? `Concrete scene hints to use: ${enrichedPack.sceneHints.join(', ')}.`
+    : '';
   const requestCopy = async (note?: string) => {
-    const prompt = buildPrompt(pack);
+    const prompt = buildPrompt(enrichedPack);
     const result = await generateStructuredContent({
       prompt,
       schema: SocialPostSchema,
@@ -53,7 +69,7 @@ export async function generateSocialCopy(
   };
 
   const requestVideoCaption = async (note?: string) => {
-    const prompt = buildPrompt(pack);
+    const prompt = buildPrompt(enrichedPack);
     const result = await generateStructuredContent({
       prompt,
       schema: VideoCaptionSchema,
@@ -72,11 +88,17 @@ export async function generateSocialCopy(
     let response = await requestVideoCaption(retryNote);
     let validation = validateVideoCaptionResponse(
       response.bodyLines || [],
-      pack,
+      enrichedPack,
     );
     if (validation.issues.length > 0) {
-      response = await requestVideoCaption(validation.issues.join('; '));
-      validation = validateVideoCaptionResponse(response.bodyLines || [], pack);
+      const previousOutput = (response.bodyLines || []).join('\n');
+      response = await requestVideoCaption(
+        `${validation.issues.join('; ')}\n${groundingInstruction}\n${sceneHintInstruction}\n${concreteSceneInstruction}\nRewrite the previous caption using the exact source facts, the keywords above, and one concrete scene.\nPrevious output:\n${previousOutput}`,
+      );
+      validation = validateVideoCaptionResponse(
+        response.bodyLines || [],
+        enrichedPack,
+      );
     }
     if (validation.issues.length === 0) {
       const combined = (validation.lines || []).join(' ');
@@ -86,22 +108,40 @@ export async function generateSocialCopy(
         );
         validation = validateVideoCaptionResponse(
           response.bodyLines || [],
-          pack,
+          enrichedPack,
         );
       }
     }
-    if (validation.issues.length > 0) {
-      const fallback = await buildFallbackCopy(pack);
-      return {
-        content: fallback.content,
-        hashtags: fallback.hashtags,
-        title: fallback.title,
-        safetyChecks: fallback.safetyChecks,
-      };
-    }
-    return buildCaptionContent(
-      pack,
+    let qualityIssues = getVideoCaptionQualityIssues(
       validation.lines,
+      enrichedPack,
+    );
+    if (qualityIssues.length > 0) {
+      const previousOutput = (validation.lines || []).join('\n');
+      response = await requestVideoCaption(
+        `${qualityIssues.join('; ')}\n${groundingInstruction}\n${sceneHintInstruction}\n${concreteSceneInstruction}\nRewrite the previous caption so it names one concrete scene and uses one provided related keyword.\nPrevious output:\n${previousOutput}`,
+      );
+      validation = validateVideoCaptionResponse(
+        response.bodyLines || [],
+        enrichedPack,
+      );
+      qualityIssues = getVideoCaptionQualityIssues(
+        validation.lines,
+        enrichedPack,
+      );
+    }
+    if (validation.issues.length > 0) {
+      throw new Error(
+        `Video caption validation failed after retries: ${validation.issues.join('; ')}`,
+      );
+    }
+    const normalizedLines = normalizeVideoCaptionLines(
+      validation.lines,
+      enrichedPack,
+    );
+    return buildCaptionContent(
+      enrichedPack,
+      normalizedLines,
       response.safetyChecks ?? undefined,
     );
   }
@@ -109,6 +149,7 @@ export async function generateSocialCopy(
   const validateQuestionContent = (text: string) => {
     const issues: string[] = [];
     const lines = normalizeQuestionLines(text);
+    const lower = text.toLowerCase();
     if (!lines[0]) {
       issues.push('Missing question line');
       return { issues, lines };
@@ -125,6 +166,20 @@ export async function generateSocialCopy(
     if (hasOffDomainKeyword(text)) {
       issues.push('Contains off-domain keywords');
     }
+    if (
+      /\bwhat does .* symbolize\b/i.test(lines[0] || '') ||
+      /\bwhat does .* mean in your life\b/i.test(lines[0] || '')
+    ) {
+      issues.push('Avoid abstract symbolism questions');
+    }
+    if (
+      !enrichedPack.sceneHints?.length ||
+      !enrichedPack.sceneHints.some((hint) =>
+        lower.includes(hint.toLowerCase()),
+      )
+    ) {
+      issues.push('Use one of the provided concrete scene hints');
+    }
     return { issues, lines };
   };
 
@@ -133,15 +188,16 @@ export async function generateSocialCopy(
   if (pack.postType === 'question') {
     let validation = validateQuestionContent(content);
     if (validation.issues.length > 0) {
-      await requestCopy('Fix formatting only. Do not change tone or wording.');
-      const response = (await requestCopy(retryNote)) as any;
+      const response = (await requestCopy(
+        `${validation.issues.join('; ')}\n${groundingInstruction}\n${sceneHintInstruction}\nRewrite the previous answer with the exact same topic focus, no fallback wording, and tighter formatting.\nPrevious output:\n${content}`,
+      )) as any;
       content = String(response.content || '').trim();
       validation = validateQuestionContent(content);
     }
     if (validation.issues.length > 0) {
-      const fallbackQuestion = `What do you notice most about ${pack.topicTitle.toLowerCase()}?`;
-      const fallbackPrompt = 'Share one specific moment.';
-      content = `${fallbackQuestion}\n${fallbackPrompt}`;
+      throw new Error(
+        `Question copy validation failed after retries: ${validation.issues.join('; ')}`,
+      );
     }
   }
   if (hasGrimoireMention(content)) {
@@ -166,6 +222,16 @@ export async function generateSocialCopy(
       ? softenDeterministicLanguage(retriedContent)
       : retriedContent;
   }
+  const qualityIssues = getSocialCopyQualityIssues(content, enrichedPack);
+  if (qualityIssues.length > 0) {
+    const retry = (await requestCopy(
+      `${qualityIssues.join('; ')}\n${groundingInstruction}\n${sceneHintInstruction}\n${concreteSceneInstruction}\nRewrite the previous copy using the exact source facts and one concrete scene.\nPrevious output:\n${content}`,
+    )) as any;
+    const retriedContent = String(retry.content || '').trim();
+    if (retriedContent) {
+      content = retriedContent;
+    }
+  }
   if (
     [
       'educational',
@@ -186,7 +252,7 @@ export async function generateSocialCopy(
               ? 'contrast'
               : 'observation';
 
-    const opening = await generateOpeningVariation(pack, {
+    const opening = await generateOpeningVariation(enrichedPack, {
       preferredIntent,
       avoidOpenings: pack.noveltyContext?.recentOpenings,
       intentOrder: OPENING_INTENTS,
@@ -201,7 +267,7 @@ export async function generateSocialCopy(
   }
 
   content = normalizeGeneratedContent(content, {
-    topicLabel: pack.topicTitle,
+    topicLabel: enrichedPack.topicTitle,
   });
   // Strip any stray hashtags the AI may have injected
   content = content
@@ -212,6 +278,6 @@ export async function generateSocialCopy(
   const safetyChecks = Array.isArray(response.safetyChecks)
     ? response.safetyChecks.map((flag: string) => String(flag))
     : [];
-  const curatedHashtags = buildCuratedHashtags(pack);
+  const curatedHashtags = buildCuratedHashtags(enrichedPack);
   return { content, hashtags: curatedHashtags, title, safetyChecks };
 }

@@ -8,6 +8,8 @@ export const planetSymbols = symbolsData.bodies;
 export const zodiacSymbol = symbolsData.zodiac;
 export const zodiacUnicode = symbolsData.unicode;
 export const astroPointSymbols = symbolsData.points;
+export const elementAstro = symbolsData.elements;
+export const modalityAstro = symbolsData.modalities;
 
 // Unicode symbols for planets (for display without special fonts)
 export const planetUnicode: Record<string, string> = {

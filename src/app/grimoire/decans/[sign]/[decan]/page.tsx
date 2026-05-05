@@ -152,6 +152,12 @@ ${decanName} Decan ${signName}s tend to be: ${data.traits.join(', ')}.
 ### Associated Tarot Card
 
 The ${data.tarotCard} is associated with this decan, reflecting its themes and energy.
+
+### How To Use This In A Birth Chart
+
+Decans are a refinement tool. Start with the planet, sign, and house first. Then use the decan to explain why two ${signName} placements can express themselves differently. The ${decanName.toLowerCase()} decan adds a ${data.subruler}-flavoured layer to ${signName}, which changes tone, timing, and emphasis without replacing the core sign.
+
+This becomes most useful when reading a Sun, Moon, Rising, or chart ruler in ${signName}. If you already know the placement house and major aspects, the decan helps you move from generic sign meanings into something much more exact.
       `}
       emotionalThemes={data.traits.map(
         (t) => t.charAt(0).toUpperCase() + t.slice(1),
@@ -175,15 +181,40 @@ The ${data.tarotCard} is associated with this decan, reflecting its themes and e
       relatedItems={[
         { name: signName, href: `/grimoire/zodiac/${sign}`, type: 'Zodiac' },
         {
+          name: `${signName} Rising`,
+          href: `/grimoire/rising/${sign}`,
+          type: 'Ascendant',
+        },
+        {
           name: data.subruler,
           href: `/grimoire/astronomy/planets/${data.subruler.toLowerCase()}`,
           type: 'Planet',
         },
         { name: 'Decans Overview', href: '/grimoire/decans', type: 'Guide' },
       ]}
+      internalLinks={[
+        { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
+        { text: `${signName} Rising`, href: `/grimoire/rising/${sign}` },
+        { text: `${signName} Overview`, href: `/grimoire/zodiac/${sign}` },
+        {
+          text: `${signName} Decans Overview`,
+          href: `/grimoire/decans/${sign}`,
+        },
+      ]}
       ctaText='Discover your decan placement'
       ctaHref='/birth-chart'
-      sources={[{ name: 'Traditional decan system' }]}
+      sources={[
+        {
+          name: 'Lunary decan interpretation framework',
+          url: 'https://lunary.app/about/methodology',
+        },
+        {
+          name: 'Traditional decan doctrine',
+        },
+        {
+          name: 'Golden Dawn and planetary decan correspondences',
+        },
+      ]}
       faqs={faqs}
     >
       <div className='mt-8'>

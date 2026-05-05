@@ -108,25 +108,38 @@ export async function generateStructuredContent<T extends ZodSchema>({
   maxTokens = 800,
   retryNote,
 }: GenerateStructuredParams<T>): Promise<z.infer<T>> {
-  const fullPrompt = retryNote
-    ? `${prompt}\n\nFix these issues:\n${retryNote}`
-    : prompt;
-
-  // Convert Zod schema to JSON Schema for the prompt
   const jsonSchema = JSON.stringify(z.toJSONSchema(schema), null, 2);
   const jsonSystemPrompt = `${systemPrompt}\n\nIMPORTANT: Return ONLY valid JSON matching this exact schema. No markdown, no explanation, no code fences.\n\nJSON Schema:\n${jsonSchema}`;
 
-  const result = await generateText({
-    model: getModel(),
-    system: jsonSystemPrompt,
-    prompt: `${fullPrompt}\n\nReturn valid JSON only, matching the schema exactly.`,
-    temperature,
-    maxOutputTokens: maxTokens,
-  });
+  let lastError: unknown = null;
+  const attempts = retryNote ? 1 : 2;
 
-  const raw = extractJSON(result.text);
-  const parsed = JSON.parse(raw);
-  return schema.parse(parsed) as z.infer<T>;
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    const attemptPrompt =
+      attempt === 0 && !retryNote
+        ? prompt
+        : `${prompt}\n\nFix these issues:\n${retryNote ?? 'Your previous response was not valid JSON.'}${lastError ? `\n\nParse error:\n${String(lastError)}` : ''}`;
+
+    const result = await generateText({
+      model: getModel(),
+      system: jsonSystemPrompt,
+      prompt: `${attemptPrompt}\n\nReturn valid JSON only, matching the schema exactly.`,
+      temperature,
+      maxOutputTokens: maxTokens,
+    });
+
+    try {
+      const raw = extractJSON(result.text);
+      const parsed = JSON.parse(raw);
+      return schema.parse(parsed) as z.infer<T>;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('Failed to generate valid structured content');
 }
 
 /**

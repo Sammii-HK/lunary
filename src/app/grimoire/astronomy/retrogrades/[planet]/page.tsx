@@ -10,9 +10,11 @@ import { generateYearlyForecast } from '@/lib/forecast/yearly';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+export const dynamicParams = false;
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return Object.keys(retrogradeInfo).map((planet) => ({ planet }));
+}
 
 /**
  * Fetch retrograde periods for a specific planet across current + next year.
@@ -33,7 +35,9 @@ async function getRetrogradeDates(planetSlug: string) {
 
   for (const yr of years) {
     try {
-      const forecast = await generateYearlyForecast(yr);
+      const forecast = await generateYearlyForecast(yr, undefined, undefined, {
+        useDbCache: false,
+      });
       const planetRetrogrades = forecast.retrogrades.filter(
         (r) => r.planet === planetName,
       );
@@ -267,7 +271,7 @@ ${nextYearPeriods.length > 0 ? `### ${nextYear} Dates\n\n${nextYearPeriods.map((
         ]}
         canonicalUrl={`https://lunary.app/grimoire/astronomy/retrogrades/${planet}`}
         dateModified={new Date().toISOString().split('T')[0]}
-        intro={`${retrogradeData.name} occurs ${retrogradeData.frequency.toLowerCase()} and lasts ${retrogradeData.duration.toLowerCase()}. ${retrogradeData.description} Below you will find all ${currentYear} and ${nextYear} dates, plus practical guidance for each period.`}
+        intro={`${retrogradeData.name} occurs ${retrogradeData.frequency.toLowerCase()} and lasts ${retrogradeData.duration.toLowerCase()}. ${retrogradeData.description} Below you will find computed ${currentYear} and ${nextYear} dates, plus practical guidance for reading each period against your own chart.`}
         tldr={`${retrogradeData.name} happens ${retrogradeData.frequency.toLowerCase()} for ${retrogradeData.duration.toLowerCase()}. In ${currentYear} it occurs ${currentYearPeriods.length} time${currentYearPeriods.length !== 1 ? 's' : ''}.`}
         meaning={`${dateSchedule}
 
@@ -277,7 +281,21 @@ A retrograde occurs when a planet appears to move backward in the sky from our p
 
 ${retrogradeData.description}
 
-During retrograde periods, the planet's energy turns inward, creating opportunities for reflection, review, and re-evaluation. This is a time to work with internal processes rather than external actions.
+During retrograde periods, the planet's energy is read as turning inward, creating opportunities for reflection, review, and re-evaluation. This is a time to work with internal processes rather than external actions.
+
+## How Lunary Calculates These Dates
+
+Lunary derives retrograde periods from apparent geocentric planetary motion. A retrograde begins when a planet's apparent zodiacal longitude changes from direct motion to backward motion, and it ends when the planet stations direct again. This is an astronomy-first calculation: the date table comes from planetary position data, then the interpretation is layered on top.
+
+For chart reading, the date alone is not the whole meaning. Check which sign the retrograde occupies, which house it falls in your natal chart, whether it aspects natal planets, and whether it crosses an angle such as the Ascendant, Descendant, Midheaven, or IC.
+
+## How to Read ${retrogradeData.name} in Your Chart
+
+- **By sign**: the zodiac sign describes the style of review.
+- **By house**: the house shows the life area being revisited.
+- **By natal aspects**: contacts to your birth chart show what is personally activated.
+- **By station degrees**: the station degree is often the loudest point of the cycle.
+- **By repetition**: if the same degree is crossed three times, the story often develops in stages.
 
 ## Effects of ${retrogradeData.name}
 
@@ -357,8 +375,25 @@ ${retrogradeData.whatToAvoid.map((a) => `- ${a}`).join('\n')}`}
           },
           { text: "View Today's Horoscope", href: '/horoscope' },
           { text: 'Calculate Birth Chart', href: '/birth-chart' },
+          { text: 'Learn the Houses', href: '/grimoire/houses' },
+          {
+            text: 'Read Current Sky Chart',
+            href: '/grimoire/astrology/sky-now',
+          },
         ]}
         faqs={faqs}
+        sources={[
+          {
+            name: 'Lunary yearly transit calculation methodology',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Apparent geocentric retrograde motion',
+          },
+          {
+            name: 'Traditional planetary retrograde interpretation',
+          },
+        ]}
         cosmicConnections={
           <CosmicConnections
             entityType='planet'

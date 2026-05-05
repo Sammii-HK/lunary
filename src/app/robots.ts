@@ -33,7 +33,10 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/profile/', '/admin/'],
       })),
     ],
-    sitemap: 'https://lunary.app/sitemap.xml',
+    sitemap: [
+      'https://lunary.app/sitemap-index.xml',
+      'https://lunary.app/sitemap.xml',
+    ],
     host: 'https://lunary.app',
   };
 }

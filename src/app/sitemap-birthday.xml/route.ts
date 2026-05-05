@@ -10,7 +10,7 @@ export async function GET(): Promise<Response> {
     loc: `${baseUrl}/grimoire/birthday/${date}`,
     lastmod: stableMonthStamp,
     changefreq: 'yearly',
-    priority: '0.5',
+    priority: '0.3',
   }));
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

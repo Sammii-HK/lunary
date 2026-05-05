@@ -1,10 +1,98 @@
 import { test, expect } from '../fixtures/auth';
 import { TEST_USERS } from '../fixtures/test-users';
+import type { Browser } from '@playwright/test';
 
 const isCI = !!process.env.CI;
 const log = (message: string) => {
   if (!isCI) console.log(message);
 };
+
+async function openAuthenticatedAuthPage(
+  browser: Browser,
+  baseURL: string | undefined,
+  path: string,
+) {
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 720 },
+    ignoreHTTPSErrors: true,
+  });
+
+  await context.route('**/api/auth/get-session', (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        session: {
+          id: 'test-session-auth-redirect',
+          userId: 'test-user-auth-redirect',
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        },
+        user: {
+          id: 'test-user-auth-redirect',
+          email: TEST_USERS.regular.email,
+          name: TEST_USERS.regular.name,
+          emailVerified: true,
+        },
+      }),
+    });
+  });
+
+  await context.route('**/api/profile', (route) => {
+    if (route.request().method() !== 'GET') {
+      route.continue();
+      return;
+    }
+
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        profile: {
+          userId: 'test-user-auth-redirect',
+          name: TEST_USERS.regular.name,
+          email: TEST_USERS.regular.email,
+          birthday: '1990-01-15',
+        },
+      }),
+    });
+  });
+
+  await context.route('**/api/subscription', (route) => {
+    if (route.request().method() !== 'GET') {
+      route.continue();
+      return;
+    }
+
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'active',
+        plan: 'monthly',
+        planType: 'monthly',
+      }),
+    });
+  });
+
+  await context.route('**/api/testimonials/prompt-tracking', (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ shouldPrompt: false }),
+    });
+  });
+
+  const page = await context.newPage();
+  await page.addInitScript(() => {
+    (window as any).__PLAYWRIGHT_AUTHENTICATED__ = true;
+  });
+
+  await page.goto(`${baseURL || 'http://localhost:3003'}${path}`, {
+    waitUntil: 'domcontentloaded',
+  });
+
+  return { context, page };
+}
 
 // Quick smoke tests for critical paths
 test.describe('Smoke Tests @smoke', () => {
@@ -119,6 +207,42 @@ test.describe('Smoke Tests @smoke', () => {
           `Has "Sign In" text: ${hasSignInText}\n` +
           `Current URL: ${currentUrl}`,
       );
+    }
+  });
+
+  test('authenticated auth page redirects to app @smoke', async ({
+    browser,
+    baseURL,
+  }) => {
+    const { context, page } = await openAuthenticatedAuthPage(
+      browser,
+      baseURL,
+      '/auth',
+    );
+
+    try {
+      await expect(page).toHaveURL(/\/app(?:[/?#]|$)/, { timeout: 30000 });
+    } finally {
+      await context.close();
+    }
+  });
+
+  test('authenticated auth page honours safe returnTo @smoke', async ({
+    browser,
+    baseURL,
+  }) => {
+    const { context, page } = await openAuthenticatedAuthPage(
+      browser,
+      baseURL,
+      '/auth?returnTo=%2Fapp%2Fbirth-chart%3Ftab%3Dplanets',
+    );
+
+    try {
+      await expect(page).toHaveURL(/\/app\/birth-chart\?tab=planets$/, {
+        timeout: 30000,
+      });
+    } finally {
+      await context.close();
     }
   });
 

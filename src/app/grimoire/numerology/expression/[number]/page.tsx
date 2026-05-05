@@ -6,8 +6,11 @@ import { expressionNumbers } from '@/constants/grimoire/numerology-extended-data
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return Object.keys(expressionNumbers).map((number) => ({ number }));
+}
 
 export async function generateMetadata({
   params,
@@ -116,7 +119,11 @@ ${numberData.challenges.map((c) => `- ${c}`).join('\n')}
 
 **Ideal Career Paths**
 
-Expression ${number} thrives in careers that allow you to use your natural talents: ${numberData.careers.join(', ')}.`}
+Expression ${number} thrives in careers that allow you to use your natural talents: ${numberData.careers.join(', ')}.
+
+### How Lunary Calculates Expression Number ${number}
+
+Lunary calculates the Expression Number from the full birth name by converting letters into numerological values, summing them, and reducing the total unless a master number is retained. The interpretation then focuses on how that final number describes outward style, natural aptitude, and the way a person tends to express ability in public life.`}
         emotionalThemes={numberData.keywords}
         howToWorkWith={[
           `Develop your natural ${numberData.talents[0].toLowerCase()} abilities`,
@@ -164,6 +171,15 @@ Expression ${number} thrives in careers that allow you to use your natural talen
           { text: 'Explore Numerology', href: '/grimoire/numerology' },
           { text: 'Life Path Numbers', href: '/grimoire/numerology' },
           { text: 'Grimoire Home', href: '/grimoire' },
+        ]}
+        sources={[
+          {
+            name: 'Lunary numerology calculation method',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Pythagorean numerology tradition',
+          },
         ]}
         ctaText='Want personalized numerology insights?'
         ctaHref='/pricing'

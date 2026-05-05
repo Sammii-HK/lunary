@@ -118,6 +118,8 @@ export default function MoonInSignsIndexPage() {
 
 Both are important. Your natal Moon sign is your emotional baseline. The transit Moon affects everyone's daily energy.
 
+Lunary uses the Moon in signs in two ways. First, as a natal placement that describes emotional processing, soothing habits, attachment needs, and instinctive reactions. Second, as a transit layer that helps explain the emotional weather of the day. The useful reading comes from knowing which one you are looking at and then connecting it back to the rest of the chart.
+
 **Moon by Element:**
 
 **Fire Moons (Aries, Leo, Sagittarius)**
@@ -145,10 +147,24 @@ Mood: Sensitive but potentially moody
 Each sign has optimal magical uses. Check the current Moon sign before important spellwork and align your intentions with the lunar energy.`}
         howToWorkWith={[
           'Track the current Moon sign using a lunar calendar',
+          'Separate natal Moon meaning from transit Moon timing before interpreting the page',
           'Plan activities that match the Moon elemental energy',
           'Time spells and rituals for compatible Moon signs',
           'Rest more during Water Moon days if you feel sensitive',
           'Take action during Fire Moon days for momentum',
+        ]}
+        sources={[
+          {
+            name: 'Lunary lunar sign interpretation framework',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Astronomy Engine moon transit calculations',
+            url: 'https://github.com/cosinekitty/astronomy',
+          },
+          {
+            name: 'Traditional Moon-sign doctrine',
+          },
         ]}
         tables={[
           {
@@ -196,10 +212,10 @@ Each sign has optimal magical uses. Check the current Moon sign before important
           { text: 'Current Moon Sign', href: '/grimoire/moon' },
           { text: 'Zodiac Signs', href: '/grimoire/zodiac' },
           { text: 'Moon Phases', href: '/grimoire/moon/phases' },
-          { text: 'Birth Chart', href: '/birth-chart' },
+          { text: 'Birth Chart', href: '/grimoire/birth-chart' },
         ]}
-        ctaText='Want personalized Moon sign insights?'
-        ctaHref='/pricing'
+        ctaText='See your natal Moon in context'
+        ctaHref='/birth-chart'
         faqs={faqs}
       >
         <section className='mb-12'>

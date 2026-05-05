@@ -246,6 +246,27 @@ interface CaptionResult {
   hashtags: string[];
 }
 
+function getPersonalizedCaptionCta(platform: 'instagram' | 'tiktok'): string {
+  return platform === 'tiktok'
+    ? "Comment 'reading' and your sign for the personal angle"
+    : "Comment 'reading' and your sign if you want the personal angle";
+}
+
+function formatTransitLabel(options: {
+  transitEvent?: string;
+  transitPlanet?: string;
+  transitSign?: string;
+}): string {
+  const event = options.transitEvent?.trim();
+  const planet = options.transitPlanet?.trim();
+  const sign = options.transitSign?.trim();
+
+  if (event) return event;
+  if (planet && sign) return `${planet} in ${sign}`;
+  if (planet) return `${planet} transit`;
+  return 'A major transit';
+}
+
 /**
  * Generate a complete Instagram caption with hashtags separated
  * (first-comment strategy: post hashtags as first comment).
@@ -771,8 +792,8 @@ export function generateTikTokCarouselCaption(
       break;
     }
     case 'transit_spotlight': {
-      const event = options.title || 'Cosmic shift happening now';
-      caption = `${event}\n\nSwipe for what it means and what to do. Comment your sign below`;
+      const event = options.title || 'Upcoming transit spotlight';
+      caption = `${event}\n\nSwipe for what changes, who it hits, and what to do next.\n\n${getPersonalizedCaptionCta('tiktok')}`;
       break;
     }
     case 'myth_vs_reality': {
@@ -875,7 +896,7 @@ function generateTransitSpotlightCaption(options: {
   transitPlanet?: string;
   transitSign?: string;
 }): string {
-  const event = options.transitEvent || 'A cosmic shift is happening';
+  const event = formatTransitLabel(options);
   const planet = options.transitPlanet;
   const sign = options.transitSign
     ? options.transitSign.charAt(0).toUpperCase() + options.transitSign.slice(1)
@@ -901,7 +922,7 @@ function generateTransitSpotlightCaption(options: {
     ? `\n${sign} and surrounding signs feel this most.`
     : '';
 
-  return `${hook}${signLine}\n\nSwipe for the full breakdown: what it means, who feels it most, and what to do about it.\n\nSave this so you can come back to it.\n\nTrack all transits free at lunary.app`;
+  return `${hook}${signLine}\n\nSwipe for the full breakdown: what changes, who feels it most, and what to do next.\n\n${getPersonalizedCaptionCta('instagram')}\n\nTrack all transits free at lunary.app`;
 }
 
 function generateMythVsRealityCaption(options: {

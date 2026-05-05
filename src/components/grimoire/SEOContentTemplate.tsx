@@ -34,6 +34,7 @@ import { MidArticleEmailCapture } from './MidArticleEmailCapture';
 import { ChartPreviewTeaser } from './ChartPreviewTeaser';
 import { SignTransitTeaser } from './SignTransitTeaser';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
+import { GrimoireExitIntent } from './GrimoireExitIntent';
 // AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
 // import AudioNarrator from '@/components/audio/AudioNarrator';
 import { AutoLinkText } from '@/components/glossary/AutoLinkText';
@@ -174,7 +175,7 @@ export interface SEOContentTemplateProps {
 const HOROSCOPE_EMAIL_CAPTURE_TEST = 'horoscope_email_capture_proposition_v1';
 const HOROSCOPE_EMAIL_UPSELL_TEST = 'horoscope_email_signup_upsell_v1';
 
-export async function SEOContentTemplate({
+export function SEOContentTemplate({
   title,
   h1,
   subtitle,
@@ -230,7 +231,7 @@ export async function SEOContentTemplate({
   // Keep SEO pages statically renderable: do not read request cookies here.
   // Public grimoire pages should not depend on per-request anon ids, otherwise
   // Next marks them dynamic/private and Google receives uncachable HTML.
-  const inlineCtaVariant = await getInlineCtaVariant();
+  const inlineCtaVariant = getInlineCtaVariant();
 
   // Auto-generate breadcrumbs from URL if not provided
   const autoBreadcrumbs =
@@ -912,6 +913,9 @@ export async function SEOContentTemplate({
           )}
         />
       )}
+
+      {/* Exit intent popup for anonymous grimoire readers */}
+      <GrimoireExitIntent hub={contextualHub} />
     </article>
   );
 }

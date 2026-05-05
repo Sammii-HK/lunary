@@ -3,6 +3,8 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const isConstrainedBuild =
+  process.env.VERCEL === '1' || process.env.CI === 'true';
 
 // Bundle analyzer (only enabled when ANALYZE env var is set)
 const withBundleAnalyzer =
@@ -16,8 +18,10 @@ const withBundleAnalyzer =
 const nextConfig = {
   outputFileTracingRoot: __dirname,
   webpack: (config, { isServer, nextRuntime, dev }) => {
-    // Allow webpack to use multiple cores (Turbo plan: 30 vCPUs, 60GB)
-    config.parallelism = 100;
+    // Preview builds run on smaller Vercel workers than local/Turbo builds.
+    // Keep webpack concurrency lower there so larger SSG/content batches do not
+    // OOM before Next can write routes-manifest.json.
+    config.parallelism = isConstrainedBuild ? 24 : 100;
 
     // Exclude Playwright and ffmpeg-static from bundling (server-only, Node.js runtime)
     if (isServer) {
@@ -114,16 +118,20 @@ const nextConfig = {
     // Haptics, Share, and RateApp are UI-only — safe to stub everywhere.
     // RevenueCat is only stubbed on the SERVER — the client bundle needs the
     // real package so it can talk to the native Capacitor bridge on iOS.
-    const pluginsStub = resolve(__dirname, 'src/stubs/capacitor-plugins-stub.ts');
-    const rateAppStub = resolve(__dirname, 'src/stubs/capacitor-rate-app-stub.ts');
+    const pluginsStub = resolve(
+      __dirname,
+      'src/stubs/capacitor-plugins-stub.ts',
+    );
+    const rateAppStub = resolve(
+      __dirname,
+      'src/stubs/capacitor-rate-app-stub.ts',
+    );
     config.resolve.alias = {
       ...config.resolve.alias,
       '@capacitor/haptics': pluginsStub,
       '@capacitor/share': pluginsStub,
       'capacitor-rate-app': rateAppStub,
-      ...(isServer
-        ? { '@revenuecat/purchases-capacitor': pluginsStub }
-        : {}),
+      ...(isServer ? { '@revenuecat/purchases-capacitor': pluginsStub } : {}),
     };
 
     // Client-side polyfills
@@ -257,14 +265,12 @@ const nextConfig = {
 
   // Server external packages - these are not bundled and loaded from node_modules at runtime
   // Required for packages with native binaries or platform-specific code
-  serverExternalPackages: [
-    'playwright',
-    'playwright-core',
-    'chromium',
-  ],
+  serverExternalPackages: ['playwright', 'playwright-core', 'chromium'],
 
   // Experimental optimizations for faster builds
   experimental: {
+    staticGenerationMaxConcurrency: isConstrainedBuild ? 4 : 8,
+    staticGenerationMinPagesPerWorker: isConstrainedBuild ? 16 : 25,
     // Optimize package imports (tree-shake unused exports)
     optimizePackageImports: [
       'lucide-react',
@@ -322,7 +328,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors *",
+            value: 'frame-ancestors *',
           },
         ],
       },

@@ -18,6 +18,7 @@ import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+export const dynamicParams = false;
 
 // Map URL slugs (1st-house, 2nd-house, etc.) to house keys
 const houseSlugMap: Record<string, keyof typeof astrologicalHouses> = {
@@ -50,6 +51,12 @@ function isHouseSlug(slug: string): boolean {
 
 function isPlanetSlug(slug: string): boolean {
   return PLANETS_FOR_HOUSES.includes(slug as HousePlanet);
+}
+
+export function generateStaticParams() {
+  return [...Object.keys(houseSlugMap), ...PLANETS_FOR_HOUSES].map((slug) => ({
+    slug,
+  }));
 }
 
 export async function generateMetadata({
@@ -332,6 +339,16 @@ Area: ${houseData.area}`}
           `Honor ${houseData.element} element practices`,
           `Use ${houseData.name} energy for growth`,
         ]}
+        symbolism={`### How Lunary Reads the ${ordinal} House
+
+Lunary treats house pages as structural astrology, not generic listicles. The starting point is the house's life area, natural sign, natural ruler, and the kind of developmental task the house represents in a chart.
+
+For the ${ordinal} House, we read:
+- the life area of ${houseData.area.toLowerCase()}
+- the natural sign ${houseData.rulingSign} and ruler ${houseData.rulingPlanet}
+- the planets occupying this house and how they redirect attention into these topics
+
+That is why the ${ordinal} House matters: it shows where experience gathers, where effort tends to land, and where transits can produce visible change.`}
         tables={[
           {
             title: `${ordinal} House Correspondences`,
@@ -365,6 +382,15 @@ Area: ${houseData.area}`}
         internalLinks={internalLinks}
         ctaText={`Want to see planets in your ${houseData.name}?`}
         ctaHref='/birth-chart'
+        sources={[
+          {
+            name: 'Lunary house interpretation framework',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Traditional Western house doctrine',
+          },
+        ]}
         faqs={faqs}
         cosmicConnections={
           <CosmicConnections

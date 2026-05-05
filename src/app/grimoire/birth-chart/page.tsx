@@ -112,18 +112,49 @@ Zodiac systems shift the perspective on your chart. Tropical astrology (the West
 
 Similarly, different house systems divide your chart's 12 houses based on different mathematical principles. Placidus is the most common in Western astrology, while whole sign houses are increasingly popular for their simplicity and accuracy. Exploring multiple house systems can deepen your chart interpretation.
 
-Understanding your birth chart helps you recognize your natural talents, work with your challenges, and make choices aligned with your authentic self. It's a tool for self-discovery and personal growth.`}
+Understanding your birth chart helps you recognize your natural talents, work with your challenges, and make choices aligned with your authentic self. It's a tool for self-discovery and personal growth.
+
+Lunary reads a chart in layers rather than isolated placements. Start with the chart angles and the Big Three. Then look at the ruler of the Ascendant, the planets clustered by house, and the strongest aspects repeating the same theme. After that, refine the reading with decans, house systems, sect, retrogrades, and timing techniques. That is how a chart turns from a pile of placements into a coherent story.`}
       howToWorkWith={[
         'Calculate your birth chart with exact birth time and location',
-        'Learn the meaning of each planet in your chart',
-        'Understand your Sun, Moon, and Rising signs',
-        'Study the houses and what they represent',
+        'Start with your Sun, Moon, and Rising signs before layering in the rest of the chart',
+        'Study the ruler of your Ascendant to see how your chart actually operates in daily life',
+        'Learn the meaning of each planet in your chart and the house it occupies',
+        'Study the houses and what they represent before judging single placements in isolation',
         'Explore different house systems (Placidus, Whole Sign, Koch, etc.)',
-        'Learn about aspects between planets',
+        'Learn about aspects between planets and note repeated patterns instead of one-off keywords',
+        'Use decans and dignities to refine chart nuance when two people share the same Sun sign',
         'Discover how your chart appears in different zodiac systems (tropical, sidereal, equatorial)',
         'Understand planetary retrogrades in your chart',
         'Use your chart for timing important decisions',
-        'Combine astrology with other divination methods',
+        'Build your reading from the chart structure first, then add intuition and symbolism',
+      ]}
+      internalLinks={[
+        {
+          text: 'Learn to Read a Birth Chart',
+          href: '/grimoire/guides/learn-birth-chart',
+        },
+        { text: 'Rising Sign Guide', href: '/grimoire/rising' },
+        { text: '1st House Meaning', href: '/grimoire/houses/1st-house' },
+        { text: 'Decans Guide', href: '/grimoire/decans' },
+        { text: 'Planetary Placements', href: '/grimoire/placements' },
+        {
+          text: 'Complete Birth Chart Guide',
+          href: '/grimoire/guides/birth-chart-complete-guide',
+        },
+      ]}
+      sources={[
+        {
+          name: 'Lunary natal chart calculation methodology',
+          url: 'https://lunary.app/about/methodology',
+        },
+        {
+          name: 'Astronomy Engine planetary calculations',
+          url: 'https://github.com/cosinekitty/astronomy',
+        },
+        {
+          name: 'Traditional Hellenistic house and sect doctrine',
+        },
       ]}
       faqs={[
         {

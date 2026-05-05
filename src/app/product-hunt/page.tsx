@@ -30,6 +30,10 @@ export const metadata: Metadata = {
       'Astronomy-based astrology with optional Astral Guide chat. Launching soon on PH.',
     images: ['/api/og/cosmic'],
   },
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 const features = [

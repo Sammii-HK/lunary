@@ -6,25 +6,26 @@ import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 export const metadata: Metadata = {
-  title:
-    'Lunary Grimoire - Complete Digital Grimoire | Astrology, Tarot, Crystals',
+  title: 'Lunary Grimoire: Astrology, Birth Charts, Houses & Transits',
   description:
-    'Complete digital grimoire with 500+ articles on tarot, crystals, astrology, moon phases, spells, and magical practice.',
+    'Astrology learning hub for birth charts, planets, houses, aspects, decans, moon phases, zodiac signs, compatibility, and transit timing.',
   keywords: [
-    'grimoire',
     'astrology',
-    'tarot',
-    'crystals',
-    'moon phases',
-    'spells',
-    'witchcraft',
-    'numerology',
     'birth chart',
+    'chart reading',
+    'astrology houses',
+    'astrology aspects',
+    'planetary placements',
+    'decans',
+    'moon phases',
+    'planetary transits',
+    'numerology',
+    'zodiac signs',
   ],
   openGraph: {
-    title: 'Lunary Grimoire - Complete Digital Grimoire',
+    title: 'Lunary Grimoire: Astrology, Birth Charts, Houses & Transits',
     description:
-      'Complete digital grimoire with 500+ articles on tarot, crystals, astrology, moon phases, spells, and magical practice.',
+      'Astrology learning hub for birth charts, planets, houses, aspects, decans, moon phases, zodiac signs, compatibility, and transit timing.',
     url: 'https://lunary.app/grimoire',
     siteName: 'Lunary',
   },
@@ -40,46 +41,39 @@ const grimoireCategories = [
     description: 'Birth charts, houses, aspects, and timing',
   },
   {
-    name: 'Tarot Cards',
-    url: 'https://lunary.app/grimoire/tarot',
-    description: 'Complete guide to all 78 tarot cards',
-  },
-  {
-    name: 'Moon Phases',
-    url: 'https://lunary.app/grimoire/moon',
-    description: 'Moon phases, rituals, and lunar magic',
-  },
-  {
     name: 'Birth Chart',
     url: 'https://lunary.app/grimoire/birth-chart',
     description: 'Learn to read your natal chart',
   },
   {
-    name: 'Runes',
-    url: 'https://lunary.app/grimoire/runes',
-    description: 'Elder Futhark rune meanings and divination',
+    name: 'Planets',
+    url: 'https://lunary.app/grimoire/planets',
+    description: 'Planet meanings, dignity, and chart interpretation',
+  },
+  {
+    name: 'Houses',
+    url: 'https://lunary.app/grimoire/houses',
+    description: 'The 12 houses and planet-in-house placements',
+  },
+  {
+    name: 'Aspects',
+    url: 'https://lunary.app/grimoire/aspects',
+    description: 'How planetary angles create support and pressure',
+  },
+  {
+    name: 'Decans',
+    url: 'https://lunary.app/grimoire/decans',
+    description: 'Degree-based sign subdivisions for deeper readings',
+  },
+  {
+    name: 'Moon Phases',
+    url: 'https://lunary.app/grimoire/moon',
+    description: 'Moon phases, signs, and lunar timing',
   },
   {
     name: 'Numerology',
     url: 'https://lunary.app/grimoire/numerology',
-    description: 'Life path numbers, angel numbers, and more',
-  },
-  {
-    name: 'Candle Magic',
-    url: 'https://lunary.app/grimoire/candle-magic',
-    description: 'Candle colors, rituals, and spellwork',
-  },
-  {
-    name: 'Correspondences',
-    url: 'https://lunary.app/grimoire/correspondences',
-    description:
-      'Magical correspondences for elements, colors, herbs, and more',
-  },
-  {
-    name: 'Witchcraft Practices',
-    url: 'https://lunary.app/grimoire/practices',
-    description:
-      'Complete guide to spells, meditation, divination, shadow work, and more',
+    description: 'Core numbers, life paths, and timing cycles',
   },
 ];
 
@@ -87,7 +81,7 @@ const GrimoireHome = () => {
   const grimoireListSchema = createItemListSchema({
     name: 'Lunary Grimoire',
     description:
-      'Complete digital grimoire with 500+ articles on tarot, crystals, astrology, moon phases, spells, and magical practice.',
+      'Astrology learning hub for birth charts, planets, houses, aspects, decans, moon phases, zodiac signs, compatibility, and transit timing.',
     url: 'https://lunary.app/grimoire',
     items: grimoireCategories,
   });

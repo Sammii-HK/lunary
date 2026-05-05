@@ -9,6 +9,10 @@ import {
   searchGrimoireForTopic,
 } from '../grimoire-content';
 import {
+  getWinningPatterns,
+  buildWinningPatternsContext,
+} from '../winning-patterns';
+import {
   CATEGORY_DOMAIN_MAP,
   TOPIC_DOMAIN_LABELS,
   DISALLOWED_ANALOGY_DOMAINS,
@@ -31,7 +35,8 @@ import {
 } from '../shared/text/normalize';
 import { hasTruncation } from '../shared/text/truncation';
 import type { SourcePack, SocialPostType } from './types';
-import { formatRulershipSentence } from '@/lib/astrology/rulerships';
+import { formatRulershipSentence } from '../../astrology/rulerships';
+import { searchSimilar } from '../../embeddings';
 
 /**
  * Check if slug is allowed for domain
@@ -132,16 +137,186 @@ const extractExamplesFromData = (
       `Example: Traditional observances include ${data.traditions.slice(0, 2).join(' or ')}.`,
     );
   }
-  if (examples.length === 0) {
-    examples.push(
-      `Notice where ${topic.toLowerCase()} surfaces as you move through your day.`,
-    );
-    examples.push(
-      `Pay attention to how ${topic.toLowerCase()} shapes timing or small decisions.`,
-    );
-  }
   return examples;
 };
+
+const extractSentences = (text: string, limit: number): string[] =>
+  text
+    .split(/[.!?]+/)
+    .map((segment) => sentenceSafe(segment))
+    .filter(Boolean)
+    .filter((sentence) => !hasTruncation(sentence))
+    .slice(0, limit);
+
+const buildSemanticQuery = (topic: string, theme: string, domain: string) =>
+  [topic, theme, `${domain} meaning`, `${topic} practical meaning`]
+    .filter(Boolean)
+    .join(' ');
+
+const SEMANTIC_CATEGORY_MAP: Record<string, string> = {
+  planetary: 'planet',
+  crystals: 'crystal',
+  zodiac: 'zodiac',
+  tarot: 'tarot',
+  lunar: 'glossary',
+  numerology: 'glossary',
+};
+
+const pickRetrievedExamples = (sentences: string[], topic: string): string[] =>
+  sentences
+    .filter((sentence) => {
+      const lower = sentence.toLowerCase();
+      return (
+        lower.includes(topic.toLowerCase()) ||
+        /\b(use|work with|tradition|practice|ritual|timing|house|transit)\b/i.test(
+          sentence,
+        )
+      );
+    })
+    .slice(0, 3);
+
+const buildSceneHints = (keywords: string[]): string[] => {
+  const joined = keywords.join(' ').toLowerCase();
+  const hints: string[] = [];
+  const add = (hint: string) => {
+    if (!hints.includes(hint)) hints.push(hint);
+  };
+
+  if (
+    /\b(identity|purpose|ego|self|authentic|life force|individuality)\b/i.test(
+      joined,
+    )
+  ) {
+    add('how you show up at work');
+    add('the way you answer a message');
+    add('the version of you in a meeting');
+  }
+  if (/\b(text|message|communication|talk|speak|voice)\b/i.test(joined)) {
+    add('a text you draft and delete');
+    add('a direct reply');
+    add('a conversation that needs clarity');
+  }
+  if (/\b(money|value|cost|spend|wallet|price)\b/i.test(joined)) {
+    add('your bank app');
+    add('the cart before checkout');
+    add('what you say yes to');
+  }
+  if (/\b(family|father|mother|relationship|love|friend)\b/i.test(joined)) {
+    add('a conversation at home');
+    add('the group chat');
+    add('a relationship decision');
+  }
+  if (/\b(vitality|power|energy|focus)\b/i.test(joined)) {
+    add('your morning routine');
+    add('the room when you walk in');
+    add('how long you stay focused');
+  }
+
+  if (hints.length === 0) {
+    add('a real-world moment you can picture');
+  }
+
+  return hints.slice(0, 4);
+};
+
+export async function enrichSourcePackWithRetrieval(
+  pack: SourcePack,
+): Promise<SourcePack> {
+  const enriched: SourcePack = { ...pack };
+  const shouldUseSemanticRetrieval = pack.sourceConfidence !== 'exact';
+
+  if (pack.grimoireFacts.length > 0) {
+    enriched.retrievedFacts = pack.grimoireFacts.slice(0, 3);
+  }
+  if (pack.grimoireExamples.length > 0) {
+    enriched.retrievedExamples = pack.grimoireExamples.slice(0, 2);
+  }
+  enriched.sceneHints = buildSceneHints(pack.relatedKeywords);
+
+  const semanticQuery = buildSemanticQuery(
+    pack.topicTitle || pack.topic,
+    pack.theme,
+    pack.contentDomain,
+  );
+
+  try {
+    if (!shouldUseSemanticRetrieval) {
+      return enriched;
+    }
+    const semanticCategory = SEMANTIC_CATEGORY_MAP[pack.contentDomain];
+    const results = await searchSimilar(semanticQuery, 4, semanticCategory);
+    const strongResults = results.filter((result) => result.similarity >= 0.62);
+    const retrievedSentences = pickUnique(
+      strongResults.flatMap((result) => extractSentences(result.content, 2)),
+      6,
+    );
+    const retrievedFacts = retrievedSentences.slice(0, 4);
+    const retrievedExamples = pickRetrievedExamples(
+      retrievedSentences,
+      pack.topicTitle || pack.topic,
+    );
+
+    if (retrievedFacts.length > 0) {
+      enriched.retrievedFacts = retrievedFacts;
+      enriched.grimoireFacts = pickUnique(
+        [...retrievedFacts, ...pack.grimoireFacts],
+        8,
+      );
+      if (!pack.grimoireExcerpt || pack.sourceConfidence === 'fallback') {
+        enriched.grimoireExcerpt = retrievedFacts[0];
+      }
+      if (pack.sourceConfidence !== 'exact') {
+        enriched.sourceConfidence =
+          pack.sourceConfidence === 'retrieved' ? 'retrieved' : 'mixed';
+      }
+    }
+
+    if (retrievedExamples.length > 0) {
+      enriched.retrievedExamples = retrievedExamples;
+      enriched.grimoireExamples = pickUnique(
+        [...retrievedExamples, ...pack.grimoireExamples],
+        4,
+      );
+    }
+  } catch (error) {
+    console.warn(
+      '[social-copy] Retrieval enrichment failed:',
+      error instanceof Error ? error.message : 'unknown',
+    );
+  }
+
+  if (!enriched.retrievedFacts?.length && pack.grimoireFacts.length > 0) {
+    enriched.retrievedFacts = pack.grimoireFacts.slice(0, 3);
+  }
+
+  if (!enriched.retrievedExamples?.length) {
+    const examplePool = pack.grimoireExamples.length
+      ? pack.grimoireExamples
+      : pack.grimoireFacts.filter((fact) =>
+          /\b(use|work with|timing|house|theme|rules|tradition|retrograde|transit)\b/i.test(
+            fact,
+          ),
+        );
+    if (examplePool.length > 0) {
+      enriched.retrievedExamples = examplePool.slice(0, 2);
+    }
+  }
+
+  try {
+    const winningPatterns = await getWinningPatterns(undefined, 45);
+    const winningContext = buildWinningPatternsContext(winningPatterns);
+    if (winningContext) {
+      enriched.winningPatternsContext = winningContext;
+    }
+  } catch (error) {
+    console.warn(
+      '[social-copy] Winning patterns enrichment failed:',
+      error instanceof Error ? error.message : 'unknown',
+    );
+  }
+
+  return enriched;
+}
 
 /**
  * Build source pack from theme and facet data
@@ -206,8 +381,6 @@ export function buildSourcePack({
   const sourceFacts = extractFactsFromData(snippet?.fullContent || null, topic);
   if (sourceSummary) sourceFacts.unshift(sentenceSafe(sourceSummary));
   if (sourceFacts.length === 0) {
-    const fallbackText =
-      facet.shortFormHook || facet.focus || `${topic} matters this week.`;
     sourceFacts.push(sentenceSafe(fallbackText));
   }
   const facts = pickUnique(sourceFacts, 8);
@@ -234,6 +407,11 @@ export function buildSourcePack({
   const grimoireSnippets = facts.slice(0, 3);
   const hashtagData = generateHashtags(theme, facet);
   const needsContext = AMBIGUOUS_DOMAINS.has(contentDomain);
+  const sourceConfidence: SourcePack['sourceConfidence'] = snippet
+    ? 'exact'
+    : sourceSummary || facts.length > 0
+      ? 'retrieved'
+      : 'fallback';
   return {
     topic,
     theme: theme.name,
@@ -257,5 +435,6 @@ export function buildSourcePack({
     constraints,
     hashtagData,
     needsContext,
+    sourceConfidence,
   };
 }

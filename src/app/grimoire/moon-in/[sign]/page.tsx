@@ -7,10 +7,14 @@ import { stringToKebabCase } from '../../../../../utils/string';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+export const dynamicParams = false;
 const signSlugs = Object.keys(zodiacSigns);
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return signSlugs.map((sign) => ({
+    sign: stringToKebabCase(sign),
+  }));
+}
 
 export async function generateMetadata({
   params,
@@ -159,7 +163,18 @@ Moon in ${signData.name} influences how you:
 
 During this transit, you may feel more ${signData.element === 'Fire' ? 'passionate, energetic, and action-oriented' : signData.element === 'Earth' ? 'practical, grounded, and stable' : signData.element === 'Air' ? 'intellectual, communicative, and social' : 'emotional, intuitive, and sensitive'}. Your emotional needs align with ${signData.name} themes, and you may find yourself drawn to activities that honor this ${signData.element.toLowerCase()} nature.
 
-Understanding Moon in ${signData.name} helps you work with this emotional energy consciously, whether it's in your natal chart (Moon sign) or during current transits.`}
+Understanding Moon in ${signData.name} helps you work with this emotional energy consciously, whether it's in your natal chart (Moon sign) or during current transits.
+
+### How Lunary Reads Moon in ${signData.name}
+
+Lunary treats a Moon-in-sign page as a mix of timing and symbolism. The timing layer comes from the Moon's average transit speed of roughly 2 to 3 days per sign. The interpretation layer comes from the meeting point between lunar topics, ${signData.name}'s ${signData.element.toLowerCase()} style, and ${signData.modality.toLowerCase()} pacing.
+
+That means this page is not just a vibe summary. It is built from:
+- lunar transit duration and sign ingress timing
+- ${signData.name}'s element, modality, and ruler
+- traditional Moon-sign interpretation about emotional needs, soothing habits, and instinctive reactions
+
+In practice, Moon in ${signData.name} tells you what kind of emotional climate is active, what responses are likely to feel natural, and where your regulation style may become more visible.`}
         glyphs={['☽', symbol]}
         emotionalThemes={[
           `${signData.element} emotional expression`,
@@ -227,6 +242,19 @@ Emotional Expression: ${signData.element.toLowerCase()}`}
           },
           { text: 'Explore Moon Phases', href: '/grimoire/moon' },
           { text: 'All Moon Signs', href: '/grimoire/moon-in' },
+        ]}
+        sources={[
+          {
+            name: 'Lunary lunar transit interpretation framework',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Astronomy Engine moon transit calculations',
+            url: 'https://github.com/cosinekitty/astronomy',
+          },
+          {
+            name: 'Traditional Western Moon-sign doctrine',
+          },
         ]}
         ctaText={`Want to see Moon in ${signData.name} in your birth chart?`}
         ctaHref='/pricing'

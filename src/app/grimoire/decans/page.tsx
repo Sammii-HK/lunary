@@ -98,6 +98,35 @@ export default function DecansIndexPage() {
           decans. Each decan has a sub-ruler that adds unique qualities to your
           Sun sign placement.
         </p>
+        <div className='max-w-3xl text-content-muted space-y-3 mb-10'>
+          <p>
+            Decans are one of the best ways to explain why people with the same
+            sign can still feel noticeably different. Lunary uses decans as a
+            refinement layer after the core chart structure is clear: planet,
+            sign, house, ruler, and aspect first, decan second.
+          </p>
+          <p>
+            They matter most when you are reading the Sun, Moon, Rising sign, or
+            chart ruler. Once the basics are in place, the decan shows which
+            planetary subcurrent is colouring that placement.
+          </p>
+        </div>
+
+        <div className='mb-10 p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/40'>
+          <h2 className='text-xl font-medium mb-3'>
+            How to use decans properly
+          </h2>
+          <ul className='list-disc pl-5 space-y-2 text-content-secondary'>
+            <li>Start with the placement itself: planet, sign, and house.</li>
+            <li>Check the sign ruler and its strongest aspects.</li>
+            <li>Use the decan to refine tone, emphasis, and timing.</li>
+            <li>Do not use decans to replace the main chart structure.</li>
+          </ul>
+          <p className='text-sm text-content-muted mt-4'>
+            Sources: Lunary decan interpretation framework, traditional decan
+            doctrine, Golden Dawn planetary decan correspondences.
+          </p>
+        </div>
 
         <div className='space-y-8'>
           {ZODIAC_SIGNS.map((sign) => {
@@ -139,6 +168,26 @@ export default function DecansIndexPage() {
               </div>
             );
           })}
+        </div>
+        <div className='mt-10 flex flex-wrap gap-3'>
+          <Link
+            href='/grimoire/birth-chart'
+            className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
+          >
+            Birth Chart Guide
+          </Link>
+          <Link
+            href='/grimoire/rising'
+            className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
+          >
+            Rising Signs
+          </Link>
+          <Link
+            href='/grimoire/placements'
+            className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
+          >
+            Planetary Placements
+          </Link>
         </div>
         <ExploreGrimoire />
       </div>

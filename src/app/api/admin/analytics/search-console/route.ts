@@ -3,6 +3,7 @@ import {
   getSearchConsoleData,
   getTopQueries,
   getTopPages,
+  querySearchConsole,
 } from '@/lib/google/search-console';
 import { resolveDateRange, formatDate } from '@/lib/analytics/date-range';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
@@ -63,6 +64,70 @@ export async function GET(request: NextRequest) {
           start: startDate,
           end: endDate,
         },
+      },
+      { status: 503 },
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
+  try {
+    const body = await request.json();
+    const startDate = body?.startDate;
+    const endDate = body?.endDate;
+
+    if (!startDate || !endDate) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Missing startDate or endDate',
+          message: 'Native Search Console query requires startDate and endDate',
+        },
+        { status: 400 },
+      );
+    }
+
+    const result = await querySearchConsole({
+      startDate,
+      endDate,
+      siteUrl: body?.siteUrl,
+      dimensions: body?.dimensions,
+      rowLimit: body?.rowLimit,
+      startRow: body?.startRow,
+      dimensionFilterGroups: body?.dimensionFilterGroups,
+      aggregationType: body?.aggregationType,
+      dataState: body?.dataState,
+      type: body?.type,
+      searchType: body?.searchType,
+    });
+
+    const response = NextResponse.json({
+      success: true,
+      data: result,
+      range: {
+        start: startDate,
+        end: endDate,
+      },
+    });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
+  } catch (error) {
+    console.error('[analytics/search-console] Native query error:', error);
+
+    const typedError = error as Error & { code?: string };
+    return NextResponse.json(
+      {
+        success: false,
+        error: typedError.message || 'Unknown error',
+        errorType: typedError.code || 'SEARCH_CONSOLE_ERROR',
+        message: 'Native Search Console query unavailable',
+        data: null,
       },
       { status: 503 },
     );

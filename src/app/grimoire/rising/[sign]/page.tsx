@@ -5,20 +5,38 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { NavParamLink } from '@/components/NavParamLink';
 import { Heading } from '@/components/ui/Heading';
 import { Eye, Star, AlertTriangle, Users } from 'lucide-react';
+import { elementAstro, modalityAstro, zodiacSymbol } from '@/constants/symbols';
 import {
   getRisingSign,
   getAllRisingSigns,
+  getPublicRisingSignSlug,
 } from '@/lib/rising-signs/getRisingSign';
 
 export const revalidate = 2592000; // 30 days
 export const dynamicParams = false;
+
+const elementGlyphs: Record<string, string> = {
+  Fire: elementAstro.fire,
+  Earth: elementAstro.earth,
+  Air: elementAstro.air,
+  Water: elementAstro.water,
+};
+
+const modalityGlyphs: Record<string, string> = {
+  Cardinal: modalityAstro.cardinal,
+  Fixed: modalityAstro.fixed,
+  Mutable: modalityAstro.mutable,
+};
 
 interface PageProps {
   params: Promise<{ sign: string }>;
 }
 
 export function generateStaticParams() {
-  return getAllRisingSigns().map((rising) => ({ sign: rising.slug }));
+  return getAllRisingSigns().flatMap((rising) => [
+    { sign: getPublicRisingSignSlug(rising.slug) },
+    { sign: rising.slug },
+  ]);
 }
 
 export async function generateMetadata({
@@ -30,6 +48,8 @@ export async function generateMetadata({
   if (!rising) {
     return { title: 'Not Found' };
   }
+
+  const publicSignSlug = getPublicRisingSignSlug(sign);
 
   return {
     title: `${rising.seoTitle} - Lunary`,
@@ -47,7 +67,7 @@ export async function generateMetadata({
       title: `${rising.seoTitle} - Lunary`,
       description: rising.seoDescription,
       type: 'article',
-      url: `https://lunary.app/grimoire/rising/${sign}`,
+      url: `https://lunary.app/grimoire/rising/${publicSignSlug}`,
     },
     twitter: {
       card: 'summary',
@@ -55,7 +75,7 @@ export async function generateMetadata({
       description: rising.seoDescription,
     },
     alternates: {
-      canonical: `https://lunary.app/grimoire/rising/${sign}`,
+      canonical: `https://lunary.app/grimoire/rising/${publicSignSlug}`,
     },
     robots: {
       index: true,
@@ -80,7 +100,13 @@ export default async function RisingSignPage({ params }: PageProps) {
   }
 
   const allRisings = getAllRisingSigns();
-  const relatedRisings = allRisings.filter((r) => r.slug !== sign).slice(0, 4);
+  const publicSignSlug = getPublicRisingSignSlug(sign);
+  const signGlyph = zodiacSymbol[publicSignSlug as keyof typeof zodiacSymbol];
+  const elementGlyph = elementGlyphs[rising.element];
+  const modalityGlyph = modalityGlyphs[rising.modality];
+  const relatedRisings = allRisings
+    .filter((r) => getPublicRisingSignSlug(r.slug) !== publicSignSlug)
+    .slice(0, 4);
 
   const meaningContent = `### First Impressions
 
@@ -97,6 +123,12 @@ ${rising.lifeApproach}
 ### How Others See You
 
 ${rising.howOthersSeeYou}
+
+### How To Read ${rising.sign} Rising In A Birth Chart
+
+Your rising sign is not just style or appearance. It sets the entire chart by defining the Ascendant and the first house. To read ${rising.sign} Rising properly, start with the Ascendant sign itself, then judge its ruler (${rising.ruler}), the house that ruler falls in, and any tight aspects it makes. That tells you how ${rising.sign} Rising actually operates in real life rather than stopping at a vibe-based description.
+
+When ${rising.sign} is rising, ${rising.element.toLowerCase()} energy shapes first reactions, pacing, and the way a person enters new situations. ${rising.modality} modality describes how that person begins things: cardinal signs initiate, fixed signs stabilize, and mutable signs adapt. This is why two people with the same Sun sign can still feel completely different once the Ascendant changes.
 
 ### Compatibility with Other Rising Signs
 
@@ -134,7 +166,7 @@ ${rising.compatibility}`;
         'ascendant',
         'first impression',
       ]}
-      canonicalUrl={`https://lunary.app/grimoire/rising/${sign}`}
+      canonicalUrl={`https://lunary.app/grimoire/rising/${publicSignSlug}`}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
         { label: 'Rising Signs', href: '/grimoire/rising' },
@@ -149,44 +181,63 @@ ${rising.compatibility}`;
       meaning={meaningContent}
       howToWorkWith={[
         `Embrace your ${rising.sign} Rising by leaning into your natural ${rising.coreTraits[0].toLowerCase()}.`,
-        `Be aware of how your ${rising.element.toLowerCase()} energy affects first impressions.`,
-        `Use your rising sign strengths consciously in new situations.`,
+        `Study ${rising.ruler} in your chart, because the chart ruler tells you how your Ascendant actually behaves.`,
+        `Be aware of how your ${rising.element.toLowerCase()} energy affects first impressions and the pace you bring into new rooms.`,
+        `Use your rising sign strengths consciously in new situations instead of defaulting to them unconsciously.`,
+      ]}
+      sources={[
+        {
+          name: 'Lunary Ascendant interpretation framework',
+          url: 'https://lunary.app/about/methodology',
+        },
+        {
+          name: 'Astronomy Engine Ascendant and chart angle calculations',
+          url: 'https://github.com/cosinekitty/astronomy',
+        },
+        {
+          name: 'Traditional Ascendant and chart-ruler doctrine',
+        },
       ]}
       faqs={faqs}
       internalLinks={[
         {
-          text: `${rising.sign} Sun Sign`,
+          text: 'Birth Chart Guide',
+          href: '/grimoire/birth-chart',
+        },
+        {
+          text: '1st House Meaning',
+          href: '/grimoire/houses/1st-house',
+        },
+        {
+          text: `${rising.sign} Zodiac Sign`,
           href: `/grimoire/zodiac/${rising.sign.toLowerCase()}`,
+        },
+        {
+          text: `${rising.sign} Decans`,
+          href: `/grimoire/decans/${rising.sign.toLowerCase()}`,
         },
         {
           text: `Moon in ${rising.sign}`,
           href: `/grimoire/moon-in/${rising.sign.toLowerCase()}`,
         },
-        {
-          text: `${rising.sign} Horoscopes`,
-          href: `/grimoire/horoscopes/${rising.sign.toLowerCase()}`,
-        },
         { text: 'All Rising Signs', href: '/grimoire/rising' },
-        {
-          text: 'Birth Chart Guide',
-          href: '/grimoire/guides/birth-chart-complete-guide',
-        },
       ]}
       ctaText='Discover Your Rising Sign'
       ctaHref='/birth-chart'
     >
       {/* Quick Stats */}
       <section className='mb-8'>
-        <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+        <div className='grid grid-cols-2 md:grid-cols-5 gap-4'>
           <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
-            <div className='text-2xl mb-1'>
-              {rising.element === 'Fire'
-                ? '🔥'
-                : rising.element === 'Earth'
-                  ? '🌍'
-                  : rising.element === 'Air'
-                    ? '💨'
-                    : '💧'}
+            <div className='font-astro text-3xl leading-none mb-2 text-lunary-primary-400'>
+              {signGlyph}
+            </div>
+            <div className='text-xs text-content-muted'>Sign</div>
+            <div className='text-sm text-content-secondary'>{rising.sign}</div>
+          </div>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
+            <div className='font-astro text-3xl leading-none mb-2 text-lunary-primary-400'>
+              {elementGlyph}
             </div>
             <div className='text-xs text-content-muted'>Element</div>
             <div className='text-sm text-content-secondary'>
@@ -194,7 +245,9 @@ ${rising.compatibility}`;
             </div>
           </div>
           <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
-            <div className='text-2xl mb-1'>⚡</div>
+            <div className='font-astro text-3xl leading-none mb-2 text-lunary-primary-400'>
+              {modalityGlyph}
+            </div>
             <div className='text-xs text-content-muted'>Modality</div>
             <div className='text-sm text-content-secondary'>
               {rising.modality}
@@ -298,32 +351,43 @@ ${rising.compatibility}`;
           Explore Other Rising Signs
         </Heading>
         <div className='grid md:grid-cols-2 gap-3 mt-4'>
-          {relatedRisings.map((related) => (
-            <NavParamLink
-              key={related.slug}
-              href={`/grimoire/rising/${related.slug}`}
-              className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
-            >
-              <div className='flex items-center justify-between'>
-                <span className='text-content-primary'>
-                  {related.sign} Rising
-                </span>
-                <span className='text-xs text-content-muted'>
-                  {related.element}
-                </span>
-              </div>
-              <div className='text-xs text-content-muted mt-1'>
-                {related.coreTraits[0]}
-              </div>
-            </NavParamLink>
-          ))}
+          {relatedRisings.map((related) => {
+            const relatedSlug = getPublicRisingSignSlug(related.slug);
+            const relatedGlyph =
+              zodiacSymbol[relatedSlug as keyof typeof zodiacSymbol];
+
+            return (
+              <NavParamLink
+                key={related.slug}
+                href={`/grimoire/rising/${relatedSlug}`}
+                className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
+              >
+                <div className='flex items-center justify-between gap-3'>
+                  <span className='flex items-center gap-2 text-content-primary'>
+                    {relatedGlyph && (
+                      <span className='font-astro text-lg text-lunary-primary-400 leading-none'>
+                        {relatedGlyph}
+                      </span>
+                    )}
+                    {related.sign} Rising
+                  </span>
+                  <span className='text-xs text-content-muted'>
+                    {related.element}
+                  </span>
+                </div>
+                <div className='text-xs text-content-muted mt-1'>
+                  {related.coreTraits[0]}
+                </div>
+              </NavParamLink>
+            );
+          })}
         </div>
       </section>
 
       {/* Cosmic Connections */}
       <CosmicConnections
         entityType='rising'
-        entityKey={sign}
+        entityKey={publicSignSlug}
         title='Explore Related Topics'
       />
     </SEOContentTemplate>
