@@ -12,8 +12,19 @@ import transitData from '@/data/slow-planet-sign-changes.json';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export const dynamicParams = false;
+
+const START_YEAR = 2025;
+const CURRENT_YEAR = new Date().getFullYear();
+const END_YEAR = Math.max(CURRENT_YEAR + 2, START_YEAR + 2);
+
+export function generateStaticParams() {
+  return YEARLY_TRANSITS.filter(
+    (transit) => transit.year >= START_YEAR && transit.year <= END_YEAR,
+  ).map((transit) => ({
+    transit: transit.id,
+  }));
+}
 
 /** Planet-sign theme mappings for dynamic transit resolution */
 const PLANET_SIGN_THEMES: Record<string, string[]> = {
@@ -35,7 +46,7 @@ function resolveDynamicTransit(transitId: string): YearlyTransit | null {
   if (!yearMatch) return null;
 
   const year = Number(yearMatch[1]);
-  if (year < 2020 || year > 2040) return null;
+  if (year < START_YEAR || year > END_YEAR) return null;
 
   const prefix = transitId.replace(/-\d{4}$/, '');
   const parts = prefix.split('-');
@@ -306,7 +317,7 @@ export async function generateMetadata({
   const transit =
     YEARLY_TRANSITS.find((t) => t.id === transitId) ||
     resolveDynamicTransit(transitId);
-  if (!transit) {
+  if (!transit || transit.year < START_YEAR || transit.year > END_YEAR) {
     return { title: 'Transit Not Found | Lunary' };
   }
 
@@ -358,7 +369,7 @@ export default async function TransitPage({
   const transit =
     YEARLY_TRANSITS.find((t) => t.id === transitId) ||
     resolveDynamicTransit(transitId);
-  if (!transit) {
+  if (!transit || transit.year < START_YEAR || transit.year > END_YEAR) {
     notFound();
   }
 

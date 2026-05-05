@@ -13,10 +13,11 @@ import { Heading } from '@/components/ui/Heading';
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 
-// Recovery-mode year range: keep discovery near-term only.
+// Dynamic year range: current year to a short future window.
+// This keeps event pages relevant and reduces low-value crawl inventory.
 const START_YEAR = 2025;
 const CURRENT_YEAR = new Date().getFullYear();
-const END_YEAR = CURRENT_YEAR + 1;
+const END_YEAR = Math.max(CURRENT_YEAR + 2, START_YEAR + 2);
 const AVAILABLE_YEARS = Array.from(
   { length: END_YEAR - START_YEAR + 1 },
   (_, i) => START_YEAR + i,

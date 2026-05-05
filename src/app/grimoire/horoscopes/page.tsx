@@ -101,11 +101,11 @@ export default function GrimoireHoroscopesPage() {
       additionalSchemas={[structuredData]}
       whatIs={{
         question: 'What are monthly horoscopes?',
-        answer: `Monthly horoscopes provide detailed astrological predictions for each zodiac sign covering an entire month. They forecast trends in love, career, health, and personal growth based on planetary movements and astrological transits. Our monthly horoscopes are updated regularly for ${currentYear} and ${nextYear}, giving you near-term planning grounded in current sky movements.`,
+        answer: `Monthly horoscopes provide detailed astrological predictions for each zodiac sign covering an entire month. They forecast trends in love, career, health, and personal growth based on planetary movements and astrological transits. Our monthly horoscopes are updated regularly for ${currentYear} and ${nextYear}, giving you a focused forecast window without sending you wandering into stale future pages.`,
       }}
       intro={`Welcome to your complete monthly horoscope guide. Discover what the stars have in store for your zodiac sign with detailed predictions covering love, career, health, and personal growth.
 
-Our monthly horoscopes are updated regularly and provide personalized insights based on current planetary movements and astrological transits. We publish forecasts for ${currentYear} and ${nextYear}, keeping the focus on the time windows people are actually living through now.
+Our monthly horoscopes are updated regularly and provide personalized insights based on current planetary movements and astrological transits. We publish forecasts for ${currentYear} and ${nextYear}, keeping the archive focused on what people are actually searching for right now.
 
 Select your zodiac sign below to explore detailed monthly predictions.`}
       breadcrumbs={[

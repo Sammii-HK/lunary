@@ -16,11 +16,13 @@ import { format } from 'date-fns';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+export const dynamicParams = false;
 
-// Recovery-mode year range: keep discovery near-term only.
+// Keep historical years indexed (starting from 2025) and only a short future window
+// to avoid filling the sitemap with speculative, low-value URLs.
 const START_YEAR = 2025;
 const CURRENT_YEAR = new Date().getFullYear();
-const END_YEAR = CURRENT_YEAR + 1;
+const END_YEAR = Math.max(CURRENT_YEAR + 2, START_YEAR + 2);
 const AVAILABLE_YEARS = Array.from(
   { length: END_YEAR - START_YEAR + 1 },
   (_, i) => START_YEAR + i,
@@ -134,7 +136,9 @@ const getTransitsYearContent = (year: number): TransitsYearContent => {
  */
 async function getEnhancedTransits(year: number): Promise<YearlyTransit[]> {
   const staticTransits = getTransitsForYear(year);
-  const forecast = await generateYearlyForecast(year);
+  const forecast = await generateYearlyForecast(year, undefined, undefined, {
+    useDbCache: false,
+  });
 
   // Create a map of static transits by planet+sign for easy lookup
   const staticByKey = new Map<string, YearlyTransit>();
@@ -203,8 +207,9 @@ async function getEnhancedTransits(year: number): Promise<YearlyTransit[]> {
   return enhancedTransits;
 }
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return AVAILABLE_YEARS.map((year) => ({ year: String(year) }));
+}
 
 export async function generateMetadata({
   params,
@@ -221,7 +226,9 @@ export async function generateMetadata({
   }
 
   // Get dynamic data for rich metadata
-  const forecast = await generateYearlyForecast(yearNum);
+  const forecast = await generateYearlyForecast(yearNum, undefined, undefined, {
+    useDbCache: false,
+  });
   const forwardIngresses = forecast.ingresses.filter((i) => !i.isRetrograde);
   const majorIngress = forwardIngresses.find((i) =>
     ['Saturn', 'Uranus', 'Neptune', 'Pluto'].includes(i.planet),
@@ -297,7 +304,9 @@ export default async function TransitsYearPage({
   // Use enhanced transits that merge static content with dynamic astronomical data
   const transits = await getEnhancedTransits(yearNum);
   // Get major planetary conjunctions for the year
-  const forecast = await generateYearlyForecast(yearNum);
+  const forecast = await generateYearlyForecast(yearNum, undefined, undefined, {
+    useDbCache: false,
+  });
   const conjunctions = forecast.conjunctions;
   const itemListSchema = createItemListSchema({
     name: `${year} Astrology Transits`,

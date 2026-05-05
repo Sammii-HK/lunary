@@ -10,8 +10,11 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return getYearRange().map((year) => ({ year: String(year) }));
+}
 
 export async function generateMetadata({
   params,
@@ -118,6 +121,14 @@ ${data.challenges.map((c) => `- ${c}`).join('\n')}
 
 ${year} offers these special opportunities:
 ${data.opportunities.map((o) => `- ${o}`).join('\n')}
+
+### How Lunary Calculates the Universal Year
+
+We calculate the universal year by reducing the full year number (${year.split('').join(' + ')}) until it resolves to ${universalYear}. That gives the shared numerological backdrop for the year rather than a personal forecast. The point is not that every person experiences the year identically; it is that the collective tone tends to emphasise the same lessons, pressures, and openings.
+
+### How to Use This Page Well
+
+Use the universal year as a timing framework, not a fortune-cookie answer. It helps to ask where the year is inviting expansion, what habits feel outdated, and which opportunities actually match the ${universalYear} rhythm instead of your old defaults.
       `}
       rituals={[
         `Meditate on the number ${universalYear} and its energy`,
@@ -166,8 +177,12 @@ ${data.opportunities.map((o) => `- ${o}`).join('\n')}
       ctaText='Calculate your personal year number'
       ctaHref='/horoscope'
       sources={[
-        { name: 'Pythagorean numerology' },
-        { name: 'Universal year calculations' },
+        {
+          name: 'Lunary numerology calculation method',
+          url: 'https://lunary.app/developers',
+        },
+        { name: 'Pythagorean numerology tradition' },
+        { name: 'Universal year reduction method' },
       ]}
     >
       <div className='mt-8'>

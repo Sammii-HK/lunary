@@ -7,8 +7,11 @@ import { karmicDebtNumbers } from '@/constants/grimoire/numerology-extended-data
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return Object.keys(karmicDebtNumbers).map((number) => ({ number }));
+}
 
 export async function generateMetadata({
   params,
@@ -113,7 +116,11 @@ Karmic Debt ${number} often indicates a past life where there were issues around
 
 **Challenges You May Face**
 
-${numberData.challenges.map((c) => `- ${c}`).join('\n')}`}
+${numberData.challenges.map((c) => `- ${c}`).join('\n')}
+
+### How Lunary Identifies Karmic Debt ${number}
+
+Lunary treats karmic debt numbers as a chart pattern, not a doom label. The number appears through standard numerology reduction rules, then gets interpreted as a repeating lesson about behaviour, responsibility, and repair. The useful question is not whether the debt is scary. It is whether the pattern keeps repeating until you handle it differently.`}
         emotionalThemes={numberData.keywords}
         howToWorkWith={numberData.howToHeal}
         journalPrompts={[
@@ -152,6 +159,19 @@ ${numberData.challenges.map((c) => `- ${c}`).join('\n')}`}
           { text: 'Explore Numerology', href: '/grimoire/numerology' },
           { text: 'Life Path Numbers', href: '/grimoire/numerology' },
           { text: 'Grimoire Home', href: '/grimoire' },
+        ]}
+        sources={[
+          {
+            name: 'Lunary numerology calculation method',
+            url: 'https://lunary.app/developers',
+          },
+          {
+            name: 'Pythagorean numerology tradition',
+          },
+          {
+            name: 'Lunary karmic pattern interpretation framework',
+            url: 'https://lunary.app/developers',
+          },
         ]}
         ctaText='Want personalized numerology insights?'
         ctaHref='/pricing'

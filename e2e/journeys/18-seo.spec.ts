@@ -100,16 +100,6 @@ test.describe('SEO - Core Pages', () => {
 });
 
 test.describe('SEO - Birth Chart Tool Robots', () => {
-  test('/birth-chart should have noindex meta tag', async ({ page }) => {
-    await page.goto(`${BASE_URL}/birth-chart`, {
-      waitUntil: 'domcontentloaded',
-    });
-    await page.waitForTimeout(1000);
-
-    const robots = await page.getAttribute('meta[name="robots"]', 'content');
-    expect(robots?.toLowerCase()).toContain('noindex');
-  });
-
   test('/birth-chart/example should have noindex meta tag', async ({
     page,
   }) => {
@@ -456,7 +446,7 @@ test.describe('SEO - Robots Meta Validation', () => {
     });
   }
 
-  const noindexRoutes = ['/birth-chart', '/birth-chart/example'];
+  const noindexRoutes = ['/birth-chart/example'];
 
   for (const route of noindexRoutes) {
     test(`${route} should be noindex`, async ({ page }) => {

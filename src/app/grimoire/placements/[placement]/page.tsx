@@ -16,12 +16,18 @@ import {
   getPlacementSEODescription,
   type CuratedPlacement,
 } from '@/lib/placements/getCuratedPlacement';
+import { getAllPlanetSignSlugs } from '@/constants/seo/planet-sign-content';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+export const dynamicParams = false;
 
 interface PageProps {
   params: Promise<{ placement: string }>;
+}
+
+export function generateStaticParams() {
+  return getAllPlanetSignSlugs().map((placement) => ({ placement }));
 }
 
 // Parse the placement slug to extract planet and sign
@@ -219,6 +225,15 @@ export default async function PlacementPage({ params }: PageProps) {
   };
 
   const meaningContent = getMeaningContent(curated);
+  const methodologyContent = `### How Lunary Reads ${pageTitle}
+
+Lunary builds placement pages from three layers:
+
+- a calculation layer that identifies the planet-sign placement
+- a structural layer that reads the sign's element, modality, and ruler
+- an interpretive layer that maps the planet's core topics into that sign's style
+
+For ${pageTitle}, that means we are not treating ${content.planet} in ${content.sign} as a random personality paragraph. We are reading how ${content.planet.toLowerCase()} themes around ${planetInfo.themes} behave when filtered through ${content.sign}'s ${signInfo.element.toLowerCase()} temperament and ${signInfo.modality.toLowerCase()} mode of action.`;
   const strengths =
     curated?.strengths || curated?.coreTraits || content.strengths;
   const challenges = curated?.challenges || content.challenges;
@@ -306,6 +321,7 @@ export default async function PlacementPage({ params }: PageProps) {
           : `${content.planet} in ${content.sign}: ${content.strengths.slice(0, 2).join(', ')}.`
       }
       meaning={meaningContent}
+      symbolism={methodologyContent}
       howToWorkWith={
         curated && 'growthPath' in curated
           ? [curated.growthPath as string]
@@ -331,6 +347,19 @@ export default async function PlacementPage({ params }: PageProps) {
       ]}
       ctaText='Discover Your Placements'
       ctaHref='/birth-chart'
+      sources={[
+        {
+          name: 'Lunary placement interpretation framework',
+          url: 'https://lunary.app/developers',
+        },
+        {
+          name: 'Astronomy Engine planetary calculations',
+          url: 'https://github.com/cosinekitty/astronomy',
+        },
+        {
+          name: 'Traditional Western astrology and essential dignity doctrine',
+        },
+      ]}
       cosmicConnections={
         <CosmicConnections
           entityType='placement'

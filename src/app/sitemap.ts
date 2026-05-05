@@ -5,6 +5,8 @@ import { execFileSync } from 'node:child_process';
 import { grimoire } from '@/constants/grimoire';
 import { sectionToSlug } from '@/utils/grimoire';
 import spellsJson from '@/data/spells.json';
+import { crystalDatabase } from '@/constants/grimoire/crystals';
+import { runesList } from '@/constants/runes';
 import { chakras } from '@/constants/chakras';
 import { tarotCards } from '../../utils/tarot/tarot-cards';
 import { tarotSpreads } from '@/constants/tarot';
@@ -40,11 +42,7 @@ import { activeAppPolicySlugs } from '@/data/app-policy-pages';
 
 dayjs.extend(isoWeek);
 import { getAllSynastryAspectSlugs } from '@/constants/seo/synastry-aspects';
-import { getCuratedCompatibilitySlugs } from '@/constants/seo/compatibility-content';
-import {
-  signDescriptions,
-  planetDescriptions,
-} from '@/constants/seo/planet-sign-content';
+import { getAllCompatibilitySlugs } from '@/constants/seo/compatibility-content';
 
 const PROJECT_ROOT = process.cwd();
 const LAST_MODIFIED_MANIFEST_PATH = resolvePath(
@@ -195,14 +193,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority,
   });
 
-  const deprioritizedMainSitemapSections = new Set([
-    'zodiac',
-    'birthday',
-    'compatibility',
-    'crystals',
-    'runes',
-  ]);
-
   const staticPageSources: Record<string, string[]> = {
     '': ['src/app/page.tsx'],
     pricing: ['src/app/pricing/page.tsx'],
@@ -217,10 +207,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'grimoire/tarot/yes-or-no/love-timeframe': [
       'src/app/grimoire/tarot/yes-or-no/love-timeframe/page.tsx',
     ],
+    'grimoire/zodiac': ['src/app/grimoire/zodiac/page.tsx'],
     'grimoire/spells': ['src/app/grimoire/spells/page.tsx'],
     'grimoire/practices': ['src/app/grimoire/practices/page.tsx'],
     'grimoire/events': ['src/app/grimoire/events/page.tsx'],
+    'grimoire/events/2025': ['src/app/grimoire/events/page.tsx'],
     'grimoire/guides': ['src/app/grimoire/guides/page.tsx'],
+    'grimoire/compatibility': ['src/app/grimoire/compatibility/page.tsx'],
     'grimoire/eclipses': ['src/app/grimoire/eclipses/page.tsx'],
     'grimoire/houses': ['src/app/grimoire/houses/page.tsx'],
     'grimoire/aspects': ['src/app/grimoire/aspects/page.tsx'],
@@ -231,12 +224,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'grimoire/lunar-nodes': ['src/app/grimoire/lunar-nodes/page.tsx'],
     'grimoire/transits': ['src/app/grimoire/transits/page.tsx'],
     'grimoire/moon': ['src/app/grimoire/moon/page.tsx'],
+    'grimoire/crystals': ['src/app/grimoire/crystals/page.tsx'],
+    'grimoire/runes': ['src/app/grimoire/runes/page.tsx'],
     'grimoire/candle-magic': ['src/app/grimoire/candle-magic/page.tsx'],
     'grimoire/correspondences': ['src/app/grimoire/correspondences/page.tsx'],
     'grimoire/decans': ['src/app/grimoire/decans/page.tsx'],
     'grimoire/cusps': ['src/app/grimoire/cusps/page.tsx'],
     'grimoire/seasons': ['src/app/grimoire/seasons/page.tsx'],
     'grimoire/placements': ['src/app/grimoire/placements/page.tsx'],
+    'grimoire/birthday': ['src/app/grimoire/birthday/page.tsx'],
     'grimoire/chinese-zodiac': ['src/app/grimoire/chinese-zodiac/page.tsx'],
     'grimoire/wheel-of-the-year': [
       'src/app/grimoire/wheel-of-the-year/page.tsx',
@@ -270,10 +266,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'referral-terms': ['src/app/referral-terms/page.tsx'],
     dmca: ['src/app/dmca/page.tsx'],
     trademark: ['src/app/trademark/page.tsx'],
-    'building-lunary': ['src/app/building-lunary/page.tsx'],
     'moon-circles': ['src/app/moon-circles/page.tsx'],
-    launch: ['src/app/launch/page.tsx'],
-    'product-hunt': ['src/app/product-hunt/page.tsx'],
     'cosmic-report-generator': ['src/app/cosmic-report-generator/page.tsx'],
     'comparison/lunary-vs-costar': [
       'src/app/comparison/lunary-vs-costar/page.tsx',
@@ -316,6 +309,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       'src/app/grimoire/guides/moon-phases-guide/page.tsx',
     ],
     'grimoire/glossary': ['src/app/grimoire/glossary/page.tsx'],
+    transits: ['src/app/transits/page.tsx'],
+    'moon-calendar': ['src/app/moon-calendar/page.tsx'],
     'about/sammii': ['src/app/about/sammii/page.tsx'],
     'about/editorial-guidelines': [
       'src/app/about/editorial-guidelines/page.tsx',
@@ -364,10 +359,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
-    { path: 'grimoire/spells', changeFrequency: 'monthly', priority: 0.7 },
+    { path: 'grimoire/zodiac', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/spells', changeFrequency: 'monthly', priority: 0.8 },
     { path: 'grimoire/practices', changeFrequency: 'monthly', priority: 0.8 },
-    { path: 'grimoire/events', changeFrequency: 'monthly', priority: 0.7 },
+    { path: 'grimoire/events', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/events/2025', changeFrequency: 'monthly', priority: 0.8 },
     { path: 'grimoire/guides', changeFrequency: 'monthly', priority: 0.8 },
+    {
+      path: 'grimoire/compatibility',
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
     { path: 'grimoire/eclipses', changeFrequency: 'monthly', priority: 0.8 },
     { path: 'grimoire/houses', changeFrequency: 'monthly', priority: 0.8 },
     { path: 'grimoire/aspects', changeFrequency: 'monthly', priority: 0.8 },
@@ -380,6 +382,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: 'grimoire/lunar-nodes', changeFrequency: 'monthly', priority: 0.8 },
     { path: 'grimoire/transits', changeFrequency: 'monthly', priority: 0.8 },
     { path: 'grimoire/moon', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/crystals', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/runes', changeFrequency: 'monthly', priority: 0.8 },
     {
       path: 'grimoire/candle-magic',
       changeFrequency: 'monthly',
@@ -398,6 +402,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
+    { path: 'grimoire/birthday', changeFrequency: 'monthly', priority: 0.7 },
     {
       path: 'grimoire/chinese-zodiac',
       changeFrequency: 'monthly',
@@ -464,14 +469,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     { path: 'dmca', changeFrequency: 'monthly', priority: 0.4 },
     { path: 'trademark', changeFrequency: 'monthly', priority: 0.4 },
-    {
-      path: 'building-lunary',
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    },
     { path: 'moon-circles', changeFrequency: 'daily', priority: 0.7 },
-    { path: 'launch', changeFrequency: 'monthly', priority: 0.7 },
-    { path: 'product-hunt', changeFrequency: 'monthly', priority: 0.7 },
     {
       path: 'cosmic-report-generator',
       changeFrequency: 'monthly',
@@ -544,6 +542,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     { path: 'grimoire/glossary', changeFrequency: 'monthly', priority: 0.7 },
+    { path: 'transits', changeFrequency: 'weekly', priority: 0.8 },
+    {
+      path: 'moon-calendar',
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
     {
       path: 'about/sammii',
       changeFrequency: 'monthly',
@@ -558,11 +562,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       path: 'about/methodology',
       changeFrequency: 'monthly',
       priority: 0.6,
-    },
-    {
-      path: 'birth-chart/example',
-      changeFrequency: 'monthly',
-      priority: 0.7,
     },
     {
       path: 'grimoire/a-z',
@@ -631,9 +630,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // Add all grimoire sections
-  const grimoireItems = Object.keys(grimoire).filter(
-    (item) => !deprioritizedMainSitemapSections.has(sectionToSlug(item)),
-  );
+  const grimoireItems = Object.keys(grimoire);
   const grimoireRoutes = grimoireItems.map((item) => ({
     url: `${baseUrl}/grimoire/${sectionToSlug(item)}`,
     lastModified: date,
@@ -644,6 +641,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Add all spell pages
   const spellRoutes = spellsJson.map((spell) => ({
     url: `${baseUrl}/grimoire/spells/${spell.id}`,
+    lastModified: date,
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }));
+
+  // Add all crystal pages
+  const crystalRoutes = crystalDatabase.map((crystal) => ({
+    url: `${baseUrl}/grimoire/crystals/${crystal.id}`,
+    lastModified: date,
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }));
+
+  // Add all rune pages
+  const runeRoutes = Object.keys(runesList).map((runeId) => ({
+    url: `${baseUrl}/grimoire/runes/${runeId}`,
     lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
@@ -968,7 +981,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${baseUrl}/grimoire/zodiac/${stringToKebabCase(sign)}`,
     lastModified: date,
     changeFrequency: 'monthly' as const,
-    priority: 0.6,
+    priority: 0.8,
   }));
 
   // Add all house pages (consolidated to /grimoire/houses/[ordinal]-house)
@@ -1069,22 +1082,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
+  // Keep historical years indexed (starting from 2025) and only a short future window
+  // so the sitemap does not balloon with speculative, low-demand URLs.
+  const startYear = 2025;
   const currentYear = new Date().getFullYear();
-  const moonStartYear = Math.max(2025, currentYear - 1);
-  const moonEndYear = currentYear + 2;
-  const moonYears = Array.from(
-    { length: moonEndYear - moonStartYear + 1 },
-    (_, i) => moonStartYear + i,
-  );
-  const eventTransitStartYear = Math.max(2025, currentYear - 1);
-  const eventTransitEndYear = currentYear + 2;
-  const eventTransitYears = Array.from(
-    { length: eventTransitEndYear - eventTransitStartYear + 1 },
-    (_, i) => eventTransitStartYear + i,
+  const endYear = Math.max(currentYear + 2, startYear + 2);
+  const dynamicYears = Array.from(
+    { length: endYear - startYear + 1 },
+    (_, i) => startYear + i,
   );
 
   // Add moon year pages (generated by moon/[year]/page.tsx)
-  const moonYearRoutes = moonYears.map((year) => ({
+  const moonYearRoutes = dynamicYears.map((year) => ({
     url: `${baseUrl}/grimoire/moon/${year}`,
     lastModified: date,
     changeFrequency: 'monthly' as const,
@@ -1223,6 +1232,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
+  // Add synastry generator page
+  const synastryGeneratorRoute = {
+    url: `${baseUrl}/grimoire/synastry/generate`,
+    lastModified: date,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  };
+
   // Add synastry aspects index and individual pages
   const synastryAspectSlugs = getAllSynastryAspectSlugs();
   const synastryAspectsIndexRoute = {
@@ -1238,27 +1255,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // Add curated compatibility pages only; generated long-tail stays live but
-  // should not be advertised as recovery-priority discovery.
-  const compatibilitySlugs = getCuratedCompatibilitySlugs();
+  // Add zodiac compatibility pages (all 78 unique pairs + 12 same-sign)
+  const compatibilitySlugs = getAllCompatibilitySlugs();
   const compatibilityRoutes = compatibilitySlugs.map((slug) => ({
     url: `${baseUrl}/grimoire/compatibility/${slug}`,
     lastModified: date,
     changeFrequency: 'monthly' as const,
-    priority: 0.5,
+    priority: 0.7,
   }));
-
-  // Add planetary placement pages (planet-in-sign combinations)
-  const planetKeys = Object.keys(planetDescriptions);
-  const signKeys = Object.keys(signDescriptions);
-  const placementRoutes = planetKeys.flatMap((planet) =>
-    signKeys.map((sign) => ({
-      url: `${baseUrl}/grimoire/placements/${planet}-in-${sign}`,
-      lastModified: date,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    })),
-  );
 
   // Add rising sign pages
   const risingSignSlugs = [
@@ -1361,7 +1365,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     additionalGrimoirePageConfigs.map(createRouteEntry);
 
   // Add events year pages (dynamic route generates current year to +10 years)
-  const eventsYearRoutes = eventTransitYears.map((year) => ({
+  const eventsYearRoutes = dynamicYears.map((year) => ({
     url: `${baseUrl}/grimoire/events/${year}`,
     lastModified: date,
     changeFrequency: 'monthly' as const,
@@ -1377,7 +1381,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'eclipses',
     'equinoxes-solstices',
   ];
-  const eventSubpages = eventTransitYears.flatMap((year) =>
+  const eventSubpages = dynamicYears.flatMap((year) =>
     eventTypes.map((eventType) => ({
       url: `${baseUrl}/grimoire/events/${year}/${eventType}`,
       lastModified: date,
@@ -1387,18 +1391,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   // Add transits year pages
-  const transitsYearRoutes = eventTransitYears.map((year) => ({
+  const transitsYearRoutes = dynamicYears.map((year) => ({
     url: `${baseUrl}/grimoire/transits/year/${year}`,
     lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
 
-  // Add individual transit pages (e.g. /grimoire/transits/saturn-taurus-2028)
+  // Add individual transit pages only for the active planning window.
   const transitIndividualRoutes = YEARLY_TRANSITS.filter(
-    (transit) =>
-      transit.year >= eventTransitStartYear &&
-      transit.year <= eventTransitEndYear,
+    (transit) => transit.year >= startYear && transit.year <= endYear,
   ).map((transit) => ({
     url: `${baseUrl}/grimoire/transits/${transit.id}`,
     lastModified: date,
@@ -1476,11 +1478,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...blogPaginationRoutes,
     ...grimoireRoutes,
     ...spellRoutes,
+    ...crystalRoutes,
+    ...runeRoutes,
     ...chakraRoutes,
     ...majorArcanaRoutes,
     ...minorArcanaRoutes,
     ...moonPhaseRoutes,
     ...fullMoonRoutes,
+    ...zodiacRoutes,
     ...planetRoutes,
     ...sabbatRoutes,
     ...tarotSpreadRoutes,
@@ -1519,10 +1524,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...expressionRoutes,
     ...soulUrgeRoutes,
     ...karmicDebtRoutes,
+    synastryGeneratorRoute,
     synastryAspectsIndexRoute,
     ...synastryAspectRoutes,
     ...compatibilityRoutes,
-    ...placementRoutes,
     risingSignIndexRoute,
     ...risingSignRoutes,
     ...numerologyIndexRoutes,

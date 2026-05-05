@@ -16,6 +16,7 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+export const dynamicParams = false;
 interface PageParams {
   planet1: string;
   aspect: string;
@@ -80,8 +81,17 @@ const ASPECT_FOCUS_MAP: Record<
   },
 };
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  return PLANETS.flatMap((planet1) =>
+    ASPECTS.flatMap((aspect) =>
+      PLANETS.map((planet2) => ({
+        planet1,
+        aspect,
+        planet2,
+      })),
+    ),
+  );
+}
 
 export async function generateMetadata({
   params,
@@ -249,7 +259,13 @@ ${interp.inSynastry}
       ]}
       ctaText='Discover aspects in your chart'
       ctaHref='/birth-chart'
-      sources={[{ name: 'Traditional astrological aspects' }]}
+      sources={[
+        {
+          name: 'Lunary aspect interpretation framework',
+          url: 'https://lunary.app/developers',
+        },
+        { name: 'Traditional Western aspect doctrine' },
+      ]}
       cosmicConnections={
         <CosmicConnections
           entityType='aspect'

@@ -13,21 +13,20 @@ import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+const START_YEAR = 2025;
 const currentYear = new Date().getFullYear();
-const minTransitYear = Math.max(2025, currentYear - 1);
-const maxTransitYear = currentYear + 1;
-const recoveryTransitYearsLabel =
-  minTransitYear === maxTransitYear
-    ? `${minTransitYear}`
-    : `${minTransitYear}-${maxTransitYear}`;
+const END_YEAR = Math.max(currentYear + 2, START_YEAR + 2);
+const YEAR_RANGE_LABEL = `${START_YEAR}-${END_YEAR}`;
+const FILTERED_TRANSITS = YEARLY_TRANSITS.filter(
+  (transit) => transit.year >= START_YEAR && transit.year <= END_YEAR,
+);
 export const metadata: Metadata = {
-  title: `Major Astrological Transits ${recoveryTransitYearsLabel}: Saturn, Jupiter & Key Dates | Lunary`,
-  description: `Complete transit calendar with exact dates, Jupiter movements, and the major planetary transits for ${recoveryTransitYearsLabel}. Track the cosmic shifts that matter now.`,
+  title: `Major Astrological Transits ${YEAR_RANGE_LABEL}: Saturn, Jupiter & Key Dates | Lunary`,
+  description: `Complete transit calendar with exact dates for ${YEAR_RANGE_LABEL}. Track the major planetary shifts that matter now, not a maze of far-future placeholders.`,
   keywords: [
-    `major astrological transits ${currentYear}`,
-    `major astrological transits ${currentYear + 1}`,
-    `astrological transits ${currentYear}`,
-    `jupiter transits ${currentYear}`,
+    'major astrological transits 2027',
+    'major astrological transits 2026',
+    'major astrological transits 2025',
     'astrological transits',
     'planetary transits',
     'saturn return meaning',
@@ -35,22 +34,22 @@ export const metadata: Metadata = {
     'neptune enters aries',
   ],
   openGraph: {
-    title: `Major Astrological Transits ${recoveryTransitYearsLabel}: Saturn, Jupiter & Key Dates | Lunary`,
-    description: `Complete transit calendar with exact dates, Jupiter movements, and the major planetary transits for ${recoveryTransitYearsLabel}.`,
+    title: `Major Astrological Transits ${YEAR_RANGE_LABEL}: Saturn, Jupiter & Key Dates | Lunary`,
+    description: `Complete transit calendar with exact dates for ${YEAR_RANGE_LABEL}.`,
     url: 'https://lunary.app/grimoire/transits',
     images: [
       {
         url: '/api/og/grimoire/transits',
         width: 1200,
         height: 630,
-        alt: `Major Astrological Transits ${recoveryTransitYearsLabel}`,
+        alt: `Major Astrological Transits ${YEAR_RANGE_LABEL}`,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `Major Astrological Transits ${recoveryTransitYearsLabel}: Saturn, Jupiter & Key Dates | Lunary`,
-    description: `Complete transit calendar with exact dates, Jupiter movements, and the major planetary transits for ${recoveryTransitYearsLabel}.`,
+    title: `Major Astrological Transits ${YEAR_RANGE_LABEL}: Saturn, Jupiter & Key Dates | Lunary`,
+    description: `Complete transit calendar with exact dates for ${YEAR_RANGE_LABEL}.`,
     images: ['/api/og/grimoire/transits'],
   },
   alternates: { canonical: 'https://lunary.app/grimoire/transits' },
@@ -67,10 +66,8 @@ export const metadata: Metadata = {
   },
 };
 
-const transitYears = YEARLY_TRANSITS.map((transit) => transit.year);
-const years = [...new Set(transitYears)]
-  .filter((year) => year >= minTransitYear && year <= maxTransitYear)
-  .sort((a, b) => a - b);
+const transitYears = FILTERED_TRANSITS.map((transit) => transit.year);
+const years = [...new Set(transitYears)].sort((a, b) => a - b);
 const cosmicSections = [
   ...getCosmicConnections('hub-transits', 'transits'),
   {
@@ -109,7 +106,7 @@ const SATURN_CYCLE_STEPS = [
   },
   {
     label: 'Saturn Return (Conjunction)',
-    years: recoveryTransitYearsLabel.replace('-', '–'),
+    years: YEAR_RANGE_LABEL,
     ages: '28–34',
     birthYears: '1995–2002',
     notes:
@@ -118,12 +115,13 @@ const SATURN_CYCLE_STEPS = [
 ];
 
 export default function TransitsIndexPage() {
+  const currentYear = new Date().getFullYear();
   const transitsListSchema = createItemListSchema({
     name: 'Astrological transits meaning & timing',
     description:
       'Interpretations for major transits with timing notes so you can read Saturn returns, Jupiter shifts, and planetary ingresses with clarity.',
     url: 'https://lunary.app/grimoire/transits',
-    items: YEARLY_TRANSITS.slice(0, 20).map((transit) => ({
+    items: FILTERED_TRANSITS.slice(0, 20).map((transit) => ({
       name: transit.title,
       url: `https://lunary.app/grimoire/transits/${transit.id}`,
       description: transit.description,
@@ -241,7 +239,7 @@ export default function TransitsIndexPage() {
           page includes exact dates, meaning, and practical guidance.
         </p>
         <div className='grid gap-3 md:grid-cols-2'>
-          {YEARLY_TRANSITS.filter(
+          {FILTERED_TRANSITS.filter(
             (t): t is YearlyTransit & { startDate: Date } =>
               !!t.startDate &&
               t.startDate.getTime() > Date.now() - 365 * 86400000 &&

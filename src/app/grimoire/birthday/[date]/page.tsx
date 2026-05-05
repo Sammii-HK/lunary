@@ -15,6 +15,7 @@ import {
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+export const dynamicParams = false;
 interface BirthdayData {
   month: number;
   day: number;
@@ -83,8 +84,22 @@ function getAdjacentBirthdayLinks(
   };
 }
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export function generateStaticParams() {
+  const params: Array<{ date: string }> = [];
+
+  for (let monthIndex = 0; monthIndex < MONTH_NAMES.length; monthIndex += 1) {
+    const monthName = MONTH_NAMES[monthIndex].toLowerCase();
+    const daysInMonth = new Date(
+      Date.UTC(2024, monthIndex + 1, 0),
+    ).getUTCDate();
+
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      params.push({ date: `${monthName}-${day}` });
+    }
+  }
+
+  return params;
+}
 
 export async function generateMetadata({
   params,
@@ -185,6 +200,24 @@ Those born on ${birthday.dateString} fall under the zodiac sign of ${zodiac.sign
 Being in the ${decan}${getOrdinalSuffix(decan)} decan of ${zodiac.sign}, those born on ${birthday.dateString} receive additional influence from ${decanRuler}. This planetary influence adds unique nuances to the core ${zodiac.sign} personality, often manifesting as enhanced ${decan === 1 ? 'core' : decan === 2 ? 'creative' : 'transformative'} qualities.
 
 Your numerology life path number is ${numerology}, which brings ${numerology === 1 ? 'leadership and independence' : numerology === 2 ? 'cooperation and sensitivity' : numerology === 3 ? 'creativity and self-expression' : numerology === 4 ? 'stability and hard work' : numerology === 5 ? 'freedom and adventure' : numerology === 6 ? 'responsibility and nurturing' : numerology === 7 ? 'introspection and wisdom' : numerology === 8 ? 'ambition and material success' : numerology === 9 ? 'humanitarianism and completion' : numerology === 11 ? 'intuition and spiritual insight' : numerology === 22 ? 'master building and vision' : 'universal love and compassion'} to your life path.
+
+### How Lunary Reads This Birthday
+
+This page combines three layers rather than treating a birthday as a one-note Sun sign label:
+
+- **Sun sign framework:** your sign, element, modality, and planetary rulership
+- **Decan refinement:** the specific third of the sign you were born into, which changes tone and emphasis
+- **Numerology timing:** the reduced date number, which adds another symbolic layer around motivation, pace, and growth
+
+That matters because two people can share the same Sun sign and still express it differently if they were born in different decans or carry a different numerology pattern.
+
+### The Decan Layer
+
+The ${decan}${getOrdinalSuffix(decan)} decan adds ${decanRuler} as a sub-ruler, which changes where your ${zodiac.sign} energy lands most strongly. This is often where people feel the “why am I not like every other ${zodiac.sign}?” question getting answered. The core sign stays the same, but the expression becomes more specific.
+
+### The Numerology Layer
+
+Numerology does not replace astrology here; it adds a second symbolic pattern. A life path of ${numerology} tends to highlight the lesson beneath your instinctive ${zodiac.sign} style, which is why the same birthday profile can feel both familiar and slightly more exact than a generic zodiac overview.
       `}
       rituals={[
         `Birthday candle ritual: Light a ${zodiac.luckyColors[0]} candle on your birthday to honor your ${zodiac.sign} energy`,
@@ -246,8 +279,12 @@ Your numerology life path number is ${numerology}, which brings ${numerology ===
       ctaText='Get your personalized birthday reading'
       ctaHref='/birth-chart'
       sources={[
-        { name: 'Traditional Western Astrology' },
-        { name: 'Numerology calculations' },
+        {
+          name: 'Lunary birthday zodiac and decan mapping',
+          url: 'https://lunary.app/developers',
+        },
+        { name: 'Traditional Western astrology' },
+        { name: 'Pythagorean numerology reduction method' },
         { name: 'Decan system' },
       ]}
     >

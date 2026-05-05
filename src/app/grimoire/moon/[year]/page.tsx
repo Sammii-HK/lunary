@@ -9,8 +9,16 @@ import { Heading } from '@/components/ui/Heading';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  const currentYear = new Date().getFullYear();
+  return [Math.max(2025, currentYear - 1), currentYear, currentYear + 1].map(
+    (year) => ({
+      year: String(year),
+    }),
+  );
+}
 
 export async function generateMetadata({
   params,
@@ -126,6 +134,19 @@ Understanding the moon's phases helps you align your spiritual practice, rituals
       intro={intro}
       meaning={meaning}
       tldr={`The ${year} moon calendar includes ${fullMoons.length} full moons and ${newMoons.length} new moons, each occurring in different zodiac signs with unique energetic qualities.`}
+      sources={[
+        {
+          name: 'Lunary lunar calendar methodology',
+          url: 'https://lunary.app/developers',
+        },
+        {
+          name: 'Astronomy Engine moon phase calculations',
+          url: 'https://github.com/cosinekitty/astronomy',
+        },
+        {
+          name: 'Traditional lunar cycle doctrine',
+        },
+      ]}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
         { label: 'Moon', href: '/grimoire/moon' },

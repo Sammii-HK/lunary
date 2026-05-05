@@ -7,6 +7,8 @@ import {
   SIGN_DISPLAY_NAMES,
   MONTH_DISPLAY_NAMES,
   SIGN_SYMBOLS,
+  SIGN_ELEMENTS,
+  SIGN_RULERS,
   ZodiacSign,
   Month,
 } from '@/constants/seo/monthly-horoscope';
@@ -19,6 +21,14 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 // 30-day revalidation for monthly horoscopes
 export const revalidate = 2592000;
 export const dynamicParams = false;
+
+const START_YEAR = 2025;
+const CURRENT_YEAR = new Date().getFullYear();
+const END_YEAR = Math.max(CURRENT_YEAR + 1, START_YEAR + 1);
+const AVAILABLE_YEARS = Array.from(
+  { length: END_YEAR - START_YEAR + 1 },
+  (_, i) => START_YEAR + i,
+);
 
 function resolveOgImageUrl(value: unknown): string | undefined {
   if (!value) return undefined;
@@ -52,19 +62,11 @@ function validateParams(params: PageParams): {
 
   if (!ZODIAC_SIGNS.includes(sign)) return null;
   if (!MONTHS.includes(month)) return null;
-  const maxYear = new Date().getFullYear() + 1;
-  if (year < 2025 || year > maxYear) return null;
+  if (year < START_YEAR || year > END_YEAR) return null;
 
   const monthNumber = MONTHS.indexOf(month) + 1;
   return { sign, year, month, monthNumber };
 }
-
-const CURRENT_YEAR = new Date().getFullYear();
-const AVAILABLE_YEARS = [
-  Math.max(2025, CURRENT_YEAR - 1),
-  CURRENT_YEAR,
-  CURRENT_YEAR + 1,
-];
 
 export function generateStaticParams() {
   return ZODIAC_SIGNS.flatMap((sign) =>
@@ -114,6 +116,8 @@ export default async function MonthlyHoroscopePage({
   const signName = SIGN_DISPLAY_NAMES[sign];
   const monthName = MONTH_DISPLAY_NAMES[month];
   const symbol = SIGN_SYMBOLS[sign];
+  const element = SIGN_ELEMENTS[sign];
+  const ruler = SIGN_RULERS[sign];
   const forecast = buildMonthlyForecast(sign, year, month);
 
   const monthIndex = MONTHS.indexOf(month);
@@ -180,16 +184,30 @@ export default async function MonthlyHoroscopePage({
       ]}
       whatIs={{
         question: `What can ${signName} expect in ${monthName} ${year}?`,
-        answer: forecast.whatToExpect,
+        answer: `${forecast.whatToExpect} ${forecast.decanFocus}`,
       }}
+      intro={`${forecast.summary} ${forecast.slowMoving}`}
       tldr={forecast.tldr}
-      faqs={forecast.faqs}
+      faqs={[
+        {
+          question: `What can ${signName} expect in ${monthName} ${year}?`,
+          answer: forecast.summary,
+        },
+        {
+          question: `What is the main challenge for ${signName} in ${monthName} ${year}?`,
+          answer: forecast.challenge,
+        },
+        {
+          question: `How do slower planets affect ${signName} in ${monthName} ${year}?`,
+          answer: `${forecast.slowMoving} ${forecast.decanFocus}`,
+        },
+      ]}
       meaning={`
 ## ${signName} Overview for ${monthName} ${year}
 
-${forecast.summary}
+${forecast.summary} As a ${element} sign guided by ${ruler}, ${signName} does best this month by following the real timing of the sky instead of forcing a generic “monthly vibe.”
 
-### Monthly Focus
+### Main Focus
 
 ${forecast.focus}
 
@@ -201,15 +219,13 @@ ${forecast.challenge}
 
 ${forecast.opportunity}
 
-### Timing Through the Month
+### Timing Checkpoints
 
 ${forecast.timing}
 
-### Slow-Moving Planets
+### Slow Movers and Decans
 
 ${forecast.slowMoving}
-
-### Decan Timing
 
 ${forecast.decanFocus}
 
@@ -224,6 +240,14 @@ ${forecast.career}
 ### Wellbeing
 
 ${forecast.wellbeing}
+
+### Year Ahead
+
+${monthName} sets part of the tone for ${year}. The point is not to control every variable; it is to notice where the sky is actually helping, where it is applying pressure, and which slice of the month wants restraint versus action.
+
+### Key Sky Events
+
+${forecast.keyEvents.map((event) => `- **${event.dateLabel}: ${event.title}** — ${event.meaning}`).join('\n')}
       `}
       emotionalThemes={forecast.emotionalThemes}
       signsMostAffected={[signName]}
@@ -231,11 +255,15 @@ ${forecast.wellbeing}
         {
           title: `${signName} ${monthName} ${year} At a Glance`,
           headers: ['Aspect', 'Details'],
-          rows: [['Sign', `${signName} ${symbol}`], ...forecast.tableRows],
+          rows: [
+            ['Sign', `${signName} ${symbol}`],
+            ['Element', element],
+            ['Ruling Planet', ruler],
+            ...forecast.tableRows,
+          ],
         },
       ]}
       components={null}
-      intro={`This ${monthName} ${year} horoscope for ${signName} is built from the actual sky story: the dominant transit pressure, the clearest opening, the slow-moving background current, and the exact dates when the tone shifts during the month.`}
       cosmicConnections={
         <HoroscopeCosmicConnections
           variant='monthly-sign'
@@ -248,30 +276,17 @@ ${forecast.wellbeing}
       ctaText={`Get your personalized ${signName} reading`}
       ctaHref='/horoscope'
       sources={[
-        { name: 'Planetary transit calculations' },
-        { name: 'Astronomy Engine sky positions' },
-        { name: 'Moon phase calculations' },
-        { name: 'Traditional astrological interpretations' },
+        {
+          name: 'Lunary monthly transit methodology',
+          url: 'https://lunary.app/developers',
+        },
+        {
+          name: 'Astronomy Engine planetary calculations',
+          url: 'https://github.com/cosinekitty/astronomy',
+        },
+        { name: 'Traditional Western astrology and decan doctrine' },
       ]}
     >
-      {forecast.keyEvents.length > 0 && (
-        <section className='mt-8 rounded-xl border border-stroke-subtle/50 bg-surface-elevated/40 p-5'>
-          <h3 className='text-lg font-medium text-content-primary mb-3'>
-            Real sky shifts this month
-          </h3>
-          <div className='space-y-3'>
-            {forecast.keyEvents.map((event) => (
-              <div key={`${event.dateLabel}-${event.title}`}>
-                <p className='text-sm font-medium text-content-primary'>
-                  {event.dateLabel} — {event.title}
-                </p>
-                <p className='text-sm text-content-muted'>{event.meaning}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
       <div className='mt-8 flex justify-between text-lg'>
         <div className='space-x-4'>
           {prevMonth && (
@@ -315,25 +330,18 @@ ${forecast.wellbeing}
 
       <div className='mt-8 p-5 bg-surface-elevated/50 border border-stroke-subtle/50 rounded-xl'>
         <h3 className='text-lg font-medium text-content-primary mb-3'>
-          Explore the chart context for {signName}
+          Explore {signName} placements
         </h3>
         <p className='text-sm text-content-muted mb-4'>
-          This monthly forecast gets sharper when you compare it with the wider
-          yearly map and your Moon or rising sign. Use the stronger sign pages
-          below instead of generic sun-sign browsing.
+          Your horoscope depends on where {signName} falls in your chart.
+          Explore each placement for deeper insight.
         </p>
         <div className='flex flex-wrap gap-3'>
           <Link
-            href={`/grimoire/horoscopes/${sign}/${year}`}
+            href={`/grimoire/zodiac/${sign}`}
             className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
           >
-            {signName} in {year} &rarr;
-          </Link>
-          <Link
-            href={`/grimoire/transits/year/${year}`}
-            className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
-          >
-            {year} major transits &rarr;
+            {signName} Sun sign &rarr;
           </Link>
           <Link
             href={`/grimoire/moon-in/${sign}`}

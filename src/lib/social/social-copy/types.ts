@@ -76,6 +76,11 @@ export type SourcePack = {
   constraints: string[];
   needsContext: boolean;
   noveltyContext?: NoveltyContext;
+  retrievedFacts?: string[];
+  retrievedExamples?: string[];
+  sceneHints?: string[];
+  winningPatternsContext?: string;
+  sourceConfidence?: 'exact' | 'retrieved' | 'mixed' | 'fallback';
   /** Optional event calendar data for transit/cosmic event posts */
   transitBrief?: TransitBrief;
 };

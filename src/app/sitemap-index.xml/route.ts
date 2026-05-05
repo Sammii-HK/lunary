@@ -1,17 +1,14 @@
 const baseUrl = 'https://lunary.app';
 
 export async function GET() {
-  const now = new Date();
-  const stableMonthStamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01T00:00:00.000Z`;
+  const now = new Date().toISOString();
 
   const sitemaps = [
     'sitemap.xml',
-    'sitemap-planets.xml',
+    'sitemap-zodiac.xml',
     'sitemap-tarot.xml',
-    'sitemap-rituals.xml',
-    'sitemap-transits.xml',
-    'sitemap-placements.xml',
     'sitemap-compatibility.xml',
+    'sitemap-birthday.xml',
     'sitemap-horoscopes.xml',
     'sitemap-chinese-zodiac.xml',
     'sitemap-seasons.xml',
@@ -20,9 +17,6 @@ export async function GET() {
     'sitemap-houses.xml',
     'sitemap-decans.xml',
     'sitemap-cusps.xml',
-    'sitemap-yearly-transits.xml',
-    'sitemap-images.xml',
-    'sitemap-transit-blog.xml',
   ];
 
   const sitemapEntries = sitemaps
@@ -30,7 +24,7 @@ export async function GET() {
       (sitemap) => `
   <sitemap>
     <loc>${baseUrl}/${sitemap}</loc>
-    <lastmod>${stableMonthStamp}</lastmod>
+    <lastmod>${now}</lastmod>
   </sitemap>`,
     )
     .join('');

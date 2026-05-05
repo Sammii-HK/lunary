@@ -15,18 +15,18 @@ import {
   MONTHS,
 } from '@/constants/seo/monthly-horoscope';
 import { formatRulershipValue } from '@/lib/astrology/rulerships';
-import { buildTransitWindowSnapshot } from '@/lib/horoscope/monthly-forecast';
 
 // 30-day revalidation for sign overview pages
 export const revalidate = 2592000;
 export const dynamicParams = false;
 
+const START_YEAR = 2025;
 const CURRENT_YEAR = new Date().getFullYear();
-const AVAILABLE_YEARS = [
-  Math.max(2025, CURRENT_YEAR - 1),
-  CURRENT_YEAR,
-  CURRENT_YEAR + 1,
-];
+const END_YEAR = Math.max(CURRENT_YEAR + 1, START_YEAR + 1);
+const AVAILABLE_YEARS = Array.from(
+  { length: END_YEAR - START_YEAR + 1 },
+  (_, i) => START_YEAR + i,
+);
 
 function resolveOgImageUrl(value: unknown): string | undefined {
   if (!value) return undefined;
@@ -72,13 +72,7 @@ export async function generateMetadata({
   }
 
   const signName = SIGN_DISPLAY_NAMES[signKey];
-  return {
-    ...signMeta(signName, sign),
-    robots: {
-      index: false,
-      follow: true,
-    },
-  };
+  return signMeta(signName, sign);
 }
 
 export default async function SignHoroscopePage({
@@ -115,12 +109,6 @@ export default async function SignHoroscopePage({
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonthSlug = MONTHS[now.getMonth()];
-  const currentSnapshot = buildTransitWindowSnapshot(
-    signKey,
-    now,
-    now,
-    'Today',
-  );
 
   const meta = signMeta(signName, sign);
   const canonicalValue =
@@ -153,11 +141,10 @@ export default async function SignHoroscopePage({
       description={meta.description ?? ''}
       keywords={keywords}
       canonicalUrl={canonicalUrl}
-      tldr={currentSnapshot.summary}
       image={image}
       imageAlt={`${signName} Horoscopes | Lunary`}
-      intro={`Select a year to read ${signName} horoscopes written with real planetary context. Each month is grounded in actual sky movement, not generic mood-board filler.`}
-      meaning={`${signName} is a ${element} sign with rulership ${rulership}. ${currentSnapshot.summary} ${currentSnapshot.focus}`}
+      intro={`Select a year to read ${signName} horoscopes written with real planetary context. Each month includes lunations, transits, and practical guidance tailored to ${element.toLowerCase()} energy.`}
+      meaning={`${signName} is a ${element} sign with rulership ${rulership}. These horoscopes help you channel your natural strengths into the rituals, relationships, and work that matter most.`}
       heroContent={heroContent}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },

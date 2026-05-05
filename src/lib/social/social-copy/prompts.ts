@@ -175,6 +175,37 @@ function buildTransitBriefBlock(pack: SourcePack): string {
   return '\n' + lines.join('\n');
 }
 
+function buildRetrievedContextBlock(pack: SourcePack): string {
+  const lines: string[] = [];
+
+  if (pack.retrievedFacts?.length) {
+    lines.push(
+      'RETRIEVED SUPPORTING CONTEXT (use if it sharpens the post):',
+      ...pack.retrievedFacts.slice(0, 3).map((fact) => `- ${fact}`),
+    );
+  }
+
+  if (pack.retrievedExamples?.length) {
+    lines.push(
+      'RETRIEVED PRACTICAL EXAMPLES:',
+      ...pack.retrievedExamples.slice(0, 2).map((example) => `- ${example}`),
+    );
+  }
+
+  if (pack.winningPatternsContext) {
+    lines.push(pack.winningPatternsContext);
+  }
+
+  if (pack.sceneHints?.length) {
+    lines.push(
+      'CONCRETE SCENE HINTS:',
+      ...pack.sceneHints.slice(0, 4).map((hint) => `- ${hint}`),
+    );
+  }
+
+  return lines.length ? `\n${lines.join('\n')}` : '';
+}
+
 /**
  * Simple hash for deterministic seeding
  */
@@ -238,6 +269,7 @@ const BANNED_PATTERNS = `
 BANNED PATTERNS:
 - "Ever notice [X]? It's [metaphor]. In numerology, [meaning]."
 - Starting with "Seeing/Spotting/Noticed [number] lately?"
+- Starting with "What does [topic] symbolize..."
 - Ending with vague reflection questions
 - Using "journey" more than once per 10 posts
 - Three-part structure (hook + explanation + question) every time
@@ -252,6 +284,14 @@ GENERIC FILLER SENTENCES (never use these - they work for ANY topic):
 - "[X] invites you to reflect on what matters"
 - "Consider what [X] might be telling you"
 Instead, write sentences with SPECIFIC details that only apply to THIS topic.`;
+
+const CONCRETE_TRANSLATION_RULE = `CONCRETE TRANSLATION:
+- If the source language is symbolic or abstract, translate it into lived behaviour.
+- Move from symbolism to scenes: texts, deadlines, spending, flirting, confidence, visibility, conflict, choices, habits.
+- Do not ask broad symbolic questions like "what does this symbolize in your life?"
+- Do not rephrase the source into vague spiritual language.
+- Prefer one specific situation over a general interpretation.
+- Give one concrete social, emotional, or practical effect people can picture.`;
 
 /**
  * Build educational post prompt
@@ -282,6 +322,7 @@ export const buildEducationalPrompt = (pack: SourcePack): string => {
   const noveltyNote = buildNoveltyInstruction(pack.noveltyContext);
 
   const transitBlock = buildTransitBriefBlock(pack);
+  const retrievedContextBlock = buildRetrievedContextBlock(pack);
   const hookHint = getHookHint(pack);
 
   return `Write a social post about "${pack.topicTitle}" in UK English.
@@ -293,7 +334,9 @@ ${pack.grimoireFacts
   .slice(0, 2)
   .map((fact) => `- ${fact}`)
   .join('\n')}
+${pack.relatedKeywords.length ? `- Related keywords: ${pack.relatedKeywords.slice(0, 5).join(', ')}` : ''}
 ${transitBlock}
+${retrievedContextBlock}
 
 ${domainContext}
 
@@ -307,6 +350,8 @@ ${reflectionNote}
 ${CRITICAL_RULES}
 
 ${RARITY_EXTRACTION_RULE}
+
+${CONCRETE_TRANSLATION_RULE}
 
 ${SAVE_WORTHINESS_RULE}
 
@@ -360,6 +405,7 @@ export const buildVideoCaptionPrompt = (pack: SourcePack): string => {
     : '\nDo not mention Lunary or the Grimoire.';
 
   const transitBlock = buildTransitBriefBlock(pack);
+  const retrievedContextBlock = buildRetrievedContextBlock(pack);
   const hookHint = getHookHint(pack);
 
   return `Write a video caption about "${pack.topicTitle}" in UK English.
@@ -371,7 +417,9 @@ ${pack.grimoireFacts
   .slice(0, 2)
   .map((fact) => `- ${fact}`)
   .join('\n')}
+${pack.relatedKeywords.length ? `- Related keywords: ${pack.relatedKeywords.slice(0, 5).join(', ')}` : ''}
 ${transitBlock}
+${retrievedContextBlock}
 
 ${domainContext}
 
@@ -381,9 +429,15 @@ ${hookHint}
 ${captionInstructions}
 ${ctaInstruction}
 
+Grounding rule:
+- Use at least one of the provided related keywords in the first line.
+- Keep the wording concrete and scene-based, not abstract or symbolic.
+
 ${CRITICAL_RULES}
 
 ${RARITY_EXTRACTION_RULE}
+
+${CONCRETE_TRANSLATION_RULE}
 
 ${SAVE_WORTHINESS_RULE}
 
@@ -421,12 +475,16 @@ export const buildQuestionPrompt = (pack: SourcePack): string => {
   const noveltyNote = buildNoveltyInstruction(pack.noveltyContext);
 
   const transitBlock = buildTransitBriefBlock(pack);
+  const retrievedContextBlock = buildRetrievedContextBlock(pack);
 
   return `Write an engaging question about "${pack.topicTitle}" in UK English.
 
 What you know:
 ${pack.grimoireExcerpt}
+${pack.relatedKeywords.length ? `\nRelated keywords: ${pack.relatedKeywords.slice(0, 5).join(', ')}` : ''}
+${pack.sceneHints?.length ? `\nConcrete scene hints: ${pack.sceneHints.slice(0, 4).join(', ')}` : ''}
 ${transitBlock}
+${retrievedContextBlock}
 
 ${domainContext}
 
@@ -440,8 +498,12 @@ Ask a genuine question that:
 - Should inspire CONCRETE, SPECIFIC responses - not vague reflection
 - Is answerable, not rhetorical
 - Optimises for COMMENTS: use rankings, relatable confessions, or specific "which one are you?" style questions
+- Use one related keyword and one scene hint if available
+- Avoid abstract symbolism questions
 
 ${CRITICAL_RULES}
+
+${CONCRETE_TRANSLATION_RULE}
 
 ${SAVE_WORTHINESS_RULE}
 

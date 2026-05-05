@@ -17,14 +17,15 @@ import { Heading } from '@/components/ui/Heading';
 import { NavParamLink } from '@/components/NavParamLink';
 
 export const revalidate = 86400;
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 1-day revalidation
+export function generateStaticParams() {
+  return synastryAspects.map((aspect) => ({ slug: aspect.slug }));
+}
 
 export async function generateMetadata({
   params,

@@ -1064,7 +1064,11 @@ export async function generateYearlyForecast(
   year: number,
   userBirthday?: string,
   observer: Observer = DEFAULT_OBSERVER,
+  options?: {
+    useDbCache?: boolean;
+  },
 ): Promise<YearlyForecast> {
+  const useDbCache = options?.useDbCache ?? true;
   // Only cache generic forecasts (no user-specific birthday)
   if (!userBirthday) {
     // 1. Check in-memory cache (instant, same invocation)
@@ -1072,32 +1076,34 @@ export async function generateYearlyForecast(
     if (memCached) return memCached;
 
     // 2. Check DB cache (yearly_forecasts table)
-    try {
-      const { sql } = await import('@vercel/postgres');
-      const result = await sql`
-        SELECT forecast FROM yearly_forecasts
-        WHERE year = ${year}
-        LIMIT 1
-      `;
-      const row = result.rows[0];
-      if (row?.forecast) {
-        const cached = row.forecast as YearlyForecast;
-        // Validate cached data has required fields — old entries may be incomplete
-        if (cached.ingresses && cached.moonEvents && cached.conjunctions) {
-          forecastMemCache.set(year, cached);
-          console.log(`[generateYearlyForecast] DB cache hit for ${year}`);
-          return cached;
+    if (useDbCache) {
+      try {
+        const { sql } = await import('@vercel/postgres');
+        const result = await sql`
+          SELECT forecast FROM yearly_forecasts
+          WHERE year = ${year}
+          LIMIT 1
+        `;
+        const row = result.rows[0];
+        if (row?.forecast) {
+          const cached = row.forecast as YearlyForecast;
+          // Validate cached data has required fields — old entries may be incomplete
+          if (cached.ingresses && cached.moonEvents && cached.conjunctions) {
+            forecastMemCache.set(year, cached);
+            console.log(`[generateYearlyForecast] DB cache hit for ${year}`);
+            return cached;
+          }
+          console.log(
+            `[generateYearlyForecast] DB cache stale for ${year}, recomputing`,
+          );
         }
-        console.log(
-          `[generateYearlyForecast] DB cache stale for ${year}, recomputing`,
+      } catch (e) {
+        // Table might not exist — fall through to computation
+        console.warn(
+          `[generateYearlyForecast] DB cache miss/error for ${year}:`,
+          (e as Error).message,
         );
       }
-    } catch (e) {
-      // Table might not exist — fall through to computation
-      console.warn(
-        `[generateYearlyForecast] DB cache miss/error for ${year}:`,
-        (e as Error).message,
-      );
     }
   }
 
@@ -1107,32 +1113,34 @@ export async function generateYearlyForecast(
   if (!userBirthday) {
     forecastMemCache.set(year, forecast);
     // Write-through to DB (fire and forget)
-    try {
-      const { sql } = await import('@vercel/postgres');
-      const stats = {
-        majorTransits: forecast.majorTransits.length,
-        retrogrades: forecast.retrogrades.length,
-        eclipses: forecast.eclipses.length,
-        keyAspects: forecast.keyAspects.length,
-      };
-      sql`
-        INSERT INTO yearly_forecasts (year, summary, forecast, stats, source, generated_at, expires_at, created_at, updated_at)
-        VALUES (${year}, ${forecast.summary}, ${JSON.stringify(forecast)}::jsonb, ${JSON.stringify(stats)}::jsonb, 'auto', NOW(), NULL, NOW(), NOW())
-        ON CONFLICT (year) DO UPDATE SET
-          forecast = EXCLUDED.forecast,
-          summary = EXCLUDED.summary,
-          stats = EXCLUDED.stats,
-          source = 'auto',
-          generated_at = NOW(),
-          updated_at = NOW()
-      `.catch((e) =>
-        console.warn(
-          `[generateYearlyForecast] DB write error:`,
-          (e as Error).message,
-        ),
-      );
-    } catch {
-      // Ignore DB write failures
+    if (useDbCache) {
+      try {
+        const { sql } = await import('@vercel/postgres');
+        const stats = {
+          majorTransits: forecast.majorTransits.length,
+          retrogrades: forecast.retrogrades.length,
+          eclipses: forecast.eclipses.length,
+          keyAspects: forecast.keyAspects.length,
+        };
+        sql`
+          INSERT INTO yearly_forecasts (year, summary, forecast, stats, source, generated_at, expires_at, created_at, updated_at)
+          VALUES (${year}, ${forecast.summary}, ${JSON.stringify(forecast)}::jsonb, ${JSON.stringify(stats)}::jsonb, 'auto', NOW(), NULL, NOW(), NOW())
+          ON CONFLICT (year) DO UPDATE SET
+            forecast = EXCLUDED.forecast,
+            summary = EXCLUDED.summary,
+            stats = EXCLUDED.stats,
+            source = 'auto',
+            generated_at = NOW(),
+            updated_at = NOW()
+        `.catch((e) =>
+          console.warn(
+            `[generateYearlyForecast] DB write error:`,
+            (e as Error).message,
+          ),
+        );
+      } catch {
+        // Ignore DB write failures
+      }
     }
   }
 
