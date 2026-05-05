@@ -32,6 +32,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://lunary.app/grimoire/birthday',
   },
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 const structuredData = {

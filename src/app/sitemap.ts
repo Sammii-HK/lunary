@@ -235,7 +235,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'grimoire/cusps': ['src/app/grimoire/cusps/page.tsx'],
     'grimoire/seasons': ['src/app/grimoire/seasons/page.tsx'],
     'grimoire/placements': ['src/app/grimoire/placements/page.tsx'],
-    'grimoire/birthday': ['src/app/grimoire/birthday/page.tsx'],
     'grimoire/chinese-zodiac': ['src/app/grimoire/chinese-zodiac/page.tsx'],
     'grimoire/wheel-of-the-year': [
       'src/app/grimoire/wheel-of-the-year/page.tsx',
