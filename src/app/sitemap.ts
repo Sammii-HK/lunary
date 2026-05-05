@@ -474,32 +474,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     { path: 'grimoire/moon/signs', changeFrequency: 'monthly', priority: 0.6 },
     {
-      path: 'grimoire/reversed-cards-guide',
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
-      path: 'grimoire/spells/fundamentals',
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
       path: 'grimoire/guides/birth-chart-complete-guide',
       changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
       path: 'grimoire/guides/learn-birth-chart',
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
-    {
-      path: 'grimoire/guides/tarot-complete-guide',
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
-    {
-      path: 'grimoire/guides/crystal-healing-guide',
       changeFrequency: 'monthly',
       priority: 0.9,
     },
@@ -1351,16 +1331,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  // Add tarot suit pages
-  const tarotSuitRoutes = ['cups', 'pentacles', 'swords', 'wands'].map(
-    (suit) => ({
-      url: `${baseUrl}/grimoire/tarot/suits/${suit}`,
-      lastModified: date,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    }),
-  );
-
   // Add shop product routes
   const shopProducts = getAllProducts();
   const shopProductRoutes = shopProducts.map((product) => ({
@@ -1454,7 +1424,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...eventSubpages,
     ...transitsYearRoutes,
     ...transitIndividualRoutes,
-    ...tarotSuitRoutes,
     ...shopProductRoutes,
     ...shopPaginationRoutes,
     ...podcastIndexRoute,

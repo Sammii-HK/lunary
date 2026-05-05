@@ -155,6 +155,33 @@ We combine technical precision with intuitive interpretation to create the most 
   },
 ];
 
+const sourceLinks = [
+  {
+    name: 'Astronomy Engine',
+    href: 'https://github.com/cosinekitty/astronomy',
+    description:
+      'Open-source astronomy library used for planetary positions, lunar phases, eclipses, transits, and coordinate transforms.',
+  },
+  {
+    name: 'JPL Horizons',
+    href: 'https://ssd.jpl.nasa.gov/horizons/',
+    description:
+      'NASA/JPL solar system ephemeris service used by Astronomy Engine for validation.',
+  },
+  {
+    name: 'USNO NOVAS',
+    href: 'https://aa.usno.navy.mil/software/novas_info',
+    description:
+      'U.S. Naval Observatory astrometry software used by Astronomy Engine for validation.',
+  },
+  {
+    name: 'Learn to Read a Birth Chart',
+    href: '/grimoire/guides/learn-birth-chart',
+    description:
+      'Lunary’s reader-facing path for applying the calculation layer to chart interpretation.',
+  },
+];
+
 export default function MethodologyPage() {
   const faqSchema = createFAQPageSchema(
     faqs.map((faq) => ({
@@ -208,6 +235,28 @@ export default function MethodologyPage() {
 
           <section className='mt-12'>
             <h2 className='text-2xl font-light mb-6'>
+              Sources & Further Reading
+            </h2>
+            <div className='grid gap-4 md:grid-cols-2'>
+              {sourceLinks.map((source) => (
+                <Link
+                  key={source.href}
+                  href={source.href}
+                  className='rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 transition-colors hover:border-lunary-primary-600 hover:bg-surface-elevated/50'
+                >
+                  <h3 className='text-lg font-medium text-content-primary mb-2'>
+                    {source.name}
+                  </h3>
+                  <p className='text-sm text-content-muted'>
+                    {source.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <section className='mt-12'>
+            <h2 className='text-2xl font-light mb-6'>
               Frequently Asked Questions
             </h2>
             <div className='space-y-4'>
@@ -233,12 +282,20 @@ export default function MethodologyPage() {
               Generate your own birth chart and experience our precision-first
               approach to astrology.
             </p>
-            <Link
-              href='/birth-chart'
-              className='inline-flex px-6 py-3 rounded-lg bg-layer-base/30 hover:bg-layer-base/50 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
-            >
-              Calculate Your Birth Chart
-            </Link>
+            <div className='flex flex-wrap gap-3'>
+              <Link
+                href='/birth-chart'
+                className='inline-flex px-6 py-3 rounded-lg bg-layer-base/30 hover:bg-layer-base/50 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
+              >
+                Calculate Your Birth Chart
+              </Link>
+              <Link
+                href='/grimoire/guides/learn-birth-chart'
+                className='inline-flex px-6 py-3 rounded-lg border border-stroke-subtle text-content-secondary hover:border-lunary-primary-600 hover:text-content-brand transition-colors'
+              >
+                Learn Chart Reading
+              </Link>
+            </div>
           </section>
 
           <div className='mt-8 flex gap-4'>
