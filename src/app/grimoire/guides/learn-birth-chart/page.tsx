@@ -11,6 +11,7 @@ import {
 } from '@/lib/schema';
 import { Button } from '@/components/ui/button';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { ChartReadingExampleInteractive } from './ChartReadingExampleInteractive';
 
 export const metadata: Metadata = {
   title: 'Learn to Read a Birth Chart: Step-by-Step Astrology Path | Lunary',
@@ -144,6 +145,49 @@ const faqs = [
   },
 ];
 
+const workedExampleParts = [
+  {
+    id: 'example-planet',
+    label: 'Planet',
+    value: 'Moon',
+    href: '/grimoire/moon',
+    explanation:
+      'The Moon describes emotional needs, instinct, memory, and what makes the body feel safe. Start with the planet because it tells you what chart function you are reading.',
+  },
+  {
+    id: 'example-sign',
+    label: 'Sign',
+    value: 'Capricorn',
+    href: '/grimoire/zodiac/capricorn',
+    explanation:
+      'Capricorn gives the Moon a controlled, practical, responsible style. The emotion is still present, but it may be managed through competence, duty, and self-control.',
+  },
+  {
+    id: 'example-house',
+    label: 'House',
+    value: '7th House',
+    href: '/grimoire/houses/7th-house',
+    explanation:
+      'The 7th house places the Moon story into one-to-one relationships. Safety, reassurance, and emotional boundaries become partnership topics.',
+  },
+  {
+    id: 'example-aspect',
+    label: 'Aspect',
+    value: 'Square Mars',
+    href: '/grimoire/aspects/moon/square/mars',
+    explanation:
+      'A square to Mars adds friction, urgency, anger, desire, and directness. The chart reader now asks how emotional control and conflict response collide.',
+  },
+  {
+    id: 'example-timing',
+    label: 'Timing',
+    value: 'Mars transit',
+    href: '/grimoire/transits',
+    explanation:
+      'When Mars later transits this Moon or repeats the square, the natal pattern may become active through arguments, decisions, attraction, or pressure in partnership.',
+  },
+];
+
 export default function LearnBirthChartPage() {
   const articleSchema = createArticleWithSpeakableSchema({
     headline: 'Learn to Read a Birth Chart: Step-by-Step Astrology Path',
@@ -261,6 +305,8 @@ export default function LearnBirthChartPage() {
           </Link>
         </div>
       </section>
+
+      <ChartReadingExampleInteractive parts={workedExampleParts} />
 
       <section id='lessons' className='mb-12'>
         <h2 className='text-3xl font-light text-content-primary mb-6'>
