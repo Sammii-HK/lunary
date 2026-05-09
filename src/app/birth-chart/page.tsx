@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { BirthChartShowcase } from '@/components/birth-chart-sections/BirthChartShowcase';
 import { ChartWheelInteractive } from './chart-wheel-interactive';
+import { assignVariantServer } from '@/lib/ab-tests-server';
 import { getCelesteChart } from '@/lib/data/getCelesteChart';
 import { ensureDescendantInChart } from '@/utils/astrology/birth-chart-analysis';
 import {
@@ -29,6 +30,7 @@ import {
   createBreadcrumbSchema,
   createSoftwareAppSchema,
 } from '@/lib/schema';
+import { BirthChartHeroCta } from './BirthChartHeroCta';
 
 const faqs = [
   {
@@ -86,21 +88,34 @@ const comparisonFeatures = [
 
 export default async function BirthChartLandingPage() {
   // Redirect authenticated users to their own birth chart
+  const cookieStore = await cookies();
+  const anonymousId = cookieStore.get('lunary_anon_id')?.value;
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .join('; ');
+
+  let userId: string | undefined;
   try {
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore
-      .getAll()
-      .map((cookie) => `${cookie.name}=${cookie.value}`)
-      .join('; ');
     const sessionResponse = await auth.api.getSession({
       headers: new Headers({ cookie: cookieHeader }),
     });
-    if (sessionResponse?.user?.id) {
+    const sessionUser =
+      sessionResponse?.data?.user ??
+      sessionResponse?.user ??
+      sessionResponse?.session?.user;
+    userId = sessionUser?.id;
+    if (userId) {
       redirect('/app/birth-chart');
     }
   } catch {
     // Not authenticated, show marketing page
   }
+
+  const variant = assignVariantServer(
+    'exec_conversion_v1',
+    userId ?? anonymousId ?? 'birth-chart',
+  );
 
   const celesteData = getCelesteChart();
 
@@ -161,20 +176,7 @@ export default async function BirthChartLandingPage() {
             Beyond the 10 classical planets — track asteroids, lunar nodes,
             Lilith, Part of Fortune, Vertex, and more.
           </p>
-          <div className='flex flex-col sm:flex-row gap-3 justify-center pt-2'>
-            <Link href='/auth'>
-              <Button className='gap-2'>
-                Calculate Your Birth Chart
-                <ArrowRight className='w-4 h-4' />
-              </Button>
-            </Link>
-            <Link href='/birth-chart/example'>
-              <Button variant='outline' className='gap-2'>
-                <BookOpen className='w-4 h-4' />
-                Learn to Read Charts
-              </Button>
-            </Link>
-          </div>
+          <BirthChartHeroCta variant={variant} />
         </header>
 
         {/* Live Chart Showcase */}
