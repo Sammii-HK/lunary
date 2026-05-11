@@ -156,6 +156,7 @@
     "backfill:posthog-events:dry": "DOTENV_CONFIG_PATH=.env.local tsx scripts/backfill-posthog-events.ts --dry-run",
     "run:cron": "tsx scripts/run-cron.ts",
     "audit:grimoire-built": "tsx scripts/audit-grimoire-links-built.ts",
+    "audit:grimoire-survival": "tsx scripts/export-grimoire-survival-map.ts",
     "audit:entitlements": "tsx scripts/auditEntitlements.ts",
     "grimoire:index": "tsx scripts/build-grimoire-search-index.ts",
     "validate:rulerships": "tsx scripts/validate-rulership-content.ts",
