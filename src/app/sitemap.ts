@@ -305,7 +305,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'grimoire/card-combinations': [
       'src/app/grimoire/card-combinations/page.tsx',
     ],
-    'grimoire/moon/signs': ['src/app/grimoire/moon/signs/page.tsx'],
     'grimoire/reversed-cards-guide': [
       'src/app/grimoire/reversed-cards-guide/page.tsx',
     ],
@@ -479,7 +478,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.6,
     },
-    { path: 'grimoire/moon/signs', changeFrequency: 'monthly', priority: 0.6 },
     {
       path: 'grimoire/guides/birth-chart-complete-guide',
       changeFrequency: 'monthly',
@@ -1040,12 +1038,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
-    {
-      url: `${baseUrl}/grimoire/moon/full-moons`,
-      lastModified: date,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
   ];
 
   // Keep historical years indexed (starting from 2025) and only a short future window
@@ -1304,7 +1296,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: 'grimoire/rising-sign', priority: 0.7 },
     { path: 'grimoire/synastry', priority: 0.7 },
     { path: 'grimoire/numerology/year', priority: 0.7 },
-    { path: 'grimoire/moon/rituals', priority: 0.7 },
   ];
 
   const additionalGrimoirePages =

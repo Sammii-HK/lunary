@@ -8,6 +8,9 @@ import { format } from 'date-fns';
 import { Sparkles, Moon as MoonIcon, Star, Circle } from 'lucide-react';
 import Link from 'next/link';
 import { Heading } from '@/components/ui/Heading';
+import { monthlyMoonPhases } from '../../../../../utils/moon/monthlyPhases';
+import { annualFullMoons } from '@/constants/moon/annualFullMoons';
+import { stringToKebabCase } from '../../../../../utils/string';
 
 export const revalidate = 86400;
 
@@ -126,6 +129,8 @@ export default async function MoonPage() {
   );
 
   const moonYears = [Math.max(2025, currentYear - 1), currentYear, nextYear];
+  const moonPhases = Object.entries(monthlyMoonPhases);
+  const fullMoons = Object.entries(annualFullMoons);
   const cosmicSections = [
     ...getCosmicConnections('hub-moon', 'moon'),
     {
@@ -165,6 +170,15 @@ export default async function MoonPage() {
         'moon rituals',
       ]}
       canonicalUrl='https://lunary.app/grimoire/moon'
+      tableOfContents={[
+        { label: 'What the Moon tracks', href: '#what-is' },
+        { label: 'How to read lunar timing', href: '#meaning' },
+        { label: 'The 8 moon phases', href: '#moon-phases' },
+        { label: 'Full moon names', href: '#full-moon-names' },
+        { label: 'Moon signs and daily mood', href: '#moon-signs' },
+        { label: 'Lunar rituals', href: '#moon-rituals' },
+        { label: 'FAQ', href: '#faq' },
+      ]}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
         { label: 'Moon Phases', href: '/grimoire/moon' },
@@ -192,6 +206,15 @@ For chart reading, the Moon matters in two distinct ways. Your natal Moon sign d
         'Work with moon signs for daily guidance and compare them to your natal Moon placement',
         'Use full moon names for seasonal magic',
         'Honor eclipses as powerful transformation times',
+      ]}
+      internalLinks={[
+        {
+          text: 'Moon Phases Guide',
+          href: '/grimoire/guides/moon-phases-guide',
+        },
+        { text: 'Moon in Signs', href: '/grimoire/moon-in' },
+        { text: 'New Moon Phase', href: '/grimoire/moon/phases/new-moon' },
+        { text: 'Full Moon Phase', href: '/grimoire/moon/phases/full-moon' },
       ]}
       sources={[
         {
@@ -233,6 +256,138 @@ For chart reading, the Moon matters in two distinct ways. Your natal Moon sign d
       }
     >
       <div className='max-w-4xl mx-auto p-4 space-y-8'>
+        <section id='moon-phases' className='space-y-4'>
+          <Heading as='h2' variant='h2'>
+            The 8 Moon Phases
+          </Heading>
+          <p className='text-content-muted'>
+            The moon phase tells you what part of the cycle you are in: begin,
+            build, culminate, release, or rest.
+          </p>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            {moonPhases.map(([key, phase]) => (
+              <Link
+                key={key}
+                href={`/grimoire/moon/phases/${stringToKebabCase(key)}`}
+                className='rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 transition-colors'
+              >
+                <div className='flex items-center justify-between gap-3'>
+                  <h3 className='text-lg font-medium text-content-primary'>
+                    {phase.symbol} {key.replace(/([A-Z])/g, ' $1').trim()}
+                  </h3>
+                  <span className='text-xs text-content-muted'>
+                    {phase.keywords.slice(0, 2).join(' · ')}
+                  </span>
+                </div>
+                <p className='mt-3 text-sm text-content-secondary line-clamp-3'>
+                  {phase.information}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section id='full-moon-names' className='space-y-4'>
+          <Heading as='h2' variant='h2'>
+            Full Moon Names
+          </Heading>
+          <p className='text-content-muted'>
+            Named full moons help you connect lunar work to the seasonal mood of
+            the year instead of treating every full moon like the same event.
+          </p>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            {fullMoons.slice(0, 6).map(([month, moon]) => (
+              <Link
+                key={month}
+                href={`/grimoire/moon/full-moons/${stringToKebabCase(month)}`}
+                className='rounded-xl border border-stroke-subtle bg-surface-elevated/20 p-4 hover:bg-surface-elevated/40 transition-colors'
+              >
+                <h3 className='text-lg font-medium text-content-primary'>
+                  {month}: {moon.name}
+                </h3>
+                <p className='mt-2 text-sm text-content-secondary line-clamp-3'>
+                  {moon.description}
+                </p>
+              </Link>
+            ))}
+          </div>
+          <div>
+            <Link
+              href='/grimoire/moon/full-moons/september'
+              className='text-sm text-lunary-primary-400 hover:text-content-brand'
+            >
+              Browse the full moon month pages
+            </Link>
+          </div>
+        </section>
+
+        <section
+          id='moon-signs'
+          className='rounded-xl border border-stroke-subtle bg-surface-elevated/20 p-5'
+        >
+          <Heading as='h2' variant='h2'>
+            Moon Signs and Daily Mood
+          </Heading>
+          <p className='text-content-secondary leading-relaxed'>
+            The current moon sign changes every two to three days and acts like
+            short-term emotional weather. Fire moon days push action. Earth moon
+            days stabilise. Air moon days favour communication. Water moon days
+            deepen intuition and feeling.
+          </p>
+          <div className='mt-4 flex flex-wrap gap-3 text-sm'>
+            <Link
+              href='/grimoire/moon-in'
+              className='text-lunary-primary-400 hover:text-content-brand'
+            >
+              Read Moon in zodiac signs
+            </Link>
+            <Link
+              href='/grimoire/moon-in/cancer'
+              className='text-lunary-primary-400 hover:text-content-brand'
+            >
+              Example: Moon in Cancer
+            </Link>
+          </div>
+        </section>
+
+        <section
+          id='moon-rituals'
+          className='rounded-xl border border-stroke-subtle bg-surface-elevated/20 p-5'
+        >
+          <Heading as='h2' variant='h2'>
+            Lunar Ritual Timing
+          </Heading>
+          <div className='grid md:grid-cols-2 gap-4'>
+            <div className='rounded-lg border border-stroke-subtle bg-surface-card/30 p-4'>
+              <h3 className='text-base font-medium text-content-primary'>
+                Waxing and new moon work
+              </h3>
+              <p className='mt-2 text-sm text-content-secondary'>
+                Use the new moon to set intention, then use waxing phases to
+                build, refine, and grow what you want more of.
+              </p>
+            </div>
+            <div className='rounded-lg border border-stroke-subtle bg-surface-card/30 p-4'>
+              <h3 className='text-base font-medium text-content-primary'>
+                Full and waning moon work
+              </h3>
+              <p className='mt-2 text-sm text-content-secondary'>
+                Use the full moon for illumination, gratitude, charging, and
+                culmination. Use waning phases for release, banishing, and
+                recovery.
+              </p>
+            </div>
+          </div>
+          <div className='mt-4'>
+            <Link
+              href='/grimoire/moon/phases/full-moon'
+              className='text-sm text-lunary-primary-400 hover:text-content-brand'
+            >
+              Go deeper on full moon timing
+            </Link>
+          </div>
+        </section>
+
         {/* Special Moons Section */}
         {specialMoons.length > 0 && (
           <section className='space-y-4'>

@@ -20,7 +20,11 @@ export const metadata: Metadata = {
       'Learn how moon signs affect daily life, emotional energy, and moods. Discover the meaning of each moon sign and how to align with cosmic rhythms.',
   },
   alternates: {
-    canonical: 'https://lunary.app/grimoire/moon/signs',
+    canonical: 'https://lunary.app/grimoire/moon',
+  },
+  robots: {
+    index: false,
+    follow: true,
   },
 };
 

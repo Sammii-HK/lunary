@@ -35,7 +35,11 @@ export const metadata: Metadata = {
     url: 'https://lunary.app/grimoire/moon/rituals',
   },
   alternates: {
-    canonical: 'https://lunary.app/grimoire/moon/rituals',
+    canonical: 'https://lunary.app/grimoire/moon',
+  },
+  robots: {
+    index: false,
+    follow: true,
   },
 };
 
