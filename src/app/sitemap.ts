@@ -1005,24 +1005,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/grimoire/numerology/core-numbers`,
-      lastModified: date,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/numerology/master-numbers`,
-      lastModified: date,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/numerology/karmic-debt`,
-      lastModified: date,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
       url: `${baseUrl}/grimoire/correspondences/days`,
       lastModified: date,
       changeFrequency: 'monthly' as const,
@@ -1295,7 +1277,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: 'grimoire/astronomy/planets', priority: 0.8 },
     { path: 'grimoire/rising-sign', priority: 0.7 },
     { path: 'grimoire/synastry', priority: 0.7 },
-    { path: 'grimoire/numerology/year', priority: 0.7 },
   ];
 
   const additionalGrimoirePages =
