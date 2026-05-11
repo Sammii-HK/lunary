@@ -7,16 +7,12 @@ import {
   PLANET_HOUSE_DISPLAY,
   getOrdinalSuffix,
 } from '@/constants/seo/houses';
-import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
-import {
-  createItemListSchema,
-  renderJsonLd,
-  createBreadcrumbSchema,
-} from '@/lib/schema';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
-// 30-day ISR revalidation
 export const revalidate = 2592000;
+
 export const metadata: Metadata = {
   title:
     'The 12 Astrological Houses: Meanings, Themes & Chart Examples | Lunary',
@@ -78,139 +74,129 @@ export default function HousesIndexPage() {
   });
 
   return (
-    <div className='min-h-screen bg-surface-base text-content-primary'>
+    <>
       {renderJsonLd(housesListSchema)}
-      {renderJsonLd(
-        createBreadcrumbSchema([
-          { name: 'Grimoire', url: '/grimoire' },
-          { name: 'Houses', url: '/grimoire/houses' },
-        ]),
-      )}
-      <div className='max-w-6xl mx-auto px-4 py-12'>
-        <Breadcrumbs
-          items={[
-            { label: 'Grimoire', href: '/grimoire' },
-            { label: 'Houses' },
-          ]}
-        />
-
-        <h1 className='text-4xl font-light mb-4'>The 12 Astrological Houses</h1>
-        <p className='text-lg text-content-muted mb-8 max-w-3xl'>
-          The houses in astrology represent different areas of life, from self
-          and identity to spirituality and the unconscious. Each house is a
-          stage where planets perform their roles.
-        </p>
-        <div className='max-w-3xl space-y-3 text-content-muted mb-10'>
-          <p>
-            Houses tell you where a placement lands in lived experience. A Venus
-            placement describes love style and values; the house tells you
-            whether that plays out through career, friendships, home, money, or
-            partnership. Without the houses, chart interpretation gets vague
-            very fast.
-          </p>
-          <p className='text-sm'>
-            Sources: Lunary house interpretation framework, traditional house
-            doctrine, Astronomy Engine chart-angle calculations.
-          </p>
-        </div>
-
-        <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12'>
-          {HOUSES.map((house) => {
-            const data = HOUSE_DATA[house];
-            return (
-              <div
-                key={house}
-                className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'
-              >
-                <div className='flex items-center gap-3 mb-3'>
-                  <span className='text-3xl font-light text-lunary-primary-400'>
-                    {house}
-                  </span>
-                  <span className='text-xs text-content-muted'>
-                    Natural Ruler: {data.naturalSign}
-                  </span>
+      <SEOContentTemplate
+        title='The 12 Astrological Houses: Meanings, Themes & Chart Examples'
+        h1='The 12 Astrological Houses'
+        description='The houses in astrology show where life happens. They map identity, money, siblings, home, creativity, work, partnership, intimacy, belief, career, community, and the unconscious.'
+        keywords={[
+          'astrological houses',
+          '12 houses',
+          'natal chart houses',
+          'house meanings',
+          'planets in houses',
+        ]}
+        canonicalUrl='https://lunary.app/grimoire/houses'
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Houses' },
+        ]}
+        whatIs={{
+          question: 'What do the houses mean in astrology?',
+          answer:
+            'The houses divide the chart into twelve life areas. A planet tells you what function is acting, the sign tells you how it acts, and the house tells you where that action shows up in lived experience.',
+        }}
+        tldr='Houses answer where. The 1st house describes identity and approach, the 7th partnership, the 10th career and public life, and the 12th the hidden and unconscious layers behind the chart.'
+        intro='The houses in astrology represent different areas of life, from self and identity to spirituality and the unconscious. Each house is a stage where planets perform their roles.'
+        meaning={`Houses tell you where a placement lands in lived experience. A Venus placement describes love style and values; the house tells you whether that plays out through career, friendships, home, money, or partnership. Without the houses, chart interpretation gets vague very fast.\n\nA useful house reading starts with the house topic itself. Then you check the sign on the cusp, the ruler of that sign, and any planets placed in the house. After that, you read the aspects affecting those planets. That order keeps the interpretation grounded instead of turning the chart into disconnected symbols.`}
+        howToWorkWith={[
+          'Start with the house topic: self, money, siblings, home, and so on.',
+          'Then judge the sign on that house cusp and its ruler.',
+          'Add any planet placed in the house.',
+          'Only after that should you interpret the aspects involving those planets.',
+        ]}
+        tableOfContents={[
+          { label: 'What houses do', href: '#what-is' },
+          { label: 'How to read houses', href: '#meaning' },
+          { label: 'The 12 houses', href: '#house-grid' },
+          { label: 'Planets in houses', href: '#planets-in-houses' },
+          { label: 'FAQ', href: '#faq' },
+        ]}
+        faqs={[
+          {
+            question: 'What is the difference between houses and signs?',
+            answer:
+              'Signs describe style. Houses describe life area. Aries tells you how something acts. The 10th house tells you that it is acting through career, reputation, or public responsibility.',
+          },
+          {
+            question: 'Do empty houses matter?',
+            answer:
+              'Yes. An empty house still matters because the sign on the cusp and the condition of its ruler still describe how that life area works.',
+          },
+        ]}
+        internalLinks={[
+          { text: 'Placements', href: '/grimoire/placements' },
+          { text: 'Rising Signs', href: '/grimoire/rising' },
+          { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
+        ]}
+        sources={[
+          {
+            name: 'Lunary house interpretation framework',
+            url: 'https://lunary.app/about/methodology',
+          },
+          { name: 'Traditional house doctrine' },
+          {
+            name: 'Astronomy Engine chart-angle calculations',
+            url: 'https://github.com/cosinekitty/astronomy',
+          },
+        ]}
+        ctaText='Discover your house placements'
+        ctaHref='/birth-chart'
+        childrenPosition='before-faqs'
+      >
+        <section id='house-grid' className='space-y-5'>
+          <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-4'>
+            {HOUSES.map((house) => {
+              const data = HOUSE_DATA[house];
+              return (
+                <div
+                  key={house}
+                  className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'
+                >
+                  <div className='flex items-center gap-3 mb-3'>
+                    <span className='text-3xl font-light text-lunary-primary-400'>
+                      {house}
+                    </span>
+                    <span className='text-xs text-content-muted'>
+                      Natural Ruler: {data.naturalSign}
+                    </span>
+                  </div>
+                  <h3 className='text-lg font-medium mb-1'>{data.name}</h3>
+                  <p className='text-sm text-content-muted mb-2'>
+                    {data.lifeArea}
+                  </p>
+                  <p className='text-xs text-content-muted'>
+                    {data.keywords.join(' • ')}
+                  </p>
                 </div>
-                <h3 className='text-lg font-medium mb-1'>{data.name}</h3>
-                <p className='text-sm text-content-muted mb-2'>
-                  {data.lifeArea}
-                </p>
-                <p className='text-xs text-content-muted'>
-                  {data.keywords.join(' • ')}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-
-        <h2 className='text-2xl font-light mb-6'>Planets in Houses</h2>
-        <div className='grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-12'>
-          {PLANETS_FOR_HOUSES.slice(0, 10).map((planet) => (
-            <Link
-              key={planet}
-              href={`/grimoire/houses/${planet}`}
-              className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all text-center group'
-            >
-              <div className='font-medium group-hover:text-content-brand transition-colors'>
-                {PLANET_HOUSE_DISPLAY[planet]}
-              </div>
-              <div className='text-xs text-content-muted'>in houses</div>
-            </Link>
-          ))}
-        </div>
-
-        <div className='mb-12 p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/40'>
-          <h2 className='text-xl font-medium mb-3'>How to use the houses</h2>
-          <ul className='list-disc pl-5 space-y-2 text-content-secondary'>
-            <li>
-              Start with the house topic: self, money, siblings, home, and so
-              on.
-            </li>
-            <li>Then judge the sign on that house cusp and its ruler.</li>
-            <li>Add any planet placed in the house.</li>
-            <li>
-              Only after that should you interpret the aspects involving those
-              planets.
-            </li>
-          </ul>
-        </div>
-
-        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
-          <h2 className='text-xl font-medium text-content-brand mb-2'>
-            Discover Your House Placements
-          </h2>
-          <p className='text-content-secondary mb-4'>
-            Find out which planets are in which houses in your natal chart.
-          </p>
-          <Link
-            href='/birth-chart'
-            className='inline-flex px-6 py-3 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
-          >
-            View Your Birth Chart
-          </Link>
-          <div className='mt-4 flex flex-wrap gap-3 text-sm'>
-            <Link
-              href='/grimoire/rising'
-              className='text-content-muted hover:text-content-secondary'
-            >
-              Rising Signs
-            </Link>
-            <Link
-              href='/grimoire/placements'
-              className='text-content-muted hover:text-content-secondary'
-            >
-              Placements
-            </Link>
-            <Link
-              href='/grimoire/birth-chart'
-              className='text-content-muted hover:text-content-secondary'
-            >
-              Birth Chart Guide
-            </Link>
+              );
+            })}
           </div>
-        </div>
+        </section>
+
+        <section id='planets-in-houses' className='space-y-4'>
+          <h2 className='text-2xl font-medium text-content-primary'>
+            Planets in Houses
+          </h2>
+          <div className='grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3'>
+            {PLANETS_FOR_HOUSES.slice(0, 10).map((planet) => (
+              <Link
+                key={planet}
+                href={`/grimoire/houses/${planet}`}
+                className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all text-center group'
+              >
+                <div className='font-medium group-hover:text-content-brand transition-colors'>
+                  {PLANET_HOUSE_DISPLAY[planet]}
+                </div>
+                <div className='text-xs text-content-muted'>in houses</div>
+              </Link>
+            ))}
+          </div>
+        </section>
 
         <ExploreGrimoire />
-      </div>
-    </div>
+      </SEOContentTemplate>
+    </>
   );
 }

@@ -5,17 +5,16 @@ import {
   signDescriptions,
 } from '@/constants/seo/planet-sign-content';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
-import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import {
   createItemListSchema,
   createFAQPageSchema,
   renderJsonLd,
-  createBreadcrumbSchema,
 } from '@/lib/schema';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
-// 30-day ISR revalidation
 export const revalidate = 2592000;
+
 export const metadata: Metadata = {
   title:
     'Astrological Placements: Sun, Moon & Rising in Every Sign: Planet in Sign Meanings - Lunary',
@@ -54,12 +53,12 @@ const faqs = [
   {
     question: 'Why do placements matter?',
     answer:
-      'Each planet governs specific life areas (love, career, emotions, etc.), and the sign it occupies modifies how that energy expresses. Understanding your placements provides deeper self-knowledge beyond just your Sun sign.',
+      'Each planet governs specific life areas and the sign it occupies modifies how that energy expresses. Understanding your placements provides deeper self-knowledge beyond just your Sun sign.',
   },
   {
     question: "What's the difference between signs, planets, and houses?",
     answer:
-      'Signs describe how energy is expressed (personality style). Planets represent what type of energy (action, love, communication). Houses show where in life that energy manifests (career, relationships, home). Together they create your unique cosmic blueprint.',
+      'Signs describe how energy is expressed. Planets represent what type of energy is acting. Houses show where in life that energy manifests. Together they create your chart logic.',
   },
 ];
 
@@ -87,71 +86,79 @@ export default function PlacementsIndexPage() {
     items: allPlacements.slice(0, 50),
   });
 
-  const faqSchema = createFAQPageSchema(
-    faqs.map((faq) => ({
-      question: faq.question,
-      answer: faq.answer,
-    })),
-  );
+  const faqSchema = createFAQPageSchema(faqs);
 
   return (
-    <div className='min-h-screen bg-surface-base text-content-primary'>
+    <>
       {renderJsonLd(itemListSchema)}
-      {renderJsonLd(
-        createBreadcrumbSchema([
-          { name: 'Grimoire', url: '/grimoire' },
-          { name: 'Placements', url: '/grimoire/placements' },
-        ]),
-      )}
       {renderJsonLd(faqSchema)}
-      <div className='max-w-6xl mx-auto px-4 py-12'>
-        <Breadcrumbs
-          items={[
-            { label: 'Grimoire', href: '/grimoire' },
-            { label: 'Placements' },
-          ]}
-        />
-
-        <header className='mb-12'>
-          <h1 className='text-4xl font-light text-content-primary mb-4'>
-            Astrological Placements: Sun, Moon & Rising in Every Sign
-          </h1>
-          <p className='text-lg text-content-muted max-w-2xl'>
-            Explore what each planet means in every zodiac sign. Click any
-            combination to learn about its influence on personality, strengths,
-            and challenges.
-          </p>
-          <div className='mt-4 max-w-3xl space-y-3 text-content-muted'>
-            <p>
-              A placement is never just a sign keyword. The useful reading is:
-              what planet is this, what does that planet govern, how does this
-              sign shape its style, and which house or aspect changes the
-              result? Lunary treats planet-in-sign pages as one layer of a full
-              chart reading, not the whole reading.
-            </p>
-            <p className='text-sm'>
-              Sources: Lunary placement interpretation framework, Astronomy
-              Engine planetary calculations, traditional planetary dignity and
-              sign doctrine.
-            </p>
-          </div>
-        </header>
-
-        <nav className='mb-8 overflow-x-auto'>
-          <div className='flex gap-2 pb-2'>
-            {planets.map(([planetKey, planet]) => (
-              <a
-                key={planetKey}
-                href={`#${planetKey}-placements`}
-                className='px-4 py-2 rounded-lg bg-surface-card/50 hover:bg-surface-card text-content-secondary hover:text-content-brand text-sm whitespace-nowrap transition-colors'
-              >
-                {planet.name}
-              </a>
-            ))}
-          </div>
-        </nav>
-
-        <div className='grid grid-cols-3 gap-4 mb-12 max-w-md'>
+      <SEOContentTemplate
+        title='Astrological Placements: Sun, Moon & Rising in Every Sign'
+        h1='Astrological Placements'
+        description='Explore what each planet means in each zodiac sign. Placements are where planets pick up style, tone, and temperament in a chart.'
+        canonicalUrl='https://lunary.app/grimoire/placements'
+        keywords={[
+          'astrological placements',
+          'sun in signs',
+          'moon in signs',
+          'planet in sign meanings',
+          'birth chart placements',
+        ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Placements' },
+        ]}
+        whatIs={{
+          question: 'What are astrological placements?',
+          answer:
+            'A placement is a planet in a sign. The planet tells you what function is being described and the sign tells you how that function behaves. House placement and aspects then refine the full interpretation.',
+        }}
+        tldr='Placements describe how planets behave by sign. Sun in Aries, Moon in Cancer, and Venus in Taurus all describe different functions picking up different styles.'
+        intro='Explore what each planet means in every zodiac sign. Click any combination to learn about its influence on personality, strengths, and challenges.'
+        meaning={`A placement is never just a sign keyword. The useful reading is: what planet is this, what does that planet govern, how does this sign shape its style, and which house or aspect changes the result? Lunary treats planet-in-sign pages as one layer of a full chart reading, not the whole reading.\n\nUse placements when you want to understand how a specific planet behaves. Use houses when you want to know where it shows up. Use aspects when you want to see what supports or pressures it.`}
+        howToWorkWith={[
+          'Planet = what part of life or psyche is being described.',
+          'Sign = how that planet behaves or expresses itself.',
+          'House = where that placement lands in lived experience.',
+          'Aspects = what modifies, supports, or pressures the placement.',
+        ]}
+        tableOfContents={[
+          { label: 'What placements are', href: '#what-is' },
+          { label: 'How to read placements', href: '#meaning' },
+          { label: 'Browse by planet', href: '#planet-sections' },
+          { label: 'Browse by sign', href: '#sign-links' },
+          { label: 'FAQ', href: '#faq' },
+        ]}
+        faqs={faqs}
+        internalLinks={[
+          { text: 'Planets', href: '/grimoire/astronomy/planets' },
+          { text: 'Zodiac Signs', href: '/grimoire/zodiac' },
+          { text: 'Houses', href: '/grimoire/houses' },
+          { text: 'Birth Chart', href: '/grimoire/birth-chart' },
+        ]}
+        sources={[
+          {
+            name: 'Lunary placement interpretation framework',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Astronomy Engine planetary calculations',
+            url: 'https://github.com/cosinekitty/astronomy',
+          },
+          { name: 'Traditional planetary dignity and sign doctrine' },
+        ]}
+        ctaText='See your placements in a real chart'
+        ctaHref='/birth-chart'
+        childrenPosition='before-faqs'
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-placements'
+            entityKey='placements'
+            title='Placement Connections'
+          />
+        }
+      >
+        <div className='grid grid-cols-3 gap-4 max-w-md' id='placement-stats'>
           <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-3xl font-light text-lunary-primary-400'>
               {planets.length}
@@ -172,7 +179,20 @@ export default function PlacementsIndexPage() {
           </div>
         </div>
 
-        {/* Planet Sections */}
+        <nav className='overflow-x-auto' id='planet-sections'>
+          <div className='flex gap-2 pb-2'>
+            {planets.map(([planetKey, planet]) => (
+              <a
+                key={planetKey}
+                href={`#${planetKey}-placements`}
+                className='px-4 py-2 rounded-lg bg-surface-card/50 hover:bg-surface-card text-content-secondary hover:text-content-brand text-sm whitespace-nowrap transition-colors'
+              >
+                {planet.name}
+              </a>
+            ))}
+          </div>
+        </nav>
+
         <div className='space-y-12'>
           {planets.map(([planetKey, planet]) => (
             <section
@@ -214,8 +234,10 @@ export default function PlacementsIndexPage() {
           ))}
         </div>
 
-        {/* Sign Quick Links */}
-        <section className='mt-12 p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
+        <section
+          id='sign-links'
+          className='p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'
+        >
           <h2 className='text-xl font-medium text-content-primary mb-4'>
             Browse by Zodiac Sign
           </h2>
@@ -232,81 +254,8 @@ export default function PlacementsIndexPage() {
           </div>
         </section>
 
-        <section className='mt-12 p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/40'>
-          <h2 className='text-xl font-medium text-content-primary mb-3'>
-            How to read placements properly
-          </h2>
-          <ul className='list-disc pl-5 space-y-2 text-content-secondary'>
-            <li>Planet = what part of life or psyche is being described.</li>
-            <li>Sign = the style, temperament, and strategy of expression.</li>
-            <li>House = where that story shows up in real life.</li>
-            <li>
-              Aspects = what supports, pressures, or complicates the placement.
-            </li>
-          </ul>
-        </section>
-
-        <section className='mt-12 mb-12'>
-          <h2 className='text-2xl font-light mb-6'>
-            Frequently Asked Questions
-          </h2>
-          <div className='space-y-4'>
-            {faqs.map((faq, index) => (
-              <div
-                key={index}
-                className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/30'
-              >
-                <h3 className='text-lg font-medium mb-2 text-content-primary'>
-                  {faq.question}
-                </h3>
-                <p className='text-content-muted'>{faq.answer}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className='text-center'>
-          <Link
-            href='/birth-chart'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium text-lg transition-colors'
-          >
-            Discover Your Placements
-          </Link>
-          <p className='mt-3 text-sm text-content-muted'>
-            Generate your complete birth chart to see all your planetary
-            placements
-          </p>
-          <div className='mt-4 flex flex-wrap items-center justify-center gap-3 text-sm'>
-            <Link
-              href='/grimoire/houses'
-              className='text-content-muted hover:text-content-secondary'
-            >
-              Houses Guide
-            </Link>
-            <Link
-              href='/grimoire/rising'
-              className='text-content-muted hover:text-content-secondary'
-            >
-              Rising Signs
-            </Link>
-            <Link
-              href='/grimoire/decans'
-              className='text-content-muted hover:text-content-secondary'
-            >
-              Decans
-            </Link>
-          </div>
-        </section>
-
-        <div className='mt-8'>
-          <CosmicConnections
-            entityType='hub-placements'
-            entityKey='placements'
-            title='Placements Connections'
-          />
-        </div>
         <ExploreGrimoire />
-      </div>
-    </div>
+      </SEOContentTemplate>
+    </>
   );
 }
