@@ -246,7 +246,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ],
     'grimoire/candle-magic': ['src/app/grimoire/candle-magic/page.tsx'],
     'grimoire/correspondences': ['src/app/grimoire/correspondences/page.tsx'],
-    'grimoire/cusps': ['src/app/grimoire/cusps/page.tsx'],
     'grimoire/seasons': ['src/app/grimoire/seasons/page.tsx'],
     'grimoire/placements': ['src/app/grimoire/placements/page.tsx'],
     'grimoire/chinese-zodiac': ['src/app/grimoire/chinese-zodiac/page.tsx'],
@@ -383,7 +382,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
-    { path: 'grimoire/cusps', changeFrequency: 'monthly', priority: 0.7 },
     {
       path: 'grimoire/placements',
       changeFrequency: 'monthly',
