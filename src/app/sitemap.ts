@@ -54,7 +54,6 @@ const RECOVERY_GRIMOIRE_SECTIONS = new Set([
   'placements',
   'horoscopes',
   'zodiac',
-  'decans',
   'cusps',
   'compatibility',
   'synastry',
@@ -240,9 +239,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'grimoire/lunar-nodes': ['src/app/grimoire/lunar-nodes/page.tsx'],
     'grimoire/transits': ['src/app/grimoire/transits/page.tsx'],
     'grimoire/moon': ['src/app/grimoire/moon/page.tsx'],
+    'grimoire/astrology/rulerships-and-dignities': [
+      'src/app/grimoire/astrology/rulerships-and-dignities/page.tsx',
+      'src/data/grimoire-pillar-content.json',
+      'src/lib/grimoire/pillar-content.ts',
+    ],
     'grimoire/candle-magic': ['src/app/grimoire/candle-magic/page.tsx'],
     'grimoire/correspondences': ['src/app/grimoire/correspondences/page.tsx'],
-    'grimoire/decans': ['src/app/grimoire/decans/page.tsx'],
     'grimoire/cusps': ['src/app/grimoire/cusps/page.tsx'],
     'grimoire/seasons': ['src/app/grimoire/seasons/page.tsx'],
     'grimoire/placements': ['src/app/grimoire/placements/page.tsx'],
@@ -376,7 +379,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: 'grimoire/lunar-nodes', changeFrequency: 'monthly', priority: 0.8 },
     { path: 'grimoire/transits', changeFrequency: 'monthly', priority: 0.8 },
     { path: 'grimoire/moon', changeFrequency: 'monthly', priority: 0.8 },
-    { path: 'grimoire/decans', changeFrequency: 'monthly', priority: 0.7 },
+    {
+      path: 'grimoire/astrology/rulerships-and-dignities',
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
     { path: 'grimoire/cusps', changeFrequency: 'monthly', priority: 0.7 },
     {
       path: 'grimoire/placements',
@@ -660,6 +667,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  const planetInSignsRoutes = Object.keys(planetaryBodies)
+    .filter((planetId) => planetId !== 'earth')
+    .map((planetId) => ({
+      url: `${baseUrl}/grimoire/astronomy/planets/${planetId}/in-signs`,
+      lastModified: date,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }));
+
   // Add all sabbat pages - using slugified names
   const sabbatRoutes = wheelOfTheYearSabbats.map((sabbat) => ({
     url: `${baseUrl}/grimoire/wheel-of-the-year/${stringToKebabCase(sabbat.name)}`,
@@ -925,6 +941,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
+  }));
+
+  const zodiacInChartRoutes = Object.keys(zodiacSigns).map((sign) => ({
+    url: `${baseUrl}/grimoire/zodiac/${stringToKebabCase(sign)}/in-the-chart`,
+    lastModified: date,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
   }));
 
   // Add all house pages (consolidated to /grimoire/houses/[ordinal]-house)
@@ -1393,7 +1416,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...moonPhaseRoutes,
     ...fullMoonRoutes,
     ...zodiacRoutes,
+    ...zodiacInChartRoutes,
     ...planetRoutes,
+    ...planetInSignsRoutes,
     ...numerologyCoreRoutes,
     ...numerologyMasterRoutes,
     ...houseRoutes,

@@ -11,15 +11,24 @@ export async function GET() {
   const zodiacSignKeys = Object.keys(zodiacSigns);
 
   const urls = zodiacSignKeys
-    .map((sign) => {
+    .flatMap((sign) => {
       const signData = zodiacSigns[sign as keyof typeof zodiacSigns];
-      return `
+      return [
+        `
     <url>
       <loc>${baseUrl}/grimoire/zodiac/${sign.toLowerCase()}</loc>
       <lastmod>${stableMonthStamp}</lastmod>
       <changefreq>monthly</changefreq>
-      <priority>0.6</priority>
-    </url>`;
+      <priority>0.8</priority>
+    </url>`,
+        `
+    <url>
+      <loc>${baseUrl}/grimoire/zodiac/${sign.toLowerCase()}/in-the-chart</loc>
+      <lastmod>${stableMonthStamp}</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.7</priority>
+    </url>`,
+      ];
     })
     .join('');
 

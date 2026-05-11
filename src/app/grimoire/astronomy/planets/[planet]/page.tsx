@@ -12,6 +12,7 @@ import {
   getEntityRelationships,
   getWikipediaUrl,
 } from '@/constants/entity-relationships';
+import Link from 'next/link';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
@@ -179,6 +180,9 @@ export default async function PlanetPage({
     colors: [],
     themes: [],
   };
+  const rules = Array.isArray(planetData.rules)
+    ? planetData.rules.join(', ') || 'None'
+    : 'None';
 
   const faqs = [
     {
@@ -253,11 +257,25 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
             headers: ['Aspect', 'Details'],
             rows: [
               ['Symbol', unicodeSymbol || 'N/A'],
+              ['Rulership', rules],
+              ['Exaltation', planetData.exalted || 'None'],
+              ['Detriment', planetData.detriment || 'None'],
+              ['Fall', planetData.fall || 'None'],
               ['Ruling Day', correspondences.day],
               ['Colors', correspondences.colors.join(', ')],
               ['Themes', correspondences.themes.join(', ')],
             ],
           },
+        ]}
+        tableOfContents={[
+          { label: `What ${planetData.name} means`, href: '#what-is' },
+          { label: `${planetData.name} in chart reading`, href: '#meaning' },
+          {
+            label: `${planetData.name} dignities`,
+            href: '#practices-overview',
+          },
+          { label: `${planetData.name} in the signs`, href: '#in-signs' },
+          { label: 'FAQ', href: '#faq' },
         ]}
         journalPrompts={[
           `How does ${planetData.name} energy manifest in my life?`,
@@ -294,6 +312,14 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
         ]}
         internalLinks={[
           { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
+          {
+            text: `${planetData.name} in the Signs`,
+            href: `/grimoire/astronomy/planets/${planet}/in-signs`,
+          },
+          {
+            text: 'Rulerships and Dignities',
+            href: '/grimoire/astrology/rulerships-and-dignities',
+          },
           { text: 'Planetary Placements', href: '/grimoire/placements' },
           { text: 'Houses Guide', href: '/grimoire/houses' },
           { text: 'Transits Guide', href: '/grimoire/transits' },
@@ -315,6 +341,7 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
           },
         ]}
         faqs={faqs}
+        childrenPosition='before-faqs'
         cosmicConnections={
           <CosmicConnections
             entityType='planet'
@@ -322,7 +349,31 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
             title={`${planetData.name} Cosmic Connections`}
           />
         }
-      />
+      >
+        <section
+          id='in-signs'
+          className='rounded-xl border border-stroke-subtle bg-surface-elevated/20 p-5'
+        >
+          <h2 className='text-xl font-medium text-content-primary'>
+            {planetData.name} in the Signs
+          </h2>
+          <p className='mt-3 text-content-secondary leading-relaxed'>
+            The fastest way to over-generic astrology is to read a sign without
+            respecting the planet carrying it. {planetData.name} in Aries and{' '}
+            {planetData.name} in Pisces are still{' '}
+            {planetData.name.toLowerCase()}, but they move in different tones,
+            rhythms, and priorities.
+          </p>
+          <div className='mt-4'>
+            <Link
+              href={`/grimoire/astronomy/planets/${planet}/in-signs`}
+              className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300'
+            >
+              Read the full {planetData.name} in-the-signs guide
+            </Link>
+          </div>
+        </section>
+      </SEOContentTemplate>
     </div>
   );
 }

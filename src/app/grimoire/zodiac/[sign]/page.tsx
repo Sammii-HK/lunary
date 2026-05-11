@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { PlacementSelector } from '@/components/grimoire/PlacementSelector';
@@ -18,6 +19,7 @@ import {
   formatRulershipValue,
   getPrimaryRuler,
 } from '@/lib/astrology/rulerships';
+import { getSignDecans } from '@/lib/grimoire/pillar-content';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
@@ -172,6 +174,7 @@ export default async function ZodiacSignPage({
           : ['Cancer', 'Scorpio', 'Pisces', 'Taurus', 'Virgo', 'Capricorn'];
 
   const rulershipValue = formatRulershipValue(signData.name);
+  const decans = getSignDecans(signKey.toLowerCase());
 
   // Entity schema for Knowledge Graph
   const zodiacSchema = createZodiacSignSchema({
@@ -249,6 +252,13 @@ Ruling Planet: ${rulershipValue}
 Symbol: ${unicodeSymbol}
 Dates: ${signData.dates}
 Tarot Card: ${signData.tarotCard}`}
+        tableOfContents={[
+          { label: `What ${signData.name} means`, href: '#what-is' },
+          { label: `${signData.name} core interpretation`, href: '#meaning' },
+          { label: `${signData.name} decans`, href: '#decans' },
+          { label: `${signData.name} in the chart`, href: '#in-the-chart' },
+          { label: 'FAQ', href: '#faq' },
+        ]}
         relatedItems={[
           ...getEntityRelationships('zodiac', signKey)
             .slice(0, 5)
@@ -290,8 +300,16 @@ Tarot Card: ${signData.tarotCard}`}
             href: `/grimoire/moon-in/${signKey.toLowerCase()}`,
           },
           {
-            text: `${signData.name} Decans`,
-            href: `/grimoire/decans/${signKey.toLowerCase()}`,
+            text: `${signData.name} in the Chart`,
+            href: `/grimoire/zodiac/${signKey.toLowerCase()}/in-the-chart`,
+          },
+          {
+            text: 'Rulerships and Dignities',
+            href: '/grimoire/astrology/rulerships-and-dignities',
+          },
+          {
+            text: `${getPrimaryRuler(signData.name)} in the Signs`,
+            href: `/grimoire/astronomy/planets/${getPrimaryRuler(signData.name).toLowerCase()}/in-signs`,
           },
           {
             text: `${signData.name} Placements`,
@@ -316,6 +334,7 @@ Tarot Card: ${signData.tarotCard}`}
         ]}
         faqs={faqs}
         components={<PlacementSelector signName={signData.name} />}
+        childrenPosition='before-faqs'
         cosmicConnections={
           <CosmicConnections
             entityType='sign'
@@ -323,7 +342,76 @@ Tarot Card: ${signData.tarotCard}`}
             title={`${signData.name} Cosmic Web`}
           />
         }
-      />
+      >
+        <section
+          id='decans'
+          className='rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5'
+        >
+          <h2 className='text-xl font-medium text-content-primary'>
+            {signData.name} Decans
+          </h2>
+          <p className='mt-3 text-content-secondary leading-relaxed'>
+            Decans are the sign&apos;s internal subdivisions. They are best used
+            as a refinement layer after you have already read the planet, sign,
+            house, and ruler.
+          </p>
+          <div className='mt-5 grid gap-4 md:grid-cols-3'>
+            {decans.map((decan) => (
+              <div
+                key={decan.decan}
+                className='rounded-lg border border-stroke-subtle bg-surface-card/40 p-4'
+              >
+                <h3 className='text-base font-medium text-content-primary'>
+                  {decan.decan === 1
+                    ? 'First'
+                    : decan.decan === 2
+                      ? 'Second'
+                      : 'Third'}{' '}
+                  Decan
+                </h3>
+                <p className='mt-2 text-sm text-content-muted'>
+                  {decan.dateRange} · {decan.degrees}
+                </p>
+                <p className='mt-2 text-sm text-content-secondary'>
+                  Co-ruler: {decan.subruler}
+                </p>
+                <p className='mt-2 text-sm text-content-secondary'>
+                  {decan.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section
+          id='in-the-chart'
+          className='rounded-xl border border-stroke-subtle bg-surface-elevated/20 p-5'
+        >
+          <h2 className='text-xl font-medium text-content-primary'>
+            {signData.name} in the Chart
+          </h2>
+          <p className='mt-3 text-content-secondary leading-relaxed'>
+            A sign is chart language, not a complete reading. Read{' '}
+            {signData.name} through the planet carrying it, the house receiving
+            it, and the condition of its ruler. That is the difference between
+            generic sign content and actual chart interpretation.
+          </p>
+          <div className='mt-4 flex flex-wrap gap-3 text-sm'>
+            <Link
+              href={`/grimoire/zodiac/${signKey.toLowerCase()}/in-the-chart`}
+              className='text-lunary-primary-400 hover:text-lunary-primary-300'
+            >
+              Read the full {signData.name} in-the-chart guide
+            </Link>
+            <Link
+              href={`/grimoire/astronomy/planets/${getPrimaryRuler(signData.name).toLowerCase()}`}
+              className='text-lunary-primary-400 hover:text-lunary-primary-300'
+            >
+              Study {getPrimaryRuler(signData.name)}
+            </Link>
+          </div>
+        </section>
+      </SEOContentTemplate>
     </div>
   );
 }

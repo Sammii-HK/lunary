@@ -22,12 +22,12 @@ const GRIMOIRE_URLS_TO_AUDIT = [
   'https://lunary.app/grimoire/astrology/sky-now',
 
   // Astrology learning hubs
-  'https://lunary.app/grimoire/planets',
+  'https://lunary.app/grimoire/astronomy/planets',
   'https://lunary.app/grimoire/placements',
   'https://lunary.app/grimoire/houses',
   'https://lunary.app/grimoire/aspects',
   'https://lunary.app/grimoire/aspects/types',
-  'https://lunary.app/grimoire/decans',
+  'https://lunary.app/grimoire/astrology/rulerships-and-dignities',
   'https://lunary.app/grimoire/rising',
   'https://lunary.app/grimoire/rising-sign',
   'https://lunary.app/grimoire/moon-in',
@@ -38,6 +38,7 @@ const GRIMOIRE_URLS_TO_AUDIT = [
 
   // Zodiac signs
   'https://lunary.app/grimoire/zodiac/aries',
+  'https://lunary.app/grimoire/zodiac/aries/in-the-chart',
   'https://lunary.app/grimoire/zodiac/taurus',
   'https://lunary.app/grimoire/zodiac/gemini',
   'https://lunary.app/grimoire/zodiac/cancer',
@@ -51,16 +52,17 @@ const GRIMOIRE_URLS_TO_AUDIT = [
   'https://lunary.app/grimoire/zodiac/pisces',
 
   // Planets
-  'https://lunary.app/grimoire/planets/sun',
-  'https://lunary.app/grimoire/planets/moon',
-  'https://lunary.app/grimoire/planets/mercury',
-  'https://lunary.app/grimoire/planets/venus',
-  'https://lunary.app/grimoire/planets/mars',
-  'https://lunary.app/grimoire/planets/jupiter',
-  'https://lunary.app/grimoire/planets/saturn',
-  'https://lunary.app/grimoire/planets/uranus',
-  'https://lunary.app/grimoire/planets/neptune',
-  'https://lunary.app/grimoire/planets/pluto',
+  'https://lunary.app/grimoire/astronomy/planets/sun',
+  'https://lunary.app/grimoire/astronomy/planets/sun/in-signs',
+  'https://lunary.app/grimoire/astronomy/planets/moon',
+  'https://lunary.app/grimoire/astronomy/planets/mercury',
+  'https://lunary.app/grimoire/astronomy/planets/venus',
+  'https://lunary.app/grimoire/astronomy/planets/mars',
+  'https://lunary.app/grimoire/astronomy/planets/jupiter',
+  'https://lunary.app/grimoire/astronomy/planets/saturn',
+  'https://lunary.app/grimoire/astronomy/planets/uranus',
+  'https://lunary.app/grimoire/astronomy/planets/neptune',
+  'https://lunary.app/grimoire/astronomy/planets/pluto',
 
   // Chart-reading example pages
   'https://lunary.app/grimoire/placements/sun-in-aries',
@@ -72,7 +74,6 @@ const GRIMOIRE_URLS_TO_AUDIT = [
   'https://lunary.app/grimoire/houses/moon/7',
   'https://lunary.app/grimoire/aspects/moon/square/mars',
   'https://lunary.app/grimoire/aspects/types/square',
-  'https://lunary.app/grimoire/decans/aquarius/2',
   'https://lunary.app/grimoire/rising/capricorn-rising',
   'https://lunary.app/grimoire/moon-in/capricorn',
 

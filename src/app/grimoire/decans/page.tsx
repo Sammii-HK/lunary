@@ -50,10 +50,10 @@ export const metadata: Metadata = {
   },
   alternates: { canonical: 'https://lunary.app/grimoire/decans' },
   robots: {
-    index: true,
+    index: false,
     follow: true,
     googleBot: {
-      index: true,
+      index: false,
       follow: true,
       'max-video-preview': -1,
       'max-image-preview': 'large',
@@ -171,7 +171,7 @@ export default function DecansIndexPage() {
         </div>
         <div className='mt-10 flex flex-wrap gap-3'>
           <Link
-            href='/grimoire/birth-chart'
+            href='/grimoire/guides/learn-birth-chart'
             className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
           >
             Birth Chart Guide
