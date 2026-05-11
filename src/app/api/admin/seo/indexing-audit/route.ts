@@ -26,7 +26,6 @@ const GRIMOIRE_URLS_TO_AUDIT = [
   'https://lunary.app/grimoire/placements',
   'https://lunary.app/grimoire/houses',
   'https://lunary.app/grimoire/aspects',
-  'https://lunary.app/grimoire/aspects/types',
   'https://lunary.app/grimoire/astrology/rulerships-and-dignities',
   'https://lunary.app/grimoire/rising',
   'https://lunary.app/grimoire/rising-sign',

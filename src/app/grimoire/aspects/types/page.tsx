@@ -77,7 +77,11 @@ export const metadata: Metadata = {
     type: 'article',
   },
   alternates: {
-    canonical: 'https://lunary.app/grimoire/aspects/types',
+    canonical: 'https://lunary.app/grimoire/aspects',
+  },
+  robots: {
+    index: false,
+    follow: true,
   },
 };
 
