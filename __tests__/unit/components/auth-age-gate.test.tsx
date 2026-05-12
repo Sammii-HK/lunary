@@ -6,6 +6,7 @@ const mockSignUp = jest.fn();
 const mockSignIn = jest.fn();
 const mockPrimeAuthenticatedAuthCache = jest.fn();
 const mockReplaceBrowserLocation = jest.fn();
+const mockMarkRecentAuthHandoff = jest.fn();
 
 jest.mock('@/lib/auth-client', () => ({
   betterAuthClient: {
@@ -24,6 +25,8 @@ jest.mock('@/components/AuthStatus', () => ({
   invalidateAuthCache: jest.fn(),
   primeAuthenticatedAuthCache: (...args: unknown[]) =>
     mockPrimeAuthenticatedAuthCache(...args),
+  markRecentAuthHandoff: (...args: unknown[]) =>
+    mockMarkRecentAuthHandoff(...args),
 }));
 
 jest.mock('@/components/SignOutButton', () => ({

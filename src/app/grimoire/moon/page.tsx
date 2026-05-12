@@ -8,9 +8,9 @@ import { format } from 'date-fns';
 import { Sparkles, Moon as MoonIcon, Star, Circle } from 'lucide-react';
 import Link from 'next/link';
 import { Heading } from '@/components/ui/Heading';
-import { monthlyMoonPhases } from '../../../../../utils/moon/monthlyPhases';
+import { monthlyMoonPhases } from '../../../../utils/moon/monthlyPhases';
 import { annualFullMoons } from '@/constants/moon/annualFullMoons';
-import { stringToKebabCase } from '../../../../../utils/string';
+import { stringToKebabCase } from '../../../../utils/string';
 
 export const revalidate = 86400;
 
