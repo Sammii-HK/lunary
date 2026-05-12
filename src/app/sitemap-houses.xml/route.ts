@@ -1,10 +1,24 @@
-import { generateAllHouseParams } from '@/constants/seo/houses';
+import { PLANETS_FOR_HOUSES } from '@/constants/seo/houses';
+
+const HOUSE_SLUGS = [
+  '1st-house',
+  '2nd-house',
+  '3rd-house',
+  '4th-house',
+  '5th-house',
+  '6th-house',
+  '7th-house',
+  '8th-house',
+  '9th-house',
+  '10th-house',
+  '11th-house',
+  '12th-house',
+];
 
 export async function GET(): Promise<Response> {
   const baseUrl = 'https://lunary.app';
   const currentYear = new Date().getFullYear();
   const stableMonthStamp = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`;
-  const houses = generateAllHouseParams();
 
   const urls = [
     {
@@ -13,11 +27,17 @@ export async function GET(): Promise<Response> {
       changefreq: 'monthly',
       priority: '0.8',
     },
-    ...houses.map((h) => ({
-      loc: `${baseUrl}/grimoire/houses/${h.planet}/${h.house}`,
+    ...HOUSE_SLUGS.map((houseSlug) => ({
+      loc: `${baseUrl}/grimoire/houses/${houseSlug}`,
+      lastmod: stableMonthStamp,
+      changefreq: 'monthly',
+      priority: '0.7',
+    })),
+    ...PLANETS_FOR_HOUSES.map((planet) => ({
+      loc: `${baseUrl}/grimoire/houses/${planet}`,
       lastmod: stableMonthStamp,
       changefreq: 'yearly',
-      priority: '0.6',
+      priority: '0.5',
     })),
   ];
 
