@@ -19,12 +19,7 @@ interface AuthState {
 
 function isTestMode(): boolean {
   if (typeof window === 'undefined') return false;
-
-  return (
-    (window as any).__PLAYWRIGHT_TEST__ === true ||
-    (window.location.hostname === 'localhost' &&
-      window.navigator.userAgent.includes('Playwright'))
-  );
+  return (window as any).__PLAYWRIGHT_TEST__ === true;
 }
 
 function isAuthenticatedTestMode(): boolean {

@@ -193,13 +193,13 @@ export function ConditionalMainWrapper({
       ref={mainRef}
       style={{
         paddingTop: showAppNav
-          ? 'calc(var(--global-nav-offset, 0px) + env(safe-area-inset-top, 0px))'
+          ? 'calc(var(--global-nav-offset, 0px) + max(env(safe-area-inset-top, 0px), 1rem))'
           : 'var(--global-nav-offset, 0px)',
         paddingBottom: showAppNav
           ? 'calc(56px + env(safe-area-inset-bottom, 0px))'
           : undefined,
         scrollPaddingTop: showAppNav
-          ? 'calc(var(--global-nav-offset, 0px) + env(safe-area-inset-top, 0px))'
+          ? 'calc(var(--global-nav-offset, 0px) + max(env(safe-area-inset-top, 0px), 1rem))'
           : 'var(--global-nav-offset, 0px)',
         minHeight: '100dvh',
       }}
