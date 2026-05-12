@@ -51,7 +51,7 @@ async function getSearchConsoleClient() {
   const serviceAccountJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   if (serviceAccountJson) {
     try {
-      const credentials = JSON.parse(serviceAccountJson);
+      const credentials = parseServiceAccountCredentials(serviceAccountJson);
       const auth = new google.auth.GoogleAuth({
         credentials,
         scopes: SCOPES,
@@ -101,6 +101,60 @@ async function getSearchConsoleClient() {
     version: 'v1',
     auth: oauth2Client,
   });
+}
+
+function parseServiceAccountCredentials(rawValue: string) {
+  const candidates = [rawValue.trim()];
+
+  try {
+    const decoded = Buffer.from(rawValue, 'base64').toString('utf8').trim();
+    if (decoded && decoded !== rawValue.trim()) {
+      candidates.push(decoded);
+    }
+  } catch {
+    // Ignore base64 decode attempts that do not produce useful JSON.
+  }
+
+  let lastError: unknown;
+
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate);
+      return normalizeServiceAccountKey(parsed);
+    } catch (error) {
+      lastError = error;
+
+      try {
+        const repaired = repairMultilinePrivateKey(candidate);
+        const parsed = JSON.parse(repaired);
+        return normalizeServiceAccountKey(parsed);
+      } catch (repairError) {
+        lastError = repairError;
+      }
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error(String(lastError));
+}
+
+function repairMultilinePrivateKey(rawJson: string) {
+  return rawJson.replace(
+    /"private_key"\s*:\s*"([\s\S]*?)"(?=\s*,\s*"client_email")/,
+    (_, privateKeyChunk: string) => {
+      const repairedKey = privateKeyChunk
+        .replace(/\r\n/g, '\n')
+        .replace(/\n/g, '\\n');
+      return `"private_key":"${repairedKey}"`;
+    },
+  );
+}
+
+function normalizeServiceAccountKey(credentials: Record<string, unknown>) {
+  if (typeof credentials.private_key === 'string') {
+    credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+  }
+
+  return credentials;
 }
 
 function resolvePropertyUrl(siteUrl?: string) {
