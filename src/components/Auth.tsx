@@ -7,6 +7,7 @@ import { Turnstile } from '@marsidev/react-turnstile';
 import { betterAuthClient } from '@/lib/auth-client';
 import {
   useAuthStatus,
+  markRecentAuthHandoff,
   invalidateAuthCache,
   primeAuthenticatedAuthCache,
 } from './AuthStatus';
@@ -248,6 +249,7 @@ export function AuthComponent({
         }
 
         setSuccess('Account created successfully! Welcome to Lunary.');
+        markRecentAuthHandoff();
 
         await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -293,6 +295,8 @@ export function AuthComponent({
         if (!result.data) {
           throw new Error('Sign in failed - no data returned');
         }
+
+        markRecentAuthHandoff();
 
         const signedInUser =
           (result.data as any)?.user ?? (result.data as any)?.session?.user;

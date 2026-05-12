@@ -7,7 +7,6 @@ function isTestMode(): boolean {
   if (typeof window === 'undefined') return false;
 
   const isPlaywrightTest =
-    window.navigator.userAgent.includes('HeadlessChrome') ||
     (window as any).__PLAYWRIGHT_TEST__ === true ||
     (window.location.hostname === 'localhost' &&
       window.navigator.userAgent.includes('Playwright'));
