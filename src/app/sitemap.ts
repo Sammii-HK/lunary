@@ -42,7 +42,7 @@ import { activeAppPolicySlugs } from '@/data/app-policy-pages';
 
 dayjs.extend(isoWeek);
 import { getAllSynastryAspectSlugs } from '@/constants/seo/synastry-aspects';
-import { getAllCompatibilitySlugs } from '@/constants/seo/compatibility-content';
+import { getCuratedCompatibilitySlugs } from '@/constants/seo/compatibility-content';
 
 const RECOVERY_GRIMOIRE_SECTIONS = new Set([
   'astrology',
@@ -1193,8 +1193,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // Add zodiac compatibility pages (all 78 unique pairs + 12 same-sign)
-  const compatibilitySlugs = getAllCompatibilitySlugs();
+  // Add curated zodiac compatibility pages only. The long-tail pair inventory
+  // remains live, but recovery should promote the stronger curated set.
+  const compatibilitySlugs = getCuratedCompatibilitySlugs();
   const compatibilityRoutes = compatibilitySlugs.map((slug) => ({
     url: `${baseUrl}/grimoire/compatibility/${slug}`,
     lastModified: date,

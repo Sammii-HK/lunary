@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import { signDescriptions } from '@/constants/seo/planet-sign-content';
+import { getCuratedCompatibilitySlugs } from '@/constants/seo/compatibility-content';
 import { CompatibilityMatrix } from '@/components/CompatibilityMatrix';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
@@ -65,16 +66,38 @@ export const metadata: Metadata = {
 
 export default function CompatibilityIndexPage() {
   const signs = Object.entries(signDescriptions);
+  const curatedSlugs = getCuratedCompatibilitySlugs();
+  const curatedPairs = curatedSlugs
+    .map((slug) => {
+      const [sign1, sign2] = slug.split('-and-');
+      const left = signDescriptions[sign1];
+      const right = signDescriptions[sign2];
+      if (!left || !right) return null;
+      return {
+        slug,
+        sign1,
+        sign2,
+        sign1Name: left.name,
+        sign2Name: right.name,
+      };
+    })
+    .filter(Boolean) as Array<{
+    slug: string;
+    sign1: string;
+    sign2: string;
+    sign1Name: string;
+    sign2Name: string;
+  }>;
 
   const compatibilityListSchema = createItemListSchema({
     name: 'Zodiac Compatibility: Best & Worst Matches for Every Sign',
     description:
-      'Complete zodiac compatibility guide with 78+ detailed match analyses for love, friendship, and work.',
+      'Selective zodiac compatibility guide with stronger curated match analyses plus links into synastry and sign interpretation.',
     url: 'https://lunary.app/grimoire/compatibility',
-    items: Object.keys(signDescriptions).map((sign) => ({
-      name: `${signDescriptions[sign].name} Compatibility`,
-      url: `https://lunary.app/grimoire/zodiac/${sign}`,
-      description: `${signDescriptions[sign].element} sign compatibility`,
+    items: curatedPairs.map((pair) => ({
+      name: `${pair.sign1Name} and ${pair.sign2Name} Compatibility`,
+      url: `https://lunary.app/grimoire/compatibility/${pair.slug}`,
+      description: `${pair.sign1Name} and ${pair.sign2Name} zodiac compatibility`,
     })),
   });
 
@@ -111,8 +134,10 @@ export default function CompatibilityIndexPage() {
             <div className='text-sm text-content-muted'>Signs</div>
           </div>
           <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
-            <div className='text-3xl font-light text-lunary-rose'>78</div>
-            <div className='text-sm text-content-muted'>Unique Pairs</div>
+            <div className='text-3xl font-light text-lunary-rose'>
+              {curatedPairs.length}
+            </div>
+            <div className='text-sm text-content-muted'>Curated Pairs</div>
           </div>
           <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-3xl font-light text-lunary-rose'>3</div>
@@ -130,48 +155,62 @@ export default function CompatibilityIndexPage() {
             compatibility analysis.
           </p>
           <CompatibilityMatrix signs={signs} />
+          <p className='text-content-muted text-sm mt-4'>
+            Sun-sign compatibility is only a starting point. For real chart
+            mechanics, use synastry and compare full placements.
+          </p>
         </div>
 
-        {/* Browse by Sign */}
+        {/* Curated pairs */}
         <div className='space-y-8'>
           <h2 className='text-2xl font-medium text-content-primary'>
-            Browse by Sign
+            Curated Compatibility Reads
           </h2>
-          {signs.map(([key1, sign1]) => (
-            <section
-              key={key1}
-              className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/30'
-            >
-              <div className='flex items-center gap-3 mb-4'>
-                <span className='text-2xl'>{ZODIAC_SYMBOLS[key1] || '⭐'}</span>
-                <div>
-                  <h3 className='text-xl font-medium text-content-primary'>
-                    {sign1.name} Compatibility
-                  </h3>
-                  <p className='text-sm text-content-muted'>
-                    {sign1.element} • {sign1.modality}
-                  </p>
+          {signs.map(([key1, sign1]) => {
+            const matchingPairs = curatedPairs.filter(
+              (pair) => pair.sign1 === key1 || pair.sign2 === key1,
+            );
+
+            if (matchingPairs.length === 0) {
+              return null;
+            }
+
+            return (
+              <section
+                key={key1}
+                className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/30'
+              >
+                <div className='flex items-center gap-3 mb-4'>
+                  <span className='text-2xl'>
+                    {ZODIAC_SYMBOLS[key1] || '⭐'}
+                  </span>
+                  <div>
+                    <h3 className='text-xl font-medium text-content-primary'>
+                      {sign1.name} Compatibility
+                    </h3>
+                    <p className='text-sm text-content-muted'>
+                      {sign1.element} • {sign1.modality}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className='flex flex-wrap gap-2'>
-                {signs.map(([key2, sign2]) => {
-                  const slug =
-                    key1 <= key2
-                      ? `${key1}-and-${key2}`
-                      : `${key2}-and-${key1}`;
-                  return (
-                    <Link
-                      key={key2}
-                      href={`/grimoire/compatibility/${slug}`}
-                      className='px-3 py-1.5 rounded-lg bg-surface-card/50 hover:bg-layer-base border border-stroke-default/50 hover:border-lunary-rose-600 text-content-secondary hover:text-lunary-rose-300 text-sm transition-colors'
-                    >
-                      {sign1.name} & {sign2.name}
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
-          ))}
+                <div className='flex flex-wrap gap-2'>
+                  {matchingPairs.map((pair) => {
+                    const otherSign =
+                      pair.sign1 === key1 ? pair.sign2Name : pair.sign1Name;
+                    return (
+                      <Link
+                        key={pair.slug}
+                        href={`/grimoire/compatibility/${pair.slug}`}
+                        className='px-3 py-1.5 rounded-lg bg-surface-card/50 hover:bg-layer-base border border-stroke-default/50 hover:border-lunary-rose-600 text-content-secondary hover:text-lunary-rose-300 text-sm transition-colors'
+                      >
+                        {sign1.name} & {otherSign}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
         </div>
 
         {/* Synastry CTA */}
