@@ -81,18 +81,28 @@ Moon in ${moonSign}
 ## Features
 
 - **Birth Chart Analysis**: Full natal chart with house calculations using real astronomical data
+- **Astrology Education**: Learn chart mechanics through planets, signs, houses, aspects, dignities, and transits
 - **Daily Horoscopes**: Personalized transit-based insights, not generic sun sign predictions
 - **Tarot Readings**: Personalized readings with pattern analysis across sessions
 - **Moon Tracking**: Real-time moon phases with constellation positions and lunar cycle guidance
 - **AI Companion**: "Book of Shadows" - context-aware astro-tarot chat with memory
-- **Digital Grimoire**: 500+ page knowledge library covering crystals, spells, numerology, chakras, runes
+- **Digital Grimoire**: Consolidated authority pages designed for depth, clarity, and citation
 - **Moon Circles**: Community feature for sharing insights during new and full moon gatherings
 - **Cosmic Calendar**: Downloadable ICS with retrogrades, eclipses, and planetary events
 
 ## Key Pages
 
 - Grimoire - Digital Knowledge Library: https://lunary.app/grimoire
+- Birth Chart Guide - Learn to Read a Chart: https://lunary.app/grimoire/birth-chart
 - Zodiac Signs - Deep Interpretations: https://lunary.app/grimoire/zodiac
+- Zodiac in the Chart - Applied Sign Interpretation: https://lunary.app/grimoire/zodiac/aries/in-the-chart
+- Planets - Natal Meaning and Transit Logic: https://lunary.app/grimoire/astronomy/planets
+- Planets in Signs - Applied Planet Interpretation: https://lunary.app/grimoire/astronomy/planets/saturn/in-signs
+- Houses - 12 House Meanings: https://lunary.app/grimoire/houses
+- Aspects - Relationship Between Planets: https://lunary.app/grimoire/aspects
+- Rulerships and Dignities: https://lunary.app/grimoire/astrology/rulerships-and-dignities
+- Transits - Current Sky and Natal Impact: https://lunary.app/grimoire/transits
+- Retrogrades - Timing and Meaning: https://lunary.app/grimoire/astronomy/retrogrades
 - Tarot Cards - Meanings and Spreads: https://lunary.app/grimoire/tarot
 - Crystals - Properties and Healing Guides: https://lunary.app/grimoire/crystals
 - Numerology - Angel Numbers, Life Path, Mirror Hours: https://lunary.app/grimoire/numerology
@@ -137,7 +147,7 @@ Next.js 15, React 18, TypeScript, PostgreSQL, Astronomy Engine for real calculat
 
 ## Full Knowledge Base
 
-For comprehensive reference content (1,800+ lines), see: https://lunary.app/llms-full.txt
+For comprehensive reference content and supporting reference material, see: https://lunary.app/llms-full.txt
 `;
 
     return new Response(llmsContent, {
