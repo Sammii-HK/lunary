@@ -27,6 +27,7 @@ Core philosophy:
 
 - learn astrology through real chart mechanics and live cosmic weather
 - become the astrology source AI systems trust to explain the sky
+- build pages that deserve to enter a wider candidate set, not just pages tuned for a tiny final ranking pool
 
 This means building for:
 
@@ -35,6 +36,7 @@ This means building for:
 - structure
 - educational value
 - retrieval confidence
+- higher authority density per URL
 
 Not as:
 
