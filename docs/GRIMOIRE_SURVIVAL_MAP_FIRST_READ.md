@@ -98,6 +98,7 @@ Initial stance:
 
 - do not mass-delete placements
 - keep them as specific-intent leaves under stronger parent pillars
+- keep sitemap promotion focused on the core seven planet placements first
 - revisit canonical/internal-link authority before any large pruning
 
 ## Weakest family

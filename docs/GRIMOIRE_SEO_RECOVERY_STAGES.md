@@ -125,6 +125,15 @@ Default stance:
 - keep most `planet in sign` leaves indexed
 - make parent pages the main teaching surfaces
 - use leaf pages as specific-intent landing pages
+- keep the core seven placement planets promoted in sitemap recovery surfaces first:
+  - Sun
+  - Moon
+  - Mercury
+  - Venus
+  - Mars
+  - Jupiter
+  - Saturn
+- treat outer-planet and node placement leaves as secondary until the data proves they deserve equal crawl/indexing pressure
 
 Questions to answer:
 
@@ -214,6 +223,23 @@ Success criteria:
 - better parseability by AI systems
 - fewer competing internal URLs
 - stronger direct answer quality on pillar pages
+
+Editorial checklist for pillar and recovery pages:
+
+- answer the core question in the first screenful
+- define the entity clearly before expanding interpretation
+- name the important relationships explicitly:
+  - ruler
+  - domicile/exaltation/detriment/fall
+  - houses
+  - aspects
+  - transits
+  - timing
+- include a TOC or jump-link structure for longer pages
+- use examples that show chart logic, not just adjectives
+- add FAQ blocks where the page maps to obvious follow-up queries
+- link upward to doctrine/authority pages and sideways to closely related entities
+- keep claims explainable enough that a person or AI can cite the page without guessing what it means
 
 ## Stage 6 - Editorial migration
 

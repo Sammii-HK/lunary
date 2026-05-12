@@ -1,12 +1,24 @@
 import { getAllPlanetSignSlugs } from '@/constants/seo/planet-sign-content';
 
 const baseUrl = 'https://lunary.app';
+const RECOVERY_PLACEMENT_PLANETS = new Set([
+  'sun',
+  'moon',
+  'mercury',
+  'venus',
+  'mars',
+  'jupiter',
+  'saturn',
+]);
 
 export async function GET() {
   const currentDate = new Date();
   const stableMonthStamp = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-01`;
   const now = stableMonthStamp;
-  const slugs = getAllPlanetSignSlugs();
+  const slugs = getAllPlanetSignSlugs().filter((slug) => {
+    const [planet] = slug.split('-in-');
+    return RECOVERY_PLACEMENT_PLANETS.has(planet);
+  });
 
   const placementUrls = slugs
     .map(
