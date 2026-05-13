@@ -1,21 +1,19 @@
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { Heart, Users, Briefcase, Star, AlertTriangle } from 'lucide-react';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { NavParamLink } from '@/components/NavParamLink';
 import { Heading } from '@/components/ui/Heading';
 import { signDescriptions } from '@/constants/seo/planet-sign-content';
-import { generateCompatibilityContent } from '@/constants/seo/compatibility-content';
+import {
+  generateCompatibilityContent,
+  getCuratedCompatibilitySlugs,
+} from '@/constants/seo/compatibility-content';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-
-// Pre-generate every valid sign pair at build time and reject unknown slugs
-// with a proper 404. Without this, unknown slugs (e.g. "aries-taurus" without
-// the -and-) render the not-found component but with HTTP 200, producing
-// soft 404s that Google demotes. 144 pairs × static generation is cheap.
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 const ZODIAC_SYMBOLS: Record<string, string> = {
   aries: '♈',
@@ -32,16 +30,8 @@ const ZODIAC_SYMBOLS: Record<string, string> = {
   pisces: '♓',
 };
 
-const ZODIAC_SIGNS = Object.keys(ZODIAC_SYMBOLS);
-
 export function generateStaticParams() {
-  const params: { match: string }[] = [];
-  for (const a of ZODIAC_SIGNS) {
-    for (const b of ZODIAC_SIGNS) {
-      params.push({ match: `${a}-and-${b}` });
-    }
-  }
-  return params;
+  return getCuratedCompatibilitySlugs().map((match) => ({ match }));
 }
 
 interface PageProps {
@@ -68,12 +58,13 @@ export async function generateMetadata({ params }: PageProps) {
   }
 
   const content = generateCompatibilityContent(parsed.sign1, parsed.sign2);
+  const canonicalSlug = content.slug;
 
   const metadata = createGrimoireMetadata({
     title: `${content.title} - Lunary`,
     description: content.description,
     keywords: content.keywords,
-    url: `https://lunary.app/grimoire/compatibility/${content.slug}`,
+    url: `https://lunary.app/grimoire/compatibility/${canonicalSlug}`,
     ogImagePath: '/api/og/grimoire/compatibility',
     ogImageAlt: content.title,
   });
@@ -86,7 +77,7 @@ export async function generateMetadata({ params }: PageProps) {
     },
     alternates: {
       ...metadata.alternates,
-      canonical: `https://lunary.app/grimoire/compatibility/${match}`,
+      canonical: `https://lunary.app/grimoire/compatibility/${canonicalSlug}`,
     },
   };
 }
@@ -125,6 +116,11 @@ export default async function CompatibilityPage({ params }: PageProps) {
   }
 
   const content = generateCompatibilityContent(parsed.sign1, parsed.sign2);
+
+  if (match !== content.slug) {
+    permanentRedirect(`/grimoire/compatibility/${content.slug}`);
+  }
+
   const sign1Info = signDescriptions[parsed.sign1];
   const sign2Info = signDescriptions[parsed.sign2];
 
