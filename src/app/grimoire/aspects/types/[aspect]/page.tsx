@@ -8,11 +8,7 @@ import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 const aspectKeys = Object.keys(astrologicalAspects);
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return aspectKeys.map((aspect) => ({ aspect: stringToKebabCase(aspect) }));
-}
+export const dynamicParams = true;
 
 export async function generateMetadata({
   params,
