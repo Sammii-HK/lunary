@@ -1,4 +1,6 @@
 import Stripe from 'stripe';
+import { unstable_cache } from 'next/cache';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 type StripeCustomerBucket =
   | 'full_price_paid'
@@ -80,8 +82,8 @@ function getSubscriptionMonthlyAmount(subscription: Stripe.Subscription) {
   };
 }
 
-export async function getStripeSubscriptionSnapshot(
-  stripe: Stripe | null = getStripeClient(),
+async function fetchStripeSubscriptionSnapshot(
+  stripe: Stripe | null,
 ): Promise<StripeSubscriptionSnapshot> {
   if (!stripe) {
     return {
@@ -169,7 +171,25 @@ export async function getStripeSubscriptionSnapshot(
   };
 }
 
-export async function getStripeMRR(stripe: Stripe | null = getStripeClient()) {
+const getCachedStripeSubscriptionSnapshot = unstable_cache(
+  async () => fetchStripeSubscriptionSnapshot(getStripeClient()),
+  ['analytics', 'stripe-subscription-snapshot'],
+  {
+    revalidate: ANALYTICS_CACHE_TTL_SECONDS,
+  },
+);
+
+export async function getStripeSubscriptionSnapshot(
+  stripe?: Stripe | null,
+): Promise<StripeSubscriptionSnapshot> {
+  if (typeof stripe !== 'undefined') {
+    return fetchStripeSubscriptionSnapshot(stripe);
+  }
+
+  return getCachedStripeSubscriptionSnapshot();
+}
+
+export async function getStripeMRR(stripe?: Stripe | null) {
   const snapshot = await getStripeSubscriptionSnapshot(stripe);
   return snapshot.mrr;
 }

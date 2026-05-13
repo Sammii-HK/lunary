@@ -42,7 +42,7 @@ import { activeAppPolicySlugs } from '@/data/app-policy-pages';
 
 dayjs.extend(isoWeek);
 import { getAllSynastryAspectSlugs } from '@/constants/seo/synastry-aspects';
-import { getAllCompatibilitySlugs } from '@/constants/seo/compatibility-content';
+import { getCuratedCompatibilitySlugs } from '@/constants/seo/compatibility-content';
 
 const RECOVERY_GRIMOIRE_SECTIONS = new Set([
   'astrology',
@@ -54,7 +54,6 @@ const RECOVERY_GRIMOIRE_SECTIONS = new Set([
   'placements',
   'horoscopes',
   'zodiac',
-  'decans',
   'cusps',
   'compatibility',
   'synastry',
@@ -240,10 +239,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'grimoire/lunar-nodes': ['src/app/grimoire/lunar-nodes/page.tsx'],
     'grimoire/transits': ['src/app/grimoire/transits/page.tsx'],
     'grimoire/moon': ['src/app/grimoire/moon/page.tsx'],
+    'grimoire/astrology/rulerships-and-dignities': [
+      'src/app/grimoire/astrology/rulerships-and-dignities/page.tsx',
+      'src/data/grimoire-pillar-content.json',
+      'src/lib/grimoire/pillar-content.ts',
+    ],
     'grimoire/candle-magic': ['src/app/grimoire/candle-magic/page.tsx'],
     'grimoire/correspondences': ['src/app/grimoire/correspondences/page.tsx'],
-    'grimoire/decans': ['src/app/grimoire/decans/page.tsx'],
-    'grimoire/cusps': ['src/app/grimoire/cusps/page.tsx'],
     'grimoire/seasons': ['src/app/grimoire/seasons/page.tsx'],
     'grimoire/placements': ['src/app/grimoire/placements/page.tsx'],
     'grimoire/chinese-zodiac': ['src/app/grimoire/chinese-zodiac/page.tsx'],
@@ -302,7 +304,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'grimoire/card-combinations': [
       'src/app/grimoire/card-combinations/page.tsx',
     ],
-    'grimoire/moon/signs': ['src/app/grimoire/moon/signs/page.tsx'],
     'grimoire/reversed-cards-guide': [
       'src/app/grimoire/reversed-cards-guide/page.tsx',
     ],
@@ -376,8 +377,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: 'grimoire/lunar-nodes', changeFrequency: 'monthly', priority: 0.8 },
     { path: 'grimoire/transits', changeFrequency: 'monthly', priority: 0.8 },
     { path: 'grimoire/moon', changeFrequency: 'monthly', priority: 0.8 },
-    { path: 'grimoire/decans', changeFrequency: 'monthly', priority: 0.7 },
-    { path: 'grimoire/cusps', changeFrequency: 'monthly', priority: 0.7 },
+    {
+      path: 'grimoire/astrology/rulerships-and-dignities',
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
     {
       path: 'grimoire/placements',
       changeFrequency: 'monthly',
@@ -472,7 +476,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.6,
     },
-    { path: 'grimoire/moon/signs', changeFrequency: 'monthly', priority: 0.6 },
     {
       path: 'grimoire/guides/birth-chart-complete-guide',
       changeFrequency: 'monthly',
@@ -659,6 +662,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
+
+  const planetInSignsRoutes = Object.keys(planetaryBodies)
+    .filter((planetId) => planetId !== 'earth')
+    .map((planetId) => ({
+      url: `${baseUrl}/grimoire/astronomy/planets/${planetId}/in-signs`,
+      lastModified: date,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }));
 
   // Add all sabbat pages - using slugified names
   const sabbatRoutes = wheelOfTheYearSabbats.map((sabbat) => ({
@@ -927,6 +939,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  const zodiacInChartRoutes = Object.keys(zodiacSigns).map((sign) => ({
+    url: `${baseUrl}/grimoire/zodiac/${stringToKebabCase(sign)}/in-the-chart`,
+    lastModified: date,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
   // Add all house pages (consolidated to /grimoire/houses/[ordinal]-house)
   const houseRoutes = Array.from({ length: 12 }, (_, i) => i + 1).map(
     (houseNum) => ({
@@ -984,24 +1003,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/grimoire/numerology/core-numbers`,
-      lastModified: date,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/numerology/master-numbers`,
-      lastModified: date,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/numerology/karmic-debt`,
-      lastModified: date,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
       url: `${baseUrl}/grimoire/correspondences/days`,
       lastModified: date,
       changeFrequency: 'monthly' as const,
@@ -1013,12 +1014,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const moonIndexRoutes = [
     {
       url: `${baseUrl}/grimoire/moon/phases`,
-      lastModified: date,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/moon/full-moons`,
       lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
@@ -1198,8 +1193,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // Add zodiac compatibility pages (all 78 unique pairs + 12 same-sign)
-  const compatibilitySlugs = getAllCompatibilitySlugs();
+  // Add curated zodiac compatibility pages only. The long-tail pair inventory
+  // remains live, but recovery should promote the stronger curated set.
+  const compatibilitySlugs = getCuratedCompatibilitySlugs();
   const compatibilityRoutes = compatibilitySlugs.map((slug) => ({
     url: `${baseUrl}/grimoire/compatibility/${slug}`,
     lastModified: date,
@@ -1280,8 +1276,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: 'grimoire/astronomy/planets', priority: 0.8 },
     { path: 'grimoire/rising-sign', priority: 0.7 },
     { path: 'grimoire/synastry', priority: 0.7 },
-    { path: 'grimoire/numerology/year', priority: 0.7 },
-    { path: 'grimoire/moon/rituals', priority: 0.7 },
   ];
 
   const additionalGrimoirePages =
@@ -1393,7 +1387,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...moonPhaseRoutes,
     ...fullMoonRoutes,
     ...zodiacRoutes,
+    ...zodiacInChartRoutes,
     ...planetRoutes,
+    ...planetInSignsRoutes,
     ...numerologyCoreRoutes,
     ...numerologyMasterRoutes,
     ...houseRoutes,

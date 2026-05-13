@@ -19,13 +19,7 @@ interface AuthState {
 
 function isTestMode(): boolean {
   if (typeof window === 'undefined') return false;
-
-  return (
-    window.navigator.userAgent.includes('HeadlessChrome') ||
-    (window as any).__PLAYWRIGHT_TEST__ === true ||
-    (window.location.hostname === 'localhost' &&
-      window.navigator.userAgent.includes('Playwright'))
-  );
+  return (window as any).__PLAYWRIGHT_TEST__ === true;
 }
 
 function isAuthenticatedTestMode(): boolean {
@@ -39,6 +33,56 @@ const defaultAuthState: AuthState = {
   profile: null,
   loading: true,
 };
+
+const RECENT_AUTH_HANDOFF_KEY = 'lunary_recent_auth_handoff';
+const RECENT_AUTH_HANDOFF_WINDOW_MS = 20000;
+
+type RecentAuthHandoff = {
+  completedAt: number;
+};
+
+function readRecentAuthHandoff(): RecentAuthHandoff | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(RECENT_AUTH_HANDOFF_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as Partial<RecentAuthHandoff>;
+    if (typeof parsed?.completedAt !== 'number') {
+      window.sessionStorage.removeItem(RECENT_AUTH_HANDOFF_KEY);
+      return null;
+    }
+
+    if (Date.now() - parsed.completedAt > RECENT_AUTH_HANDOFF_WINDOW_MS) {
+      window.sessionStorage.removeItem(RECENT_AUTH_HANDOFF_KEY);
+      return null;
+    }
+
+    return { completedAt: parsed.completedAt };
+  } catch {
+    window.sessionStorage.removeItem(RECENT_AUTH_HANDOFF_KEY);
+    return null;
+  }
+}
+
+export function hasRecentAuthHandoff() {
+  return Boolean(readRecentAuthHandoff());
+}
+
+export function markRecentAuthHandoff() {
+  if (typeof window === 'undefined') return;
+
+  window.sessionStorage.setItem(
+    RECENT_AUTH_HANDOFF_KEY,
+    JSON.stringify({ completedAt: Date.now() }),
+  );
+}
+
+export function clearRecentAuthHandoff() {
+  if (typeof window === 'undefined') return;
+  window.sessionStorage.removeItem(RECENT_AUTH_HANDOFF_KEY);
+}
 
 const AuthContext = createContext<
   AuthState & { refreshAuth: () => void; signOut: () => void }
@@ -168,7 +212,10 @@ export function AuthStatusProvider({
         // to /auth. Up to 3 attempts with short backoff gives the session
         // time to propagate.
         let lastError: unknown;
-        const maxAttempts = 3;
+        const recentAuthHandoff = readRecentAuthHandoff();
+        const maxAttempts = recentAuthHandoff ? 8 : 3;
+        const nullUserRetryDelayMs = recentAuthHandoff ? 700 : 400;
+        const errorRetryDelayMs = recentAuthHandoff ? 1200 : 800;
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
           try {
             const session = await betterAuthClient.getSession();
@@ -181,6 +228,7 @@ export function AuthStatusProvider({
                 : null;
 
             if (user) {
+              clearRecentAuthHandoff();
               const newState: AuthState = {
                 isAuthenticated: true,
                 user,
@@ -199,7 +247,7 @@ export function AuthStatusProvider({
             // accepting it, but never cache so a later mount gets a
             // fresh read.
             if (attempt < maxAttempts - 1) {
-              await new Promise((r) => setTimeout(r, 400));
+              await new Promise((r) => setTimeout(r, nullUserRetryDelayMs));
               continue;
             }
             return {
@@ -212,7 +260,7 @@ export function AuthStatusProvider({
             lastError = error;
             if (attempt < maxAttempts - 1) {
               // Brief pause before retry so transient issues can clear.
-              await new Promise((r) => setTimeout(r, 800));
+              await new Promise((r) => setTimeout(r, errorRetryDelayMs));
             }
           }
         }

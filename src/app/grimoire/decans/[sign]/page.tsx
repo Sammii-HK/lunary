@@ -52,7 +52,11 @@ export async function generateMetadata({
       url: `https://lunary.app/grimoire/decans/${sign}`,
     },
     alternates: {
-      canonical: `https://lunary.app/grimoire/decans/${sign}`,
+      canonical: `https://lunary.app/grimoire/zodiac/${sign}`,
+    },
+    robots: {
+      index: false,
+      follow: true,
     },
   };
 }

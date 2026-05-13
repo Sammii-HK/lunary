@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Capacitor } from '@capacitor/core';
 import { WifiOff } from 'lucide-react';
-import { useAuthStatus } from '@/components/AuthStatus';
+import { hasRecentAuthHandoff, useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import SessionTracker from '@/components/SessionTracker';
 import { TourProvider } from '@/context/TourContext';
@@ -46,8 +46,13 @@ export default function AuthenticatedLayout({
   children: React.ReactNode;
 }) {
   const authStatus = useAuthStatus();
+  const { refreshAuth } = authStatus;
   const router = useRouter();
   const pathname = usePathname() ?? '/app';
+  const waitingForRecentAuthHandoff =
+    !authStatus.loading &&
+    !authStatus.isAuthenticated &&
+    hasRecentAuthHandoff();
 
   // Ensure first client render matches server render to prevent hydration mismatch.
   // The server always renders loading state; the client must do the same on hydration
@@ -63,6 +68,13 @@ export default function AuthenticatedLayout({
 
   useEffect(() => {
     if (!authStatus.loading && !authStatus.isAuthenticated) {
+      if (hasRecentAuthHandoff()) {
+        const retryTimer = window.setTimeout(() => {
+          refreshAuth();
+        }, 500);
+        return () => window.clearTimeout(retryTimer);
+      }
+
       const returnTo = encodeURIComponent(pathname);
       if (Capacitor.isNativePlatform()) {
         // Native: replace so WKWebView back-button doesn't expose auth content.
@@ -73,7 +85,13 @@ export default function AuthenticatedLayout({
         router.push(`/auth?returnTo=${returnTo}`);
       }
     }
-  }, [authStatus.isAuthenticated, authStatus.loading, pathname, router]);
+  }, [
+    authStatus.isAuthenticated,
+    authStatus.loading,
+    pathname,
+    refreshAuth,
+    router,
+  ]);
 
   // Fire product_opened once when user is authenticated
   // The analytics guard handles daily deduplication at storage/DB level
@@ -143,11 +161,13 @@ export default function AuthenticatedLayout({
     }
   }, [authStatus.loading, authStatus.isAuthenticated, authStatus.user?.id]);
 
-  if (!mounted || authStatus.loading) {
+  if (!mounted || authStatus.loading || waitingForRecentAuthHandoff) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
         <span className='text-content-muted text-sm'>
-          Checking authentication…
+          {waitingForRecentAuthHandoff
+            ? 'Finishing sign-in…'
+            : 'Checking authentication…'}
         </span>
       </div>
     );

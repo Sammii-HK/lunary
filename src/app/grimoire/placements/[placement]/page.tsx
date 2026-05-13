@@ -337,8 +337,20 @@ For ${pageTitle}, that means we are not treating ${content.planet} in ${content.
           href: `/grimoire/astronomy/planets/${parsed.planet}`,
         },
         {
+          text: `${content.planet} in Every Sign`,
+          href: `/grimoire/astronomy/planets/${parsed.planet}/in-signs`,
+        },
+        {
           text: `${content.sign} Sign`,
           href: `/grimoire/zodiac/${parsed.sign}`,
+        },
+        {
+          text: `${content.sign} in the Chart`,
+          href: `/grimoire/zodiac/${parsed.sign}/in-the-chart`,
+        },
+        {
+          text: 'Rulerships and Dignities',
+          href: '/grimoire/astrology/rulerships-and-dignities',
         },
         {
           text: 'Birth Chart Guide',

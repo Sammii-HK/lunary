@@ -1,0 +1,40 @@
+{
+  "rulershipsAndDignities": {
+    "title": "Astrological Rulerships and Dignities",
+    "h1": "Rulerships and Dignities in Astrology",
+    "description": "Learn how rulership, domicile, exaltation, detriment, and fall change the way planets and signs are interpreted in a birth chart.",
+    "whatIsQuestion": "What are rulerships and dignities in astrology?",
+    "whatIsAnswer": "Rulerships and dignities describe how comfortably a planet can express itself in a sign. Domicile and exaltation strengthen a planet's ability to act clearly. Detriment and fall describe conditions where the planet has to work harder or express itself less directly.",
+    "tldr": "Use dignities after you know the planet, sign, house, and major aspects. They help you judge condition, confidence, and how naturally a placement can do its job.",
+    "intro": "Rulership doctrine gives you a way to move past flat sign keywords. It asks whether a planet is operating in its own terrain, in supportive conditions, or in a place that pulls against its usual style. That makes chart reading much more precise.",
+    "meaning": "A planet in **domicile** is in one of the signs it rules, so its basic function tends to feel direct and recognisable.\n\nA planet in **exaltation** is not at home, but it is treated like an honoured guest. Its gifts can show up strongly, though sometimes in an idealised way.\n\nA planet in **detriment** is opposite one of its domiciles. It still works, but it has to express itself through a style that does not naturally match its priorities.\n\nA planet in **fall** is opposite its exaltation. This can describe sensitivity, awkwardness, or compensating behaviour around that function.\n\nThese labels are not moral scores. They are interpretive conditions. A difficult dignity does not mean a bad chart, and a strong dignity does not remove the need to read house placement, aspects, sect, timing, and the ruler's condition.",
+    "howToWorkWith": [
+      "Start with the planet's job first, then ask whether the sign helps or complicates that job.",
+      "Check the sign ruler and the house before making big claims from dignity alone.",
+      "Use exaltation and fall to judge tone and pressure, not to declare a placement good or bad.",
+      "Compare the natal dignity with current transits to see when a planet is being supported or strained."
+    ],
+    "faqs": [
+      {
+        "question": "What is the difference between rulership and dignity?",
+        "answer": "Rulership tells you which planet governs a sign. Dignity tells you how strong or comfortable a planet is in the sign it occupies."
+      },
+      {
+        "question": "Is exaltation better than domicile?",
+        "answer": "Not exactly. Domicile is a planet acting on home ground. Exaltation is a planet acting in highly supportive conditions. Both can be strong, but they describe different kinds of strength."
+      },
+      {
+        "question": "Does detriment or fall mean something is wrong with me?",
+        "answer": "No. These conditions describe tension, mismatch, or compensating habits in how a planet works. They often become some of the most interesting parts of a chart once integrated."
+      }
+    ]
+  },
+  "planetInSigns": {
+    "introLead": "The planet tells you what function is being described. The sign tells you how that function behaves. Use this page to compare how the same planet changes style across all twelve signs.",
+    "closingNote": "These sign readings become more accurate when you add house placement, major aspects, and the condition of the sign ruler."
+  },
+  "signInChart": {
+    "introLead": "A sign is not a complete reading on its own. This page shows how the same sign changes meaning depending on which planet carries it, whether it rises, and which house it touches.",
+    "closingNote": "For an actual chart reading, combine these sections with the ruler's condition, any major aspects, and the relevant house topics."
+  }
+}

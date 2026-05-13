@@ -10,14 +10,23 @@ export async function GET() {
   const planetKeys = Object.keys(planetaryBodies);
 
   const urls = planetKeys
-    .map((planet) => {
-      return `
+    .flatMap((planet) => {
+      return [
+        `
     <url>
       <loc>${baseUrl}/grimoire/astronomy/planets/${planet.toLowerCase()}</loc>
       <lastmod>${now}</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.8</priority>
-    </url>`;
+    </url>`,
+        `
+    <url>
+      <loc>${baseUrl}/grimoire/astronomy/planets/${planet.toLowerCase()}/in-signs</loc>
+      <lastmod>${now}</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.7</priority>
+    </url>`,
+      ];
     })
     .join('');
 

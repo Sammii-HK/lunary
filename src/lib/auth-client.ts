@@ -5,14 +5,7 @@ import { createAuthClient } from 'better-auth/client';
 // Detect Playwright e2e test mode (NOT Jest unit tests)
 function isTestMode(): boolean {
   if (typeof window === 'undefined') return false;
-
-  const isPlaywrightTest =
-    window.navigator.userAgent.includes('HeadlessChrome') ||
-    (window as any).__PLAYWRIGHT_TEST__ === true ||
-    (window.location.hostname === 'localhost' &&
-      window.navigator.userAgent.includes('Playwright'));
-
-  return isPlaywrightTest;
+  return (window as any).__PLAYWRIGHT_TEST__ === true;
 }
 
 // Better Auth client - NO Jazz plugin (handled server-side with fallback)

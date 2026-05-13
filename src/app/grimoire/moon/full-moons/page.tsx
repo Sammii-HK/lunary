@@ -44,13 +44,13 @@ export const metadata: Metadata = {
     images: ['/api/og/cosmic'],
   },
   alternates: {
-    canonical: 'https://lunary.app/grimoire/moon/full-moons',
+    canonical: 'https://lunary.app/grimoire/moon',
   },
   robots: {
-    index: true,
+    index: false,
     follow: true,
     googleBot: {
-      index: true,
+      index: false,
       follow: true,
       'max-video-preview': -1,
       'max-image-preview': 'large',

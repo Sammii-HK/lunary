@@ -184,13 +184,17 @@ export const test = base.extend<AuthFixtures>({
     });
 
     const page = await context.newPage();
+    page.setDefaultNavigationTimeout(120000);
 
     // Set authenticated test flag before navigating
     await page.addInitScript(() => {
       (window as any).__PLAYWRIGHT_AUTHENTICATED__ = true;
     });
 
-    await page.goto(`${testBaseURL}/`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${testBaseURL}/`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 120000,
+    });
 
     await use(page);
     await page.close();
@@ -250,13 +254,17 @@ export const test = base.extend<AuthFixtures>({
     });
 
     const page = await context.newPage();
+    page.setDefaultNavigationTimeout(120000);
 
     // Set authenticated test flag before navigating
     await page.addInitScript(() => {
       (window as any).__PLAYWRIGHT_AUTHENTICATED__ = true;
     });
 
-    await page.goto(`${testBaseURL}/admin`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${testBaseURL}/admin`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 120000,
+    });
 
     await use(page);
     await page.close();

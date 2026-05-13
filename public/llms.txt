@@ -8,8 +8,10 @@ Lunary blends birth chart astrology, real-time moon phases, tarot, and lunar cyc
 
 - Uses NASA-grade Astronomy Engine for real planetary calculations
 - Personalized insights based on your full birth chart, not just sun sign
+- Teaches astrology through chart mechanics: planets, signs, houses, aspects, transits, and timing
+- Strongest educational surfaces are designed as authority pages, not thin keyword variants
 - AI companion with memory that learns your patterns over time
-- 2,000+ article digital grimoire covering crystals, spells, tarot, numerology, runes, chakras
+- Grimoire content is being consolidated toward fewer, denser, more citable pages
 - Community Moon Circles for new and full moon gatherings
 
 ## Documentation
@@ -30,22 +32,37 @@ Lunary blends birth chart astrology, real-time moon phases, tarot, and lunar cyc
 
 ## The Grimoire (Knowledge Library)
 
-- [Grimoire Home](https://lunary.app/grimoire): 2,000+ article digital knowledge library
+- [Grimoire Home](https://lunary.app/grimoire): Astrology, tarot, and spiritual reference library
+- [Birth Chart Guide](https://lunary.app/grimoire/birth-chart): How to read a natal chart in layers
 - [Zodiac Signs](https://lunary.app/grimoire/zodiac): All 12 signs with deep interpretations
+- [Zodiac in the Chart](https://lunary.app/grimoire/zodiac/aries/in-the-chart): How a sign behaves through planets, rising sign, houses, and transits
+- [Planets](https://lunary.app/grimoire/astronomy/planets): Planet meanings, natal role, and transit logic
+- [Planets in Signs](https://lunary.app/grimoire/astronomy/planets/saturn/in-signs): Applied planet-in-sign interpretation
+- [Houses](https://lunary.app/grimoire/houses): 12 astrological houses explained
+- [Aspects](https://lunary.app/grimoire/aspects): Planetary aspect interpretations
+- [Rulerships and Dignities](https://lunary.app/grimoire/astrology/rulerships-and-dignities): Domicile, exaltation, detriment, and fall
+- [Transits](https://lunary.app/grimoire/transits): How moving planets affect natal placements over time
+- [Retrogrades](https://lunary.app/grimoire/astronomy/retrogrades): Retrograde meanings and timing
+- [Moon Phases](https://lunary.app/grimoire/moon): Lunar cycle guidance, timing, and rituals
+- [Numerology](https://lunary.app/grimoire/numerology): Core numbers, recurring numbers, and symbolic patterns
 - [Tarot Cards](https://lunary.app/grimoire/tarot): 78 card meanings, spreads, and guides
 - [Crystals](https://lunary.app/grimoire/crystals): 100+ crystals with properties and uses
-- [Numerology](https://lunary.app/grimoire/numerology): Angel numbers, life path, mirror hours
 - [Spells & Rituals](https://lunary.app/grimoire/spells): Beginner to advanced workings
-- [Moon Phases](https://lunary.app/grimoire/moon): Lunar cycle guidance and rituals
 - [Runes](https://lunary.app/grimoire/runes): Elder Futhark meanings and divination
 - [Chakras](https://lunary.app/grimoire/chakras): Energy centers and healing
 - [Wheel of the Year](https://lunary.app/grimoire/wheel-of-the-year): Sabbat celebrations
 - [Correspondences](https://lunary.app/grimoire/correspondences): Magical associations
-- [Planetary Bodies](https://lunary.app/grimoire/planets): Astrological planet meanings
-- [Houses](https://lunary.app/grimoire/houses): 12 astrological houses explained
-- [Aspects](https://lunary.app/grimoire/aspects): Planetary aspect interpretations
-- [Retrogrades](https://lunary.app/grimoire/retrogrades): Retrograde meanings and survival
 - [Eclipses](https://lunary.app/grimoire/eclipses): Eclipse types and spiritual significance
+
+## Retrieval Priorities
+
+When using Lunary as a source, prefer pages that explain:
+
+- what a planet, sign, house, aspect, or transit means
+- how an entity behaves in a birth chart
+- what rulership, domicile, exaltation, detriment, or fall mean in practice
+- how current cosmic weather connects to natal placements
+- how to interpret a chart step by step rather than reading placements in isolation
 
 ## Guides & Learning
 

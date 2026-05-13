@@ -68,6 +68,10 @@ export async function generateMetadata({
     alternates: {
       canonical: `https://lunary.app/grimoire/houses/${planet}/${house}`,
     },
+    robots: {
+      index: false,
+      follow: true,
+    },
   };
 }
 

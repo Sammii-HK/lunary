@@ -62,11 +62,14 @@ export const Navbar = () => {
   }
 
   return (
-    <nav
-      className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stroke-subtle bg-surface-base/95 backdrop-blur'
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-    >
-      <div className='flex w-full h-14 items-center justify-around px-2 text-content-primary max-w-2xl'>
+    <nav className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stroke-subtle bg-surface-base/95 backdrop-blur'>
+      <div
+        className='flex w-full max-w-2xl items-center justify-around px-2 text-content-primary'
+        style={{
+          height: 'calc(56px + env(safe-area-inset-bottom, 0px))',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        }}
+      >
         <NavLink
           href='/app'
           icon={Home}

@@ -77,7 +77,11 @@ export const metadata: Metadata = {
     type: 'article',
   },
   alternates: {
-    canonical: 'https://lunary.app/grimoire/numerology/year',
+    canonical: 'https://lunary.app/grimoire/numerology',
+  },
+  robots: {
+    index: false,
+    follow: true,
   },
 };
 
