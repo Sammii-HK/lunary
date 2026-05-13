@@ -38,17 +38,7 @@ function getMoonEventBySlug(
   return list.find((event) => event.slug === moonPhase);
 }
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return SUPPORTED_YEARS.flatMap((year) => {
-    const events = getMoonEventsForYear(year);
-    return [...events.fullMoons, ...events.newMoons].map((event) => ({
-      year: String(year),
-      moonPhase: event.slug,
-    }));
-  });
-}
+export const dynamicParams = true;
 
 export async function generateMetadata({
   params,
