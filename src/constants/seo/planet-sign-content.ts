@@ -265,6 +265,15 @@ function generateAdvice(
 
 // Get all valid planet keys
 export const planetKeys = Object.keys(planetDescriptions);
+export const RECOVERY_PLACEMENT_PLANETS = [
+  'sun',
+  'moon',
+  'mercury',
+  'venus',
+  'mars',
+  'jupiter',
+  'saturn',
+] as const;
 
 // Get all valid sign keys
 export const signKeys = Object.keys(signDescriptions);

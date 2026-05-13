@@ -1,15 +1,10 @@
-import { getAllPlanetSignSlugs } from '@/constants/seo/planet-sign-content';
+import {
+  getAllPlanetSignSlugs,
+  RECOVERY_PLACEMENT_PLANETS,
+} from '@/constants/seo/planet-sign-content';
 
 const baseUrl = 'https://lunary.app';
-const RECOVERY_PLACEMENT_PLANETS = new Set([
-  'sun',
-  'moon',
-  'mercury',
-  'venus',
-  'mars',
-  'jupiter',
-  'saturn',
-]);
+const RECOVERY_PLACEMENT_PLANET_SET = new Set(RECOVERY_PLACEMENT_PLANETS);
 
 export async function GET() {
   const currentDate = new Date();
@@ -17,7 +12,9 @@ export async function GET() {
   const now = stableMonthStamp;
   const slugs = getAllPlanetSignSlugs().filter((slug) => {
     const [planet] = slug.split('-in-');
-    return RECOVERY_PLACEMENT_PLANETS.has(planet);
+    return RECOVERY_PLACEMENT_PLANET_SET.has(
+      planet as (typeof RECOVERY_PLACEMENT_PLANETS)[number],
+    );
   });
 
   const placementUrls = slugs
