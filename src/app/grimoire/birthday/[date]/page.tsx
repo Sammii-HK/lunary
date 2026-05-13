@@ -15,7 +15,7 @@ import {
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-export const dynamicParams = false;
+export const dynamicParams = true;
 interface BirthdayData {
   month: number;
   day: number;
@@ -82,23 +82,6 @@ function getAdjacentBirthdayLinks(
     prev: formatBirthdaySlug(prev),
     next: formatBirthdaySlug(next),
   };
-}
-
-export function generateStaticParams() {
-  const params: Array<{ date: string }> = [];
-
-  for (let monthIndex = 0; monthIndex < MONTH_NAMES.length; monthIndex += 1) {
-    const monthName = MONTH_NAMES[monthIndex].toLowerCase();
-    const daysInMonth = new Date(
-      Date.UTC(2024, monthIndex + 1, 0),
-    ).getUTCDate();
-
-    for (let day = 1; day <= daysInMonth; day += 1) {
-      params.push({ date: `${monthName}-${day}` });
-    }
-  }
-
-  return params;
 }
 
 export async function generateMetadata({

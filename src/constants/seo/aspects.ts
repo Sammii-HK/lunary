@@ -51,6 +51,16 @@ export const ASPECTS = [
 
 export type Aspect = (typeof ASPECTS)[number];
 
+export const RECOVERY_ASPECT_PLANETS = [
+  'sun',
+  'moon',
+  'mercury',
+  'venus',
+  'mars',
+  'jupiter',
+  'saturn',
+] as const satisfies readonly Planet[];
+
 export const ASPECT_DATA: Record<
   Aspect,
   {
@@ -249,4 +259,24 @@ export function generateAllAspectParams(): {
   }
 
   return params;
+}
+
+export function getCanonicalAspectPair(
+  planet1: Planet,
+  planet2: Planet,
+): { planet1: Planet; planet2: Planet } | null {
+  if (planet1 === planet2) {
+    return null;
+  }
+
+  const firstIndex = PLANETS.indexOf(planet1);
+  const secondIndex = PLANETS.indexOf(planet2);
+
+  if (firstIndex === -1 || secondIndex === -1) {
+    return null;
+  }
+
+  return firstIndex < secondIndex
+    ? { planet1, planet2 }
+    : { planet1: planet2, planet2: planet1 };
 }
