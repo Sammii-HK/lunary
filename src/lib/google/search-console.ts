@@ -121,9 +121,7 @@ function parseServiceAccountCredentials(rawValue: string) {
     try {
       const parsed = JSON.parse(candidate);
       return normalizeServiceAccountKey(parsed);
-    } catch (error) {
-      lastError = error;
-
+    } catch {
       try {
         const repaired = repairMultilinePrivateKey(candidate);
         const parsed = JSON.parse(repaired);
