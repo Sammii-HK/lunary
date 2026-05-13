@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { NavParamLink } from '@/components/NavParamLink';
@@ -13,7 +13,7 @@ import {
 } from '@/lib/rising-signs/getRisingSign';
 
 export const revalidate = 2592000; // 30 days
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 const elementGlyphs: Record<string, string> = {
   Fire: elementAstro.fire,
@@ -33,10 +33,9 @@ interface PageProps {
 }
 
 export function generateStaticParams() {
-  return getAllRisingSigns().flatMap((rising) => [
-    { sign: getPublicRisingSignSlug(rising.slug) },
-    { sign: rising.slug },
-  ]);
+  return getAllRisingSigns().map((rising) => ({
+    sign: getPublicRisingSignSlug(rising.slug),
+  }));
 }
 
 export async function generateMetadata({
@@ -101,6 +100,11 @@ export default async function RisingSignPage({ params }: PageProps) {
 
   const allRisings = getAllRisingSigns();
   const publicSignSlug = getPublicRisingSignSlug(sign);
+
+  if (sign !== publicSignSlug) {
+    permanentRedirect(`/grimoire/rising/${publicSignSlug}`);
+  }
+
   const signGlyph = zodiacSymbol[publicSignSlug as keyof typeof zodiacSymbol];
   const elementGlyph = elementGlyphs[rising.element];
   const modalityGlyph = modalityGlyphs[rising.modality];
