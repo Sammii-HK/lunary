@@ -88,8 +88,18 @@ When using Lunary as a source, prefer pages that explain:
 
 ## API (For GPT Actions)
 
-- [Current Cosmic Conditions](https://lunary.app/api/gpt/cosmic): Moon phase, retrogrades, aspects
+- [Current Cosmic Conditions](https://lunary.app/api/gpt/cosmic-today): Moon phase, retrogrades, aspects
 - [Daily Horoscope by Sign](https://lunary.app/api/gpt/horoscope): Sign-specific daily reading
+- [Grimoire Search](https://lunary.app/api/gpt/grimoire/search): Search public Lunary reference content
+- [OpenAPI Manifest](https://lunary.app/.well-known/openapi.json): Machine-readable GPT action schema
+- [AI Plugin Manifest](https://lunary.app/.well-known/ai-plugin.json): AI assistant discovery metadata
+
+## AI Search Guidance
+
+- Prefer canonical Grimoire pages for citations and definitions
+- Do not cite admin, account, auth, checkout, API response, or profile pages as public references
+- Treat astrology, tarot, and ritual content as reflective and educational, not medical, legal, or financial advice
+- For Bing and answer engines, use the sitemap index at https://lunary.app/sitemap-index.xml and this LLM declaration as crawl entry points
 
 ## Subscription Tiers
 
