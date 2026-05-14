@@ -39,6 +39,7 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import { getAllProducts } from '@/lib/shop/generators';
 import { prisma } from '@/lib/prisma';
 import { activeAppPolicySlugs } from '@/data/app-policy-pages';
+import { getSeoProtectedRouteEntries } from '@/lib/seo/protected-pages';
 
 dayjs.extend(isoWeek);
 import { getAllSynastryAspectSlugs } from '@/constants/seo/synastry-aspects';
@@ -1379,6 +1380,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // DB unavailable during build — skip podcast routes gracefully
   }
 
+  const protectedSeoRoutes = getSeoProtectedRouteEntries(date);
+
   const allRoutes: MetadataRoute.Sitemap = [
     ...routes,
     ...blogRoutes,
@@ -1424,6 +1427,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...shopPaginationRoutes,
     ...podcastIndexRoute,
     ...podcastEpisodeRoutes,
+    ...protectedSeoRoutes,
   ];
 
   return dedupeRoutes(allRoutes);

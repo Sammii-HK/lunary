@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { formatDate } from '@/lib/analytics/date-range';
-import { getSearchConsoleData, getTopPages } from '@/lib/google/search-console';
+import { getBipAcquisitionSnapshot } from '@/lib/bip/acquisition-metrics';
 import generateSitemap from '@/app/sitemap';
 
 export const dynamic = 'force-dynamic';
@@ -55,27 +55,23 @@ export async function GET(request: NextRequest) {
     let topPages: Array<{ url: string; clicks: number }> = [];
 
     try {
-      // Get Search Console data for yesterday
-      const searchConsoleData = await getSearchConsoleData(
+      const acquisition = await getBipAcquisitionSnapshot(
         metricDate,
         metricDate,
       );
-      clicks = searchConsoleData.totalClicks;
-      impressions = searchConsoleData.totalImpressions;
-      ctr = searchConsoleData.averageCtr; // Keep as decimal (0.05 = 5%)
-      averagePosition = searchConsoleData.averagePosition;
-
-      // Get top 10 pages for yesterday
-      const topPagesData = await getTopPages(metricDate, metricDate, 10);
-      topPages = topPagesData.map((page) => ({
-        url: page.page,
+      clicks = acquisition.clicks;
+      impressions = acquisition.impressions;
+      ctr = acquisition.ctr;
+      averagePosition = acquisition.averagePosition;
+      topPages = acquisition.topPages.map((page) => ({
+        url: page.url,
         clicks: page.clicks,
       }));
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       console.error(
-        '[sync-seo-metrics] Search Console API error:',
+        '[sync-seo-metrics] search acquisition API error:',
         errorMessage,
       );
       // Continue with 0 values if API fails

@@ -254,6 +254,9 @@ export function TarotView({
           timeFrame,
           userBirthday,
           userReadings,
+          new Date(),
+          user?.location?.timezone ||
+            Intl.DateTimeFormat().resolvedOptions().timeZone,
         );
         setPersonalizedReading(reading);
       } catch (error) {
@@ -265,7 +268,13 @@ export function TarotView({
     }
 
     fetchPersonalizedReading();
-  }, [hasPaidAccess, userName, userBirthday, timeFrame]);
+  }, [
+    hasPaidAccess,
+    userName,
+    userBirthday,
+    timeFrame,
+    user?.location?.timezone,
+  ]);
 
   // Build basic 7-day patterns for free users from previousReadings
   const freeBasicPatterns = useMemo(() => {

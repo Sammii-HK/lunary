@@ -3,6 +3,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import { Roboto_Mono } from 'next/font/google';
 import localFont from 'next/font/local';
+import Script from 'next/script';
 import { Suspense } from 'react';
 import './globals.css';
 
@@ -17,6 +18,8 @@ const astronomicon = localFont({
   variable: '--font-astro',
   display: 'swap',
 });
+
+const clarityProjectId = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
 
 import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
 import { PWA_MANIFEST_URL } from '@/constants/pwa';
@@ -174,6 +177,17 @@ export default function RootLayout({
         className={`${roboto.className} ${astronomicon.variable} flex flex-col w-full h-dvh bg-surface-base text-content-primary overflow-hidden`}
         suppressHydrationWarning
       >
+        {clarityProjectId ? (
+          <Script id='microsoft-clarity' strategy='afterInteractive'>
+            {`
+              (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i+"?ref=bwt";
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "${clarityProjectId}");
+            `}
+          </Script>
+        ) : null}
         {/* Auto-recover from stale chunk errors after deploys */}
         <script
           dangerouslySetInnerHTML={{

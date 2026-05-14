@@ -20,32 +20,10 @@ import { generateTarotTransitConnection } from '@/lib/tarot/generate-transit-con
 import type { TransitInsight } from '@/lib/tarot/generate-transit-connection';
 import { getLocalDateString } from '@/lib/cache/dailyCache';
 import { ShareDailyTarotCard } from '@/components/share/ShareDailyTarotCard';
-import { seedToIndex } from '@/lib/tarot/chart-seeding';
-import { TAROT_DECK, type TarotDeckCard } from '@/utils/tarot/deck';
+import { getTarotCard } from 'utils/tarot/tarot';
 
 dayjs.extend(utc);
 dayjs.extend(dayOfYear);
-
-function simpleHash(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash &= hash;
-  }
-  return Math.abs(hash);
-}
-
-function getSeededTarotCard(
-  seedInput: string,
-  userName?: string,
-  userBirthday?: string,
-): TarotDeckCard {
-  const seed = [seedInput, userName?.trim(), userBirthday?.trim()]
-    .filter(Boolean)
-    .join('|');
-  return TAROT_DECK[seedToIndex(simpleHash(seed), TAROT_DECK.length)];
-}
 
 export const DailyCardPreview = () => {
   const { user } = useUser();
@@ -82,12 +60,12 @@ export const DailyCardPreview = () => {
     // Generate general card for all users
     const dayOfYearNum = selectedDay.dayOfYear();
     const generalSeed = `cosmic-${dateStr}-${dayOfYearNum}-energy`;
-    const generalCard = getSeededTarotCard(generalSeed);
+    const generalCard = getTarotCard(generalSeed);
 
     // Also generate personalized card for preview (if we have user data)
     const personalizedCard =
       userName && userBirthday
-        ? getSeededTarotCard(`daily-${dateStr}`, userName, userBirthday)
+        ? getTarotCard(`daily-${dateStr}`, userName, userBirthday)
         : null;
 
     if (canAccessPersonalized && personalizedCard) {

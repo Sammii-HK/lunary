@@ -164,6 +164,7 @@ export interface MetricsCardOptions {
   newSignups: number;
   dau?: number;
   subscriberCount?: number;
+  aiCitations?: number;
 }
 
 function buildMetricsElement(opts: MetricsCardOptions): React.ReactElement {
@@ -182,6 +183,15 @@ function buildMetricsElement(opts: MetricsCardOptions): React.ReactElement {
       value: opts.impressionsPerDay,
       delta: opts.impressionsDelta,
       fmt: formatImpressions,
+    });
+  }
+
+  if (opts.aiCitations && opts.aiCitations > 0) {
+    allStats.push({
+      label: 'Bing AI citations',
+      value: opts.aiCitations,
+      delta: 0,
+      fmt: (n: number) => n.toLocaleString('en-GB'),
     });
   }
 
@@ -268,6 +278,15 @@ function buildMetricsElement(opts: MetricsCardOptions): React.ReactElement {
   }
   if (opts.dau && opts.dau > 0 && !stats.some((s) => s.label === 'DAU')) {
     footerParts.push(`${opts.dau} DAU yesterday`);
+  }
+  if (
+    opts.aiCitations &&
+    opts.aiCitations > 0 &&
+    !stats.some((s) => s.label === 'Bing AI citations')
+  ) {
+    footerParts.push(
+      `${opts.aiCitations.toLocaleString('en-GB')} AI citations`,
+    );
   }
   const footerText = footerParts.join('  ·  ');
 

@@ -131,6 +131,8 @@
     "seo:indexnow:discovery": "tsx scripts/submit-indexnow-discovery.ts",
     "seo:indexnow:discovery:dry": "tsx scripts/submit-indexnow-discovery.ts --dry-run",
     "seo:verify:ai": "tsx scripts/verify-seo-coverage.ts --ai-discovery-only",
+    "seo:bing-ai:scrape": "tsx scripts/scrape-bing-ai-performance.ts",
+    "seo:bing-ai:scrape:headed": "tsx scripts/scrape-bing-ai-performance.ts --headed",
     "seo:e2e": "playwright test e2e/journeys/18-seo.spec.ts",
     "seo:e2e:prod": "BASE_URL=https://lunary.app playwright test e2e/journeys/18-seo.spec.ts",
     "analyze": "ANALYZE=true pnpm build",

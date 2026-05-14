@@ -18,10 +18,53 @@ type Props = {
   id?: string;
 };
 
+export function buildMoonLitPath({
+  cx,
+  cy,
+  r,
+  illumination,
+  waxing,
+  segments = 48,
+}: {
+  cx: number;
+  cy: number;
+  r: number;
+  illumination: number;
+  waxing: boolean;
+  segments?: number;
+}): string {
+  const k = Math.max(0, Math.min(1, illumination));
+  if (k <= 0.001) return '';
+
+  const safeSegments = Math.max(12, segments);
+  const terminatorFactor = 1 - 2 * k;
+  const outerPoints: Array<[number, number]> = [];
+  const terminatorPoints: Array<[number, number]> = [];
+
+  for (let i = 0; i <= safeSegments; i += 1) {
+    const t = i / safeSegments;
+    const y = cy - r + t * r * 2;
+    const yOffset = y - cy;
+    const halfWidth = Math.sqrt(Math.max(0, r * r - yOffset * yOffset));
+
+    if (waxing) {
+      outerPoints.push([cx + halfWidth, y]);
+      terminatorPoints.push([cx + terminatorFactor * halfWidth, y]);
+    } else {
+      outerPoints.push([cx - halfWidth, y]);
+      terminatorPoints.push([cx - terminatorFactor * halfWidth, y]);
+    }
+  }
+
+  const points = [...outerPoints, ...terminatorPoints.reverse()];
+  return `${points
+    .map(([x, y], index) => `${index === 0 ? 'M' : 'L'} ${x} ${y}`)
+    .join(' ')} Z`;
+}
+
 /**
- * Pure SVG moon shape rendered with two arcs that meet at the top/bottom.
- * The terminator x-radius is computed from illumination + waxing flag, so
- * the same component handles new → crescent → quarter → gibbous → full.
+ * Pure SVG moon shape rendered from the illuminated horizontal slices.
+ * This avoids arc fill-rule ambiguity where crescents can appear as gibbous.
  */
 export function MoonPhase({
   cx,
@@ -40,13 +83,13 @@ export function MoonPhase({
       ? Math.max(0, Math.min(1, illumination))
       : Math.abs(Math.cos(phase * Math.PI * 2)) * 0.5 + 0.5;
   const isWaxing = typeof waxing === 'boolean' ? waxing : phase < 0.5;
-  const ratio = 2 * k - 1;
-  const rx = Math.max(0.001, Math.abs(ratio) * r);
-  const terminatorSweep = ratio > 0 ? 1 : 0;
-  const litPath =
-    `M ${cx} ${cy - r} ` +
-    `A ${r} ${r} 0 0 ${isWaxing ? 1 : 0} ${cx} ${cy + r} ` +
-    `A ${rx} ${r} 0 0 ${isWaxing ? terminatorSweep : 1 - terminatorSweep} ${cx} ${cy - r} Z`;
+  const litPath = buildMoonLitPath({
+    cx,
+    cy,
+    r,
+    illumination: k,
+    waxing: isWaxing,
+  });
 
   const gid = id || 'moon';
 
@@ -64,7 +107,11 @@ export function MoonPhase({
         />
       )}
       <circle cx={cx} cy={cy} r={r} fill={fillDark} />
-      <path d={litPath} fill={`url(#${gid}-grad)`} />
+      {k >= 0.999 ? (
+        <circle cx={cx} cy={cy} r={r} fill={`url(#${gid}-grad)`} />
+      ) : litPath ? (
+        <path d={litPath} fill={`url(#${gid}-grad)`} />
+      ) : null}
       <defs>
         <radialGradient id={`${gid}-grad`} cx='40%' cy='35%' r='75%'>
           <stop offset='0%' stopColor='#fffbe6' />

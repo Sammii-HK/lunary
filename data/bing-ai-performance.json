@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-05-15T00:00:00.000Z",
+  "source": "Manual Bing Webmaster Tools AI Performance snapshot. The public Bing Webmaster API does not expose AI Performance citations yet.",
+  "summary": {
+    "totalCitations": 333,
+    "averageCitedPages": 62,
+    "totalClicks": 21,
+    "totalImpressions": 1200,
+    "averageCtr": 0.018
+  },
+  "citedPages": []
+}

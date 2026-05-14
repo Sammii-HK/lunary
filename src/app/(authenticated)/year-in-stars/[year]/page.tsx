@@ -245,7 +245,7 @@ export default async function YearInStarsByYearPage({
     .catch(() => null);
 
   if (!session?.user?.id) {
-    redirect(`/login?next=/year-in-stars/${year}`);
+    redirect(`/auth?returnTo=/year-in-stars/${year}`);
   }
 
   const userId = session.user.id;

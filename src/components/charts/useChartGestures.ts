@@ -28,13 +28,29 @@ const PINCH_THRESHOLD = 8;
 const TAP_SUPPRESS_MS = 180;
 const MAX_PAN = 120;
 
+const DEFAULT_STATE: ChartGestureState = {
+  scale: 1,
+  tx: 0,
+  ty: 0,
+};
+
+function normaliseGestureState(
+  state: ChartGestureState | null | undefined,
+): ChartGestureState {
+  if (
+    !state ||
+    !Number.isFinite(state.scale) ||
+    !Number.isFinite(state.tx) ||
+    !Number.isFinite(state.ty)
+  ) {
+    return DEFAULT_STATE;
+  }
+  return state;
+}
+
 export function useChartGestures(opts: { enabled?: boolean } = {}) {
   const { enabled = true } = opts;
-  const [state, setState] = useState<ChartGestureState>({
-    scale: 1,
-    tx: 0,
-    ty: 0,
-  });
+  const [state, setState] = useState<ChartGestureState>(DEFAULT_STATE);
 
   const stateRef = useRef(state);
   const pointers = useRef(new Map<number, PointerRec>());
@@ -62,9 +78,11 @@ export function useChartGestures(opts: { enabled?: boolean } = {}) {
 
   const updateState = useCallback((next: SetStateAction<ChartGestureState>) => {
     setState((current) => {
-      const resolved = typeof next === 'function' ? next(current) : next;
-      stateRef.current = resolved;
-      return resolved;
+      const safeCurrent = normaliseGestureState(current);
+      const resolved = typeof next === 'function' ? next(safeCurrent) : next;
+      const safeResolved = normaliseGestureState(resolved);
+      stateRef.current = safeResolved;
+      return safeResolved;
     });
   }, []);
 
@@ -139,32 +157,30 @@ export function useChartGestures(opts: { enabled?: boolean } = {}) {
       p.y = e.clientY;
       const list = [...pointers.current.values()];
 
-      if (list.length === 2 && pinchStart.current) {
+      const pinch = pinchStart.current;
+      if (list.length === 2 && pinch) {
         const dx = list[0].x - list[1].x;
         const dy = list[0].y - list[1].y;
         const dist = Math.hypot(dx, dy);
-        if (pinchStart.current.dist <= 0) return;
-        const ratio = dist / pinchStart.current.dist;
+        if (pinch.dist <= 0) return;
+        const ratio = dist / pinch.dist;
         const midX = (list[0].x + list[1].x) / 2;
         const midY = (list[0].y + list[1].y) / 2;
-        const distanceDelta = Math.abs(dist - pinchStart.current.dist);
-        const midpointDelta = Math.hypot(
-          midX - pinchStart.current.midX,
-          midY - pinchStart.current.midY,
-        );
+        const distanceDelta = Math.abs(dist - pinch.dist);
+        const midpointDelta = Math.hypot(midX - pinch.midX, midY - pinch.midY);
         if (
-          !pinchStart.current.active &&
+          !pinch.active &&
           distanceDelta < PINCH_THRESHOLD &&
           midpointDelta < PINCH_THRESHOLD
         ) {
           return;
         }
-        pinchStart.current.active = true;
+        pinch.active = true;
         if (e.cancelable) e.preventDefault();
-        const nextScale = clamp(pinchStart.current!.scale * ratio);
+        const nextScale = clamp(pinch.scale * ratio);
         const nextPan = clampPan(
-          pinchStart.current.tx + midX - pinchStart.current.midX,
-          pinchStart.current.ty + midY - pinchStart.current.midY,
+          pinch.tx + midX - pinch.midX,
+          pinch.ty + midY - pinch.midY,
           nextScale,
         );
         updateState({
@@ -177,20 +193,17 @@ export function useChartGestures(opts: { enabled?: boolean } = {}) {
         panStart.current &&
         stateRef.current.scale > 1
       ) {
-        const dx = list[0].x - panStart.current.x;
-        const dy = list[0].y - panStart.current.y;
-        if (!panStart.current.active && Math.hypot(dx, dy) < PAN_THRESHOLD) {
+        const pan = panStart.current;
+        const dx = list[0].x - pan.x;
+        const dy = list[0].y - pan.y;
+        if (!pan.active && Math.hypot(dx, dy) < PAN_THRESHOLD) {
           return;
         }
-        panStart.current.active = true;
+        pan.active = true;
         if (e.cancelable) e.preventDefault();
         updateState((s) => ({
           scale: s.scale,
-          ...clampPan(
-            panStart.current!.tx + dx,
-            panStart.current!.ty + dy,
-            s.scale,
-          ),
+          ...clampPan(pan.tx + dx, pan.ty + dy, s.scale),
         }));
       }
     },

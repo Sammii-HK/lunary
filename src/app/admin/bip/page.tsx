@@ -1,5 +1,5 @@
 import { sql } from '@vercel/postgres';
-import { getSearchConsoleData } from '@/lib/google/search-console';
+import { getBipAcquisitionSnapshot } from '@/lib/bip/acquisition-metrics';
 import { BipTriggerButtons } from './BipTriggerButtons';
 import Image from 'next/image';
 import * as fs from 'node:fs';
@@ -15,6 +15,8 @@ interface BipMetrics {
   mrr: number;
   subscriberCount: number;
   impressionsPerDay: number;
+  clicksPerDay: number;
+  aiCitations: number;
 }
 
 interface BipState {
@@ -62,14 +64,25 @@ async function getCurrentMetrics(): Promise<BipMetrics> {
     .split('T')[0];
 
   let impressionsPerDay = 0;
+  let clicksPerDay = 0;
+  let aiCitations = 0;
   try {
-    const scData = await getSearchConsoleData(sevenDaysAgo, today);
-    impressionsPerDay = Math.round(scData.totalImpressions / 7);
+    const acquisition = await getBipAcquisitionSnapshot(sevenDaysAgo, today);
+    impressionsPerDay = acquisition.impressionsPerDay;
+    clicksPerDay = acquisition.clicksPerDay;
+    aiCitations = acquisition.sources.bingAiCitations;
   } catch (err) {
-    console.warn('[BIP Admin] GSC fetch failed:', err);
+    console.warn('[BIP Admin] acquisition metrics fetch failed:', err);
   }
 
-  return { mau, mrr, subscriberCount, impressionsPerDay };
+  return {
+    mau,
+    mrr,
+    subscriberCount,
+    impressionsPerDay,
+    clicksPerDay,
+    aiCitations,
+  };
 }
 
 async function getBipState(): Promise<BipState> {
@@ -126,7 +139,7 @@ export default async function BipPreviewPage() {
         <h2 className='text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-3'>
           Current metrics
         </h2>
-        <div className='grid grid-cols-2 sm:grid-cols-4 gap-4'>
+        <div className='grid grid-cols-2 sm:grid-cols-5 gap-4'>
           <div className='bg-[#14141e] border border-[#2a2a3e] rounded-xl p-4'>
             <div className='text-2xl font-bold'>{metrics.mau}</div>
             <div className='text-neutral-400 text-sm mt-1'>MAU</div>
@@ -153,6 +166,14 @@ export default async function BipPreviewPage() {
                 : '—'}
             </div>
             <div className='text-neutral-400 text-sm mt-1'>impressions/day</div>
+          </div>
+          <div className='bg-[#14141e] border border-[#2a2a3e] rounded-xl p-4'>
+            <div className='text-2xl font-bold'>
+              {metrics.aiCitations > 0
+                ? metrics.aiCitations.toLocaleString()
+                : '—'}
+            </div>
+            <div className='text-neutral-400 text-sm mt-1'>AI citations</div>
           </div>
         </div>
       </section>
