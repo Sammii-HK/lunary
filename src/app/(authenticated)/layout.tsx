@@ -12,6 +12,7 @@ import { AnnouncementProvider } from '@/components/feature-announcements/Announc
 import { nativePushService } from '@/services/native';
 import { configureIAP } from '@/hooks/useIAPSubscription';
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 
 function OfflineBanner() {
   const [isOffline, setIsOffline] = useState(false);
@@ -163,24 +164,20 @@ export default function AuthenticatedLayout({
 
   if (!mounted || authStatus.loading || waitingForRecentAuthHandoff) {
     return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <span className='text-content-muted text-sm'>
-          {waitingForRecentAuthHandoff
+      <BrandedPageLoader
+        message={
+          waitingForRecentAuthHandoff
             ? 'Finishing sign-in…'
-            : 'Checking authentication…'}
-        </span>
-      </div>
+            : 'Checking authentication…'
+        }
+      />
     );
   }
 
   if (!authStatus.isAuthenticated) {
     // Keep showing loading while window.location.replace navigates to /auth.
     // Returning null here causes a blank screen in Capacitor WKWebView.
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <span className='text-content-muted text-sm'>Redirecting…</span>
-      </div>
-    );
+    return <BrandedPageLoader message='Redirecting…' />;
   }
 
   return (

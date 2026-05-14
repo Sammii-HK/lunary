@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Lock, Loader2 } from 'lucide-react';
+import { ArrowLeft, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SpaceHeader } from '@/components/community/SpaceHeader';
 import { CommunityPostFeed } from '@/components/community/CommunityPostFeed';
 import { SharePostForm } from '@/components/community/SharePostForm';
 import { WeeklyThemeCard } from '@/components/community/WeeklyThemeCard';
 import { useSubscription } from '@/hooks/useSubscription';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 
 interface SpaceData {
   id: number;
@@ -85,14 +86,7 @@ export default function CommunitySpaceClient() {
   };
 
   if (isLoading) {
-    return (
-      <div className='min-h-screen p-4'>
-        <div className='max-w-2xl mx-auto flex items-center gap-2 py-8'>
-          <Loader2 className='w-5 h-5 text-content-muted animate-spin' />
-          <span className='text-sm text-content-muted'>Loading space...</span>
-        </div>
-      </div>
-    );
+    return <BrandedPageLoader message='Loading this space…' />;
   }
 
   if (error || !space) {

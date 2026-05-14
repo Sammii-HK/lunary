@@ -69,21 +69,25 @@ export function BrandedPageLoader({ message }: Props) {
           <span className='absolute bottom-0 left-1/2 h-1 w-1 -translate-x-1/2 translate-y-1/2 rounded-full bg-lunary-rose shadow-[0_0_6px_rgba(238,120,158,0.7)]' />
         </motion.div>
 
-        {/* Logo — gentle breath + soft halo */}
-        <motion.div
-          className='absolute inset-0 flex items-center justify-center'
-          animate={{ scale: [1, 1.06, 1] }}
-          transition={{ duration: 3.6, repeat: Infinity, ease: 'easeInOut' }}
-        >
+        {/* Logo — steady moon, breathing glow */}
+        <div className='absolute inset-0 flex items-center justify-center'>
           <div className='relative'>
-            <div
+            <motion.div
               aria-hidden
               className='absolute inset-0 rounded-full'
+              animate={{
+                opacity: [0.45, 0.8, 0.45],
+                scale: [1.45, 1.7, 1.45],
+              }}
+              transition={{
+                duration: 3.6,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
               style={{
                 background:
                   'radial-gradient(circle, rgba(138,107,255,0.45) 0%, rgba(138,107,255,0) 70%)',
                 filter: 'blur(8px)',
-                transform: 'scale(1.6)',
               }}
             />
             <Image
@@ -95,7 +99,7 @@ export function BrandedPageLoader({ message }: Props) {
               className='relative h-20 w-20 sm:h-24 sm:w-24 select-none'
             />
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {message && (

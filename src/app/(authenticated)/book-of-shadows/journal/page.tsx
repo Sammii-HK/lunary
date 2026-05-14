@@ -25,6 +25,7 @@ import type { AnniversaryRecord } from '@/lib/journal/anniversary-finder';
 import { HabitCaptureRow } from '@/components/cosmic-habits/HabitCaptureRow';
 import { CorrelationsCard } from '@/components/cosmic-habits/CorrelationsCard';
 import type { HabitCapture } from '@/lib/cosmic-habits/types';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 
 interface EntryCardProps {
   entry: JournalEntry;
@@ -208,13 +209,7 @@ export default function JournalPage() {
   };
 
   if (authLoading || isLoading) {
-    return (
-      <div className='min-h-screen bg-surface-base flex items-center justify-center'>
-        <div className='animate-pulse text-content-muted'>
-          Loading your journal...
-        </div>
-      </div>
-    );
+    return <BrandedPageLoader message='Loading your journal…' />;
   }
 
   if (!user) {

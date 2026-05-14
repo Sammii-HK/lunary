@@ -14,6 +14,7 @@ import {
   Zap,
   TrendingUp,
 } from 'lucide-react';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 
 interface ApiKeyData {
   id: string;
@@ -118,11 +119,7 @@ export default function DeveloperDashboard() {
   }
 
   if (loading) {
-    return (
-      <div className='min-h-screen bg-surface-base text-content-primary flex items-center justify-center'>
-        <div className='animate-pulse text-content-muted'>Loading...</div>
-      </div>
-    );
+    return <BrandedPageLoader message='Loading the dashboard…' />;
   }
 
   return (

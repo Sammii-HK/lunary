@@ -28,6 +28,7 @@ import {
 import { useProgressedChart } from '@/hooks/useProgressedChart';
 import { useDashaTimeline } from '@/hooks/useDashaTimeline';
 import { DashaTimeline } from '@/components/DashaTimeline';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 import type { HouseCusp } from '@utils/astrology/houseSystems';
 
 type HouseSystem =
@@ -365,14 +366,7 @@ const BirthChartPage = () => {
   const shouldShowLoading = loading || !hasMounted;
 
   if (shouldShowLoading) {
-    return (
-      <div className='h-full flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4'></div>
-          <p className='text-content-muted'>Loading your birth chart...</p>
-        </div>
-      </div>
-    );
+    return <BrandedPageLoader message='Loading your birth chart…' />;
   }
 
   // Check subscription access first
