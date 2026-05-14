@@ -9,20 +9,10 @@ function isLocalHost(request: NextRequest): boolean {
   return LOCAL_HOSTS.has(hostname) || hostname.endsWith('.localhost');
 }
 
-function sanitizeRedirect(value: string | null): string {
-  if (!value || !value.startsWith('/') || value.startsWith('//')) return '/';
-  return value;
-}
-
 export async function GET(request: NextRequest) {
   if (process.env.NODE_ENV === 'production' && !isLocalHost(request)) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
-
-  const redirectTo = sanitizeRedirect(
-    request.nextUrl.searchParams.get('redirect'),
-  );
-  const redirectJson = JSON.stringify(redirectTo);
 
   const response = new NextResponse(
     `<!doctype html>
@@ -46,7 +36,13 @@ export async function GET(request: NextRequest) {
             await Promise.all(keys.map((key) => caches.delete(key)));
           }
         } finally {
-          const target = new URL(${redirectJson}, window.location.origin);
+          const params = new URLSearchParams(window.location.search);
+          const redirect = params.get('redirect');
+          const path =
+            redirect && redirect.startsWith('/') && !redirect.startsWith('//')
+              ? redirect
+              : '/';
+          const target = new URL(path, window.location.origin);
           target.searchParams.set('cacheReset', String(Date.now()));
           window.location.replace(target.href);
         }

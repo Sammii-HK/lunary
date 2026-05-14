@@ -3,6 +3,13 @@ import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
+const INTERNAL_ANALYTICS_BASE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+  (process.env.NODE_ENV === 'development'
+    ? 'http://localhost:3003'
+    : 'https://lunary.app');
+
 /**
  * Export analytics data as CSV or JSON
  * GET /api/admin/analytics/export?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD&format=csv|json
@@ -27,12 +34,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Use hardcoded production origin to prevent SSRF attacks. In local dev,
-    // use the actual request origin because the Next dev server runs on 3003.
-    const baseUrl = process.env.VERCEL
-      ? 'https://lunary.app'
-      : new URL(request.url).origin;
-    const queryParams = `start_date=${startDate}&end_date=${endDate}`;
+    // Use a trusted configured origin for internal fan-out. Never derive the
+    // outbound host from request headers, which are user-controllable.
+    const baseUrl = INTERNAL_ANALYTICS_BASE_URL;
+    const queryParams = new URLSearchParams({
+      start_date: startDate,
+      end_date: endDate,
+    }).toString();
 
     // Forward auth header to internal admin API calls
     const authHeader = request.headers.get('authorization');

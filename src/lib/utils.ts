@@ -67,6 +67,8 @@ export function sanitizeForLog(value: string): string {
   return String(value).replace(/[\r\n\x00-\x1F\x7F]/g, '');
 }
 
+let fallbackUuidCounter = 0;
+
 export function generateUUID(): string {
   if (
     typeof crypto !== 'undefined' &&
@@ -74,10 +76,38 @@ export function generateUUID(): string {
   ) {
     return crypto.randomUUID();
   }
-  // Fallback for older Android WebViews
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+
+  if (
+    typeof crypto !== 'undefined' &&
+    typeof crypto.getRandomValues === 'function'
+  ) {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, (byte) =>
+      byte.toString(16).padStart(2, '0'),
+    ).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(
+      12,
+      16,
+    )}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  }
+
+  // Last-resort uniqueness fallback for very old WebViews without Web Crypto.
+  fallbackUuidCounter = (fallbackUuidCounter + 1) % 0xffff;
+  const now = Date.now().toString(16).padStart(12, '0').slice(-12);
+  const perf =
+    typeof performance !== 'undefined'
+      ? Math.floor(performance.now() * 1000)
+          .toString(16)
+          .padStart(8, '0')
+          .slice(-8)
+      : '00000000';
+  const counter = fallbackUuidCounter.toString(16).padStart(4, '0');
+
+  return `${perf.slice(0, 8)}-${counter}-4${now.slice(0, 3)}-8${now.slice(
+    3,
+    6,
+  )}-${now.slice(6)}${counter}${perf.slice(0, 2)}`;
 }
