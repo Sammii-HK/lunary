@@ -50,6 +50,32 @@ Example body:
 
 This route submits to the IndexNow global endpoint so Bing and other participating engines can pick it up.
 
+## Submit discovery URLs after an SEO deploy
+
+After changing `robots.txt`, `llms.txt`, `.well-known` manifests, or the sitemap index, run a dry run first:
+
+```bash
+pnpm seo:indexnow:discovery:dry
+```
+
+Then submit the curated discovery set:
+
+```bash
+pnpm seo:indexnow:discovery
+```
+
+This sends only the homepage, crawl declarations, AI manifests, sitemap index, and curated high-signal sitemap files. It does not touch Neon and does not submit deprioritized scaled families such as birthday, crystals, decans, or broad ritual inventory.
+
+## Verify AI search readiness
+
+Run the AI discovery verifier before submitting the branch:
+
+```bash
+pnpm seo:verify:ai
+```
+
+This checks the public AI/Bing discovery files, GPT action auth declarations, sitemap-index curation, robots allowances, and the shared Grimoire direct-answer block used for answer-engine extraction.
+
 ## Recommended triggers
 
 Submit when these change materially:

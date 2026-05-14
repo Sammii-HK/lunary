@@ -3,7 +3,11 @@ openapi: 3.1.1
 info:
   title: Lunary GPT API
   version: 1.0.0
-  description: Private Lunary endpoints for Custom GPTs. Provides Grimoire search and symbolic cross-system bridging using Lunary’s internal knowledge base.
+  description: |
+    Authenticated Lunary endpoints for configured GPT Actions. Every /api/gpt/* route
+    requires Authorization: Bearer <LUNARY_GPT_SECRET>. Public crawlers should use
+    canonical Grimoire pages, /llms.txt, /llms-full.txt, and /sitemap-index.xml
+    instead of these private API responses.
 
 servers:
   - url: https://lunary.app/api

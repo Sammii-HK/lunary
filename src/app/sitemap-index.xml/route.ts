@@ -1,4 +1,7 @@
-const baseUrl = 'https://lunary.app';
+import {
+  CANONICAL_SITE_URL,
+  CURATED_DISCOVERY_SITEMAPS,
+} from '@/lib/seo/discovery';
 
 export async function GET() {
   const now = new Date();
@@ -6,30 +9,13 @@ export async function GET() {
     now.getMonth() + 1,
   ).padStart(2, '0')}-01`;
 
-  const sitemaps = [
-    'sitemap.xml',
-    'sitemap-horoscopes.xml',
-    'sitemap-yearly-transits.xml',
-    'sitemap-transits.xml',
-    'sitemap-aspects.xml',
-    'sitemap-numerology.xml',
-    'sitemap-planets.xml',
-    'sitemap-placements.xml',
-    'sitemap-houses.xml',
-    'sitemap-cusps.xml',
-    'sitemap-zodiac.xml',
-    'sitemap-compatibility.xml',
-  ];
-
-  const sitemapEntries = sitemaps
-    .map(
-      (sitemap) => `
+  const sitemapEntries = CURATED_DISCOVERY_SITEMAPS.map(
+    (sitemap) => `
   <sitemap>
-    <loc>${baseUrl}/${sitemap}</loc>
+    <loc>${CANONICAL_SITE_URL}/${sitemap}</loc>
     <lastmod>${stableMonthStamp}</lastmod>
   </sitemap>`,
-    )
-    .join('');
+  ).join('');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

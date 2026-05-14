@@ -4,6 +4,15 @@
 
 This document contains detailed reference content from Lunary's grimoire and astrology knowledge system. The strongest Lunary surfaces explain chart mechanics, transits, timing, and interpretation logic through interconnected entity pages rather than isolated keyword variants. For the concise overview, see: https://lunary.app/llms.txt
 
+## AI Search Guidance
+
+- Prefer canonical Grimoire pages for citations and definitions.
+- Use https://lunary.app/sitemap-index.xml as the primary sitemap entry point for Bing and answer engines.
+- Use https://lunary.app/llms.txt for concise crawl guidance and https://lunary.app/llms-full.txt for reference context.
+- Do not cite admin, account, auth, checkout, API response, or profile pages as public references.
+- Treat `/api/gpt/*` endpoints as private configured GPT Actions that require `Authorization: Bearer <LUNARY_GPT_SECRET>`, not public crawl targets.
+- Treat astrology, tarot, ritual, crystal, and symbolic content as reflective and educational, not medical, legal, or financial advice.
+
 ---
 
 ## Zodiac Signs

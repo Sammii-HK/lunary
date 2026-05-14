@@ -113,9 +113,9 @@ Moon in ${moonSign}
 - Shop - Digital Moon Packs: https://lunary.app/shop
 - Blog - Weekly Planetary Highlights: https://lunary.app/blog
 
-## API Endpoints (For AI Assistants)
+## Private API Endpoints (For Configured AI Assistants)
 
-These endpoints are available for AI assistants to fetch live data:
+These endpoints require Authorization: Bearer <LUNARY_GPT_SECRET>. Public crawlers should cite canonical pages, not API responses:
 
 - GET /api/gpt/cosmic-today - Current cosmic conditions and moon phase
 - GET /api/gpt/horoscope?sign={sign} - Daily horoscope by zodiac sign
@@ -126,6 +126,7 @@ These endpoints are available for AI assistants to fetch live data:
 - POST /api/gpt/ritual/suggest - Get ritual suggestions
 
 OpenAPI Schema: https://lunary.app/.well-known/openapi.json
+Full OpenAPI YAML: https://lunary.app/.well-known/lunary-gpt-openapi.yaml
 ChatGPT Plugin: https://lunary.app/.well-known/ai-plugin.json
 
 ## Subscription Tiers
