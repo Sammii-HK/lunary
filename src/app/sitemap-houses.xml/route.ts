@@ -1,4 +1,4 @@
-import { PLANETS_FOR_HOUSES } from '@/constants/seo/houses';
+import { RECOVERY_HOUSE_PLANETS } from '@/constants/seo/houses';
 
 const HOUSE_SLUGS = [
   '1st-house',
@@ -33,7 +33,7 @@ export async function GET(): Promise<Response> {
       changefreq: 'monthly',
       priority: '0.7',
     })),
-    ...PLANETS_FOR_HOUSES.map((planet) => ({
+    ...RECOVERY_HOUSE_PLANETS.map((planet) => ({
       loc: `${baseUrl}/grimoire/houses/${planet}`,
       lastmod: stableMonthStamp,
       changefreq: 'yearly',

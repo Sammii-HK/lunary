@@ -7,12 +7,6 @@ export async function GET(): Promise<Response> {
   const cusps = generateAllCuspParams();
 
   const urls = [
-    {
-      loc: `${baseUrl}/grimoire/cusps`,
-      lastmod: stableMonthStamp,
-      changefreq: 'monthly',
-      priority: '0.8',
-    },
     ...cusps.map((c) => ({
       loc: `${baseUrl}/grimoire/cusps/${c.cusp}`,
       lastmod: stableMonthStamp,

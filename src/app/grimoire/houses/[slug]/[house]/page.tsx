@@ -9,23 +9,15 @@ import {
   getOrdinalSuffix,
   HousePlanet,
   House,
-  generateAllHouseParams,
 } from '@/constants/seo/houses';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-export const dynamicParams = false;
+export const dynamicParams = true;
 interface PageParams {
   slug: string;
   house: string;
-}
-
-export function generateStaticParams() {
-  return generateAllHouseParams().map(({ planet, house }) => ({
-    slug: planet,
-    house,
-  }));
 }
 
 export async function generateMetadata({

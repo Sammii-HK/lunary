@@ -877,11 +877,11 @@ export async function GET(request: NextRequest) {
 
     try {
       // Count pages from sitemap (always use current sitemap)
-      const sitemapData = generateSitemap();
+      const sitemapData = await generateSitemap();
       pagesIndexed = sitemapData.length;
       // Count articles (grimoire + blog pages)
       articleCount = sitemapData.filter(
-        (entry) =>
+        (entry: { url: string }) =>
           entry.url.includes('/grimoire/') || entry.url.includes('/blog/week/'),
       ).length;
 
@@ -946,14 +946,14 @@ export async function GET(request: NextRequest) {
     // Notification metrics (by date and type)
     const notificationMetricsResult = await sql`
       SELECT
-        DATE(created_at) AS date,
+        DATE(created_at AT TIME ZONE 'UTC')::text AS date,
         notification_type,
         COUNT(*) FILTER (WHERE event_type = 'sent') AS sent,
         COUNT(*) FILTER (WHERE event_type = 'opened') AS opened,
         COUNT(*) FILTER (WHERE event_type = 'clicked') AS clicked
       FROM analytics_notification_events
       WHERE created_at >= ${thirtyDaysAgoTimestamp}
-      GROUP BY DATE(created_at), notification_type
+      GROUP BY DATE(created_at AT TIME ZONE 'UTC'), notification_type
       ORDER BY date DESC, notification_type
     `;
 
@@ -962,7 +962,7 @@ export async function GET(request: NextRequest) {
       const opened = Number(row.opened || 0);
       const clicked = Number(row.clicked || 0);
       return {
-        date: formatDate(new Date(row.date)),
+        date: String(row.date),
         type: row.notification_type as string,
         sent,
         openRate: sent > 0 ? (opened / sent) * 100 : 0,

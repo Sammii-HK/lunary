@@ -194,6 +194,7 @@ export default function AdminDashboard() {
     useState(false);
 
   const handleAuthSuccess = () => {
+    authState.refreshAuth();
     setAuthIssue({ type: 'none' });
     setIsAuthorized(null);
   };

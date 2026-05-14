@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, type NextFetchEvent } from 'next/server';
 
 const camelToKebab = (str: string) =>
   str
@@ -144,6 +144,107 @@ const shouldSkipTracking = (request: NextRequest, hostname: string) => {
   return false;
 };
 
+const shouldSkipServerPageview = (request: NextRequest, hostname: string) => {
+  if (request.method !== 'GET') return true;
+
+  const pathname = request.nextUrl.pathname;
+  if (pathname.startsWith('/admin')) return true;
+  if (hostname.startsWith('admin.')) return true;
+
+  const ua = request.headers.get('user-agent') || '';
+  if (!ua || ua.length < 20) return true;
+  if (BOT_UA_PATTERN.test(ua)) return true;
+
+  const acceptLang = request.headers.get('accept-language');
+  if (!acceptLang) return true;
+
+  const purpose = request.headers.get('purpose');
+  if (purpose === 'prefetch') return true;
+  if (request.headers.get('x-middleware-prefetch') === '1') return true;
+  if (request.headers.get('next-router-prefetch') === '1') return true;
+
+  const secFetchDest = request.headers.get('sec-fetch-dest');
+  if (secFetchDest && !['document', 'empty'].includes(secFetchDest)) {
+    return true;
+  }
+
+  if (!secFetchDest) {
+    const isModernChrome = /Chrome\/(?:7[6-9]|[89]\d|1\d\d)/.test(ua);
+    const isModernFirefox = /Firefox\/(?:9\d|1\d\d)/.test(ua);
+    const isModernSafari = /Version\/(?:1[7-9]|[2-9]\d)\.\d.*Safari/.test(ua);
+    if (isModernChrome || isModernFirefox || isModernSafari) return true;
+  }
+
+  if (secFetchDest && !request.headers.get('sec-fetch-mode')) return true;
+
+  return false;
+};
+
+function pageviewForwardHeaders(request: NextRequest, anonId: string) {
+  const headers = new Headers({
+    'content-type': 'application/json',
+    'x-lunary-anon-id': anonId,
+  });
+
+  for (const name of [
+    'user-agent',
+    'accept-language',
+    'sec-fetch-dest',
+    'sec-fetch-mode',
+    'referer',
+    'x-vercel-ip-country',
+    'x-vercel-ip-country-region',
+    'x-vercel-ip-city',
+    'x-forwarded-for',
+  ]) {
+    const value = request.headers.get(name);
+    if (value) headers.set(name, value);
+  }
+
+  return headers;
+}
+
+function queueServerPageview(
+  request: NextRequest,
+  event: NextFetchEvent,
+  anonId: string,
+  pagePath: string,
+) {
+  const url = new URL('/api/ether/cv', request.url);
+  const referrer = request.headers.get('referer') || undefined;
+  const attributionParams = {
+    utm_source: request.nextUrl.searchParams.get('utm_source') || undefined,
+    utm_medium: request.nextUrl.searchParams.get('utm_medium') || undefined,
+    utm_campaign: request.nextUrl.searchParams.get('utm_campaign') || undefined,
+    utm_content: request.nextUrl.searchParams.get('utm_content') || undefined,
+    utm_term: request.nextUrl.searchParams.get('utm_term') || undefined,
+    ref: request.nextUrl.searchParams.get('ref') || undefined,
+    source: request.nextUrl.searchParams.get('source') || undefined,
+  };
+
+  event.waitUntil(
+    fetch(url, {
+      method: 'POST',
+      headers: pageviewForwardHeaders(request, anonId),
+      body: JSON.stringify({
+        event: 'page_viewed',
+        eventId: `server-pageview:${crypto.randomUUID()}`,
+        anonymousId: anonId,
+        pagePath,
+        metadata: {
+          source: 'server_middleware_pageview',
+          server_side: true,
+          analytics_channel: 'middleware',
+          referrer,
+          ...attributionParams,
+        },
+      }),
+    }).catch((error) => {
+      console.warn('[middleware/pageview] failed to queue pageview:', error);
+    }),
+  );
+}
+
 type NormaliseResult = {
   pathname: string;
   changed: boolean;
@@ -236,7 +337,7 @@ function isAllowedAuthOrigin(origin: string | null): boolean {
   return false;
 }
 
-export function middleware(request: NextRequest) {
+export function middleware(request: NextRequest, event: NextFetchEvent) {
   const { pathname, searchParams } = request.nextUrl;
 
   const hostname =
@@ -442,7 +543,11 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  if (!shouldSkipTracking(request, hostname) && isProd) {
+  const shouldAssignAbTests = isProd && !shouldSkipTracking(request, hostname);
+  const shouldTrackServerPageview =
+    isProd && !shouldSkipServerPageview(request, hostname);
+
+  if (shouldAssignAbTests || shouldTrackServerPageview) {
     let anonId = request.cookies.get(ANON_ID_COOKIE)?.value;
 
     if (!anonId) {
@@ -456,40 +561,42 @@ export function middleware(request: NextRequest) {
       });
     }
 
-    // Assign A/B test variants (deterministic based on anonId)
-    const existingTests = request.cookies.get(AB_TEST_COOKIE)?.value;
-    let abTests: Record<string, string> = {};
+    if (shouldAssignAbTests) {
+      // Assign A/B test variants (deterministic based on anonId)
+      const existingTests = request.cookies.get(AB_TEST_COOKIE)?.value;
+      let abTests: Record<string, string> = {};
 
-    try {
-      if (existingTests) {
-        abTests = JSON.parse(existingTests);
+      try {
+        if (existingTests) {
+          abTests = JSON.parse(existingTests);
+        }
+      } catch {
+        // Invalid JSON, reset
       }
-    } catch {
-      // Invalid JSON, reset
-    }
 
-    // Assign variants for any missing tests
-    let testsChanged = false;
-    for (const [testName, testConfig] of Object.entries(AB_TESTS)) {
-      if (!abTests[testName]) {
-        abTests[testName] = assignVariant(anonId, testName, testConfig);
-        testsChanged = true;
+      // Assign variants for any missing tests
+      let testsChanged = false;
+      for (const [testName, testConfig] of Object.entries(AB_TESTS)) {
+        if (!abTests[testName]) {
+          abTests[testName] = assignVariant(anonId, testName, testConfig);
+          testsChanged = true;
+        }
+      }
+
+      if (testsChanged || !existingTests) {
+        response.cookies.set(AB_TEST_COOKIE, JSON.stringify(abTests), {
+          httpOnly: false, // Readable by client JS for tracking
+          sameSite: 'lax',
+          secure: isProd,
+          path: '/',
+          maxAge: 60 * 60 * 24 * 90, // 90 days
+        });
       }
     }
 
-    if (testsChanged || !existingTests) {
-      response.cookies.set(AB_TEST_COOKIE, JSON.stringify(abTests), {
-        httpOnly: false, // Readable by client JS for tracking
-        sameSite: 'lax',
-        secure: isProd,
-        path: '/',
-        maxAge: 60 * 60 * 24 * 90, // 90 days
-      });
+    if (shouldTrackServerPageview) {
+      queueServerPageview(request, event, anonId, finalPath);
     }
-
-    // app_opened tracking REMOVED — it fired for every visitor (including bots)
-    // and inflated DAU to 3,650 when real page viewers were ~211.
-    // Real engagement is tracked client-side via page_viewed and product events.
   }
 
   return response;

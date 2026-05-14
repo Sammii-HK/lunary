@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
             `
             SELECT
               COUNT(DISTINCT user_id) as dau,
-              COUNT(DISTINCT DATE(created_at)) as active_days,
+              COUNT(DISTINCT DATE(created_at AT TIME ZONE 'UTC')) as active_days,
               COUNT(*) as total_events
             FROM conversion_events
             WHERE user_id = ANY($1::text[])
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
             `
             SELECT
               COUNT(DISTINCT user_id) as dau,
-              COUNT(DISTINCT DATE(created_at)) as active_days,
+              COUNT(DISTINCT DATE(created_at AT TIME ZONE 'UTC')) as active_days,
               COUNT(*) as total_events
             FROM conversion_events
             WHERE user_id = ANY($1::text[])

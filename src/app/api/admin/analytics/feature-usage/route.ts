@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
         sql.query(
           `
             SELECT
-              DATE(created_at) as date,
+              DATE(created_at AT TIME ZONE 'UTC')::text as date,
               event_type,
               COUNT(*) as count
             FROM conversion_events
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
               AND created_at >= $2
               AND created_at <= $3
               AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
-            GROUP BY DATE(created_at), event_type
+            GROUP BY DATE(created_at AT TIME ZONE 'UTC'), event_type
             ORDER BY date ASC
           `,
           [

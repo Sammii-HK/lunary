@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { AuthComponent } from '@/components/Auth';
 import { Modal, ModalHeader, ModalBody } from '@/components/ui/modal';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 import Link from 'next/link';
 
 interface Collection {
@@ -161,11 +162,7 @@ function CollectionsPageContent() {
   };
 
   if (authState.loading) {
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='text-content-muted'>Loading...</div>
-      </div>
-    );
+    return <BrandedPageLoader message='Loading your collections…' />;
   }
 
   if (!authState.isAuthenticated) {

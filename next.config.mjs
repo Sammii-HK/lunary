@@ -22,7 +22,7 @@ const nextConfig = {
     // Preview builds run on smaller Vercel workers than local/Turbo builds.
     // Keep webpack concurrency lower there so larger SSG/content batches do not
     // OOM before Next can write routes-manifest.json.
-    config.parallelism = isVercelBuild ? 8 : isConstrainedBuild ? 24 : 100;
+    config.parallelism = isVercelBuild ? 2 : isConstrainedBuild ? 24 : 100;
 
     // Exclude Playwright and ffmpeg-static from bundling (server-only, Node.js runtime)
     if (isServer) {

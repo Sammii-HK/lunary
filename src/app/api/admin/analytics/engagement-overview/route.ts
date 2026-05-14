@@ -59,7 +59,9 @@ export async function GET(request: NextRequest) {
       const [snapshotResult, todaySignupsResult] = await Promise.all([
         snapshotEndDate >= range.start
           ? sql.query(
-              `SELECT *
+              `SELECT
+                daily_metrics.*,
+                metric_date::text AS metric_date_key
             FROM daily_metrics
             WHERE metric_date >= $1 AND metric_date <= $2
             ORDER BY metric_date ASC`,
@@ -98,7 +100,7 @@ export async function GET(request: NextRequest) {
 
         // Build DAU trend from all rows
         const dau_trend = rows.map((row) => {
-          const d = row.metric_date;
+          const d = row.metric_date_key ?? row.metric_date;
           const date =
             d instanceof Date
               ? d.toISOString().split('T')[0]

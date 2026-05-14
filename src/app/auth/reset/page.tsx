@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSafeSearchParams } from '@/lib/safeSearchParams';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -211,11 +212,7 @@ function ResetPasswordContent() {
 export default function ResetPasswordPage() {
   return (
     <Suspense
-      fallback={
-        <div className='min-h-screen bg-surface-base text-content-primary flex items-center justify-center p-4'>
-          <div className='text-content-muted'>Loading...</div>
-        </div>
-      }
+      fallback={<BrandedPageLoader message='Loading reset password…' />}
     >
       <ResetPasswordContent />
     </Suspense>

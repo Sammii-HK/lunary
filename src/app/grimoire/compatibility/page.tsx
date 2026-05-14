@@ -33,11 +33,11 @@ export const metadata: Metadata = {
   title:
     'Zodiac Compatibility: Best & Worst Matches for Every Sign: Love & Relationship Matches - Lunary',
   description:
-    'Complete zodiac compatibility guide. Explore love, friendship, and work compatibility between all 12 zodiac signs. 78+ detailed match analyses.',
+    'Selective zodiac compatibility guide. Explore curated love, friendship, and work match reads, then go deeper with synastry and full-chart comparison.',
   openGraph: {
     title: 'Zodiac Compatibility: Best & Worst Matches for Every Sign - Lunary',
     description:
-      'Explore compatibility between all 12 zodiac signs in love and relationships.',
+      'Explore curated zodiac compatibility reads, then go deeper with synastry and full-chart comparison.',
     url: 'https://lunary.app/grimoire/compatibility',
     images: [
       {
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Zodiac Compatibility: Best & Worst Matches for Every Sign - Lunary',
     description:
-      'Explore compatibility between all 12 zodiac signs in love and relationships.',
+      'Explore curated zodiac compatibility reads, then go deeper with synastry and full-chart comparison.',
     images: ['/api/og/grimoire/compatibility'],
   },
   alternates: {

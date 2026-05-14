@@ -7,8 +7,123 @@ import {
   TEST_EMAIL_PATTERN,
   TEST_EMAIL_EXACT,
 } from '@/lib/analytics/test-filter';
+import { queryPostHogAPI } from '@/lib/posthog-server';
 
 export const dynamic = 'force-dynamic';
+
+type PostHogQueryResponse = {
+  results?: unknown[][];
+  error?: string | null;
+};
+
+type PostHogPageviewUsers = {
+  reach: string[];
+  grimoire: string[];
+};
+
+const POSTHOG_PAGEVIEW_ROW_LIMIT = 100_000;
+
+function formatHogQlDateTime(value: string): string {
+  return value.slice(0, 19).replace('T', ' ');
+}
+
+function escapeHogQlString(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+function stringValue(value: unknown): string | null {
+  return typeof value === 'string' && value.trim().length > 0
+    ? value.trim()
+    : null;
+}
+
+function normalizePostHogPath(
+  pagePath: unknown,
+  pathname: unknown,
+  currentUrl: unknown,
+): string {
+  const directPath =
+    typeof pagePath === 'string' && pagePath.trim().length > 0
+      ? pagePath.trim()
+      : typeof pathname === 'string' && pathname.trim().length > 0
+        ? pathname.trim()
+        : null;
+
+  if (directPath) {
+    try {
+      return new URL(directPath).pathname || '/';
+    } catch {
+      return directPath.split('?')[0]?.split('#')[0] || '/';
+    }
+  }
+
+  if (typeof currentUrl === 'string' && currentUrl.trim().length > 0) {
+    try {
+      return new URL(currentUrl).pathname || '/';
+    } catch {
+      return '/';
+    }
+  }
+
+  return '/';
+}
+
+async function loadPostHogPageviewUsers(
+  startIso: string,
+  endExclusiveIso: string,
+): Promise<PostHogPageviewUsers | null> {
+  const start = escapeHogQlString(formatHogQlDateTime(startIso));
+  const end = escapeHogQlString(formatHogQlDateTime(endExclusiveIso));
+
+  const query = `
+    SELECT
+      distinct_id,
+      properties.page_path,
+      properties.$pathname,
+      properties.$current_url
+    FROM events
+    WHERE event IN ('page_viewed', '$pageview')
+      AND timestamp >= toDateTime('${start}')
+      AND timestamp < toDateTime('${end}')
+    ORDER BY timestamp ASC
+    LIMIT ${POSTHOG_PAGEVIEW_ROW_LIMIT}
+  `;
+
+  const result = await queryPostHogAPI<PostHogQueryResponse>('/query/', {
+    method: 'POST',
+    body: JSON.stringify({
+      query: {
+        kind: 'HogQLQuery',
+        query,
+      },
+      name: 'lunary daily pageview rollup',
+    }),
+  });
+
+  if (!result || result.error) {
+    return null;
+  }
+
+  const reach = new Set<string>();
+  const grimoire = new Set<string>();
+
+  for (const row of result.results ?? []) {
+    const identity = stringValue(row[0]);
+    if (!identity) continue;
+
+    reach.add(identity);
+
+    const path = normalizePostHogPath(row[1], row[2], row[3]);
+    if (path.startsWith('/grimoire')) {
+      grimoire.add(identity);
+    }
+  }
+
+  return {
+    reach: Array.from(reach).sort(),
+    grimoire: Array.from(grimoire).sort(),
+  };
+}
 
 /**
  * Compute daily metrics and store in daily_metrics table
@@ -103,6 +218,61 @@ export async function GET(request: NextRequest) {
       TEST_EMAIL_EXACT,
       dateStr,
     ];
+    const postHogPageviewUsers = await loadPostHogPageviewUsers(
+      dayStart.toISOString(),
+      new Date(dayEnd.getTime() + 1).toISOString(),
+    );
+
+    const reachSnapshotQuery = postHogPageviewUsers
+      ? sql.query(
+          `INSERT INTO daily_unique_users (metric_date, segment, user_ids, user_count)
+           VALUES ($1::date, 'reach', $2::text[], cardinality($2::text[]))
+           ON CONFLICT (metric_date, segment) DO UPDATE SET
+             user_ids = EXCLUDED.user_ids, user_count = EXCLUDED.user_count`,
+          [dateStr, postHogPageviewUsers.reach],
+        )
+      : sql.query(
+          `INSERT INTO daily_unique_users (metric_date, segment, user_ids, user_count)
+           SELECT $5::date, 'reach',
+             COALESCE(array_agg(DISTINCT resolved_id) FILTER (WHERE resolved_id IS NOT NULL), '{}'),
+             COUNT(DISTINCT resolved_id)
+           FROM (
+             SELECT ${anyId} as resolved_id
+             FROM conversion_events ce ${idJoin}
+             WHERE ce.created_at >= $1 AND ce.created_at <= $2
+               AND ce.event_type = 'page_viewed'
+               AND ${whereBase}
+           ) sub
+           ON CONFLICT (metric_date, segment) DO UPDATE SET
+             user_ids = EXCLUDED.user_ids, user_count = EXCLUDED.user_count`,
+          snapshotParams,
+        );
+
+    const grimoireSnapshotQuery = postHogPageviewUsers
+      ? sql.query(
+          `INSERT INTO daily_unique_users (metric_date, segment, user_ids, user_count)
+           VALUES ($1::date, 'grimoire', $2::text[], cardinality($2::text[]))
+           ON CONFLICT (metric_date, segment) DO UPDATE SET
+             user_ids = EXCLUDED.user_ids, user_count = EXCLUDED.user_count`,
+          [dateStr, postHogPageviewUsers.grimoire],
+        )
+      : sql.query(
+          `INSERT INTO daily_unique_users (metric_date, segment, user_ids, user_count)
+           SELECT $5::date, 'grimoire',
+             COALESCE(array_agg(DISTINCT resolved_id) FILTER (WHERE resolved_id IS NOT NULL), '{}'),
+             COUNT(DISTINCT resolved_id)
+           FROM (
+             SELECT ${anyId} as resolved_id
+             FROM conversion_events ce ${idJoin}
+             WHERE ce.created_at >= $1 AND ce.created_at <= $2
+               AND ce.event_type = 'page_viewed'
+               AND ce.page_path LIKE '/grimoire%'
+               AND ${whereBase}
+           ) sub
+           ON CONFLICT (metric_date, segment) DO UPDATE SET
+             user_ids = EXCLUDED.user_ids, user_count = EXCLUDED.user_count`,
+          snapshotParams,
+        );
 
     await Promise.all([
       // all: any user with any event
@@ -162,42 +332,11 @@ export async function GET(request: NextRequest) {
         snapshotParams,
       ),
 
-      // reach: page_viewed events (any user)
-      sql.query(
-        `INSERT INTO daily_unique_users (metric_date, segment, user_ids, user_count)
-         SELECT $5::date, 'reach',
-           COALESCE(array_agg(DISTINCT resolved_id) FILTER (WHERE resolved_id IS NOT NULL), '{}'),
-           COUNT(DISTINCT resolved_id)
-         FROM (
-           SELECT ${anyId} as resolved_id
-           FROM conversion_events ce ${idJoin}
-           WHERE ce.created_at >= $1 AND ce.created_at <= $2
-             AND ce.event_type = 'page_viewed'
-             AND ${whereBase}
-         ) sub
-         ON CONFLICT (metric_date, segment) DO UPDATE SET
-           user_ids = EXCLUDED.user_ids, user_count = EXCLUDED.user_count`,
-        snapshotParams,
-      ),
+      // reach: PostHog pageviews, with Neon fallback for older backfills
+      reachSnapshotQuery,
 
-      // grimoire: grimoire page views
-      sql.query(
-        `INSERT INTO daily_unique_users (metric_date, segment, user_ids, user_count)
-         SELECT $5::date, 'grimoire',
-           COALESCE(array_agg(DISTINCT resolved_id) FILTER (WHERE resolved_id IS NOT NULL), '{}'),
-           COUNT(DISTINCT resolved_id)
-         FROM (
-           SELECT ${anyId} as resolved_id
-           FROM conversion_events ce ${idJoin}
-           WHERE ce.created_at >= $1 AND ce.created_at <= $2
-             AND ce.event_type = 'page_viewed'
-             AND ce.page_path LIKE '/grimoire%'
-             AND ${whereBase}
-         ) sub
-         ON CONFLICT (metric_date, segment) DO UPDATE SET
-           user_ids = EXCLUDED.user_ids, user_count = EXCLUDED.user_count`,
-        snapshotParams,
-      ),
+      // grimoire: PostHog pageviews under /grimoire
+      grimoireSnapshotQuery,
     ]);
 
     // ─── PHASE 2: Read DAU counts + derive WAU/MAU from snapshots ───
@@ -1026,10 +1165,19 @@ export async function GET(request: NextRequest) {
       success: true,
       date: dateStr,
       identity_resolution: hasIdentityLinks,
+      pageview_rollup_source: postHogPageviewUsers
+        ? 'posthog'
+        : 'neon_fallback',
       metrics: {
         dau,
         wau,
         mau,
+        reachDau,
+        reachWau,
+        reachMau,
+        grimoireDau,
+        grimoireWau,
+        grimoireMau,
         productDau,
         productWau,
         productMau,

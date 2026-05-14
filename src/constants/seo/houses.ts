@@ -52,6 +52,15 @@ export const housesData = housesJson as HousesJsonSchema;
 export const HOUSES_JSON = housesData;
 export const HOUSES: House[] = housesData.houses;
 export const PLANETS_FOR_HOUSES: HousePlanet[] = housesData.planetsForHouses;
+export const RECOVERY_HOUSE_PLANETS: HousePlanet[] = [
+  'sun',
+  'moon',
+  'mercury',
+  'venus',
+  'mars',
+  'jupiter',
+  'saturn',
+];
 export const PLANET_HOUSE_DISPLAY = housesData.planetHouseDisplay;
 export const HOUSE_DATA = housesData.houseData;
 

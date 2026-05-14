@@ -9,13 +9,15 @@ import { useABTestTracking } from '@/hooks/useABTestTracking';
 import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
 import { conversionTracking } from '@/lib/analytics';
 import { useEffect } from 'react';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 
 export default function TarotReadings() {
   const { user, loading } = useUser();
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
 
-  // Track one tarot page view. CTA/test-specific impressions are tracked separately.
+  // Global pageviews are tracked by PageViewTracker; this hook only emits
+  // active test impressions.
   useABTestTracking('tarot', 'page_viewed', []);
 
   // For unauthenticated users, force paid tarot access to false immediately
@@ -52,27 +54,12 @@ export default function TarotReadings() {
 
   // Simple sequential loading checks - prioritize unauthenticated users
   if (authStatus.loading) {
-    // Still checking authentication - show loading
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='w-8 h-8 border-2 border-stroke-strong border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-content-muted'>Loading your tarot reading...</p>
-        </div>
-      </div>
-    );
+    return <BrandedPageLoader message='Loading your tarot reading…' />;
   }
 
   // If authenticated but user data is still loading, show loading
   if (authStatus.isAuthenticated && loading) {
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='w-8 h-8 border-2 border-stroke-strong border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-content-muted'>Loading your tarot reading...</p>
-        </div>
-      </div>
-    );
+    return <BrandedPageLoader message='Loading your tarot reading…' />;
   }
 
   // Otherwise, continue to render content

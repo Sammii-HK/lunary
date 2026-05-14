@@ -1,18 +1,5 @@
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
+
 export default function Loading() {
-  return (
-    <div className='flex flex-row h-full overflow-hidden relative'>
-      <div className='flex-1 overflow-y-auto min-w-0'>
-        <div className='p-4 md:p-6 lg:p-8 min-h-full'>
-          <div className='space-y-6'>
-            <div className='h-8 bg-surface-card/50 rounded w-1/3 animate-pulse' />
-            <div className='space-y-4'>
-              <div className='h-4 bg-surface-card/50 rounded w-full animate-pulse' />
-              <div className='h-4 bg-surface-card/50 rounded w-5/6 animate-pulse' />
-              <div className='h-4 bg-surface-card/50 rounded w-4/6 animate-pulse' />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <BrandedPageLoader message='Opening the grimoire…' />;
 }

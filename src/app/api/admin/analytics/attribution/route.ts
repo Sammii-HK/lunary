@@ -100,20 +100,20 @@ export async function GET(request: NextRequest) {
 
     const dailyTrend = hasDateRange
       ? await sql`
-          SELECT DATE(ua.created_at) as date, ua.first_touch_source as source, COUNT(*) as user_count
+          SELECT DATE(ua.created_at AT TIME ZONE 'UTC')::text as date, ua.first_touch_source as source, COUNT(*) as user_count
           FROM user_attribution ua
           WHERE COALESCE(ua.first_touch_at, ua.created_at) >= ${safeStartDate}::date
             AND COALESCE(ua.first_touch_at, ua.created_at) <= ${safeEndDate}::date + INTERVAL '1 day'
             AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = ua.user_id AND s.user_email LIKE ${TEST_EMAIL_PATTERN})
             AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})
-          GROUP BY DATE(ua.created_at), ua.first_touch_source ORDER BY date DESC, user_count DESC`
+          GROUP BY DATE(ua.created_at AT TIME ZONE 'UTC'), ua.first_touch_source ORDER BY date DESC, user_count DESC`
       : await sql`
-          SELECT DATE(ua.created_at) as date, ua.first_touch_source as source, COUNT(*) as user_count
+          SELECT DATE(ua.created_at AT TIME ZONE 'UTC')::text as date, ua.first_touch_source as source, COUNT(*) as user_count
           FROM user_attribution ua
           WHERE COALESCE(ua.first_touch_at, ua.created_at) >= NOW() - INTERVAL '30 days'
             AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = ua.user_id AND s.user_email LIKE ${TEST_EMAIL_PATTERN})
             AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})
-          GROUP BY DATE(ua.created_at), ua.first_touch_source ORDER BY date DESC, user_count DESC`;
+          GROUP BY DATE(ua.created_at AT TIME ZONE 'UTC'), ua.first_touch_source ORDER BY date DESC, user_count DESC`;
 
     const organicStats = hasDateRange
       ? await sql`

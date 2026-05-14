@@ -12,6 +12,7 @@ import {
   getRealPlanetaryPositions,
 } from '../../../../../utils/astrology/astronomical-data';
 import { ASPECT_DATA } from '@/constants/seo/aspects';
+import { mergeDailyTarotFallbackRows } from '@/lib/patterns/merge-daily-tarot-readings';
 
 export const dynamic = 'force-dynamic';
 
@@ -134,9 +135,27 @@ export async function GET(request: NextRequest) {
     startDate.setDate(startDate.getDate() - timeFrameDays);
     const startDateStr = startDate.toISOString().split('T')[0];
 
-    // Query all readings including single-card daily pulls
+    const profileResult = await sql`
+      SELECT up.name, up.birthday, up.timezone, u."createdAt" AS user_created_at
+      FROM "user" u
+      LEFT JOIN user_profiles up ON up.user_id = u.id
+      WHERE u.id = ${userId}
+      LIMIT 1
+    `;
+
+    const userCreatedAt =
+      profileResult.rows[0]?.user_created_at instanceof Date
+        ? profileResult.rows[0].user_created_at
+        : profileResult.rows[0]?.user_created_at
+          ? new Date(profileResult.rows[0].user_created_at)
+          : null;
+
+    const effectiveStartDate =
+      userCreatedAt && userCreatedAt > startDate ? userCreatedAt : startDate;
+
+    // Query all saved readings including single-card daily pulls
     const result = await sql`
-      SELECT id, cards, created_at, spread_slug
+      SELECT id, cards, created_at, spread_slug, created_at::date::text AS reading_date
       FROM tarot_readings
       WHERE user_id = ${userId}
         AND created_at >= ${startDateStr}::date
@@ -144,10 +163,17 @@ export async function GET(request: NextRequest) {
       ORDER BY created_at DESC
     `;
 
+    const mergedRows = mergeDailyTarotFallbackRows({
+      rows: result.rows,
+      profile: profileResult.rows[0] || {},
+      startDate: effectiveStartDate,
+      endDate: new Date(),
+    });
+
     // Extract individual card appearances from spreads, each with cosmic context.
     // Keep reading-level metadata so consumers can count readings and cards separately.
     const readingArrays = await Promise.all(
-      result.rows.map(async (row) => {
+      mergedRows.map(async (row) => {
         try {
           const cardsData =
             typeof row.cards === 'string' ? JSON.parse(row.cards) : row.cards;
@@ -203,8 +229,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       readings,
-      count: result.rows.length,
-      readingCount: result.rows.length,
+      count: mergedRows.length,
+      readingCount: mergedRows.length,
       cardCount: readings.length,
       timeFrameDays,
       source: 'observed',

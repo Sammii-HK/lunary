@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
-import {
-  canonicaliseEvent,
-  insertCanonicalEvent,
-} from '@/lib/analytics/canonical-events';
+import { canonicaliseEvent } from '@/lib/analytics/canonical-events';
 import { deterministicEventId } from '@/lib/analytics/deterministic-event-id';
-import { getCurrentUser } from '@/lib/get-user-session';
 import { detectBot } from '@/lib/analytics/bot-detection';
+import { forwardEventToPostHog } from '@/lib/posthog-forward';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,9 +10,16 @@ export const runtime = 'nodejs';
 
 const ANON_ID_COOKIE = 'lunary_anon_id';
 
-export async function POST(request: NextRequest) {
-  const startTime = Date.now();
+function currentUrlFromPath(request: NextRequest, pagePath: string | null) {
+  if (!pagePath) return null;
+  try {
+    return new URL(pagePath, request.nextUrl.origin).toString();
+  } catch {
+    return null;
+  }
+}
 
+export async function POST(request: NextRequest) {
   try {
     // Bot detection (second layer — middleware already filters, but direct calls bypass it)
     const botReason = detectBot(request.headers);
@@ -43,13 +46,8 @@ export async function POST(request: NextRequest) {
     const anonCookie = request.cookies.get(ANON_ID_COOKIE)?.value;
     const anonymousId = anonHeader || anonCookie || undefined;
 
-    const currentUser = await getCurrentUser(request);
-    const userId = currentUser?.id;
-    const userEmail = currentUser?.email;
-
-    // Generate deterministic eventId so DB unique constraint handles dedup
     const today = new Date().toISOString().split('T')[0];
-    const identity = userId || anonymousId || 'unknown';
+    const identity = anonymousId || 'unknown';
     const eventId = deterministicEventId('page_viewed', identity, path, today);
 
     const platform =
@@ -58,9 +56,7 @@ export async function POST(request: NextRequest) {
     const canonical = canonicaliseEvent({
       eventType: 'page_viewed',
       eventId,
-      userId,
       anonymousId,
-      userEmail,
       pagePath: path,
       metadata: {
         source: 'server_pageview',
@@ -82,36 +78,26 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Identity stitching MUST run before dedup early-return.
-    // When a logged-in user's page_viewed is deduplicated (anonymous event
-    // already exists today), we still need the identity link so dau-wau-mau
-    // can resolve their anonymous events to their real user ID.
-    if (userId && anonymousId && !userId.startsWith('anon:')) {
-      sql
-        .query(
-          `INSERT INTO analytics_identity_links (user_id, anonymous_id)
-           VALUES ($1, $2)
-           ON CONFLICT DO NOTHING`,
-          [userId, anonymousId],
-        )
-        .catch((e) => {
-          if (
-            !(e instanceof Error) ||
-            !e.message.includes('analytics_identity_links')
-          ) {
-            console.warn('[page_viewed] identity link error:', e);
-          }
-        });
-    }
+    const currentUrl = currentUrlFromPath(request, canonical.row.pagePath);
+    forwardEventToPostHog({
+      distinctId: canonical.row.anonymousId || 'unknown',
+      event: '$pageview',
+      properties: {
+        ...canonical.row.metadata,
+        event_id: canonical.row.eventId,
+        canonical_event_type: canonical.row.eventType,
+        page_path: canonical.row.pagePath,
+        $pathname: canonical.row.pagePath,
+        $current_url: currentUrl,
+        $referrer:
+          typeof canonical.row.metadata?.referrer === 'string'
+            ? canonical.row.metadata.referrer
+            : undefined,
+        authenticated: false,
+      },
+    });
 
-    // Dedup handled by DB unique constraint on event_id — single INSERT, no SELECT needed
-    const { inserted } = await insertCanonicalEvent(canonical.row);
-
-    if (!inserted) {
-      return NextResponse.json({ status: 'skipped', reason: 'duplicate' });
-    }
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, source: 'posthog' });
   } catch (error) {
     console.error('[page_viewed] ERROR:', {
       error: error instanceof Error ? error.message : 'Unknown error',

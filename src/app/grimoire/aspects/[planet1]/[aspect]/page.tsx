@@ -16,7 +16,7 @@ import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 const aspectReadMethods: Record<Aspect, string> = {
   conjunct:
@@ -44,15 +44,6 @@ const aspectTypeSlugs: Record<Aspect, string> = {
   quincunx: 'quincunx',
   semisextile: 'semisextile',
 };
-
-export function generateStaticParams() {
-  return PLANETS.flatMap((planet1) =>
-    ASPECTS.map((aspect) => ({
-      planet1,
-      aspect,
-    })),
-  );
-}
 
 export async function generateMetadata({
   params,

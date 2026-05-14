@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ChevronRight, Users, Loader2 } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Users } from 'lucide-react';
 import { Heading } from '@/components/ui/Heading';
 import { zodiacSymbol, bodiesSymbols } from '@utils/zodiac/zodiac';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 
 interface CommunitySpace {
   id: number;
@@ -137,18 +138,7 @@ export default function CommunityHubClient() {
   ];
 
   if (isLoading) {
-    return (
-      <div className='min-h-screen p-4'>
-        <div className='max-w-2xl mx-auto'>
-          <div className='flex items-center gap-2 py-4'>
-            <Loader2 className='w-5 h-5 text-content-muted animate-spin' />
-            <span className='text-sm text-content-muted'>
-              Loading your spaces...
-            </span>
-          </div>
-        </div>
-      </div>
-    );
+    return <BrandedPageLoader message='Loading your spaces…' />;
   }
 
   const hasSpaces = mySpaces.length > 0;

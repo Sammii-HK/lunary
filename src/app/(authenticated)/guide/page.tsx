@@ -62,6 +62,7 @@ import { Heading } from '@/components/ui/Heading';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { PersonaPicker } from '@/components/personas/PersonaPicker';
 import type { PersonaConfig } from '@/lib/personas/types';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 
 interface CollectionFolder {
   id: number;
@@ -946,13 +947,7 @@ function BookOfShadowsContent() {
   });
 
   if (authState.loading) {
-    return (
-      <div className='min-h-screen w-full bg-gradient-to-b from-surface-base via-surface-elevated to-surface-base text-content-primary'>
-        <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-4 py-6 md:py-10'>
-          <div className='text-content-muted'>Loading...</div>
-        </div>
-      </div>
-    );
+    return <BrandedPageLoader message='Loading your guide…' />;
   }
 
   if (!authState.isAuthenticated) {

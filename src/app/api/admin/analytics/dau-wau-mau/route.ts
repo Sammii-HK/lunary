@@ -33,7 +33,9 @@ async function getSnapshotRows(rangeStart: Date, rangeEnd: Date) {
   }
 
   const snapshotResult = await sql.query(
-    `SELECT *
+    `SELECT
+      daily_metrics.*,
+      metric_date::text AS metric_date_key
     FROM daily_metrics
     WHERE metric_date >= $1 AND metric_date <= $2
     ORDER BY metric_date ASC`,
@@ -45,7 +47,7 @@ async function getSnapshotRows(rangeStart: Date, rangeEnd: Date) {
 
 /** Normalize a metric_date value from daily_metrics to YYYY-MM-DD string */
 const snapshotRowDate = (row: Record<string, unknown>): string => {
-  const d = row.metric_date;
+  const d = row.metric_date_key ?? row.metric_date;
   if (d instanceof Date) return d.toISOString().split('T')[0];
   if (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}/.test(d))
     return d.split('T')[0];
@@ -112,6 +114,22 @@ const AUDIT_THRESHOLD_PERCENT = 2;
 // or nesting sql fragments. Instead pass JS arrays as parameters and cast to text[].
 
 const formatDateKey = (date: Date) => date.toISOString().split('T')[0];
+
+const normalizeRowDateKey = (value: unknown): string => {
+  // Daily buckets should arrive as YYYY-MM-DD text, with Date fallback for
+  // older snapshot paths.
+  if (value instanceof Date) return formatDateKey(value);
+  if (typeof value === 'string') {
+    // Keep date-only strings stable.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) return formatDateKey(parsed);
+    return value;
+  }
+  const parsed = new Date(String(value));
+  if (!Number.isNaN(parsed.getTime())) return formatDateKey(parsed);
+  return String(value);
+};
 
 // Count total events (not distinct users) in a window
 const countEventsInWindow = (
@@ -238,21 +256,6 @@ const intersectionSize = (a: Set<string>, b: Set<string>) => {
   return count;
 };
 
-const normalizeRowDateKey = (value: unknown): string => {
-  // `DATE(created_at)` can come back as a Date or a string depending on driver.
-  if (value instanceof Date) return formatDateKey(value);
-  if (typeof value === 'string') {
-    // Keep date-only strings stable.
-    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
-    const parsed = new Date(value);
-    if (!Number.isNaN(parsed.getTime())) return formatDateKey(parsed);
-    return value;
-  }
-  const parsed = new Date(String(value));
-  if (!Number.isNaN(parsed.getTime())) return formatDateKey(parsed);
-  return String(value);
-};
-
 const alignDateToGranularity = (
   date: Date,
   granularity: 'day' | 'week' | 'month',
@@ -373,12 +376,14 @@ export async function GET(request: NextRequest) {
     // FAST PATH: Use pre-computed daily_metrics for instant load (~2 queries vs 12+).
     // daily_metrics uses user_id counts (no identity resolution) — close enough
     // for dashboard monitoring. Use ?live=1 for exact identity-resolved numbers.
-    // Only for daily granularity — weekly/monthly need date bucketing the live path provides.
-    if (!forceLive && granularity === 'day') {
+    // Use snapshots for all dashboard granularities; ?live=1 is the explicit
+    // audit path because pageview reach now lives in PostHog, not Neon.
+    if (!forceLive) {
       const snapshotRows = await getSnapshotRows(range.start, range.end);
 
       if (snapshotRows.length > 0) {
-        const realtimeDAU = await getRealtimeDAU();
+        const realtimeDAU =
+          searchParams.get('realtime') === '1' ? await getRealtimeDAU() : null;
         const latest = snapshotRows[snapshotRows.length - 1];
 
         // Build trend arrays — headline uses reach (page_viewed) not 'all' segment
@@ -564,8 +569,8 @@ export async function GET(request: NextRequest) {
           total_accounts: totalAccounts,
           // Source indicator
           source: 'daily_metrics',
-          snapshot_date: latest.metric_date,
-          dau_source: 'realtime',
+          snapshot_date: snapshotRowDate(latest),
+          dau_source: realtimeDAU === null ? 'daily_metrics' : 'realtime',
         };
 
         const fields = getFieldsParam(searchParams);
@@ -593,7 +598,7 @@ export async function GET(request: NextRequest) {
       ? `
       WITH canonical AS (
         SELECT
-          DATE((ce.created_at AT TIME ZONE 'UTC')) AS date,
+          DATE(ce.created_at AT TIME ZONE 'UTC')::text AS date,
           COALESCE(
             CASE WHEN ce.user_id IS NOT NULL AND ce.user_id <> '' THEN 'user:' || ce.user_id END,
             CASE WHEN l.user_id IS NOT NULL THEN 'user:' || l.user_id END,
@@ -615,7 +620,7 @@ export async function GET(request: NextRequest) {
       : `
       WITH canonical AS (
         SELECT
-          DATE((created_at AT TIME ZONE 'UTC')) AS date,
+          DATE(created_at AT TIME ZONE 'UTC')::text AS date,
           COALESCE(
             CASE WHEN user_id IS NOT NULL AND user_id <> '' THEN 'user:' || user_id END,
             CASE WHEN anonymous_id IS NOT NULL AND anonymous_id <> '' THEN 'anon:' || anonymous_id END
@@ -650,7 +655,7 @@ export async function GET(request: NextRequest) {
       sql.query(
         `
           SELECT
-            DATE(created_at) as date,
+            DATE(created_at AT TIME ZONE 'UTC')::text as date,
             user_id,
             anonymous_id
           FROM conversion_events
@@ -670,7 +675,7 @@ export async function GET(request: NextRequest) {
       sql.query(
         `
           SELECT
-            DATE(created_at) as date,
+            DATE(created_at AT TIME ZONE 'UTC')::text as date,
             user_id,
             anonymous_id
           FROM conversion_events
@@ -690,7 +695,7 @@ export async function GET(request: NextRequest) {
       sql.query(
         `
           SELECT
-            DATE(created_at) as date,
+            DATE(created_at AT TIME ZONE 'UTC')::text as date,
             user_id,
             anonymous_id
           FROM conversion_events
@@ -710,7 +715,7 @@ export async function GET(request: NextRequest) {
       sql.query(
         `
           SELECT
-            DATE(created_at) as date,
+            DATE(created_at AT TIME ZONE 'UTC')::text as date,
             user_id,
             anonymous_id
           FROM conversion_events
@@ -730,7 +735,7 @@ export async function GET(request: NextRequest) {
       sql.query(
         `
           SELECT
-            DATE(created_at) as date,
+            DATE(created_at AT TIME ZONE 'UTC')::text as date,
             user_id,
             anonymous_id
           FROM conversion_events
@@ -966,7 +971,6 @@ export async function GET(request: NextRequest) {
       range.end,
       granularity,
     );
-    const trends = engagementTrends;
     const productTrends = buildRollingTrends(
       productMap,
       range.start,
@@ -985,6 +989,7 @@ export async function GET(request: NextRequest) {
       range.end,
       granularity,
     );
+    const trends = sitewideTrends;
 
     const currentBucket = formatDateKey(
       alignDateToGranularity(range.end, granularity),
@@ -1113,7 +1118,7 @@ export async function GET(request: NextRequest) {
         SELECT
           user_id,
           COUNT(*) as total_events,
-          COUNT(DISTINCT DATE(created_at)) as active_days
+          COUNT(DISTINCT DATE(created_at AT TIME ZONE 'UTC')) as active_days
         FROM conversion_events
         WHERE event_type = ANY($1::text[])
           AND user_id IS NOT NULL
@@ -1263,39 +1268,37 @@ export async function GET(request: NextRequest) {
         ? (signedInProductWau / signedInProductMau) * 100
         : 0;
 
-    // Engaged Rate = total events / product users (events per user)
-    const engagedRateDau =
-      productDau > 0 ? engagementEventsDau / productDau : 0;
-    const engagedRateWau =
-      productWau > 0 ? engagementEventsWau / productWau : 0;
-    const engagedRateMau =
-      productMau > 0 ? engagementEventsMau / productMau : 0;
+    // Traffic/Product ratio: keeps the headline semantics aligned with the
+    // snapshot path. Product users are a subset of pageview reach.
+    const engagedRateDau = productDau > 0 ? sitewideDau / productDau : 0;
+    const engagedRateWau = productWau > 0 ? sitewideWau / productWau : 0;
+    const engagedRateMau = productMau > 0 ? sitewideMau / productMau : 0;
 
     const fullData = {
-      // Engagement = total events (not distinct users) - shows usage intensity
-      dau: engagementEventsDau,
-      wau: engagementEventsWau,
-      mau: engagementEventsMau,
-      // Also expose distinct user counts
+      // Headline traffic = distinct page_viewed identities.
+      dau: sitewideDau,
+      wau: sitewideWau,
+      mau: sitewideMau,
+      // Product/engagement distinct user counts.
       engaged_users_dau: engagementUsersDau,
       engaged_users_wau: engagementUsersWau,
       engaged_users_mau: engagementUsersMau,
-      // Engaged Rate = total events / product users (events per user)
+      // Traffic/Product ratio.
       engaged_rate_dau: Number(engagedRateDau.toFixed(1)),
       engaged_rate_wau: Number(engagedRateWau.toFixed(1)),
       engaged_rate_mau: Number(engagedRateMau.toFixed(1)),
       // Keep stickiness for backwards compatibility
       stickiness_dau_mau:
-        engagementUsersMau > 0
-          ? Number(((engagementUsersDau / engagementUsersMau) * 100).toFixed(2))
+        sitewideMau > 0
+          ? Number(((sitewideDau / sitewideMau) * 100).toFixed(2))
           : 0,
       stickiness_wau_mau:
-        engagementUsersMau > 0
-          ? Number(((engagementUsersWau / engagementUsersMau) * 100).toFixed(2))
+        sitewideMau > 0
+          ? Number(((sitewideWau / sitewideMau) * 100).toFixed(2))
           : 0,
       stickiness_dau_wau:
-        engagementUsersWau > 0
-          ? Number(((engagementUsersDau / engagementUsersWau) * 100).toFixed(2))
+        sitewideWau > 0
+          ? Number(((sitewideDau / sitewideWau) * 100).toFixed(2))
           : 0,
       returning_dau: returningDau,
       returning_wau: returningWau,
@@ -1316,6 +1319,7 @@ export async function GET(request: NextRequest) {
       },
       churn_rate: churnRate,
       trends,
+      engagement_trends: engagementTrends,
       product_trends: productTrends,
       signed_in_product_trends: productTrends,
       grimoire_trends: grimoireTrends,

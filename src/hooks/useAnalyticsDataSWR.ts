@@ -25,20 +25,110 @@ import {
   type ConsolidatedSnapshot,
 } from '@/lib/analytics/snapshot-extractors';
 
+class AnalyticsFetchError extends Error {
+  constructor(
+    readonly url: string,
+    readonly status: number,
+    readonly statusText: string,
+    readonly detail?: string,
+  ) {
+    super(
+      detail ? `${status} ${statusText}: ${detail}` : `${status} ${statusText}`,
+    );
+    this.name = 'AnalyticsFetchError';
+  }
+}
+
+type EndpointError = {
+  label: string;
+  error: unknown;
+};
+
+const readErrorDetail = async (res: Response): Promise<string | undefined> => {
+  const contentType = res.headers.get('content-type') ?? '';
+
+  try {
+    if (contentType.includes('application/json')) {
+      const body = (await res.json()) as {
+        error?: unknown;
+        message?: unknown;
+        details?: unknown;
+      };
+      const message = body.error ?? body.message ?? body.details;
+      return typeof message === 'string' && message.trim().length > 0
+        ? message.trim()
+        : undefined;
+    }
+
+    const body = await res.text();
+    return body.trim().length > 0 ? body.trim().slice(0, 180) : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const describeEndpointError = ({ label, error }: EndpointError): string => {
+  if (error instanceof AnalyticsFetchError) {
+    const status = error.statusText
+      ? `${error.status} ${error.statusText}`
+      : String(error.status);
+    return error.detail
+      ? `${label} (${status}: ${error.detail})`
+      : `${label} (${status})`;
+  }
+
+  if (error instanceof Error && error.message) {
+    return `${label} (${error.message})`;
+  }
+
+  return label;
+};
+
+const formatAnalyticsError = (errors: EndpointError[]): string | null => {
+  if (errors.length === 0) return null;
+
+  const authError = errors.find(
+    ({ error }) =>
+      error instanceof AnalyticsFetchError &&
+      (error.status === 401 || error.status === 403),
+  );
+
+  if (authError?.error instanceof AnalyticsFetchError) {
+    return `Admin analytics API is unauthorized (${authError.error.status}). Sign in with an admin account and refresh; failed endpoints are not being counted as zero.`;
+  }
+
+  const visibleErrors = errors.slice(0, 6).map(describeEndpointError);
+  const remaining = errors.length - visibleErrors.length;
+  const suffix = remaining > 0 ? `, +${remaining} more` : '';
+
+  return `Some metrics unavailable; existing data stays visible and failed endpoints are not counted as zero: ${visibleErrors.join(', ')}${suffix}`;
+};
+
 // Generic fetcher for SWR
 const fetcher = async (url: string) => {
   const res = await fetch(url);
   if (!res.ok) {
-    throw new Error(`Failed to fetch ${url}`);
+    throw new AnalyticsFetchError(
+      url,
+      res.status,
+      res.statusText,
+      await readErrorDetail(res),
+    );
   }
   return res.json();
 };
 
 // Different refresh intervals for different metric types
 const REFRESH_INTERVALS = {
-  REALTIME: 5 * 60 * 1000, // 5 minutes for DAU/WAU/MAU
-  STANDARD: 30 * 60 * 1000, // 30 minutes for most metrics
+  REALTIME: 0, // Manual refresh only; keep Neon CPU low.
+  STANDARD: 0, // Manual refresh only; keep analytics tabs from warming compute.
   DISABLED: 0, // No auto-refresh - only fetch once
+} as const;
+
+const DEDUPE_INTERVALS = {
+  REALTIME: 5 * 60 * 1000,
+  STANDARD: 30 * 60 * 1000,
+  DISABLED: 24 * 60 * 60 * 1000,
 } as const;
 
 // SWR configuration presets
@@ -47,19 +137,19 @@ const SWR_CONFIGS = {
     refreshInterval: REFRESH_INTERVALS.REALTIME,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
-    dedupingInterval: REFRESH_INTERVALS.REALTIME,
+    dedupingInterval: DEDUPE_INTERVALS.REALTIME,
   },
   STANDARD: {
     refreshInterval: REFRESH_INTERVALS.STANDARD,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
-    dedupingInterval: REFRESH_INTERVALS.STANDARD,
+    dedupingInterval: DEDUPE_INTERVALS.STANDARD,
   },
   DISABLED: {
     refreshInterval: REFRESH_INTERVALS.DISABLED,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
-    dedupingInterval: 24 * 60 * 60 * 1000,
+    dedupingInterval: DEDUPE_INTERVALS.DISABLED,
   },
 } as const;
 
@@ -94,7 +184,8 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
     SWR_CONFIGS.REALTIME,
   );
 
-  // 2. DAU/WAU/MAU — same params as original (granularity triggers fast/live path)
+  // 2. DAU/WAU/MAU — default to snapshot data. Live Neon scans are available
+  // on the endpoint for audit work, but the dashboard should stay cheap.
   const { data: activityLive, error: activityError } = useSWR<ActivityResponse>(
     `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
     fetcher,
@@ -312,21 +403,24 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
 
   // ── Combine errors ─────────────────────────────────────────────────
 
-  const errors = [
-    snapshotError && 'Snapshot (features, growth, subscription)',
-    activityError && 'DAU/WAU/MAU activity',
-    engagementOverviewError && 'Engagement overview',
-    activationError && 'Activation',
-    grimoireHealthError && 'Grimoire health',
-    conversionsError && 'Conversions',
-    ctaConversionsError && 'CTA conversions',
-    ctaLocationsError && 'CTA locations',
-    notificationsError && 'Notifications',
-    featureUsageError && 'Feature usage',
-    attributionError && 'Attribution',
-    successMetricsError && 'Success metrics',
-    intentionBreakdownError && 'Intention breakdown',
-  ].filter(Boolean);
+  const errors: EndpointError[] = [
+    {
+      label: 'Snapshot (features, growth, subscription)',
+      error: snapshotError,
+    },
+    { label: 'DAU/WAU/MAU activity', error: activityError },
+    { label: 'Engagement overview', error: engagementOverviewError },
+    { label: 'Activation', error: activationError },
+    { label: 'Grimoire health', error: grimoireHealthError },
+    { label: 'Conversions', error: conversionsError },
+    { label: 'CTA conversions', error: ctaConversionsError },
+    { label: 'CTA locations', error: ctaLocationsError },
+    { label: 'Notifications', error: notificationsError },
+    { label: 'Feature usage', error: featureUsageError },
+    { label: 'Attribution', error: attributionError },
+    { label: 'Success metrics', error: successMetricsError },
+    { label: 'Intention breakdown', error: intentionBreakdownError },
+  ].filter((item): item is EndpointError => Boolean(item.error));
 
   // Only block on snapshot (the critical path)
   const loading = !snapshot;
@@ -378,10 +472,7 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
 
     // State
     loading,
-    error:
-      errors.length > 0
-        ? `Some metrics unavailable: ${errors.join(', ')}`
-        : null,
+    error: formatAnalyticsError(errors),
 
     // Actions
     refresh,

@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
-import {
-  formatDate,
-  formatTimestamp,
-  resolveDateRange,
-} from '@/lib/analytics/date-range';
+import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
@@ -88,7 +84,7 @@ export async function GET(request: NextRequest) {
 
     const trends = await sql`
       SELECT
-        DATE(created_at) AS date,
+        DATE(created_at AT TIME ZONE 'UTC')::text AS date,
         COUNT(*) AS sessions,
         COALESCE(SUM(token_count), 0) AS tokens
       FROM analytics_ai_usage
@@ -105,7 +101,7 @@ export async function GET(request: NextRequest) {
           WHERE ce.user_id = analytics_ai_usage.user_id
             AND (ce.user_email LIKE ${TEST_EMAIL_PATTERN} OR ce.user_email = ${TEST_EMAIL_EXACT})
         )
-      GROUP BY DATE(created_at)
+      GROUP BY DATE(created_at AT TIME ZONE 'UTC')
       ORDER BY date ASC
     `;
 
@@ -126,7 +122,7 @@ export async function GET(request: NextRequest) {
           : 0,
       mode_breakdown: modeBreakdown,
       trends: trends.rows.map((trend) => ({
-        date: formatDate(new Date(trend.date)),
+        date: String(trend.date),
         sessions: Number(trend.sessions || 0),
         tokens: Number(trend.tokens || 0),
       })),

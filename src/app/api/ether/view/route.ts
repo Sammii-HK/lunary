@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  canonicaliseEvent,
-  insertCanonicalEvent,
-} from '@/lib/analytics/canonical-events';
-import { getCurrentUser } from '@/lib/get-user-session';
+import { canonicaliseEvent } from '@/lib/analytics/canonical-events';
 import { detectBot } from '@/lib/analytics/bot-detection';
+import { forwardEventToPostHog } from '@/lib/posthog-forward';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +17,15 @@ const resolvePathFromReferer = (referer: string | null): string | null => {
     return null;
   }
 };
+
+function currentUrlFromPath(request: NextRequest, pagePath: string | null) {
+  if (!pagePath) return null;
+  try {
+    return new URL(pagePath, request.nextUrl.origin).toString();
+  } catch {
+    return null;
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,15 +52,9 @@ export async function POST(request: NextRequest) {
         ? payload.anonymousId
         : anonHeader || anonCookie || undefined;
 
-    const currentUser = await getCurrentUser(request);
-    const userId = currentUser?.id;
-    const userEmail = currentUser?.email;
-
     const canonical = canonicaliseEvent({
       eventType: 'cta_impression',
-      userId,
       anonymousId,
-      userEmail,
       pagePath,
       metadata: {
         source: 'cta_impression',
@@ -107,8 +107,29 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    await insertCanonicalEvent(canonical.row);
-    return NextResponse.json({ success: true });
+    const distinctId = canonical.row.anonymousId || 'unknown';
+    const currentUrl = currentUrlFromPath(request, canonical.row.pagePath);
+
+    forwardEventToPostHog({
+      distinctId,
+      event: 'cta_impression',
+      properties: {
+        ...canonical.row.metadata,
+        event_id: canonical.row.eventId,
+        canonical_event_type: canonical.row.eventType,
+        feature_name: canonical.row.featureName,
+        page_path: canonical.row.pagePath,
+        $pathname: canonical.row.pagePath,
+        $current_url: currentUrl,
+        $referrer:
+          typeof canonical.row.metadata?.referrer === 'string'
+            ? canonical.row.metadata.referrer
+            : undefined,
+        authenticated: false,
+      },
+    });
+
+    return NextResponse.json({ success: true, source: 'posthog' });
   } catch (error) {
     console.error('[telemetry/cta-view] Failed to record CTA view', error);
     return NextResponse.json(

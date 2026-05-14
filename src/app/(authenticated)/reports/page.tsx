@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useUser } from '@/context/UserContext';
 import { WeeklyReport } from '@/lib/cosmic-snapshot/reports';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 
 export default function ReportsPage() {
   const { user } = useUser();
@@ -11,13 +12,7 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user?.id) {
-      loadReports();
-    }
-  }, [user?.id]);
-
-  const loadReports = async () => {
+  async function loadReports() {
     setLoading(true);
     setError(null);
     try {
@@ -32,17 +27,16 @@ export default function ReportsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    if (user?.id) {
+      loadReports();
+    }
+  }, [user?.id]);
 
   if (loading) {
-    return (
-      <div className='min-h-screen bg-surface-base flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='w-8 h-8 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-content-muted'>Loading your cosmic reports...</p>
-        </div>
-      </div>
-    );
+    return <BrandedPageLoader message='Loading your cosmic reports…' />;
   }
 
   if (error) {

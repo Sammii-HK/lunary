@@ -23,7 +23,6 @@ import {
   MessageSquare,
   Gift,
 } from 'lucide-react';
-import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/Heading';
 import { MarketingFooter } from '@/components/MarketingFooter';
@@ -32,11 +31,6 @@ import { CTA_COPY } from '@/lib/cta-copy';
 import { conversionTracking } from '@/lib/analytics';
 
 export default function FeaturesPage() {
-  // Track page view on mount
-  useEffect(() => {
-    conversionTracking.pageViewed('/features');
-  }, []);
-
   // CTA click handler
   const handleCtaClick = (location: string, label: string, href: string) => {
     conversionTracking.ctaClicked({

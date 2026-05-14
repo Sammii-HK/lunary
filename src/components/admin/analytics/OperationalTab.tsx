@@ -71,6 +71,8 @@ interface OperationalTabProps {
       label: string;
       data: NotificationBucket;
     }>;
+    notificationsUnavailable: boolean;
+    notificationUnavailableMessage: string | null;
   };
 }
 
@@ -96,6 +98,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
     discordAnalytics,
     searchConsoleData,
     grimoireTopPages,
+    intentionBreakdown,
     loading,
   } = data;
 
@@ -126,6 +129,8 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
     grimoireMau,
     grimoireOnlyMau,
     notificationTypes,
+    notificationsUnavailable,
+    notificationUnavailableMessage,
   } = computed;
 
   return (
@@ -687,6 +692,51 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
         </Card>
       </section>
 
+      {/* Profile Intentions */}
+      <section className='space-y-3'>
+        <div>
+          <h2 className='text-sm font-medium text-content-primary'>
+            Profile Intentions
+          </h2>
+          <p className='text-xs text-content-muted'>
+            Distribution of non-empty intention values saved to user profiles.
+          </p>
+        </div>
+        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
+          <CardHeader>
+            <CardTitle className='text-base font-medium'>
+              Intention breakdown
+            </CardTitle>
+            <CardDescription className='text-xs text-content-muted'>
+              Empty here means the profile intention field has not collected
+              values yet.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className='overflow-x-auto'>
+            <MetricTable
+              columns={[
+                { label: 'Intention', key: 'intention', type: 'text' },
+                {
+                  label: 'Users',
+                  key: 'count',
+                  type: 'number',
+                  align: 'right',
+                },
+                {
+                  label: 'Share',
+                  key: 'percentage',
+                  type: 'percentage',
+                  align: 'right',
+                  decimals: 1,
+                },
+              ]}
+              data={intentionBreakdown ?? []}
+              emptyMessage='No profile intention values have been collected yet.'
+            />
+          </CardContent>
+        </Card>
+      </section>
+
       {/* Event Volume & Quality */}
       <section className='space-y-6'>
         <div>
@@ -845,7 +895,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
             <p className='text-xs text-content-muted'>
               Pageview Reach = `page_viewed` deduped - Engaged Users = key
               action events - Signed-in Product Usage = authenticated product
-              event users - Grimoire Viewers = `grimoire_viewed` users
+              event users - Grimoire Viewers = grimoire-scoped content users
             </p>
             <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4 pt-3'>
               <MiniStat
@@ -886,7 +936,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
             Grimoire Deep Dive
           </h2>
           <p className='text-xs text-content-muted'>
-            Grimoire viewers are scoped to `grimoire_viewed` events and feed the
+            Grimoire viewers are scoped to Grimoire content events and feed the
             conversion flywheel.
           </p>
         </div>
@@ -1116,38 +1166,54 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-                {notificationTypes.map((type) => (
-                  <div
-                    key={type.key}
-                    className='rounded-2xl border border-stroke-subtle bg-surface-elevated/40 p-4'
-                  >
-                    <div className='flex items-center gap-2 text-sm font-medium text-content-secondary'>
-                      <Bell className='h-4 w-4 text-content-brand' />
-                      {type.label}
+              {notificationsUnavailable ? (
+                <div className='flex items-start gap-3 rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-4 text-sm text-content-muted'>
+                  <Info className='mt-0.5 h-4 w-4 flex-shrink-0 text-content-brand-accent' />
+                  <p>
+                    {notificationUnavailableMessage ??
+                      'Notification metrics are unavailable right now; they are not counted as zero.'}
+                  </p>
+                </div>
+              ) : notificationTypes.length > 0 ? (
+                <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                  {notificationTypes.map((type) => (
+                    <div
+                      key={type.key}
+                      className='rounded-2xl border border-stroke-subtle bg-surface-elevated/40 p-4'
+                    >
+                      <div className='flex items-center gap-2 text-sm font-medium text-content-secondary'>
+                        <Bell className='h-4 w-4 text-content-brand' />
+                        {type.label}
+                      </div>
+                      <div className='mt-3 grid gap-2 text-sm'>
+                        <div className='flex items-center justify-between text-content-muted'>
+                          <span>Sent</span>
+                          <span>{type.data.sent.toLocaleString()}</span>
+                        </div>
+                        <div className='flex items-center justify-between text-content-muted'>
+                          <span>Open rate</span>
+                          <span>
+                            {Number(type.data.open_rate ?? 0).toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className='flex items-center justify-between text-content-muted'>
+                          <span>CTR</span>
+                          <span>
+                            {Number(type.data.click_through_rate ?? 0).toFixed(
+                              1,
+                            )}
+                            %
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className='mt-3 grid gap-2 text-sm'>
-                      <div className='flex items-center justify-between text-content-muted'>
-                        <span>Sent</span>
-                        <span>{type.data.sent.toLocaleString()}</span>
-                      </div>
-                      <div className='flex items-center justify-between text-content-muted'>
-                        <span>Open rate</span>
-                        <span>
-                          {Number(type.data.open_rate ?? 0).toFixed(1)}%
-                        </span>
-                      </div>
-                      <div className='flex items-center justify-between text-content-muted'>
-                        <span>CTR</span>
-                        <span>
-                          {Number(type.data.click_through_rate ?? 0).toFixed(1)}
-                          %
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className='rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-4 text-sm text-content-muted'>
+                  No tracked notification metrics in this range.
+                </div>
+              )}
             </CardContent>
           </Card>
           {discordAnalytics && (

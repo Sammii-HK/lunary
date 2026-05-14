@@ -262,9 +262,6 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
       }
     : { dau: 0, wau: 0, mau: 0 };
 
-  const returningReferrerBreakdown =
-    engagementOverview?.returning_referrer_breakdown;
-
   // App metrics
   const appDau = activity?.app_opened_dau ?? 0;
   const appWau = activity?.app_opened_wau ?? 0;
@@ -278,11 +275,8 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
   const engagementRate = appMau > 0 ? (engagedMau / appMau) * 100 : null;
 
   // Audit metrics
-  const appVisits = engagementOverview?.audit?.raw_events_count ?? null;
   const canonicalIdentities =
     engagementOverview?.audit?.distinct_canonical_identities ?? null;
-  const appVisitsPerUser =
-    appVisits !== null && appMau > 0 ? appVisits / appMau : null;
 
   // Reach metrics
   const reachDau = activity?.sitewide_dau ?? 0;
@@ -510,12 +504,14 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
     [activity?.trends],
   );
 
-  const sortedAppOpenedTrends = useMemo(
+  const sortedSitewideTrends = useMemo(
     () =>
-      activity?.app_opened_trends
-        ? sortRowsByDate(activity.app_opened_trends)
-        : [],
-    [activity?.app_opened_trends],
+      activity?.sitewide_trends
+        ? sortRowsByDate(activity.sitewide_trends)
+        : activity?.app_opened_trends
+          ? sortRowsByDate(activity.app_opened_trends)
+          : [],
+    [activity?.sitewide_trends, activity?.app_opened_trends],
   );
 
   const sortedProductTrends = useMemo(
@@ -560,31 +556,31 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
   const siteDauStats = useMemo(
     () =>
       computeRollingAverage(
-        sortedAppOpenedTrends,
+        sortedSitewideTrends,
         (row) => row.dau ?? 0,
         momentumWindowSize,
       ),
-    [sortedAppOpenedTrends],
+    [sortedSitewideTrends],
   );
 
   const siteWauStats = useMemo(
     () =>
       computeRollingAverage(
-        sortedAppOpenedTrends,
+        sortedSitewideTrends,
         (row) => row.wau ?? 0,
         momentumWindowSize,
       ),
-    [sortedAppOpenedTrends],
+    [sortedSitewideTrends],
   );
 
   const siteMauStats = useMemo(
     () =>
       computeRollingAverage(
-        sortedAppOpenedTrends,
+        sortedSitewideTrends,
         (row) => row.mau ?? 0,
         momentumWindowSize,
       ),
-    [sortedAppOpenedTrends],
+    [sortedSitewideTrends],
   );
 
   const productDauStats = useMemo(
@@ -864,28 +860,36 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
   ]);
 
   // Notification types
+  const notificationsUnavailable = notifications?.available === false;
+  const notificationUnavailableMessage =
+    typeof notifications?.message === 'string'
+      ? notifications.message
+      : notificationsUnavailable
+        ? 'Notification metrics could not be loaded right now; they are not counted as zero.'
+        : null;
+
   const notificationTypes: Array<{
     key: string;
     label: string;
     data: NotificationBucket;
-  }> = useMemo(
-    () =>
-      ['cosmic_pulse', 'moon_circle', 'weekly_report']
-        .map((key) => ({
-          key,
-          label: key.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-          data: (notifications?.[key] as NotificationBucket | undefined) ?? {
-            sent: 0,
-            delivered: 0,
-            opened: 0,
-            clicked: 0,
-            open_rate: 0,
-            click_through_rate: 0,
-          },
-        }))
-        .filter((item) => item.data),
-    [notifications],
-  );
+  }> = useMemo(() => {
+    if (!notifications || notificationsUnavailable) return [];
+
+    return ['cosmic_pulse', 'moon_circle', 'weekly_report']
+      .map((key) => ({
+        key,
+        label: key.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+        data: (notifications[key] as NotificationBucket | undefined) ?? {
+          sent: 0,
+          delivered: 0,
+          opened: 0,
+          clicked: 0,
+          open_rate: 0,
+          click_through_rate: 0,
+        },
+      }))
+      .filter((item) => item.data);
+  }, [notifications, notificationsUnavailable]);
 
   return {
     // Window dates
@@ -898,7 +902,6 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
     productWauToMauRatio,
     grimoireShareRatio,
     productReturningPercent,
-    returningReferrerBreakdown,
 
     // App metrics
     appDau,
@@ -912,9 +915,7 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
     engagementRate,
 
     // Audit metrics
-    appVisits,
     canonicalIdentities,
-    appVisitsPerUser,
 
     // Reach metrics
     reachDau,
@@ -978,7 +979,7 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
 
     // Sorted trends
     sortedActivityTrends,
-    sortedAppOpenedTrends,
+    sortedSitewideTrends,
     sortedProductTrends,
     sortedActivationTrends,
 
@@ -1003,6 +1004,8 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
 
     // Notifications
     notificationTypes,
+    notificationsUnavailable,
+    notificationUnavailableMessage,
 
     // Export formatters
     formatCurrency,

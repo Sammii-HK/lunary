@@ -64,7 +64,7 @@ export default function WelcomePage() {
   const [openFAQId, setOpenFAQId] = useState<string | null>(null);
   const homepageFAQs = getHomepageFAQs();
 
-  // Track page view with A/B test data
+  // Track active A/B test exposures without inflating page_viewed.
   useABTestTracking('welcome', 'page_viewed', [
     'homepage-features-test',
     'cta-copy-test',

@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       queries.push(
         sql.query(
           `SELECT
-            metric_date,
+            metric_date::text AS metric_date,
             dau, wau, mau, reach_dau, reach_wau, reach_mau,
             signed_in_product_dau, signed_in_product_wau, signed_in_product_mau,
             app_opened_mau,

@@ -4,7 +4,6 @@ import {
   Activity,
   CheckCircle,
   Download,
-  Loader2,
   RefreshCw,
   Sparkles,
   Target,
@@ -44,16 +43,7 @@ import {
 interface SnapshotTabProps {
   data: AnalyticsDataState & AnalyticsDataActions;
   computed: {
-    appDau: number;
-    appWau: number;
-    appMau: number;
-    engagedDau: number;
-    engagedWau: number;
-    engagedMau: number;
-    engagementRate: number | null;
-    appVisits: number | null;
     canonicalIdentities: number | null;
-    appVisitsPerUser: number | null;
     reachDau: number;
     reachWau: number;
     reachMau: number;
@@ -62,17 +52,10 @@ interface SnapshotTabProps {
     productMauCurrentWeek: number;
     productMauGrowth: number;
     overallD7Retention: number;
-    overallD30Retention: number;
     primaryCards: PrimaryCard[];
     productMaError: boolean;
     integrityWarnings: string[];
-    engagedMatchesApp: boolean;
     filteredInsights: any[];
-    returningReferrerBreakdown?: {
-      organic_returning: number;
-      direct_returning: number;
-      internal_returning: number;
-    };
     siteMomentumRows: MomentumRow[];
     productMomentumRows: MomentumRow[];
     activationMomentumRows: MomentumRow[];
@@ -104,12 +87,7 @@ export function SnapshotTab({
   } = data;
 
   const {
-    appDau,
-    appWau,
-    appMau,
-    appVisits,
     canonicalIdentities,
-    appVisitsPerUser,
     reachDau,
     reachWau,
     reachMau,
@@ -122,7 +100,6 @@ export function SnapshotTab({
     productMaError,
     integrityWarnings,
     filteredInsights,
-    returningReferrerBreakdown,
     siteMomentumRows,
     productMomentumRows,
     activationMomentumRows,
@@ -369,7 +346,7 @@ export function SnapshotTab({
           eyebrow='Product Engagement'
           title='Signed-In Product Usage'
           description='Signed-in product users capture authenticated engagement inside the app.'
-          footerText='Product users are a subset of App users. Counts will not align 1:1.'
+          footerText='Product users are signed-in app users only. Public visitor counts live in Visitor Traffic and the Acquisition tab.'
         >
           <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
             <MiniStat
@@ -437,19 +414,19 @@ export function SnapshotTab({
           </div>
           <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
             <MiniStat
-              label='Engaged Rate (DAU)'
+              label='Traffic / Product (DAU)'
               value={activity?.engaged_rate_dau?.toFixed(1) ?? '—'}
               icon={<Sparkles className='h-5 w-5 text-lunary-success-300' />}
             />
             <MiniStat
-              label='Engaged Rate (WAU)'
+              label='Traffic / Product (WAU)'
               value={activity?.engaged_rate_wau?.toFixed(1) ?? '—'}
               icon={
                 <Sparkles className='h-5 w-5 text-content-brand-secondary' />
               }
             />
             <MiniStat
-              label='Engaged Rate (MAU)'
+              label='Traffic / Product (MAU)'
               value={activity?.engaged_rate_mau?.toFixed(1) ?? '—'}
               icon={<Sparkles className='h-5 w-5 text-content-brand-accent' />}
             />
@@ -467,62 +444,64 @@ export function SnapshotTab({
       </section>
 
       {/* Retention & Return */}
-      <section className='space-y-3'>
-        <StatSection
-          eyebrow='Retention & return'
-          title='Returning canonical users'
-          description='D1 + WAU/MAU overlap inspect deduped identity recurrence.'
-          footerText='Returning Users (range) need 2+ distinct active days in the window. WAU/MAU overlap compares the current period to the prior window.'
-        >
-          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-            <MiniStat
-              label='Returning DAU (D1)'
-              value={engagementOverview?.returning_dau ?? 0}
-              icon={
-                <Activity className='h-5 w-5 text-content-brand-secondary' />
-              }
-            />
-            <MiniStat
-              label='Returning WAU overlap'
-              value={engagementOverview?.returning_wau ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
-            />
-            <MiniStat
-              label='Returning MAU overlap'
-              value={engagementOverview?.returning_mau ?? 0}
-              icon={<Activity className='h-5 w-5 text-content-brand' />}
-            />
-            <MiniStat
-              label='Returning Users (range)'
-              value={engagementOverview?.returning_users_range ?? 0}
-              icon={<Target className='h-5 w-5 text-content-brand-accent' />}
-            />
-          </div>
-        </StatSection>
-      </section>
+      {includeAudit && (
+        <section className='space-y-3'>
+          <StatSection
+            eyebrow='Audit'
+            title='Legacy All-Event Return'
+            description='D1 + WAU/MAU overlap inspect deduped identity recurrence across all tracked events.'
+            footerText='Diagnostic only. This is not a Vercel visitor count and may include legacy anonymous event noise.'
+          >
+            <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+              <MiniStat
+                label='Returning DAU (D1)'
+                value={engagementOverview?.returning_dau ?? 0}
+                icon={
+                  <Activity className='h-5 w-5 text-content-brand-secondary' />
+                }
+              />
+              <MiniStat
+                label='Returning WAU overlap'
+                value={engagementOverview?.returning_wau ?? 0}
+                icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
+              />
+              <MiniStat
+                label='Returning MAU overlap'
+                value={engagementOverview?.returning_mau ?? 0}
+                icon={<Activity className='h-5 w-5 text-content-brand' />}
+              />
+              <MiniStat
+                label='Returning Users (range)'
+                value={engagementOverview?.returning_users_range ?? 0}
+                icon={<Target className='h-5 w-5 text-content-brand-accent' />}
+              />
+            </div>
+          </StatSection>
+        </section>
+      )}
 
-      {/* App Active Users */}
+      {/* Visitor Traffic */}
       <section className='space-y-3'>
         <StatSection
-          eyebrow='Core App Usage'
-          title='App Active Users'
-          description='Measures who opened the app in the selected window.'
-          footerText='App Active Users (DAU/WAU/MAU) are deduplicated by canonical identity per UTC window. Counts may differ from Vercel analytics due to bot filtering and PWA activity.'
+          eyebrow='Traffic'
+          title='Visitor Traffic'
+          description='Counts distinct canonical identities with at least one page_viewed event in the selected window.'
+          footerText='This is the closest Lunary snapshot metric to Vercel visitors. Use the Acquisition tab for page views, referrers, bounce rate, and pages per visitor. Historical ranges before the global pageview tracker rollout will undercount.'
         >
           <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
             <MiniStat
-              label='App DAU'
-              value={appDau}
+              label='Visitor DAU'
+              value={reachDau}
               icon={<Activity className='h-5 w-5 text-content-brand' />}
             />
             <MiniStat
-              label='App WAU'
-              value={appWau}
+              label='Visitor WAU'
+              value={reachWau}
               icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
             />
             <MiniStat
-              label='App MAU'
-              value={appMau}
+              label='Visitor MAU'
+              value={reachMau}
               icon={
                 <Activity className='h-5 w-5 text-content-brand-secondary' />
               }
@@ -532,107 +511,68 @@ export function SnapshotTab({
               value={engagementOverview?.new_users ?? 0}
               icon={<Target className='h-5 w-5 text-content-brand-secondary' />}
             />
-            {appVisits !== null && (
+            {includeAudit && canonicalIdentities !== null && (
               <MiniStat
-                label='App Visits'
-                value={appVisits}
-                icon={<Loader2 className='h-5 w-5 text-content-brand-accent' />}
+                label='Canonical identities (audit)'
+                value={canonicalIdentities}
+                icon={<Sparkles className='h-5 w-5 text-lunary-success-300' />}
               />
             )}
-          </div>
-          {appVisits !== null && (
-            <div className='grid gap-4 md:grid-cols-2'>
-              <MiniStat
-                label='App visits per App user'
-                value={
-                  appVisitsPerUser !== null ? appVisitsPerUser.toFixed(2) : '—'
-                }
-                icon={<Target className='h-5 w-5 text-content-brand' />}
-              />
-              {includeAudit && canonicalIdentities !== null && (
-                <MiniStat
-                  label='Canonical identities (audit)'
-                  value={canonicalIdentities}
-                  icon={
-                    <Sparkles className='h-5 w-5 text-lunary-success-300' />
-                  }
-                />
-              )}
-            </div>
-          )}
-        </StatSection>
-      </section>
-
-      {/* Returning Referrer Breakdown */}
-      <section className='space-y-3'>
-        <StatSection
-          eyebrow='Returning referrer breakdown'
-          title='Where returning users come from'
-          description='Uses the most recent app_opened metadata for returning users.'
-          footerText='Segments use the most recent app_opened metadata (referrer, UTM source, or origin type) for returning users (2+ active days).'
-        >
-          <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
-            <MiniStat
-              label='Organic returning'
-              value={returningReferrerBreakdown?.organic_returning ?? 0}
-              icon={<Sparkles className='h-5 w-5 text-content-brand' />}
-            />
-            <MiniStat
-              label='Direct / brand returning'
-              value={returningReferrerBreakdown?.direct_returning ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
-            />
-            <MiniStat
-              label='Internal returning'
-              value={returningReferrerBreakdown?.internal_returning ?? 0}
-              icon={
-                <Activity className='h-5 w-5 text-content-brand-secondary' />
-              }
-            />
           </div>
         </StatSection>
       </section>
 
       {/* Active Days Distribution */}
-      <section className='space-y-3'>
-        <StatSection
-          eyebrow='Active days distribution (range)'
-          title='Distinct active days per user'
-          description='Users grouped by distinct active days in the selected range.'
-        >
-          <div className='grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5'>
-            <MiniStat
-              label='1 day'
-              value={engagementOverview?.active_days_distribution?.['1'] ?? 0}
-              icon={<Activity className='h-5 w-5 text-content-brand' />}
-            />
-            <MiniStat
-              label='2-3 days'
-              value={engagementOverview?.active_days_distribution?.['2-3'] ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
-            />
-            <MiniStat
-              label='4-7 days'
-              value={engagementOverview?.active_days_distribution?.['4-7'] ?? 0}
-              icon={
-                <Activity className='h-5 w-5 text-content-brand-secondary' />
-              }
-            />
-            <MiniStat
-              label='8-14 days'
-              value={
-                engagementOverview?.active_days_distribution?.['8-14'] ?? 0
-              }
-              icon={<Activity className='h-5 w-5 text-content-brand-accent' />}
-            />
-            <MiniStat
-              label='15+ days'
-              value={engagementOverview?.active_days_distribution?.['15+'] ?? 0}
-              icon={<Target className='h-5 w-5 text-content-brand' />}
-            />
-          </div>
-        </StatSection>
-      </section>
+      {includeAudit && (
+        <section className='space-y-3'>
+          <StatSection
+            eyebrow='Audit'
+            title='Legacy Active Days Distribution'
+            description='Canonical identities grouped by distinct active days across all tracked events.'
+            footerText='Diagnostic only. Use Product Usage for signed-in engagement and Acquisition for visitor traffic.'
+          >
+            <div className='grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5'>
+              <MiniStat
+                label='1 day'
+                value={engagementOverview?.active_days_distribution?.['1'] ?? 0}
+                icon={<Activity className='h-5 w-5 text-content-brand' />}
+              />
+              <MiniStat
+                label='2-3 days'
+                value={
+                  engagementOverview?.active_days_distribution?.['2-3'] ?? 0
+                }
+                icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
+              />
+              <MiniStat
+                label='4-7 days'
+                value={
+                  engagementOverview?.active_days_distribution?.['4-7'] ?? 0
+                }
+                icon={
+                  <Activity className='h-5 w-5 text-content-brand-secondary' />
+                }
+              />
+              <MiniStat
+                label='8-14 days'
+                value={
+                  engagementOverview?.active_days_distribution?.['8-14'] ?? 0
+                }
+                icon={
+                  <Activity className='h-5 w-5 text-content-brand-accent' />
+                }
+              />
+              <MiniStat
+                label='15+ days'
+                value={
+                  engagementOverview?.active_days_distribution?.['15+'] ?? 0
+                }
+                icon={<Target className='h-5 w-5 text-content-brand' />}
+              />
+            </div>
+          </StatSection>
+        </section>
+      )}
 
       {/* Content & Funnel */}
       <section className='space-y-3'>
@@ -642,7 +582,7 @@ export function SnapshotTab({
               Content & Funnel
             </CardTitle>
             <CardDescription className='text-xs text-content-muted'>
-              Grimoire metrics are scoped to `grimoire_viewed`.
+              Grimoire metrics are scoped to page_viewed events under /grimoire.
             </CardDescription>
           </CardHeader>
           <CardContent className='space-y-4'>
@@ -741,55 +681,16 @@ export function SnapshotTab({
         </Card>
       </section>
 
-      {/* Reach */}
-      <section className='space-y-3'>
-        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
-          <CardHeader>
-            <CardTitle className='text-base font-medium'>
-              Reach (page_viewed)
-            </CardTitle>
-            <CardDescription className='text-xs text-content-muted'>
-              Reach measures visits. App usage measures product engagement.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='space-y-4'>
-            <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
-              <MiniStat
-                label='Reach DAU'
-                value={reachDau}
-                icon={<Activity className='h-5 w-5 text-content-brand' />}
-              />
-              <MiniStat
-                label='Reach WAU'
-                value={reachWau}
-                icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
-              />
-              <MiniStat
-                label='Reach MAU'
-                value={reachMau}
-                icon={
-                  <Activity className='h-5 w-5 text-content-brand-secondary' />
-                }
-              />
-            </div>
-            <p className='text-xs text-content-muted'>
-              Reach counts distinct canonical identities with at least one
-              `page_viewed` event in the window.
-            </p>
-          </CardContent>
-        </Card>
-      </section>
-
       {/* Momentum */}
       <section className='space-y-3'>
         <StatSection
           eyebrow='Momentum'
           title='Rolling Averages & Deltas'
-          description='Site uses app_opened. Product uses signed-in events. Activation uses signup rate.'
+          description='Site uses page_viewed reach. Product uses signed-in events. Activation uses signup rate.'
           footerText='Activation momentum is expressed as the rolling rate plus its change vs. the previous 7-day window.'
         >
           <MomentumSection
-            title='Site momentum (app_opened)'
+            title='Site momentum (page_viewed reach)'
             rows={siteMomentumRows}
           />
           <MomentumSection

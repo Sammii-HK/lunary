@@ -30,7 +30,6 @@ const GRIMOIRE_URLS_TO_AUDIT = [
   'https://lunary.app/grimoire/rising',
   'https://lunary.app/grimoire/rising-sign',
   'https://lunary.app/grimoire/moon-in',
-  'https://lunary.app/grimoire/zodiac',
   'https://lunary.app/grimoire/moon',
   'https://lunary.app/grimoire/transits',
   'https://lunary.app/grimoire/horoscopes',
@@ -70,10 +69,10 @@ const GRIMOIRE_URLS_TO_AUDIT = [
   'https://lunary.app/grimoire/placements/mars-in-leo',
   'https://lunary.app/grimoire/houses/1st-house',
   'https://lunary.app/grimoire/houses/7th-house',
-  'https://lunary.app/grimoire/houses/moon/7',
+  'https://lunary.app/grimoire/houses/moon',
   'https://lunary.app/grimoire/aspects/moon/square/mars',
   'https://lunary.app/grimoire/aspects/types/square',
-  'https://lunary.app/grimoire/rising/capricorn-rising',
+  'https://lunary.app/grimoire/rising/capricorn',
   'https://lunary.app/grimoire/moon-in/capricorn',
 
   // Query families that were still showing strong positions in tiny tests

@@ -11,9 +11,10 @@ const fetcher = async (url: string) => {
   return res.json();
 };
 
-// Refresh every 5 minutes for real-time data
+// Manual refresh only; this dashboard fans out to analytics queries and should
+// not keep Neon compute warm in a background tab.
 const SWR_CONFIG = {
-  refreshInterval: 5 * 60 * 1000,
+  refreshInterval: 0,
   revalidateOnFocus: false,
   revalidateOnReconnect: false,
   dedupingInterval: 5 * 60 * 1000,

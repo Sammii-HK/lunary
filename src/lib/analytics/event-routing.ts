@@ -1,15 +1,16 @@
-import type { CanonicalEventType } from '@/lib/analytics/canonical-events';
 import { forwardEventToPostHog } from '@/lib/posthog-forward';
+import type { CanonicalEventType } from '@/lib/analytics/canonical-events';
 
 const POSTHOG_ONLY_EVENTS = new Set<CanonicalEventType>([
   'page_viewed',
   'cta_impression',
-  'cta_clicked',
 ]);
 
 export function shouldPersistEventToNeon(
   eventType: CanonicalEventType,
 ): boolean {
+  // High-volume traffic events live in PostHog. Neon is kept for product,
+  // conversion, revenue, and lifecycle events where relational joins matter.
   return !POSTHOG_ONLY_EVENTS.has(eventType);
 }
 

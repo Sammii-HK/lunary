@@ -7,6 +7,7 @@ import {
 // Mock dependencies
 const mockGetABTestVariantClient = jest.fn();
 const mockTrackEvent = jest.fn();
+const mockTrackCtaImpression = jest.fn();
 
 jest.mock('@/lib/ab-tests-client', () => ({
   getABTestVariantClient: (testName: string) =>
@@ -15,6 +16,7 @@ jest.mock('@/lib/ab-tests-client', () => ({
 
 jest.mock('@/lib/analytics', () => ({
   trackEvent: jest.fn((...args) => mockTrackEvent(...args)),
+  trackCtaImpression: jest.fn((...args) => mockTrackCtaImpression(...args)),
   getCtaAttribution: jest.fn(() => null),
 }));
 
@@ -45,17 +47,14 @@ describe('useABTestTracking', () => {
   });
 
   describe('Event tracking for users NOT in A/B tests', () => {
-    it('should fire 1 bare event when no tests are active', async () => {
+    it('should not emit page/app events or impressions when no tests are active', async () => {
       renderHook(() =>
         useABTestTracking('dashboard', 'app_opened', ['cta-copy-test']),
       );
 
       await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(1);
-        expect(mockTrackEvent).toHaveBeenCalledWith('app_opened', {
-          pagePath: '/dashboard',
-          metadata: { page: 'dashboard' },
-        });
+        expect(mockTrackEvent).not.toHaveBeenCalled();
+        expect(mockTrackCtaImpression).not.toHaveBeenCalled();
       });
     });
   });
@@ -74,33 +73,33 @@ describe('useABTestTracking', () => {
       renderHook(() => useABTestTracking('horoscope', 'page_viewed'));
 
       await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(3);
+        expect(mockTrackCtaImpression).toHaveBeenCalledTimes(3);
 
-        expect(mockTrackEvent).toHaveBeenCalledWith('page_viewed', {
+        expect(mockTrackCtaImpression).toHaveBeenCalledWith({
+          ctaId: 'ab_cta_copy',
+          location: 'ab_test_horoscope',
+          label: 'horoscope cta_copy exposure',
           pagePath: '/horoscope',
-          metadata: {
-            abTest: 'cta_copy',
-            abVariant: 'mystical',
-            page: 'horoscope',
-          },
+          abTest: 'cta_copy',
+          abVariant: 'mystical',
         });
 
-        expect(mockTrackEvent).toHaveBeenCalledWith('page_viewed', {
+        expect(mockTrackCtaImpression).toHaveBeenCalledWith({
+          ctaId: 'ab_paywall_preview',
+          location: 'ab_test_horoscope',
+          label: 'horoscope paywall_preview exposure',
           pagePath: '/horoscope',
-          metadata: {
-            abTest: 'paywall_preview',
-            abVariant: 'blur',
-            page: 'horoscope',
-          },
+          abTest: 'paywall_preview',
+          abVariant: 'blur',
         });
 
-        expect(mockTrackEvent).toHaveBeenCalledWith('page_viewed', {
+        expect(mockTrackCtaImpression).toHaveBeenCalledWith({
+          ctaId: 'ab_feature_preview',
+          location: 'ab_test_horoscope',
+          label: 'horoscope feature_preview exposure',
           pagePath: '/horoscope',
-          metadata: {
-            abTest: 'feature_preview',
-            abVariant: 'peek',
-            page: 'horoscope',
-          },
+          abTest: 'feature_preview',
+          abVariant: 'peek',
         });
       });
     });
@@ -125,10 +124,10 @@ describe('useABTestTracking', () => {
       renderHook(() => useABTestTracking('horoscope', 'page_viewed'));
 
       await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(9);
+        expect(mockTrackCtaImpression).toHaveBeenCalledTimes(9);
 
-        const trackedTests = mockTrackEvent.mock.calls.map(
-          (call: any[]) => call[1]?.metadata?.abTest,
+        const trackedTests = mockTrackCtaImpression.mock.calls.map(
+          (call: any[]) => call[0]?.abTest,
         );
         expect(trackedTests).toContain('cta_copy');
         expect(trackedTests).toContain('paywall_preview');
@@ -162,10 +161,10 @@ describe('useABTestTracking', () => {
       );
 
       await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(2);
+        expect(mockTrackCtaImpression).toHaveBeenCalledTimes(2);
 
-        const trackedTests = mockTrackEvent.mock.calls.map(
-          (call: any[]) => call[1]?.metadata?.abTest,
+        const trackedTests = mockTrackCtaImpression.mock.calls.map(
+          (call: any[]) => call[0]?.abTest,
         );
         expect(trackedTests).toContain('cta_copy');
         expect(trackedTests).toContain('feature_preview');
@@ -189,24 +188,24 @@ describe('useABTestTracking', () => {
       );
 
       await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(2);
+        expect(mockTrackCtaImpression).toHaveBeenCalledTimes(2);
 
-        expect(mockTrackEvent).toHaveBeenCalledWith('page_viewed', {
+        expect(mockTrackCtaImpression).toHaveBeenCalledWith({
+          ctaId: 'ab_weekly_lock',
+          location: 'ab_test_tarot',
+          label: 'tarot weekly_lock exposure',
           pagePath: '/tarot',
-          metadata: {
-            abTest: 'weekly_lock',
-            abVariant: 'heavy-blur',
-            page: 'tarot',
-          },
+          abTest: 'weekly_lock',
+          abVariant: 'heavy-blur',
         });
 
-        expect(mockTrackEvent).toHaveBeenCalledWith('page_viewed', {
+        expect(mockTrackCtaImpression).toHaveBeenCalledWith({
+          ctaId: 'ab_tarot_truncation',
+          location: 'ab_test_tarot',
+          label: 'tarot tarot_truncation exposure',
           pagePath: '/tarot',
-          metadata: {
-            abTest: 'tarot_truncation',
-            abVariant: 'short',
-            page: 'tarot',
-          },
+          abTest: 'tarot_truncation',
+          abVariant: 'short',
         });
       });
     });

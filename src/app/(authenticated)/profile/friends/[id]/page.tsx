@@ -20,6 +20,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/Heading';
 import { CosmicSpinner } from '@/components/states/CosmicSpinner';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 import {
   zodiacSymbol,
   bodiesSymbols,
@@ -171,12 +172,7 @@ export default function FriendProfilePage() {
   }, [friendId]);
 
   if (loading) {
-    return (
-      <div className='flex flex-col items-center justify-center min-h-[400px] gap-4'>
-        <CosmicSpinner size='lg' />
-        <p className='text-content-muted'>Loading friend profile...</p>
-      </div>
-    );
+    return <BrandedPageLoader message='Loading friend profile…' />;
   }
 
   if (error || !friend) {

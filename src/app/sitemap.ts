@@ -1205,18 +1205,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Add rising sign pages
   const risingSignSlugs = [
-    'aries-rising',
-    'taurus-rising',
-    'gemini-rising',
-    'cancer-rising',
-    'leo-rising',
-    'virgo-rising',
-    'libra-rising',
-    'scorpio-rising',
-    'sagittarius-rising',
-    'capricorn-rising',
-    'aquarius-rising',
-    'pisces-rising',
+    'aries',
+    'taurus',
+    'gemini',
+    'cancer',
+    'leo',
+    'virgo',
+    'libra',
+    'scorpio',
+    'sagittarius',
+    'capricorn',
+    'aquarius',
+    'pisces',
   ];
   const risingSignIndexRoute = {
     url: `${baseUrl}/grimoire/rising`,

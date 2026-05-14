@@ -7,12 +7,22 @@ import {
 import { deterministicEventId } from '@/lib/analytics/deterministic-event-id';
 import { getCurrentUser } from '@/lib/get-user-session';
 import { detectBot } from '@/lib/analytics/bot-detection';
+import { forwardEventToPostHog } from '@/lib/posthog-forward';
 
 export const dynamic = 'force-dynamic';
 
 export const runtime = 'nodejs';
 
 const ANON_ID_COOKIE = 'lunary_anon_id';
+
+function currentUrlFromPath(request: NextRequest, pagePath: string | null) {
+  if (!pagePath) return null;
+  try {
+    return new URL(pagePath, request.nextUrl.origin).toString();
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Batch analytics endpoint — replaces 3 separate middleware calls
@@ -99,8 +109,31 @@ export async function POST(request: NextRequest) {
       metadata: { ...sharedMeta, source: 'server_pageview' },
     });
     if (visitCanonical.ok) {
-      const { inserted } = await insertCanonicalEvent(visitCanonical.row);
-      results.visit = inserted ? 'tracked' : 'duplicate';
+      const currentUrl = currentUrlFromPath(
+        request,
+        visitCanonical.row.pagePath,
+      );
+      forwardEventToPostHog({
+        distinctId:
+          visitCanonical.row.anonymousId ||
+          visitCanonical.row.userId ||
+          'unknown',
+        event: '$pageview',
+        properties: {
+          ...visitCanonical.row.metadata,
+          event_id: visitCanonical.row.eventId,
+          canonical_event_type: visitCanonical.row.eventType,
+          page_path: visitCanonical.row.pagePath,
+          $pathname: visitCanonical.row.pagePath,
+          $current_url: currentUrl,
+          $referrer:
+            typeof visitCanonical.row.metadata?.referrer === 'string'
+              ? visitCanonical.row.metadata.referrer
+              : undefined,
+          authenticated: Boolean(userId),
+        },
+      });
+      results.visit = 'posthog';
     }
 
     // 2. app_opened (once per identity per day)

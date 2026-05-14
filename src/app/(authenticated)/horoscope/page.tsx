@@ -13,6 +13,7 @@ import { useABTestTracking } from '@/hooks/useABTestTracking';
 import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { iosLabel } from '@/lib/ios-labels';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 
 export default function HoroscopePage() {
   const { user, loading } = useUser();
@@ -21,7 +22,7 @@ export default function HoroscopePage() {
   const subscription = useSubscription();
   useNotificationDeepLink(); // Handle push notification deep links
 
-  // Track horoscope page with A/B tests: cta-copy, feature-preview, transit-limit
+  // Track active A/B test exposures without inflating page_viewed.
   useABTestTracking('horoscope', 'page_viewed', [
     'cta-copy-test',
     'feature_preview_blur_v1',
@@ -69,30 +70,19 @@ export default function HoroscopePage() {
 
   // Simple sequential loading checks - prioritize unauthenticated users
   if (authStatus.loading) {
-    // Still checking authentication - show loading
     return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='w-8 h-8 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-content-muted'>
-            {iosLabel('Loading your horoscope...', isNativeIOS)}
-          </p>
-        </div>
-      </div>
+      <BrandedPageLoader
+        message={iosLabel('Loading your horoscope…', isNativeIOS)}
+      />
     );
   }
 
   // If authenticated but user data is still loading, show loading
   if (authStatus.isAuthenticated && loading) {
     return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='w-8 h-8 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-content-muted'>
-            {iosLabel('Loading your horoscope...', isNativeIOS)}
-          </p>
-        </div>
-      </div>
+      <BrandedPageLoader
+        message={iosLabel('Loading your horoscope…', isNativeIOS)}
+      />
     );
   }
 

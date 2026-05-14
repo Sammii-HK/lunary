@@ -8,6 +8,7 @@ import { Heart, Sparkles, Users, Star, AlertTriangle } from 'lucide-react';
 import {
   generatePlanetSignContent,
   planetDescriptions,
+  RECOVERY_PLACEMENT_PLANETS,
   signDescriptions,
 } from '@/constants/seo/planet-sign-content';
 import {
@@ -20,14 +21,21 @@ import { getAllPlanetSignSlugs } from '@/constants/seo/planet-sign-content';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 interface PageProps {
   params: Promise<{ placement: string }>;
 }
 
 export function generateStaticParams() {
-  return getAllPlanetSignSlugs().map((placement) => ({ placement }));
+  return getAllPlanetSignSlugs()
+    .filter((placement) => {
+      const [planet] = placement.split('-in-');
+      return RECOVERY_PLACEMENT_PLANETS.includes(
+        planet as (typeof RECOVERY_PLACEMENT_PLANETS)[number],
+      );
+    })
+    .map((placement) => ({ placement }));
 }
 
 // Parse the placement slug to extract planet and sign

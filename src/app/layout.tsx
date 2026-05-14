@@ -31,6 +31,7 @@ import { AttributionCapture } from '@/components/AttributionCapture';
 import { AstronomyProviderWrapper } from '@/components/AstronomyProviderWrapper';
 import { PostHogProvider } from '@/components/PostHogProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
+import { PageViewTracker } from '@/components/PageViewTracker';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -187,6 +188,7 @@ export default function RootLayout({
                   msg.indexOf('ChunkLoadError') !== -1 ||
                   msg.indexOf('Loading chunk') !== -1 ||
                   msg.indexOf('Failed to fetch dynamically imported module') !== -1 ||
+                  msg.indexOf("Cannot read properties of undefined (reading 'call')") !== -1 ||
                   (e.filename && e.filename.indexOf('/_next/') !== -1 && e.message && e.message.indexOf('is not a function') !== -1)
                 ) {
                   var key = 'lunary_chunk_reload';
@@ -194,7 +196,26 @@ export default function RootLayout({
                   var now = Date.now();
                   if (!last || now - parseInt(last, 10) > 10000) {
                     sessionStorage.setItem(key, String(now));
-                    window.location.reload();
+                    var tasks = [];
+                    try {
+                      if ('serviceWorker' in navigator && navigator.serviceWorker) {
+                        tasks.push(navigator.serviceWorker.getRegistrations().then(function(rs) {
+                          return Promise.all(rs.map(function(r) { return r.unregister(); }));
+                        }));
+                      }
+                    } catch (err) {}
+                    try {
+                      if ('caches' in window) {
+                        tasks.push(caches.keys().then(function(keys) {
+                          return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+                        }));
+                      }
+                    } catch (err) {}
+                    Promise.allSettled(tasks).then(function() {
+                      window.location.reload();
+                    }, function() {
+                      window.location.reload();
+                    });
                   }
                 }
               });
@@ -211,6 +232,7 @@ export default function RootLayout({
                   <UserProvider>
                     <AstronomyProviderWrapper>
                       <AppOpenedTracker />
+                      <PageViewTracker />
                       <Suspense
                         fallback={
                           <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>

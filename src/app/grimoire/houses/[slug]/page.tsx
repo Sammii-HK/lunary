@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {
   HOUSES,
   PLANETS_FOR_HOUSES,
+  RECOVERY_HOUSE_PLANETS,
   PLANET_HOUSE_DISPLAY,
   HOUSE_DATA,
   getOrdinalSuffix,
@@ -54,9 +55,11 @@ function isPlanetSlug(slug: string): boolean {
 }
 
 export function generateStaticParams() {
-  return [...Object.keys(houseSlugMap), ...PLANETS_FOR_HOUSES].map((slug) => ({
-    slug,
-  }));
+  return [...Object.keys(houseSlugMap), ...RECOVERY_HOUSE_PLANETS].map(
+    (slug) => ({
+      slug,
+    }),
+  );
 }
 
 export async function generateMetadata({

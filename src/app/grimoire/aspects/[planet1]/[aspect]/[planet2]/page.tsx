@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import {
   PLANETS,
@@ -8,6 +8,8 @@ import {
   PLANET_SYMBOLS,
   ASPECT_DATA,
   getAspectInterpretation,
+  generateAllAspectParams,
+  getCanonicalAspectPair,
   Planet,
   Aspect,
 } from '@/constants/seo/aspects';
@@ -16,7 +18,7 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-export const dynamicParams = false;
+export const dynamicParams = true;
 interface PageParams {
   planet1: string;
   aspect: string;
@@ -82,15 +84,7 @@ const ASPECT_FOCUS_MAP: Record<
 };
 
 export function generateStaticParams() {
-  return PLANETS.flatMap((planet1) =>
-    ASPECTS.flatMap((aspect) =>
-      PLANETS.map((planet2) => ({
-        planet1,
-        aspect,
-        planet2,
-      })),
-    ),
-  );
+  return generateAllAspectParams();
 }
 
 export async function generateMetadata({
@@ -108,9 +102,19 @@ export async function generateMetadata({
     return { title: 'Aspect Not Found | Lunary' };
   }
 
-  const p1 = PLANET_DISPLAY[planet1 as Planet];
-  const p2 = PLANET_DISPLAY[planet2 as Planet];
+  const canonicalPair = getCanonicalAspectPair(
+    planet1 as Planet,
+    planet2 as Planet,
+  );
+
+  if (!canonicalPair) {
+    return { title: 'Aspect Not Found | Lunary' };
+  }
+
+  const p1 = PLANET_DISPLAY[canonicalPair.planet1];
+  const p2 = PLANET_DISPLAY[canonicalPair.planet2];
   const aspectData = ASPECT_DATA[aspect as Aspect];
+  const canonicalPath = `https://lunary.app/grimoire/aspects/${canonicalPair.planet1}/${aspect}/${canonicalPair.planet2}`;
 
   const title = `${p1} ${aspectData.displayName} ${p2}: Meaning in Astrology | Lunary`;
   const description = `${p1} ${aspectData.displayName.toLowerCase()} ${p2} meaning in natal charts, transits, and synastry. Learn how this ${aspectData.nature} aspect affects your life.`;
@@ -129,10 +133,10 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      url: `https://lunary.app/grimoire/aspects/${planet1}/${aspect}/${planet2}`,
+      url: canonicalPath,
     },
     alternates: {
-      canonical: `https://lunary.app/grimoire/aspects/${planet1}/${aspect}/${planet2}`,
+      canonical: canonicalPath,
     },
   };
 }
@@ -152,8 +156,23 @@ export default async function AspectPage({
     notFound();
   }
 
-  const p1 = planet1 as Planet;
-  const p2 = planet2 as Planet;
+  const canonicalPair = getCanonicalAspectPair(
+    planet1 as Planet,
+    planet2 as Planet,
+  );
+
+  if (!canonicalPair) {
+    notFound();
+  }
+
+  if (planet1 !== canonicalPair.planet1 || planet2 !== canonicalPair.planet2) {
+    permanentRedirect(
+      `/grimoire/aspects/${canonicalPair.planet1}/${aspect}/${canonicalPair.planet2}`,
+    );
+  }
+
+  const p1 = canonicalPair.planet1;
+  const p2 = canonicalPair.planet2;
   const asp = aspect as Aspect;
 
   const interp = getAspectInterpretation(p1, asp, p2);
