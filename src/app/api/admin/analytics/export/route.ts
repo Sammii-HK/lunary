@@ -27,10 +27,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Use hardcoded baseUrl to prevent SSRF attacks
+    // Use hardcoded production origin to prevent SSRF attacks. In local dev,
+    // use the actual request origin because the Next dev server runs on 3003.
     const baseUrl = process.env.VERCEL
       ? 'https://lunary.app'
-      : 'http://localhost:3000';
+      : new URL(request.url).origin;
     const queryParams = `start_date=${startDate}&end_date=${endDate}`;
 
     // Forward auth header to internal admin API calls
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest) {
       cohortsRes,
       successMetricsRes,
       subscriptionLifecycleRes,
+      acquisitionRes,
     ] = await Promise.all([
       fetch(`${baseUrl}/api/admin/analytics/dau-wau-mau?${queryParams}`, {
         headers: fetchHeaders,
@@ -72,6 +74,10 @@ export async function GET(request: NextRequest) {
         `${baseUrl}/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1`,
         { headers: fetchHeaders },
       ),
+      fetch(
+        `${baseUrl}/api/admin/analytics/acquisition-breakdown?${queryParams}`,
+        { headers: fetchHeaders },
+      ),
     ]);
 
     const dauWauMau = dauWauMauRes.ok ? await dauWauMauRes.json() : null;
@@ -85,6 +91,7 @@ export async function GET(request: NextRequest) {
     const subscriptionLifecycle = subscriptionLifecycleRes.ok
       ? await subscriptionLifecycleRes.json()
       : null;
+    const acquisition = acquisitionRes.ok ? await acquisitionRes.json() : null;
 
     // Build the export data structure - matches dashboard exactly
     const exportData = {
@@ -96,7 +103,7 @@ export async function GET(request: NextRequest) {
         },
       },
       engagement: {
-        // DAU/WAU/MAU from engagement events (matches dashboard "Engagement" metrics)
+        // DAU/WAU/MAU from page_viewed reach (matches dashboard traffic metrics)
         dau: dauWauMau?.dau ?? null,
         wau: dauWauMau?.wau ?? null,
         mau: dauWauMau?.mau ?? null,
@@ -119,6 +126,16 @@ export async function GET(request: NextRequest) {
         // Grimoire
         grimoire_mau: dauWauMau?.content_mau_grimoire ?? null,
         grimoire_only_mau: dauWauMau?.grimoire_only_mau ?? null,
+      },
+      acquisition: {
+        visitors: acquisition?.summary?.visitors ?? null,
+        unique_people: acquisition?.summary?.uniqueVisitors ?? null,
+        page_views: acquisition?.summary?.pageViews ?? null,
+        sessions: acquisition?.summary?.sessions ?? null,
+        bounce_rate: acquisition?.summary?.bounceRate ?? null,
+        pages_per_visitor: acquisition?.summary?.pagesPerVisitor ?? null,
+        pages_per_unique_person:
+          acquisition?.summary?.pagesPerUniqueVisitor ?? null,
       },
       retention: {
         day_1: dauWauMau?.retention?.day_1 ?? null,
@@ -176,7 +193,11 @@ export async function GET(request: NextRequest) {
       // Additional trend series for different metric types
       app_opened_trends: dauWauMau?.app_opened_trends ?? [],
       signed_in_product_trends: dauWauMau?.signed_in_product_trends ?? [],
+      sitewide_trends: dauWauMau?.sitewide_trends ?? [],
       grimoire_trends: dauWauMau?.grimoire_trends ?? [],
+      acquisition_daily: acquisition?.daily ?? [],
+      acquisition_referrers: acquisition?.breakdowns?.referrers ?? [],
+      acquisition_pages: acquisition?.breakdowns?.pages ?? [],
       cohorts: cohorts?.cohorts ?? [],
       conversion_funnel: conversions?.funnel ?? null,
     };
@@ -199,6 +220,12 @@ export async function GET(request: NextRequest) {
       csvContent += 'ENGAGEMENT METRICS\n';
       csvContent += 'Metric,Value\n';
       sectionToRows(exportData.engagement).forEach((row) => {
+        csvContent += `${row.metric},${row.value}\n`;
+      });
+
+      csvContent += '\nACQUISITION METRICS\n';
+      csvContent += 'Metric,Value\n';
+      sectionToRows(exportData.acquisition).forEach((row) => {
         csvContent += `${row.metric},${row.value}\n`;
       });
 

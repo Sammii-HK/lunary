@@ -22,7 +22,7 @@ export default function HoroscopePage() {
   const subscription = useSubscription();
   useNotificationDeepLink(); // Handle push notification deep links
 
-  // Track horoscope page with A/B tests: cta-copy, feature-preview, transit-limit
+  // Track active A/B test exposures without inflating page_viewed.
   useABTestTracking('horoscope', 'page_viewed', [
     'cta-copy-test',
     'feature_preview_blur_v1',

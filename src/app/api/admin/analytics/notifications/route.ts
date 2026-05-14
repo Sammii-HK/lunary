@@ -20,6 +20,25 @@ type NotificationBucket = {
 
 const DEFAULT_BUCKETS = ['cosmic_pulse', 'moon_circle', 'weekly_report'];
 
+const withRates = (
+  metrics: NotificationBucket = {
+    sent: 0,
+    delivered: 0,
+    opened: 0,
+    clicked: 0,
+  },
+) => ({
+  ...metrics,
+  open_rate:
+    metrics.sent > 0
+      ? Number(((metrics.opened / metrics.sent) * 100).toFixed(2))
+      : 0,
+  click_through_rate:
+    metrics.sent > 0
+      ? Number(((metrics.clicked / metrics.sent) * 100).toFixed(2))
+      : 0,
+});
+
 export async function GET(request: NextRequest) {
   try {
     const authResult = await requireAdminAuth(request);
@@ -152,6 +171,8 @@ export async function GET(request: NextRequest) {
     }
 
     const response = NextResponse.json({
+      available: true,
+      source: 'neon',
       ...payload,
       overall_open_rate: overallOpenRate,
       overall_click_through_rate: overallClickRate,
@@ -163,30 +184,19 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('[analytics/notifications] Failed to load metrics', error);
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 },
+
+    const response = NextResponse.json({
+      available: false,
+      source: 'unavailable',
+      message:
+        'Notification metrics could not be loaded right now; they are not counted as zero.',
+      overall_open_rate: null,
+      overall_click_through_rate: null,
+    });
+    response.headers.set(
+      'Cache-Control',
+      'private, max-age=60, stale-while-revalidate=120',
     );
+    return response;
   }
 }
-
-const withRates = (
-  metrics: NotificationBucket = {
-    sent: 0,
-    delivered: 0,
-    opened: 0,
-    clicked: 0,
-  },
-) => ({
-  ...metrics,
-  open_rate:
-    metrics.sent > 0
-      ? Number(((metrics.opened / metrics.sent) * 100).toFixed(2))
-      : 0,
-  click_through_rate:
-    metrics.sent > 0
-      ? Number(((metrics.clicked / metrics.sent) * 100).toFixed(2))
-      : 0,
-});

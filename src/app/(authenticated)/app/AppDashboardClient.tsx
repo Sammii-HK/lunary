@@ -247,7 +247,7 @@ export default function AppDashboardClient() {
   const { containerRef, pullDistance, isRefreshing, progress } =
     usePullToRefresh({ onRefresh: handleRefresh });
 
-  // Track dashboard view with A/B test data (cta-copy-test)
+  // Track dashboard A/B test exposure without inflating app_opened.
   useABTestTracking('dashboard', 'app_opened', ['cta-copy-test']);
 
   // Sync widget data when dashboard loads (native platforms only)

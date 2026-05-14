@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     // Get daily cost trends
     const costTrendsResult = await sql`
       SELECT 
-        DATE(created_at) as date,
+        DATE(created_at AT TIME ZONE 'UTC')::text as date,
         COUNT(*) as generations,
       SUM(token_count) as total_tokens
       FROM analytics_ai_usage
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
           WHERE ce.user_id = analytics_ai_usage.user_id
             AND (ce.user_email LIKE ${TEST_EMAIL_PATTERN} OR ce.user_email = ${TEST_EMAIL_EXACT})
         )
-      GROUP BY DATE(created_at)
+      GROUP BY DATE(created_at AT TIME ZONE 'UTC')
       ORDER BY date ASC
     `;
 
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
       const tokens = Number(row.total_tokens || 0);
       const estimatedCost = (tokens / 1000) * 0.001; // Rough estimate
       return {
-        date: row.date,
+        date: String(row.date),
         generations: Number(row.generations || 0),
         tokens,
         estimatedCost: Number(estimatedCost.toFixed(4)),

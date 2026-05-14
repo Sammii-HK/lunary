@@ -105,6 +105,22 @@ export function registerAnalyticsTools(server: McpServer) {
   );
 
   server.tool(
+    'get_acquisition_breakdown',
+    'Acquisition breakdown from PostHog: Vercel-like visitors, page views, referrers, ChatGPT/OpenAI traffic, pages, countries, devices, and events',
+    timeParams,
+    async (params) => {
+      try {
+        const data = await lunary('/analytics/acquisition-breakdown', {
+          params: timeQueryParams(params),
+        });
+        return jsonResult(data);
+      } catch (error) {
+        return errorResult(error);
+      }
+    },
+  );
+
+  server.tool(
     'get_api_costs',
     'API spend breakdown by provider (OpenAI, Anthropic, etc.)',
     timeParams,

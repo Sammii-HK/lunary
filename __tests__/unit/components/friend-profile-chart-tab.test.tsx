@@ -192,7 +192,9 @@ describe('FriendProfilePage - ChartTab', () => {
 
     render(<FriendProfilePage />);
 
-    expect(screen.getByText(/loading friend profile/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('status', { name: /loading friend profile/i }),
+    ).toBeInTheDocument();
   });
 
   it('renders friend profile after loading', async () => {

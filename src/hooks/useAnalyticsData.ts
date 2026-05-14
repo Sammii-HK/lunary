@@ -108,12 +108,21 @@ export type NotificationBucket = {
 };
 
 export type NotificationResponse = {
+  available?: boolean;
+  source?: 'neon' | 'unavailable';
+  message?: string;
   cosmic_pulse?: NotificationBucket;
   moon_circle?: NotificationBucket;
   weekly_report?: NotificationBucket;
-  overall_open_rate: number;
-  overall_click_through_rate: number;
-  [key: string]: NotificationBucket | number | undefined;
+  overall_open_rate: number | null;
+  overall_click_through_rate: number | null;
+  [key: string]:
+    | NotificationBucket
+    | number
+    | string
+    | boolean
+    | null
+    | undefined;
 };
 
 export type FeatureUsageResponse = {
@@ -692,7 +701,7 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
     } finally {
       setLoading(false);
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, granularity, includeAudit]);
 
   // Fetch analytics on mount and when dependencies change
   useEffect(() => {

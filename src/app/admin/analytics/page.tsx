@@ -10,16 +10,217 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AuthComponent } from '@/components/Auth';
+import { useAuthStatus } from '@/components/AuthStatus';
 import { useAnalyticsDataSWR } from '@/hooks/useAnalyticsDataSWR';
 import { useAnalyticsComputations } from '@/hooks/useAnalyticsComputations';
 import { SnapshotTab } from '@/components/admin/analytics/SnapshotTab';
 import { OperationalTab } from '@/components/admin/analytics/OperationalTab';
+import { AcquisitionTab } from '@/components/admin/analytics/AcquisitionTab';
 import { AnalyticsDashboardSkeleton } from '@/components/admin/analytics/AnalyticsSkeleton';
+import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 import { formatDateInput } from '@/lib/analytics/utils';
 
 const DEFAULT_RANGE_DAYS = 30;
 
+type AdminAnalyticsAuthState =
+  | { status: 'checking' }
+  | { status: 'signed-out'; details?: string }
+  | { status: 'authorized' }
+  | { status: 'denied'; details: string };
+
 export default function AnalyticsPage() {
+  const authState = useAuthStatus();
+  const [adminAuth, setAdminAuth] = useState<AdminAnalyticsAuthState>({
+    status: 'checking',
+  });
+  const [authWaitExpired, setAuthWaitExpired] = useState(false);
+
+  useEffect(() => {
+    if (!authState.loading) {
+      setAuthWaitExpired(false);
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setAuthWaitExpired(true);
+    }, 6000);
+
+    return () => window.clearTimeout(timeout);
+  }, [authState.loading]);
+
+  useEffect(() => {
+    if (authState.loading) {
+      setAdminAuth({ status: 'checking' });
+      return;
+    }
+
+    if (!authState.isAuthenticated) {
+      setAdminAuth({
+        status: 'signed-out',
+        details: 'Sign in with your Lunary admin account to continue.',
+      });
+      return;
+    }
+
+    let cancelled = false;
+
+    const verifyAdmin = async () => {
+      setAdminAuth({ status: 'checking' });
+
+      const adminEmails = (
+        process.env.NEXT_PUBLIC_ADMIN_EMAILS ||
+        process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
+        ''
+      )
+        .split(',')
+        .map((email) => email.trim().toLowerCase())
+        .filter(Boolean);
+
+      if (adminEmails.length === 0) {
+        if (!cancelled) {
+          setAdminAuth({
+            status: 'denied',
+            details:
+              'Set NEXT_PUBLIC_ADMIN_EMAILS in .env.local before loading analytics.',
+          });
+        }
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/get-user-email', {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store',
+        });
+
+        if (response.status === 401) {
+          if (!cancelled) {
+            setAdminAuth({
+              status: 'signed-out',
+              details: 'Your admin session expired. Sign in again to continue.',
+            });
+          }
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(`Session check failed with ${response.status}`);
+        }
+
+        const result = (await response.json()) as { email?: string };
+        const email = result.email?.toLowerCase();
+
+        if (email && adminEmails.includes(email)) {
+          if (!cancelled) setAdminAuth({ status: 'authorized' });
+          return;
+        }
+
+        if (!cancelled) {
+          setAdminAuth({
+            status: 'denied',
+            details: email
+              ? `Add "${email}" to NEXT_PUBLIC_ADMIN_EMAILS to enable analytics access.`
+              : 'We could not verify your admin email. Sign in again.',
+          });
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setAdminAuth({
+            status: 'denied',
+            details:
+              error instanceof Error
+                ? error.message
+                : 'Unable to verify admin access.',
+          });
+        }
+      }
+    };
+
+    verifyAdmin();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authState.isAuthenticated, authState.loading]);
+
+  if (authState.loading && authWaitExpired) {
+    return (
+      <AdminAnalyticsSignIn
+        details='Session check is taking too long. Sign in again to continue.'
+        onSuccess={authState.refreshAuth}
+      />
+    );
+  }
+
+  if (authState.loading || adminAuth.status === 'checking') {
+    return <BrandedPageLoader message='Checking admin session...' />;
+  }
+
+  if (adminAuth.status === 'signed-out') {
+    return (
+      <AdminAnalyticsSignIn
+        details={adminAuth.details}
+        onSuccess={authState.refreshAuth}
+      />
+    );
+  }
+
+  if (adminAuth.status === 'denied') {
+    return <AdminAnalyticsDenied details={adminAuth.details} />;
+  }
+
+  return <AnalyticsDashboardContent />;
+}
+
+function AdminAnalyticsSignIn({
+  details,
+  onSuccess,
+}: {
+  details?: string;
+  onSuccess: () => void;
+}) {
+  return (
+    <div className='flex min-h-screen items-center justify-center bg-surface-base px-4 py-10 text-content-primary'>
+      <div className='w-full max-w-xl space-y-6'>
+        <div className='space-y-3 text-center'>
+          <p className='text-xs uppercase tracking-[0.4em] text-content-primary/50'>
+            Analytics
+          </p>
+          <h1 className='text-3xl font-light tracking-tight'>
+            Sign in to continue
+          </h1>
+          <p className='text-sm text-content-primary/70'>
+            {details ||
+              'Use your Lunary admin account before loading analytics data.'}
+          </p>
+        </div>
+        <div className='rounded-3xl border border-white/10 bg-surface-base/70 p-6 shadow-2xl backdrop-blur-2xl'>
+          <AuthComponent onSuccess={onSuccess} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdminAnalyticsDenied({ details }: { details: string }) {
+  return (
+    <div className='flex min-h-screen items-center justify-center bg-surface-base px-4 py-10 text-content-primary'>
+      <div className='max-w-md space-y-3 text-center'>
+        <p className='text-xs uppercase tracking-[0.4em] text-content-primary/50'>
+          Analytics
+        </p>
+        <h1 className='text-2xl font-semibold text-lunary-error-200'>
+          Access denied
+        </h1>
+        <p className='text-sm text-content-muted'>{details}</p>
+      </div>
+    </div>
+  );
+}
+
+function AnalyticsDashboardContent() {
   const today = new Date();
   const defaultEnd = formatDateInput(today);
   const defaultStart = (() => {
@@ -42,7 +243,7 @@ export default function AnalyticsPage() {
     useState<string>('all');
   const exportMenuRef = useRef<HTMLDivElement>(null);
 
-  const VALID_TABS = ['snapshot', 'details'] as const;
+  const VALID_TABS = ['snapshot', 'details', 'acquisition'] as const;
   type Tab = (typeof VALID_TABS)[number];
 
   const [activeTab, setActiveTab] = useState<Tab>(() => {
@@ -314,6 +515,12 @@ export default function AnalyticsPage() {
             >
               Operational Details
             </TabsTrigger>
+            <TabsTrigger
+              value='acquisition'
+              className='rounded-lg px-4 py-2 text-xs sm:text-sm'
+            >
+              Acquisition
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value='snapshot'>
@@ -326,6 +533,14 @@ export default function AnalyticsPage() {
 
           <TabsContent value='details'>
             <OperationalTab data={analyticsData} computed={computedMetrics} />
+          </TabsContent>
+
+          <TabsContent value='acquisition'>
+            <AcquisitionTab
+              startDate={startDate}
+              endDate={endDate}
+              active={activeTab === 'acquisition'}
+            />
           </TabsContent>
         </Tabs>
       )}

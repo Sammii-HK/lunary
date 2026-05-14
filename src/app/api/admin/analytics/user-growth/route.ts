@@ -26,7 +26,7 @@ async function getSignupTrendsFromDailyMetrics(
   }
 
   const result = await sql.query(
-    `SELECT metric_date as date, new_signups as signups
+    `SELECT metric_date::text as date, new_signups as signups
      FROM daily_metrics
      WHERE metric_date >= $1 AND metric_date <= $2
      ORDER BY metric_date ASC`,
@@ -41,10 +41,7 @@ async function getSignupTrendsFromDailyMetrics(
   }
 
   return result.rows.map((row) => ({
-    date:
-      row.date instanceof Date
-        ? row.date.toISOString().split('T')[0]
-        : String(row.date),
+    date: String(row.date),
     signups: Number(row.signups || 0),
   }));
 }

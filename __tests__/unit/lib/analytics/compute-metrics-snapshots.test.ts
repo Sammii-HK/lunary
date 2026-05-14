@@ -23,11 +23,29 @@ jest.mock('@vercel/postgres', () => {
   return { sql: tagFn };
 });
 
+jest.mock('@/lib/posthog-server', () => ({
+  queryPostHogAPI: jest.fn(() =>
+    Promise.resolve({
+      results: [
+        ['anon-home', '/', '/', 'https://lunary.app/'],
+        [
+          'anon-grimoire',
+          '/grimoire',
+          '/grimoire',
+          'https://lunary.app/grimoire',
+        ],
+      ],
+    }),
+  ),
+}));
+
 import { sql } from '@vercel/postgres';
 import { GET } from '@/app/api/cron/compute-metrics/route';
+import { queryPostHogAPI } from '@/lib/posthog-server';
 import { NextRequest } from 'next/server';
 
 const mockSqlQuery = (sql as any).query as jest.Mock;
+const mockQueryPostHogAPI = queryPostHogAPI as jest.Mock;
 
 // Save original so we can restore
 const originalCronSecret = process.env.CRON_SECRET;
@@ -143,6 +161,18 @@ function defaultMockImpl(queryStr: string, _params?: any[]) {
 describe('compute-metrics cron (snapshot approach)', () => {
   beforeEach(() => {
     mockSqlQuery.mockReset();
+    mockQueryPostHogAPI.mockReset();
+    mockQueryPostHogAPI.mockResolvedValue({
+      results: [
+        ['anon-home', '/', '/', 'https://lunary.app/'],
+        [
+          'anon-grimoire',
+          '/grimoire',
+          '/grimoire',
+          'https://lunary.app/grimoire',
+        ],
+      ],
+    });
     // Remove cron secret so tests don't need auth
     delete process.env.CRON_SECRET;
   });
@@ -161,10 +191,8 @@ describe('compute-metrics cron (snapshot approach)', () => {
 
     await GET(makeRequest('2026-02-15'));
 
-    const snapshotInserts = mockSqlQuery.mock.calls.filter(
-      ([q]: [string]) =>
-        q.includes('INSERT INTO daily_unique_users') &&
-        q.includes('conversion_events'),
+    const snapshotInserts = mockSqlQuery.mock.calls.filter(([q]: [string]) =>
+      q.includes('INSERT INTO daily_unique_users'),
     );
 
     expect(snapshotInserts.length).toBe(5);
@@ -193,10 +221,8 @@ describe('compute-metrics cron (snapshot approach)', () => {
 
     await GET(makeRequest('2026-02-15'));
 
-    const snapshotInserts = mockSqlQuery.mock.calls.filter(
-      ([q]: [string]) =>
-        q.includes('INSERT INTO daily_unique_users') &&
-        q.includes('conversion_events'),
+    const snapshotInserts = mockSqlQuery.mock.calls.filter(([q]: [string]) =>
+      q.includes('INSERT INTO daily_unique_users'),
     );
 
     expect(snapshotInserts.length).toBe(5);
@@ -216,7 +242,7 @@ describe('compute-metrics cron (snapshot approach)', () => {
         q.includes('conversion_events'),
     );
 
-    expect(snapshotInserts.length).toBe(5);
+    expect(snapshotInserts.length).toBe(3);
     for (const [, params] of snapshotInserts) {
       const start = new Date(params[0]);
       const end = new Date(params[1]);
@@ -262,7 +288,8 @@ describe('compute-metrics cron (snapshot approach)', () => {
     expect(productInsert[1][5]).not.toContain('page_viewed');
   });
 
-  it('grimoire segment filters to /grimoire% paths', async () => {
+  it('grimoire Neon fallback filters to /grimoire% paths', async () => {
+    mockQueryPostHogAPI.mockResolvedValueOnce(null);
     mockSqlQuery.mockImplementation(defaultMockImpl);
 
     await GET(makeRequest('2026-02-15'));
@@ -449,6 +476,18 @@ describe('compute-metrics auth', () => {
 describe('compute-metrics error handling', () => {
   beforeEach(() => {
     mockSqlQuery.mockReset();
+    mockQueryPostHogAPI.mockReset();
+    mockQueryPostHogAPI.mockResolvedValue({
+      results: [
+        ['anon-home', '/', '/', 'https://lunary.app/'],
+        [
+          'anon-grimoire',
+          '/grimoire',
+          '/grimoire',
+          'https://lunary.app/grimoire',
+        ],
+      ],
+    });
     delete process.env.CRON_SECRET;
   });
 
@@ -493,15 +532,13 @@ describe('compute-metrics date windows', () => {
 
     await GET(makeRequest('2026-01-01'));
 
-    const snapshotInserts = mockSqlQuery.mock.calls.filter(
-      ([q]: [string]) =>
-        q.includes('INSERT INTO daily_unique_users') &&
-        q.includes('conversion_events'),
+    const snapshotInserts = mockSqlQuery.mock.calls.filter(([q]: [string]) =>
+      q.includes('INSERT INTO daily_unique_users'),
     );
 
     expect(snapshotInserts.length).toBe(5);
     for (const [, params] of snapshotInserts) {
-      expect(params[4]).toBe('2026-01-01');
+      expect(params.includes('2026-01-01')).toBe(true);
     }
   });
 

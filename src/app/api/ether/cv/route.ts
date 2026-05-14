@@ -7,8 +7,14 @@ import {
 import { forwardEventToPostHog, aliasPostHogUser } from '@/lib/posthog-forward';
 import { sql } from '@vercel/postgres';
 import { detectBot } from '@/lib/analytics/bot-detection';
+import type { CanonicalEventType } from '@/lib/analytics/canonical-events';
 
 export const dynamic = 'force-dynamic';
+
+const POSTHOG_ONLY_EVENTS = new Set<CanonicalEventType>([
+  'page_viewed',
+  'cta_impression',
+]);
 
 function normalizeEmail(email: unknown): string | null {
   if (typeof email !== 'string') return null;
@@ -40,6 +46,78 @@ function extractOriginMetadata(
   const originType = normalizeOriginField(input?.origin_type);
 
   return { originHub, originPage, originType };
+}
+
+function detectDeviceType(userAgent: string | null): string | null {
+  if (!userAgent) return null;
+  if (/ipad|tablet|sm-t|kindle|silk/i.test(userAgent)) return 'tablet';
+  if (/mobile|iphone|ipod|android/i.test(userAgent)) return 'mobile';
+  return 'desktop';
+}
+
+function detectOs(userAgent: string | null): string | null {
+  if (!userAgent) return null;
+  if (/android/i.test(userAgent)) return 'Android';
+  if (/iphone|ipad|ipod/i.test(userAgent)) return 'iOS';
+  if (/windows/i.test(userAgent)) return 'Windows';
+  if (/mac os x|macintosh/i.test(userAgent)) return 'Mac';
+  if (/cros/i.test(userAgent)) return 'ChromeOS';
+  if (/linux/i.test(userAgent)) return 'GNU/Linux';
+  return null;
+}
+
+function detectBrowser(userAgent: string | null): string | null {
+  if (!userAgent) return null;
+  if (/edg\//i.test(userAgent)) return 'Edge';
+  if (/samsungbrowser/i.test(userAgent)) return 'Samsung Internet';
+  if (/firefox|fxios/i.test(userAgent)) return 'Firefox';
+  if (/crios/i.test(userAgent)) return 'Chrome iOS';
+  if (/chrome/i.test(userAgent)) return 'Chrome';
+  if (/safari/i.test(userAgent)) return 'Safari';
+  return null;
+}
+
+function enrichMetadataFromRequest(
+  metadata: unknown,
+  request: NextRequest,
+): Record<string, unknown> | null {
+  const input =
+    metadata && typeof metadata === 'object'
+      ? ({ ...(metadata as Record<string, unknown>) } as Record<
+          string,
+          unknown
+        >)
+      : {};
+
+  const userAgent = request.headers.get('user-agent');
+  const referrer = request.headers.get('referer');
+  const country =
+    request.headers.get('x-vercel-ip-country') ||
+    request.headers.get('x-country');
+  const device = detectDeviceType(userAgent);
+  const os = detectOs(userAgent);
+  const browser = detectBrowser(userAgent);
+
+  if (!input.referrer && referrer) input.referrer = referrer;
+  if (!input.user_agent && userAgent) input.user_agent = userAgent;
+  if (!input.country && country) input.country = country;
+  if (!input.device && device) input.device = device;
+  if (!input.os && os) input.os = os;
+  if (!input.browser && browser) input.browser = browser;
+
+  return Object.keys(input).length > 0 ? input : null;
+}
+
+function buildCurrentUrl(
+  request: NextRequest,
+  pagePath: string | null,
+): string | null {
+  if (!pagePath) return null;
+  try {
+    return new URL(pagePath, request.nextUrl.origin).toString();
+  } catch {
+    return null;
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -80,7 +158,65 @@ export async function POST(request: NextRequest) {
       metadata,
     } = data;
 
+    const enrichedMetadata = enrichMetadataFromRequest(metadata, request);
+
     const normalizedEmail = normalizeEmail(userEmail);
+
+    if (POSTHOG_ONLY_EVENTS.has(event)) {
+      const canonical = canonicaliseEvent({
+        eventType: event,
+        eventId,
+        anonymousId,
+        userEmail: normalizedEmail,
+        planType,
+        trialDaysRemaining,
+        featureName,
+        pagePath,
+        entityType,
+        entityId,
+        metadata: enrichedMetadata,
+      });
+
+      if (!canonical.ok) {
+        return NextResponse.json({
+          success: true,
+          skipped: true,
+          reason: canonical.reason,
+        });
+      }
+
+      const distinctId =
+        canonical.row.anonymousId || canonical.row.userId || 'unknown';
+      const currentUrl = buildCurrentUrl(request, canonical.row.pagePath);
+
+      forwardEventToPostHog({
+        distinctId,
+        event:
+          canonical.row.eventType === 'page_viewed'
+            ? '$pageview'
+            : canonical.row.eventType,
+        properties: {
+          ...canonical.row.metadata,
+          event_id: canonical.row.eventId,
+          canonical_event_type: canonical.row.eventType,
+          feature_name: canonical.row.featureName,
+          page_path: canonical.row.pagePath,
+          $pathname: canonical.row.pagePath,
+          $current_url: currentUrl,
+          $referrer:
+            typeof canonical.row.metadata?.referrer === 'string'
+              ? canonical.row.metadata.referrer
+              : undefined,
+          $session_id:
+            typeof canonical.row.metadata?.analytics_session_id === 'string'
+              ? canonical.row.metadata.analytics_session_id
+              : undefined,
+          authenticated: false,
+        },
+      });
+
+      return NextResponse.json({ success: true, source: 'posthog' });
+    }
 
     // Always resolve identity from the session — never trust userId from the
     // request body. Accepting arbitrary body userIds was the bot attack vector:
@@ -129,7 +265,7 @@ export async function POST(request: NextRequest) {
       pagePath,
       entityType,
       entityId,
-      metadata,
+      metadata: enrichedMetadata,
     });
 
     if (!canonical.ok) {
@@ -148,7 +284,7 @@ export async function POST(request: NextRequest) {
       !String(resolvedUserId).startsWith('anon:')
     ) {
       const { originHub, originPage, originType } = extractOriginMetadata(
-        metadata,
+        enrichedMetadata,
         canonical.row.pagePath,
       );
       const signupAt = canonical.row.createdAt ?? new Date();

@@ -16,7 +16,8 @@ export default function TarotReadings() {
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
 
-  // Track one tarot page view. CTA/test-specific impressions are tracked separately.
+  // Global pageviews are tracked by PageViewTracker; this hook only emits
+  // active test impressions.
   useABTestTracking('tarot', 'page_viewed', []);
 
   // For unauthenticated users, force paid tarot access to false immediately

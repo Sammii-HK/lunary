@@ -12,13 +12,7 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user?.id) {
-      loadReports();
-    }
-  }, [user?.id]);
-
-  const loadReports = async () => {
+  async function loadReports() {
     setLoading(true);
     setError(null);
     try {
@@ -33,7 +27,13 @@ export default function ReportsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    if (user?.id) {
+      loadReports();
+    }
+  }, [user?.id]);
 
   if (loading) {
     return <BrandedPageLoader message='Loading your cosmic reports…' />;

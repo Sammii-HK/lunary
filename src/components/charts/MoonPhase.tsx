@@ -40,8 +40,8 @@ export function MoonPhase({
       ? Math.max(0, Math.min(1, illumination))
       : Math.abs(Math.cos(phase * Math.PI * 2)) * 0.5 + 0.5;
   const isWaxing = typeof waxing === 'boolean' ? waxing : phase < 0.5;
-  const ratio = 1 - 2 * k;
-  const rx = Math.abs(ratio) * r;
+  const ratio = 2 * k - 1;
+  const rx = Math.max(0.001, Math.abs(ratio) * r);
   const terminatorSweep = ratio > 0 ? 1 : 0;
   const litPath =
     `M ${cx} ${cy - r} ` +

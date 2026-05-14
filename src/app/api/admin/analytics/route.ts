@@ -97,6 +97,34 @@ export async function GET(request: NextRequest) {
     const trialConversionRate =
       trialStarted > 0 ? (trialConverted / trialStarted) * 100 : 0;
 
+    const traffic = await sql.query(
+      `
+        WITH pageviews AS (
+          SELECT
+            id::text AS row_id,
+            DATE(created_at AT TIME ZONE 'UTC')::text AS event_date,
+            COALESCE(
+              NULLIF(CASE WHEN user_id LIKE 'anon:%' THEN substring(user_id FROM 6) ELSE user_id END, ''),
+              NULLIF(anonymous_id, ''),
+              'unknown:' || id::text
+            ) AS identity
+          FROM conversion_events
+          WHERE event_type = 'page_viewed'
+            AND created_at >= $1
+            AND ${testUserFilter()}
+        )
+        SELECT
+          COUNT(*)::int AS page_views,
+          COUNT(DISTINCT event_date || ':' || identity)::int AS visitors,
+          COUNT(DISTINCT identity)::int AS unique_people
+        FROM pageviews
+      `,
+      [dateStartIso],
+    );
+    const pageViews = Number(traffic.rows[0]?.page_views || 0);
+    const visitors = Number(traffic.rows[0]?.visitors || 0);
+    const uniqueVisitors = Number(traffic.rows[0]?.unique_people || 0);
+
     const timeToConvert = await sql`
       SELECT
         AVG(EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) / 86400) as avg_days
@@ -255,7 +283,10 @@ export async function GET(request: NextRequest) {
 
     try {
       const tiktokVisits = await sql`
-        SELECT COUNT(DISTINCT user_id) as count
+        SELECT COUNT(DISTINCT COALESCE(
+          NULLIF(CASE WHEN user_id LIKE 'anon:%' THEN substring(user_id FROM 6) ELSE user_id END, ''),
+          NULLIF(anonymous_id, '')
+        )) as count
         FROM conversion_events
         WHERE (
           metadata->>'utm_source' = 'tiktok'
@@ -268,7 +299,7 @@ export async function GET(request: NextRequest) {
       const tiktokSignupsResult = await sql`
         SELECT COUNT(DISTINCT user_id) as count
         FROM conversion_events
-        WHERE event_type = 'signup'
+        WHERE event_type = 'signup_completed'
         AND (
           metadata->>'utm_source' = 'tiktok'
           OR metadata->>'referrer' LIKE '%tiktok.com%'
@@ -319,6 +350,9 @@ export async function GET(request: NextRequest) {
         conversionRate,
         trialConversionRate,
         avgTimeToConvert,
+        visitors,
+        uniqueVisitors,
+        pageViews,
         revenue,
         mrr,
         birthDataSubmitted: parseInt(birthDataSubmitted.rows[0]?.count || '0'),

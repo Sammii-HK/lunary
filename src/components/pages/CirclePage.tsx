@@ -14,17 +14,12 @@ import {
   MessageCircle,
   Gift,
 } from 'lucide-react';
-import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { MarketingFooter } from '@/components/MarketingFooter';
 import { conversionTracking } from '@/lib/analytics';
 import { Heading } from '@/components/ui/Heading';
 
 export default function CirclePage() {
-  useEffect(() => {
-    conversionTracking.pageViewed('/circle');
-  }, []);
-
   const handleCtaClick = (location: string, label: string, href: string) => {
     conversionTracking.ctaClicked({
       location,

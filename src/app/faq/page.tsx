@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Mail, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,11 +14,6 @@ import { conversionTracking } from '@/lib/analytics';
 export default function FAQPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [openQuestionId, setOpenQuestionId] = useState<string | null>(null);
-
-  // Track page view on mount
-  useEffect(() => {
-    conversionTracking.pageViewed('/faq');
-  }, []);
 
   // CTA click handler
   const handleCtaClick = (location: string, label: string, href: string) => {

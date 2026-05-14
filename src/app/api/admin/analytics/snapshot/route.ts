@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
+    const includeRealtime = searchParams.get('live') === '1';
 
     // Check if query includes today
     const today = new Date();
@@ -41,19 +42,26 @@ export async function GET(request: NextRequest) {
     const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
     // Query ALL rows in date range (not LIMIT 1)
-    const [allRowsResult, realtimeDauResult, todaySignupsResult, stripeMrr] =
-      await Promise.all([
-        sql.query(
-          `SELECT *
+    const [
+      allRowsResult,
+      realtimeProductDauResult,
+      realtimeAppOpenedDauResult,
+      todaySignupsResult,
+      stripeMrr,
+    ] = await Promise.all([
+      sql.query(
+        `SELECT
+            daily_metrics.*,
+            metric_date::text AS metric_date_key
          FROM daily_metrics
          WHERE metric_date >= $1 AND metric_date <= $2
          ORDER BY metric_date ASC`,
-          [startDateStr, endDateStr],
-        ),
-        // Real-time DAU only if querying today
-        includesToday
-          ? sql.query(
-              `SELECT COUNT(DISTINCT user_id) as count
+        [startDateStr, endDateStr],
+      ),
+      // Real-time signed-in product DAU only if querying today.
+      includeRealtime && includesToday
+        ? sql.query(
+            `SELECT COUNT(DISTINCT user_id) as count
              FROM conversion_events
              WHERE event_type = ANY($1::text[])
                AND user_id IS NOT NULL
@@ -61,100 +69,126 @@ export async function GET(request: NextRequest) {
                AND created_at >= $2
                AND created_at < $3
                AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))`,
-              [
-                PRODUCT_EVENTS,
-                today.toISOString(),
-                tomorrow.toISOString(),
-                TEST_EMAIL_PATTERN,
-                TEST_EMAIL_EXACT,
-              ],
-            )
-          : Promise.resolve(null),
-        // Real-time signups for today
-        includesToday
-          ? sql.query(
-              `SELECT COUNT(*) as count
+            [
+              PRODUCT_EVENTS,
+              today.toISOString(),
+              tomorrow.toISOString(),
+              TEST_EMAIL_PATTERN,
+              TEST_EMAIL_EXACT,
+            ],
+          )
+        : Promise.resolve(null),
+      // Real-time app-open DAU only if querying today.
+      includeRealtime && includesToday
+        ? sql.query(
+            `SELECT COUNT(DISTINCT COALESCE(
+                NULLIF(CASE WHEN user_id LIKE 'anon:%' THEN substring(user_id FROM 6) ELSE user_id END, ''),
+                NULLIF(anonymous_id, '')
+              )) as count
+             FROM conversion_events
+             WHERE event_type = 'app_opened'
+               AND created_at >= $1
+               AND created_at < $2
+               AND (user_email IS NULL OR (user_email NOT LIKE $3 AND user_email != $4))`,
+            [
+              today.toISOString(),
+              tomorrow.toISOString(),
+              TEST_EMAIL_PATTERN,
+              TEST_EMAIL_EXACT,
+            ],
+          )
+        : Promise.resolve(null),
+      // Real-time signups for today
+      includeRealtime && includesToday
+        ? sql.query(
+            `SELECT COUNT(*) as count
              FROM "user"
              WHERE "createdAt" >= $1 AND "createdAt" < $2
                AND (email IS NULL OR (email NOT LIKE $3 AND email != $4))`,
-              [
-                today.toISOString(),
-                tomorrow.toISOString(),
-                TEST_EMAIL_PATTERN,
-                TEST_EMAIL_EXACT,
-              ],
-            )
-          : Promise.resolve(null),
-        getStripeMRR(),
-      ]);
+            [
+              today.toISOString(),
+              tomorrow.toISOString(),
+              TEST_EMAIL_PATTERN,
+              TEST_EMAIL_EXACT,
+            ],
+          )
+        : Promise.resolve(null),
+      getStripeMRR(),
+    ]);
 
     if (allRowsResult.rows.length === 0) {
-      return NextResponse.json(
-        { error: 'No snapshot data available' },
-        { status: 404 },
+      const response = NextResponse.json(buildEmptySnapshot(range));
+      const cacheTTL = getAnalyticsCacheTTL(includesToday && includeRealtime);
+      response.headers.set(
+        'Cache-Control',
+        `private, max-age=${cacheTTL}, stale-while-revalidate=${cacheTTL * 2}`,
       );
+      return response;
     }
 
     const rows = allRowsResult.rows;
     const latest = rows[rows.length - 1];
-    const realtimeDau = realtimeDauResult
-      ? Number(realtimeDauResult.rows[0]?.count || 0)
+    const realtimeProductDau = realtimeProductDauResult
+      ? Number(realtimeProductDauResult.rows[0]?.count || 0)
+      : null;
+    const realtimeAppOpenedDau = realtimeAppOpenedDauResult
+      ? Number(realtimeAppOpenedDauResult.rows[0]?.count || 0)
       : null;
 
     // Summary metrics from latest row — use reach (page_viewed) as headline DAU,
     // not 'all' segment which includes bot cookie IDs and is inflated
-    const dau = realtimeDau ?? Number(latest.reach_dau || 0);
+    const dau = Number(latest.reach_dau || 0);
     const wau = Number(latest.reach_wau || 0);
     const mau = Number(latest.reach_mau || 0);
     const signedInProductDau =
-      realtimeDau ?? Number(latest.signed_in_product_dau || 0);
+      realtimeProductDau ?? Number(latest.signed_in_product_dau || 0);
     const signedInProductWau = Number(latest.signed_in_product_wau || 0);
     const signedInProductMau = Number(latest.signed_in_product_mau || 0);
 
     // Build trend arrays from all rows
     const trends = rows.map((r) => ({
-      date: formatMetricDate(r.metric_date),
+      date: formatMetricDate(r.metric_date_key ?? r.metric_date),
       dau: Number(r.reach_dau || 0),
       wau: Number(r.reach_wau || 0),
       mau: Number(r.reach_mau || 0),
     }));
 
     const signed_in_product_trends = rows.map((r) => ({
-      date: formatMetricDate(r.metric_date),
+      date: formatMetricDate(r.metric_date_key ?? r.metric_date),
       dau: Number(r.signed_in_product_dau || 0),
       wau: Number(r.signed_in_product_wau || 0),
       mau: Number(r.signed_in_product_mau || 0),
     }));
 
     const app_opened_trends = rows.map((r) => ({
-      date: formatMetricDate(r.metric_date),
+      date: formatMetricDate(r.metric_date_key ?? r.metric_date),
       dau: Number(r.app_opened_dau || 0),
       wau: Number(r.app_opened_wau || 0),
       mau: Number(r.app_opened_mau || 0),
     }));
 
     const sitewide_trends = rows.map((r) => ({
-      date: formatMetricDate(r.metric_date),
+      date: formatMetricDate(r.metric_date_key ?? r.metric_date),
       dau: Number(r.reach_dau || 0),
       wau: Number(r.reach_wau || 0),
       mau: Number(r.reach_mau || 0),
     }));
 
     const dau_trend = rows.map((r) => ({
-      date: formatMetricDate(r.metric_date),
+      date: formatMetricDate(r.metric_date_key ?? r.metric_date),
       dau: Number(r.reach_dau || 0),
       returning_dau: Number(r.returning_dau || 0),
     }));
 
     const activation_trends = rows.map((r) => ({
-      date: formatMetricDate(r.metric_date),
+      date: formatMetricDate(r.metric_date_key ?? r.metric_date),
       rate: Number(r.activation_rate || 0),
       signups: Number(r.new_signups || 0),
       activated: Number(r.activated_users || 0),
     }));
 
     const growth_trends = rows.map((r) => ({
-      date: formatMetricDate(r.metric_date),
+      date: formatMetricDate(r.metric_date_key ?? r.metric_date),
       signups: Number(r.new_signups || 0),
     }));
 
@@ -188,8 +222,10 @@ export async function GET(request: NextRequest) {
         : 0;
 
     const response = NextResponse.json({
-      source: includesToday ? 'hybrid' : 'snapshot',
-      snapshot_date: latest.metric_date,
+      source: includeRealtime && includesToday ? 'hybrid' : 'snapshot',
+      snapshot_date: formatMetricDate(
+        latest.metric_date_key ?? latest.metric_date,
+      ),
       range: { start: range.start, end: range.end },
       row_count: rows.length,
 
@@ -202,7 +238,8 @@ export async function GET(request: NextRequest) {
       signed_in_product_mau: signedInProductMau,
 
       // App opened metrics
-      app_opened_dau: realtimeDau ?? Number(latest.app_opened_dau || 0),
+      app_opened_dau:
+        realtimeAppOpenedDau ?? Number(latest.app_opened_dau || 0),
       app_opened_wau: Number(latest.app_opened_wau || 0),
       app_opened_mau: Number(latest.app_opened_mau || 0),
 
@@ -335,11 +372,11 @@ export async function GET(request: NextRequest) {
       },
 
       // Flags
-      is_realtime_dau: includesToday,
+      is_realtime_dau: includesToday && includeRealtime,
     });
 
     // Smart caching
-    const cacheTTL = getAnalyticsCacheTTL(includesToday);
+    const cacheTTL = getAnalyticsCacheTTL(includesToday && includeRealtime);
     response.headers.set(
       'Cache-Control',
       `private, max-age=${cacheTTL}, stale-while-revalidate=${cacheTTL * 2}`,
@@ -353,6 +390,101 @@ export async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+function buildEmptySnapshot(range: { start: Date; end: Date }) {
+  const snapshotDate = range.end.toISOString().split('T')[0];
+  const emptyTrend: Array<{
+    date: string;
+    dau: number;
+    wau: number;
+    mau: number;
+  }> = [];
+
+  return {
+    source: 'snapshot',
+    snapshot_date: snapshotDate,
+    range: { start: range.start, end: range.end },
+    row_count: 0,
+    dau: 0,
+    wau: 0,
+    mau: 0,
+    signed_in_product_dau: 0,
+    signed_in_product_wau: 0,
+    signed_in_product_mau: 0,
+    app_opened_dau: 0,
+    app_opened_wau: 0,
+    app_opened_mau: 0,
+    returning_dau: 0,
+    returning_wau: 0,
+    returning_mau: 0,
+    reach_dau: 0,
+    reach_wau: 0,
+    reach_mau: 0,
+    sitewide_dau: 0,
+    sitewide_wau: 0,
+    sitewide_mau: 0,
+    grimoire_dau: 0,
+    grimoire_wau: 0,
+    grimoire_mau: 0,
+    content_mau_grimoire: 0,
+    grimoire_only_mau: 0,
+    grimoire_to_app_rate: 0,
+    grimoire_to_app_users: 0,
+    retention: { day_1: 0, day_7: 0, day_30: 0 },
+    d1_retention: 0,
+    d7_retention: 0,
+    d30_retention: 0,
+    product_d7_retention: 0,
+    active_days_distribution: {
+      '1': 0,
+      '2-3': 0,
+      '4-7': 0,
+      '8-14': 0,
+      '15+': 0,
+    },
+    stickiness: 0,
+    stickiness_dau_mau: 0,
+    stickiness_wau_mau: 0,
+    avg_active_days_per_week: 0,
+    total_accounts: 0,
+    new_signups: 0,
+    activated_users: 0,
+    activation_rate: 0,
+    mrr: 0,
+    active_subscriptions: 0,
+    trial_subscriptions: 0,
+    new_conversions: 0,
+    feature_adoption: {
+      dashboard: 0,
+      horoscope: 0,
+      tarot: 0,
+      chart: 0,
+      guide: 0,
+      ritual: 0,
+    },
+    returning_referrer_breakdown: {
+      organic_returning: 0,
+      direct_returning: 0,
+      internal_returning: 0,
+    },
+    trends: emptyTrend,
+    signed_in_product_trends: emptyTrend,
+    app_opened_trends: emptyTrend,
+    sitewide_trends: emptyTrend,
+    dau_trend: [],
+    activation_trends: [],
+    growth_trends: [],
+    user_growth_rate: 0,
+    total_signups_range: 0,
+    subscription_30d: {
+      window_days: 30,
+      signups: 0,
+      conversions: 0,
+      conversion_rate: 0,
+    },
+    is_realtime_dau: false,
+  };
 }
 
 function formatMetricDate(date: string | Date): string {

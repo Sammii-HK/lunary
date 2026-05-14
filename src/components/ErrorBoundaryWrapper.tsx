@@ -19,9 +19,42 @@ function isChunkLoadError(error: Error): boolean {
     msg.includes('Minified React error #130') ||
     msg.includes('Minified React error #423') ||
     msg.includes('Failed to fetch dynamically imported module') ||
+    msg.includes("Cannot read properties of undefined (reading 'call')") ||
     msg.includes('Element type is invalid') ||
     error.name === 'ChunkLoadError'
   );
+}
+
+async function clearLocalAppCaches() {
+  if (typeof window === 'undefined') return;
+
+  const tasks: Promise<unknown>[] = [];
+
+  try {
+    if ('serviceWorker' in navigator && navigator.serviceWorker) {
+      tasks.push(
+        navigator.serviceWorker
+          .getRegistrations()
+          .then((registrations) =>
+            Promise.all(
+              registrations.map((registration) => registration.unregister()),
+            ),
+          ),
+      );
+    }
+  } catch {}
+
+  try {
+    if ('caches' in window) {
+      tasks.push(
+        caches
+          .keys()
+          .then((keys) => Promise.all(keys.map((key) => caches.delete(key)))),
+      );
+    }
+  } catch {}
+
+  await Promise.allSettled(tasks);
 }
 
 function isCapacitorWebError(error: Error): boolean {
@@ -70,14 +103,14 @@ class Boundary extends React.Component<
       const now = Date.now();
       if (!lastReload || now - parseInt(lastReload, 10) > 10_000) {
         sessionStorage.setItem(RELOAD_KEY, String(now));
-        window.location.reload();
+        void clearLocalAppCaches().finally(() => window.location.reload());
       }
     }
   }
 
   handleRefresh = () => {
     if (typeof window !== 'undefined') {
-      window.location.reload();
+      void clearLocalAppCaches().finally(() => window.location.reload());
     }
   };
 

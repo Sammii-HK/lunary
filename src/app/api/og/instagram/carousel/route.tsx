@@ -88,6 +88,7 @@ export async function GET(request: NextRequest) {
     const category = (searchParams.get('category') || 'tarot') as ThemeCategory;
     const variant = (searchParams.get('variant') ||
       'body') as CarouselSlideVariant;
+    const styleVariant = (searchParams.get('styleVariant') || '').toLowerCase();
     const symbol = searchParams.get('symbol') || '';
     const nextSubtitle = searchParams.get('nextSubtitle') || '';
 
@@ -115,6 +116,43 @@ export async function GET(request: NextRequest) {
 
     let accent = CATEGORY_ACCENT[category] || CATEGORY_ACCENT.tarot;
     let gradient = CATEGORY_GRADIENT[category] || CATEGORY_GRADIENT.tarot;
+    const STYLE_VARIANTS: Record<string, { accent: string; gradient: string }> =
+      {
+        ledger: {
+          accent: '#22D3EE',
+          gradient:
+            'linear-gradient(135deg, #071826 0%, #102542 48%, #0A0F1F 100%)',
+        },
+        spotlight: {
+          accent: '#FBBF24',
+          gradient:
+            'linear-gradient(135deg, #111827 0%, #1E1B4B 52%, #0B1020 100%)',
+        },
+        atlas: {
+          accent: '#34D399',
+          gradient:
+            'linear-gradient(135deg, #062620 0%, #0F2142 50%, #090F1F 100%)',
+        },
+        axis: {
+          accent: '#A78BFA',
+          gradient:
+            'linear-gradient(135deg, #10172A 0%, #062B32 52%, #0B1020 100%)',
+        },
+        eclipse: {
+          accent: '#E5E7EB',
+          gradient:
+            'linear-gradient(135deg, #18181B 0%, #33203D 50%, #09090B 100%)',
+        },
+        zodiac_map: {
+          accent: '#C77DFF',
+          gradient:
+            'linear-gradient(135deg, #251044 0%, #13213F 50%, #090F1F 100%)',
+        },
+      };
+    if (STYLE_VARIANTS[styleVariant]) {
+      accent = STYLE_VARIANTS[styleVariant].accent;
+      gradient = STYLE_VARIANTS[styleVariant].gradient;
+    }
 
     // Use sign-specific background and accent for zodiac sign carousels
     if (category === 'zodiac') {

@@ -288,16 +288,11 @@ export default function PricingPage() {
     // Track with whichever A/B test is active (prefer CTA test)
     const abMetadata = ctaMetadata || displayMetadata || {};
 
-    if (Object.keys(abMetadata).length > 0) {
-      // Track pricing_page_viewed as impression event with A/B test metadata
-      import('@/lib/analytics').then(({ trackEvent }) => {
-        trackEvent('pricing_page_viewed', {
-          metadata: abMetadata,
-        });
+    import('@/lib/analytics').then(({ trackEvent }) => {
+      trackEvent('pricing_page_viewed', {
+        metadata: abMetadata,
       });
-    } else {
-      conversionTracking.pageViewed('/pricing');
-    }
+    });
 
     // Track pricing view for browse-abandon email flow
     fetch('/api/track/pricing-viewed', { method: 'POST' }).catch(() => {});

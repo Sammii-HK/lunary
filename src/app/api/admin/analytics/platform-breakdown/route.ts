@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     // Daily breakdown for charting
     const dailyResult = await sql`
       SELECT
-        DATE(created_at AT TIME ZONE 'UTC') as date,
+        DATE(created_at AT TIME ZONE 'UTC')::text as date,
         COALESCE(metadata->>'platform', 'unknown') as platform,
         COUNT(*) as sessions,
         COUNT(DISTINCT user_id) as unique_users
@@ -93,10 +93,7 @@ export async function GET(request: NextRequest) {
 
     const dailyMap = new Map<string, DailyEntry>();
     for (const row of dailyResult.rows) {
-      const date =
-        row.date instanceof Date
-          ? row.date.toISOString().slice(0, 10)
-          : String(row.date);
+      const date = String(row.date);
       const platform = normalisePlatform(row.platform as string);
       const count = Number(row.sessions || 0);
 

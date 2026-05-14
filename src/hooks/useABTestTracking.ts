@@ -10,7 +10,11 @@
 
 import { useEffect, useMemo } from 'react';
 import { getABTestVariantClient } from '@/lib/ab-tests-client';
-import { trackEvent, getCtaAttribution } from '@/lib/analytics';
+import {
+  trackCtaImpression,
+  trackEvent,
+  getCtaAttribution,
+} from '@/lib/analytics';
 
 /** PostHog test name -> admin dashboard test name */
 const TEST_NAME_MAPPING: Record<string, string> = {
@@ -30,13 +34,14 @@ const TEST_NAME_MAPPING: Record<string, string> = {
 const ALL_TEST_NAMES = Object.keys(TEST_NAME_MAPPING);
 
 /**
- * Track page view with all active A/B test variants.
+ * Track exposure to all active A/B test variants.
  * Reads variants from the middleware cookie — available on first render.
- * Fires one event per active test so each records impressions independently.
+ * Fires one cta_impression per active test so each records impressions
+ * independently without inflating page_viewed or app_opened counts.
  */
 export function useABTestTracking(
   pageName: string,
-  eventType: 'page_viewed' | 'app_opened' = 'page_viewed',
+  _eventType: 'page_viewed' | 'app_opened' = 'page_viewed',
   tests?: string[],
 ) {
   // Read variants from cookie (instant, no async)
@@ -69,27 +74,24 @@ export function useABTestTracking(
     [activeTests],
   );
 
-  // Fire one impression event per active test
+  // Fire one impression event per active test.
   useEffect(() => {
     if (activeTests.length === 0) {
-      trackEvent(eventType, {
-        pagePath: `/${pageName}`,
-        metadata: { page: pageName },
-      });
       return;
     }
 
     for (const testMeta of activeTests) {
-      trackEvent(eventType, {
+      trackCtaImpression({
+        ctaId: `ab_${testMeta.abTest}`,
+        location: `ab_test_${pageName}`,
+        label: `${pageName} ${testMeta.abTest} exposure`,
         pagePath: `/${pageName}`,
-        metadata: {
-          ...testMeta,
-          page: pageName,
-        },
+        abTest: testMeta.abTest,
+        abVariant: testMeta.abVariant,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageName, eventType, activeTestsKey]);
+  }, [pageName, activeTestsKey]);
 
   // Backward compatibility
   const abMetadata = activeTests.length > 0 ? activeTests[0] : null;

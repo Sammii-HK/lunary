@@ -16,6 +16,7 @@ export type ConversionEvent =
   | 'product_opened'
   | 'page_viewed'
   | 'cta_clicked'
+  | 'cta_impression'
   | 'birth_data_submitted'
   | 'trial_started'
   | 'trial_expired'
@@ -126,10 +127,18 @@ const AUTH_CACHE_TTL = 1000 * 60; // 1 minute
 let cachedAuthContext: AuthContext | null = null;
 let cachedAuthContextAt = 0;
 const ANON_ID_STORAGE_KEY = 'lunary_anon_id';
+const ANALYTICS_SESSION_STORAGE_KEY = 'lunary_analytics_session';
 const APP_OPENED_GUARD_KEY = 'lunary_event_guard';
 const PRODUCT_OPENED_GUARD_KEY = 'lunary_product_opened_guard';
 const DAILY_DASHBOARD_GUARD_PREFIX = 'lunary_daily_dashboard_viewed_guard';
 const APP_OPENED_GUARD_TTL_MS = 1000 * 60 * 30; // 30 minutes (for product_opened)
+const ANALYTICS_SESSION_TTL_MS = 1000 * 60 * 30;
+const NOTIFICATION_EVENT_TYPES = new Set<ConversionEvent>([
+  'signup',
+  'trial_started',
+  'trial_converted',
+  'subscription_started',
+]);
 
 // In-memory fallback for when localStorage is unavailable (private browsing)
 // This prevents duplicate events within the same browser session
@@ -419,6 +428,40 @@ export function getAnonymousId(): string | undefined {
   }
 }
 
+function getAnalyticsSessionId(): string | undefined {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  try {
+    const now = Date.now();
+    const raw = window.sessionStorage.getItem(ANALYTICS_SESSION_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as { id?: string; updatedAt?: number };
+      if (
+        parsed.id &&
+        parsed.updatedAt &&
+        now - parsed.updatedAt < ANALYTICS_SESSION_TTL_MS
+      ) {
+        window.sessionStorage.setItem(
+          ANALYTICS_SESSION_STORAGE_KEY,
+          JSON.stringify({ id: parsed.id, updatedAt: now }),
+        );
+        return parsed.id;
+      }
+    }
+
+    const id = generateUUID();
+    window.sessionStorage.setItem(
+      ANALYTICS_SESSION_STORAGE_KEY,
+      JSON.stringify({ id, updatedAt: now }),
+    );
+    return id;
+  } catch {
+    return undefined;
+  }
+}
+
 function getOriginMetadata(): Record<string, string> {
   if (typeof window === 'undefined') {
     return {};
@@ -491,6 +534,7 @@ export async function trackEvent(
         ...utmParams,
         ...attributionData,
         ...originMetadata,
+        analytics_session_id: getAnalyticsSessionId(),
         platform: detectPlatform(),
         referrer:
           (typeof document !== 'undefined' ? document.referrer : undefined) ||
@@ -508,7 +552,9 @@ export async function trackEvent(
       eventData.userEmail = metadataEmail;
     }
 
-    const authContext = await getAuthContext();
+    const shouldResolveAuthContext =
+      event !== 'page_viewed' && event !== 'cta_impression';
+    const authContext = shouldResolveAuthContext ? await getAuthContext() : {};
 
     if (!eventData.userId && authContext.userId) {
       eventData.userId = authContext.userId;
@@ -549,24 +595,27 @@ export async function trackEvent(
       body: JSON.stringify(apiPayload),
     });
 
-    const notificationPromise = fetch('/api/admin/notifications/conversion', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        eventType: event,
-        userId: eventData.userId,
-        userEmail: eventData.userEmail,
-        planType: eventData.planType,
-        metadata: eventData.metadata,
-      }),
-    });
+    const promises: Promise<Response>[] = [analyticsPromise];
 
-    const settledResults = await Promise.allSettled([
-      analyticsPromise,
-      notificationPromise,
-    ]);
+    if (NOTIFICATION_EVENT_TYPES.has(event)) {
+      promises.push(
+        fetch('/api/admin/notifications/conversion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            eventType: event,
+            userId: eventData.userId,
+            userEmail: eventData.userEmail,
+            planType: eventData.planType,
+            metadata: eventData.metadata,
+          }),
+        }),
+      );
+    }
+
+    const settledResults = await Promise.allSettled(promises);
 
     if (settledResults[0].status === 'rejected') {
       console.error(
@@ -575,7 +624,7 @@ export async function trackEvent(
       );
     }
 
-    if (settledResults[1].status === 'rejected') {
+    if (settledResults[1]?.status === 'rejected') {
       console.error(
         'Failed to send conversion notification:',
         settledResults[1].reason,
@@ -627,7 +676,7 @@ export async function trackCtaImpression(
 ): Promise<void> {
   try {
     const sanitized = sanitizeEventPayload({
-      event: 'cta_clicked',
+      event: 'cta_impression',
       featureName: `${payload.ctaId}_impression`,
       pagePath: payload.pagePath,
       hub: payload.hub,
