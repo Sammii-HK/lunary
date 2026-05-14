@@ -279,6 +279,7 @@ export function SEOContentTemplate({
       '@type': 'SpeakableSpecification',
       cssSelector: [
         'h1',
+        '.direct-answer-summary',
         '.tldr',
         '.what-is-answer',
         'header p',
@@ -345,6 +346,13 @@ export function SEOContentTemplate({
           'exact_timing',
         ] as const)
       : undefined;
+  const directAnswer = whatIs?.answer || tldr || description;
+  const directAnswerEntityName = entityName || h1 || title;
+  const directAnswerRelationships = [
+    ...(articleSection ? [articleSection] : []),
+    ...keywords.slice(0, 4),
+    ...(relatedItems?.slice(0, 3).map((item) => item.name) || []),
+  ].filter((item, index, list) => list.indexOf(item) === index);
 
   return (
     <article className='max-w-4xl mx-auto px-4 pb-[120px]'>
@@ -450,6 +458,80 @@ export function SEOContentTemplate({
           >
             {contextualCopySentence}
           </div>
+        )}
+
+        {directAnswer && (
+          <section
+            id='direct-answer'
+            itemScope
+            itemType='https://schema.org/DefinedTerm'
+            className='direct-answer-summary bg-surface-elevated/55 border border-stroke-subtle rounded-lg p-4 sm:p-6 overflow-x-hidden'
+          >
+            <meta itemProp='name' content={directAnswerEntityName} />
+            <meta itemProp='description' content={directAnswer} />
+            {directAnswerRelationships.map((relationship) => (
+              <meta
+                key={`direct-answer-keyword-${relationship}`}
+                itemProp='keywords'
+                content={relationship}
+              />
+            ))}
+            <Heading
+              as='h2'
+              variant='h2'
+              className='text-content-brand-accent mb-4'
+            >
+              {directAnswerEntityName} at a Glance
+            </Heading>
+            <div className='space-y-4'>
+              <div>
+                <h3 className='text-sm font-semibold text-content-primary mb-1'>
+                  Direct answer
+                </h3>
+                <AutoLinkText
+                  as='p'
+                  className='text-content-secondary leading-relaxed break-words'
+                >
+                  {directAnswer}
+                </AutoLinkText>
+              </div>
+              {intro && intro !== directAnswer && (
+                <div>
+                  <h3 className='text-sm font-semibold text-content-primary mb-1'>
+                    How to read it
+                  </h3>
+                  <AutoLinkText
+                    as='p'
+                    className='text-content-secondary leading-relaxed break-words'
+                  >
+                    {intro}
+                  </AutoLinkText>
+                </div>
+              )}
+              {directAnswerRelationships.length > 0 && (
+                <div>
+                  <h3 className='text-sm font-semibold text-content-primary mb-2'>
+                    Related concepts
+                  </h3>
+                  <div className='flex flex-wrap gap-2'>
+                    {directAnswerRelationships.map((relationship) => (
+                      <span
+                        key={relationship}
+                        className='rounded-md border border-stroke-subtle bg-layer-base/30 px-2.5 py-1 text-xs text-content-muted break-words'
+                      >
+                        {relationship}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <p className='text-xs text-content-muted leading-relaxed'>
+                Use this page as Lunary's canonical reference for{' '}
+                {directAnswerEntityName}, including definitions, chart
+                interpretation, and related Grimoire context.
+              </p>
+            </div>
+          </section>
         )}
 
         {/* TL;DR Quick Meaning Block */}

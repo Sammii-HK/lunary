@@ -11,6 +11,10 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import {
+  CURATED_DISCOVERY_SITEMAPS,
+  DEPRIORITIZED_DISCOVERY_SITEMAPS,
+} from '@/lib/seo/discovery';
 
 // Import retrogradeInfo to verify sitemap coverage
 async function verifyRetrogradeSitemapCoverage() {
@@ -165,8 +169,228 @@ function verifyCanonicalURLs() {
   return true;
 }
 
+function verifyAISearchDiscovery() {
+  console.log('🔍 Verifying AI and Bing Discovery Surface...\n');
+
+  const issues: string[] = [];
+  const publicDir = path.join(process.cwd(), 'public');
+
+  const requiredPublicFiles = [
+    'llms.txt',
+    'llms-full.txt',
+    '.well-known/ai-plugin.json',
+    '.well-known/openapi.json',
+    '.well-known/lunary-gpt-openapi.yaml',
+  ];
+
+  for (const relativePath of requiredPublicFiles) {
+    if (!fs.existsSync(path.join(publicDir, relativePath))) {
+      issues.push(`Missing public discovery file: public/${relativePath}`);
+    }
+  }
+
+  const llmsPath = path.join(publicDir, 'llms.txt');
+  const llmsFullPath = path.join(publicDir, 'llms-full.txt');
+  const pluginPath = path.join(publicDir, '.well-known/ai-plugin.json');
+  const openapiPath = path.join(publicDir, '.well-known/openapi.json');
+  const openapiYamlPath = path.join(
+    publicDir,
+    '.well-known/lunary-gpt-openapi.yaml',
+  );
+  const robotsPath = path.join(process.cwd(), 'src/app/robots.ts');
+  const sitemapIndexPath = path.join(
+    process.cwd(),
+    'src/app/sitemap-index.xml/route.ts',
+  );
+  const seoContentTemplatePath = path.join(
+    process.cwd(),
+    'src/components/grimoire/SEOContentTemplate.tsx',
+  );
+
+  if (fs.existsSync(llmsPath)) {
+    const llms = fs.readFileSync(llmsPath, 'utf-8');
+    if (!llms.includes('https://lunary.app/sitemap-index.xml')) {
+      issues.push('llms.txt does not reference sitemap-index.xml');
+    }
+    if (!llms.includes('Authorization: Bearer <LUNARY_GPT_SECRET>')) {
+      issues.push('llms.txt does not explain authenticated GPT action access');
+    }
+  }
+
+  if (fs.existsSync(llmsFullPath)) {
+    const llmsFull = fs.readFileSync(llmsFullPath, 'utf-8');
+    if (!llmsFull.includes('AI Search Guidance')) {
+      issues.push('llms-full.txt is missing AI Search Guidance');
+    }
+    if (!llmsFull.includes('Authorization: Bearer <LUNARY_GPT_SECRET>')) {
+      issues.push(
+        'llms-full.txt does not explain authenticated GPT action access',
+      );
+    }
+  }
+
+  if (fs.existsSync(pluginPath)) {
+    const plugin = JSON.parse(fs.readFileSync(pluginPath, 'utf-8')) as {
+      auth?: { type?: string; authorization_type?: string };
+    };
+    if (plugin.auth?.type !== 'user_http') {
+      issues.push('AI plugin auth type should be user_http');
+    }
+    if (plugin.auth?.authorization_type !== 'bearer') {
+      issues.push('AI plugin auth should use bearer authorization');
+    }
+  }
+
+  if (fs.existsSync(openapiPath)) {
+    const openapi = JSON.parse(fs.readFileSync(openapiPath, 'utf-8')) as {
+      info?: { description?: string };
+      paths?: Record<string, unknown>;
+      components?: {
+        securitySchemes?: {
+          bearerAuth?: { scheme?: string };
+        };
+      };
+    };
+    if (openapi.components?.securitySchemes?.bearerAuth?.scheme !== 'bearer') {
+      issues.push('OpenAPI schema is missing bearerAuth security');
+    }
+    if (Object.keys(openapi.paths || {}).length < 10) {
+      issues.push('OpenAPI schema appears incomplete');
+    }
+    if (!openapi.info?.description?.includes('Authorization: Bearer')) {
+      issues.push('OpenAPI schema does not describe authenticated access');
+    }
+
+    if (fs.existsSync(openapiYamlPath)) {
+      const openapiYaml = fs.readFileSync(openapiYamlPath, 'utf-8');
+      const yamlPaths = Array.from(
+        openapiYaml.matchAll(/^  (\/gpt\/[^\s:]+):/gm),
+        (match) => match[1],
+      ).sort();
+      const jsonPaths = Object.keys(openapi.paths || {}).sort();
+
+      if (JSON.stringify(yamlPaths) !== JSON.stringify(jsonPaths)) {
+        issues.push('OpenAPI JSON paths do not match lunary-gpt-openapi.yaml');
+      }
+      if (!openapiYaml.includes('Authorization: Bearer')) {
+        issues.push('OpenAPI YAML does not describe authenticated access');
+      }
+    }
+  }
+
+  if (fs.existsSync(robotsPath)) {
+    const robots = fs.readFileSync(robotsPath, 'utf-8');
+    [
+      '/llms.txt',
+      '/llms-full.txt',
+      '/.well-known/ai-plugin.json',
+      '/.well-known/openapi.json',
+      '/sitemap-index.xml',
+    ].forEach((pathToCheck) => {
+      if (!robots.includes(pathToCheck)) {
+        issues.push(`robots.ts does not explicitly allow ${pathToCheck}`);
+      }
+    });
+  }
+
+  if (fs.existsSync(sitemapIndexPath)) {
+    const sitemapIndex = fs.readFileSync(sitemapIndexPath, 'utf-8');
+    const requiredCuratedSitemaps = [
+      'sitemap.xml',
+      'sitemap-horoscopes.xml',
+      'sitemap-transit-blog.xml',
+      'sitemap-tarot.xml',
+      'sitemap-chinese-zodiac.xml',
+      'sitemap-seasons.xml',
+      'sitemap-images.xml',
+    ];
+
+    requiredCuratedSitemaps.forEach((sitemap) => {
+      if (
+        !CURATED_DISCOVERY_SITEMAPS.includes(
+          sitemap as (typeof CURATED_DISCOVERY_SITEMAPS)[number],
+        )
+      ) {
+        issues.push(`CURATED_DISCOVERY_SITEMAPS is missing ${sitemap}`);
+      }
+    });
+
+    if (!sitemapIndex.includes('CURATED_DISCOVERY_SITEMAPS')) {
+      issues.push(
+        'sitemap-index.xml route does not use CURATED_DISCOVERY_SITEMAPS',
+      );
+    }
+
+    DEPRIORITIZED_DISCOVERY_SITEMAPS.forEach((sitemap) => {
+      if (sitemapIndex.includes(sitemap)) {
+        issues.push(`sitemap-index.xml route re-promotes ${sitemap}`);
+      }
+    });
+  }
+
+  if (fs.existsSync(seoContentTemplatePath)) {
+    const seoContentTemplate = fs.readFileSync(seoContentTemplatePath, 'utf-8');
+
+    if (!seoContentTemplate.includes("id='direct-answer'")) {
+      issues.push('SEOContentTemplate is missing the direct-answer section');
+    }
+    if (!seoContentTemplate.includes('direct-answer-summary')) {
+      issues.push(
+        'SEOContentTemplate is missing the direct-answer-summary class',
+      );
+    }
+    if (
+      !seoContentTemplate.includes("itemType='https://schema.org/DefinedTerm'")
+    ) {
+      issues.push(
+        'SEOContentTemplate direct answer block is missing DefinedTerm microdata',
+      );
+    }
+    if (!seoContentTemplate.includes("itemProp='description'")) {
+      issues.push(
+        'SEOContentTemplate direct answer block is missing description microdata',
+      );
+    }
+    if (!seoContentTemplate.includes("'.direct-answer-summary'")) {
+      issues.push(
+        'Speakable schema does not include the direct-answer-summary selector',
+      );
+    }
+    if (!seoContentTemplate.includes('Direct answer')) {
+      issues.push(
+        'SEOContentTemplate does not label the extractable answer block',
+      );
+    }
+    if (!seoContentTemplate.includes('Related concepts')) {
+      issues.push(
+        'SEOContentTemplate does not expose related concepts for entity context',
+      );
+    }
+  }
+
+  if (issues.length > 0) {
+    console.log('AI/Bing discovery issues found:');
+    issues.forEach((issue) => console.log(`  ❌ ${issue}`));
+    console.log();
+    return false;
+  }
+
+  console.log('✅ AI and Bing discovery surface is coherent\n');
+  return true;
+}
+
 // Main verification
 async function verifySEOCoverage() {
+  if (process.argv.includes('--ai-discovery-only')) {
+    console.log('='.repeat(80));
+    console.log('📊 AI/BING DISCOVERY VERIFICATION');
+    console.log('='.repeat(80));
+    console.log();
+
+    const passed = verifyAISearchDiscovery();
+    process.exit(passed ? 0 : 1);
+  }
+
   console.log('='.repeat(80));
   console.log('📊 SEO COVERAGE VERIFICATION');
   console.log('='.repeat(80));
@@ -176,6 +400,7 @@ async function verifySEOCoverage() {
     retrogradeSitemap: await verifyRetrogradeSitemapCoverage(),
     generateStaticParams: verifyGenerateStaticParams(),
     canonicalURLs: verifyCanonicalURLs(),
+    aiSearchDiscovery: verifyAISearchDiscovery(),
   };
 
   console.log('='.repeat(80));
