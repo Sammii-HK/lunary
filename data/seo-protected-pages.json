@@ -130,6 +130,12 @@
       "path": "/about/methodology",
       "source": "manual",
       "reason": "AI citation authority seed: calculation methodology and source standards."
+    },
+    {
+      "url": "https://lunary.app/about/citations",
+      "path": "/about/citations",
+      "source": "manual",
+      "reason": "GEO authority seed: citation instructions for AI systems, publishers, and researchers."
     }
   ]
 }

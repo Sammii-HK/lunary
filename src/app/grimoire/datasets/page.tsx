@@ -22,11 +22,25 @@ const datasets = [
     cadence: 'Updated when source Grimoire content changes',
   },
   {
+    name: 'Core Astrology Dataset Snapshot',
+    href: '/grimoire/datasets/core-astrology-2026-05-17.json',
+    description:
+      'Versioned snapshot of the core astrology dataset for systems that require a stable, non-moving citation URL.',
+    cadence: 'Frozen snapshot',
+  },
+  {
     name: 'Current Sky Facts',
     href: '/grimoire/datasets/current-sky-facts.json',
     description:
       'Date-stamped Sun, Moon, visible planet, moon phase, and lunar illumination facts calculated with Astronomy Engine.',
     cadence: 'Refreshed hourly, intended as a daily citation surface',
+  },
+  {
+    name: 'Current Sky Snapshot',
+    href: '/grimoire/datasets/current-sky/2026-05-17',
+    description:
+      'Stable UTC-date snapshot of current sky facts, useful for archived references and reproducible AI citations.',
+    cadence: 'Frozen daily snapshot',
   },
 ];
 

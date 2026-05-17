@@ -1,15 +1,44 @@
 {
   "summary": {
-    "generatedAt": "2026-05-17T20:56:47.572Z",
+    "generatedAt": "2026-05-17T21:31:54.779Z",
     "source": "public/ai-citation-map.json",
-    "targetCount": 39,
+    "targetCount": 42,
     "averageScore": 95,
-    "excellent": 39,
+    "excellent": 42,
     "good": 0,
     "needsWork": 0,
     "critical": 0
   },
   "results": [
+    {
+      "url": "https://lunary.app/about/citations",
+      "pathname": "/about/citations",
+      "topic": "How to cite Lunary",
+      "role": "canonical",
+      "score": 95,
+      "grade": "excellent",
+      "routeSource": {
+        "absolutePath": "/Users/sammii/development/lunary/src/app/about/citations/page.tsx",
+        "relativePath": "src/app/about/citations/page.tsx",
+        "pattern": "/about/citations",
+        "exactSegments": 2,
+        "dynamicSegments": 0,
+        "kind": "page"
+      },
+      "sourceSignals": {
+        "usesSeoContentTemplate": false,
+        "hasCanonicalSignal": true,
+        "hasDirectAnswerSignal": true,
+        "hasStructuredDataSignal": true,
+        "hasFaqSignal": true
+      },
+      "inSitemap": true,
+      "protectedSeoPage": true,
+      "issues": ["Page does not appear to use SEOContentTemplate."],
+      "recommendations": [
+        "Move this page onto SEOContentTemplate or add equivalent answer/schema blocks."
+      ]
+    },
     {
       "url": "https://lunary.app/about/methodology",
       "pathname": "/about/methodology",
@@ -430,6 +459,33 @@
       ]
     },
     {
+      "url": "https://lunary.app/grimoire/datasets/core-astrology-2026-05-17.json",
+      "pathname": "/grimoire/datasets/core-astrology-2026-05-17.json",
+      "topic": "Machine-readable astrology datasets",
+      "role": "supporting",
+      "score": 95,
+      "grade": "excellent",
+      "routeSource": {
+        "absolutePath": "/Users/sammii/development/lunary/src/app/grimoire/datasets/core-astrology-2026-05-17.json/route.ts",
+        "relativePath": "src/app/grimoire/datasets/core-astrology-2026-05-17.json/route.ts",
+        "pattern": "/grimoire/datasets/core-astrology-2026-05-17.json",
+        "exactSegments": 3,
+        "dynamicSegments": 0,
+        "kind": "route"
+      },
+      "sourceSignals": {
+        "usesSeoContentTemplate": true,
+        "hasCanonicalSignal": true,
+        "hasDirectAnswerSignal": true,
+        "hasStructuredDataSignal": true,
+        "hasFaqSignal": false
+      },
+      "inSitemap": true,
+      "protectedSeoPage": false,
+      "issues": [],
+      "recommendations": []
+    },
+    {
       "url": "https://lunary.app/grimoire/datasets/core-astrology.json",
       "pathname": "/grimoire/datasets/core-astrology.json",
       "topic": "Astrology glossary definitions",
@@ -469,6 +525,33 @@
         "pattern": "/grimoire/datasets/current-sky-facts.json",
         "exactSegments": 3,
         "dynamicSegments": 0,
+        "kind": "route"
+      },
+      "sourceSignals": {
+        "usesSeoContentTemplate": true,
+        "hasCanonicalSignal": true,
+        "hasDirectAnswerSignal": true,
+        "hasStructuredDataSignal": true,
+        "hasFaqSignal": false
+      },
+      "inSitemap": true,
+      "protectedSeoPage": false,
+      "issues": [],
+      "recommendations": []
+    },
+    {
+      "url": "https://lunary.app/grimoire/datasets/current-sky/2026-05-17",
+      "pathname": "/grimoire/datasets/current-sky/2026-05-17",
+      "topic": "Machine-readable astrology datasets",
+      "role": "supporting",
+      "score": 95,
+      "grade": "excellent",
+      "routeSource": {
+        "absolutePath": "/Users/sammii/development/lunary/src/app/grimoire/datasets/current-sky/[date]/route.ts",
+        "relativePath": "src/app/grimoire/datasets/current-sky/[date]/route.ts",
+        "pattern": "/grimoire/datasets/current-sky/[date]",
+        "exactSegments": 3,
+        "dynamicSegments": 1,
         "kind": "route"
       },
       "sourceSignals": {

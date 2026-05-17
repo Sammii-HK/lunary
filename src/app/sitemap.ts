@@ -333,8 +333,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       'src/app/grimoire/datasets/core-astrology.json/route.ts',
       'src/lib/seo/citation-datasets.ts',
     ],
+    'grimoire/datasets/core-astrology-2026-05-17.json': [
+      'src/app/grimoire/datasets/core-astrology-2026-05-17.json/route.ts',
+      'src/lib/seo/citation-datasets.ts',
+    ],
     'grimoire/datasets/current-sky-facts.json': [
       'src/app/grimoire/datasets/current-sky-facts.json/route.ts',
+      'src/lib/seo/citation-datasets.ts',
+    ],
+    'grimoire/datasets/current-sky/2026-05-17': [
+      'src/app/grimoire/datasets/current-sky/[date]/route.ts',
       'src/lib/seo/citation-datasets.ts',
     ],
     'about/sammii': ['src/app/about/sammii/page.tsx'],
@@ -342,6 +350,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       'src/app/about/editorial-guidelines/page.tsx',
     ],
     'about/methodology': ['src/app/about/methodology/page.tsx'],
+    'about/citations': ['src/app/about/citations/page.tsx'],
     'birth-chart/example': ['src/app/birth-chart/example/page.tsx'],
     'grimoire/a-z': ['src/app/grimoire/a-z/page.tsx'],
     'grimoire/beginners': ['src/app/grimoire/beginners/page.tsx'],
@@ -521,9 +530,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     },
     {
+      path: 'grimoire/datasets/core-astrology-2026-05-17.json',
+      changeFrequency: 'yearly',
+      priority: 0.5,
+    },
+    {
       path: 'grimoire/datasets/current-sky-facts.json',
       changeFrequency: 'daily',
       priority: 0.6,
+    },
+    {
+      path: 'grimoire/datasets/current-sky/2026-05-17',
+      changeFrequency: 'yearly',
+      priority: 0.5,
     },
     {
       path: 'about/sammii',
@@ -537,6 +556,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       path: 'about/methodology',
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      path: 'about/citations',
       changeFrequency: 'monthly',
       priority: 0.6,
     },

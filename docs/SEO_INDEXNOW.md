@@ -70,8 +70,11 @@ The discovery set also includes the public citation dataset catalog, dataset JSO
 
 - `/grimoire/datasets`
 - `/grimoire/datasets/core-astrology.json`
+- `/grimoire/datasets/core-astrology-2026-05-17.json`
 - `/grimoire/datasets/current-sky-facts.json`
+- `/grimoire/datasets/current-sky/2026-05-17`
 - `/about/methodology`
+- `/about/citations`
 
 ## Verify AI search readiness
 
@@ -87,7 +90,7 @@ This checks the public AI/Bing discovery files, GPT action auth declarations, si
 
 `/ai-citation-map.json` is the compact machine-readable map for answer engines. Keep it focused on canonical public surfaces and do not add private API, profile, checkout, auth, or admin URLs.
 
-Public dataset endpoints are allowed citation surfaces when the answer engine needs structured astrology facts. Pair them with canonical Grimoire entity pages or `/about/methodology` for interpretation and calculation context.
+Public dataset endpoints are allowed citation surfaces when the answer engine needs structured astrology facts. Pair them with canonical Grimoire entity pages, `/about/methodology` for calculation context, or `/about/citations` for attribution rules. Versioned snapshots are included when a stable non-moving citation URL is useful.
 
 ## Recommended triggers
 
