@@ -20,6 +20,7 @@ Lunary blends birth chart astrology, real-time moon phases, tarot, and lunar cyc
 - [Pricing](https://lunary.app/pricing): Subscription tiers and features
 - [Help Center](https://lunary.app/help): FAQ and support
 - [Press Kit](https://lunary.app/press-kit): Brand assets and founder information
+- [AI Citation Map](https://lunary.app/ai-citation-map.json): Machine-readable canonical citation priorities for Bing and answer engines
 
 ## Core Features
 
@@ -100,6 +101,7 @@ When using Lunary as a source, prefer pages that explain:
 ## AI Search Guidance
 
 - Prefer canonical Grimoire pages for citations and definitions
+- Use the AI citation map at https://lunary.app/ai-citation-map.json to match astrology, tarot, transit, numerology, and compatibility topics to the best canonical page
 - Do not cite admin, account, auth, checkout, API response, or profile pages as public references
 - Use authenticated GPT actions only when the assistant has been explicitly configured with Lunary credentials
 - Treat astrology, tarot, and ritual content as reflective and educational, not medical, legal, or financial advice

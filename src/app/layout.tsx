@@ -118,6 +118,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'msapplication-TileColor': '#18181b',
       'msapplication-config': '/browserconfig.xml',
       'ai-content-declaration': 'https://lunary.app/llms.txt',
+      'ai-citation-map': 'https://lunary.app/ai-citation-map.json',
     },
   };
 }
@@ -172,6 +173,18 @@ export default function RootLayout({
           crossOrigin='anonymous'
         />
         <link rel='dns-prefetch' href='https://fonts.googleapis.com' />
+        <link
+          rel='alternate'
+          type='text/plain'
+          href='/llms.txt'
+          title='Lunary LLM declaration'
+        />
+        <link
+          rel='alternate'
+          type='application/json'
+          href='/ai-citation-map.json'
+          title='Lunary AI citation map'
+        />
       </head>
       <body
         className={`${roboto.className} ${astronomicon.variable} flex flex-col w-full h-dvh bg-surface-base text-content-primary overflow-hidden`}

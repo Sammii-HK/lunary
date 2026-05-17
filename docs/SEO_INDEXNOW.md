@@ -52,7 +52,7 @@ This route submits to the IndexNow global endpoint so Bing and other participati
 
 ## Submit discovery URLs after an SEO deploy
 
-After changing `robots.txt`, `llms.txt`, `.well-known` manifests, or the sitemap index, run a dry run first:
+After changing `robots.txt`, `llms.txt`, `ai-citation-map.json`, `.well-known` manifests, or the sitemap index, run a dry run first:
 
 ```bash
 pnpm seo:indexnow:discovery:dry
@@ -64,7 +64,7 @@ Then submit the curated discovery set:
 pnpm seo:indexnow:discovery
 ```
 
-This sends only the homepage, crawl declarations, AI manifests, sitemap index, and curated high-signal sitemap files. It does not touch Neon and does not submit deprioritized scaled families such as birthday, crystals, decans, or broad ritual inventory.
+This sends only the homepage, crawl declarations, AI citation map, AI manifests, sitemap index, and curated high-signal sitemap files. It does not touch Neon and does not submit deprioritized scaled families such as birthday, crystals, decans, or broad ritual inventory.
 
 ## Verify AI search readiness
 
@@ -74,7 +74,11 @@ Run the AI discovery verifier before submitting the branch:
 pnpm seo:verify:ai
 ```
 
-This checks the public AI/Bing discovery files, GPT action auth declarations, sitemap-index curation, robots allowances, and the shared Grimoire direct-answer block used for answer-engine extraction.
+This checks the public AI/Bing discovery files, GPT action auth declarations, sitemap-index curation, crawler-specific robots allowances, the AI citation map, and the shared Grimoire direct-answer block used for answer-engine extraction.
+
+## AI citation map
+
+`/ai-citation-map.json` is the compact machine-readable map for answer engines. Keep it focused on canonical public surfaces and do not add private API, profile, checkout, auth, or admin URLs.
 
 ## Recommended triggers
 

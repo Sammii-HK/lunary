@@ -4,6 +4,11 @@ import Link from 'next/link';
 import { Heading } from '@/components/ui/Heading';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import {
+  createArticleSchema,
+  createFAQPageSchema,
+  renderJsonLdMulti,
+} from '@/lib/schema';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 43200; // 12 hours — transit blog index changes weekly at most
@@ -31,6 +36,22 @@ const PLANET_GLYPHS: Record<string, string> = {
   Neptune: '\u2646',
   Pluto: '\u2647',
 };
+
+const transitBlogFaqs = [
+  {
+    question: 'What are astrology transits?',
+    answer:
+      'Astrology transits compare current planetary positions with a birth chart to interpret timing, themes, and pressure points as planets move through signs, houses, and aspects.',
+  },
+  {
+    question: 'Why do major planetary transits matter?',
+    answer:
+      'Major transits from Jupiter, Saturn, Uranus, Neptune, and Pluto often describe longer developmental periods because these planets move slowly and stay active for weeks, months, or years.',
+  },
+];
+
+const tldr: string =
+  'Astrology transits are the current movements of planets compared with a natal chart, used to interpret timing, themes, and practical periods of growth, challenge, release, or momentum.';
 
 interface TransitPostCard {
   slug: string;
@@ -72,6 +93,23 @@ export default async function TransitBlogIndexPage() {
 
   return (
     <main className='min-h-screen bg-[#050505] text-content-secondary'>
+      {renderJsonLdMulti([
+        createArticleSchema({
+          headline: 'Transit Guides: Deep-Dive Astrology Articles',
+          description:
+            'In-depth astrology transit guides covering dates, meanings, historical context, and chart interpretation for major planetary transits.',
+          url: 'https://lunary.app/blog/transits',
+          keywords: [
+            'astrology transits',
+            'planetary transits',
+            'current sky astrology',
+            'transit dates',
+            'transit meanings',
+          ],
+          section: 'Astrology Transits',
+        }),
+        createFAQPageSchema(transitBlogFaqs),
+      ])}
       <div className='mx-auto max-w-4xl px-4 py-16'>
         <Heading as='h1' variant='h1'>
           Transit guides
@@ -81,6 +119,15 @@ export default async function TransitBlogIndexPage() {
           context, exact dates, practical guidance, and what it means for your
           sign. Drawn from our grimoire, grounded in real astronomical data.
         </p>
+
+        <section className='mt-8 rounded-xl border border-lunary-primary-800/40 bg-layer-deep/30 p-5'>
+          <Heading as='h2' variant='h3'>
+            What are astrology transits?
+          </Heading>
+          <p className='mt-3 text-sm leading-relaxed text-content-brand/75'>
+            {tldr}
+          </p>
+        </section>
 
         {posts.length === 0 && (
           <p className='mt-12 text-lunary-primary-400'>

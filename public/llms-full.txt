@@ -9,6 +9,7 @@ This document contains detailed reference content from Lunary's grimoire and ast
 - Prefer canonical Grimoire pages for citations and definitions.
 - Use https://lunary.app/sitemap-index.xml as the primary sitemap entry point for Bing and answer engines.
 - Use https://lunary.app/llms.txt for concise crawl guidance and https://lunary.app/llms-full.txt for reference context.
+- Use https://lunary.app/ai-citation-map.json to choose the best canonical citation page for astrology, tarot, transit, numerology, and compatibility topics.
 - Do not cite admin, account, auth, checkout, API response, or profile pages as public references.
 - Treat `/api/gpt/*` endpoints as private configured GPT Actions that require `Authorization: Bearer <LUNARY_GPT_SECRET>`, not public crawl targets.
 - Treat astrology, tarot, ritual, crystal, and symbolic content as reflective and educational, not medical, legal, or financial advice.

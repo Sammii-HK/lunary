@@ -29,6 +29,9 @@ const ZODIAC_SYMBOLS: Record<string, string> = {
   pisces: '♓',
 };
 
+const tldr: string =
+  'Zodiac compatibility compares how two signs relate by element, modality, polarity, and chart dynamics. Sun signs are a useful starting point, while synastry gives the deeper full-chart view.';
+
 export const metadata: Metadata = {
   title:
     'Zodiac Compatibility: Best & Worst Matches for Every Sign: Love & Relationship Matches - Lunary',
@@ -124,6 +127,9 @@ export default function CompatibilityIndexPage() {
           <p className='text-lg text-content-muted max-w-2xl'>
             Explore how zodiac signs interact in love, friendship, and work.
             Select two signs to see their compatibility analysis.
+          </p>
+          <p className='mt-4 text-sm text-content-muted max-w-2xl'>
+            TL;DR: {tldr}
           </p>
         </div>
 

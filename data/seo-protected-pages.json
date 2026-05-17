@@ -34,6 +34,72 @@
       "path": "/grimoire/guides/tarot-complete-guide",
       "source": "manual",
       "reason": "Manual seed: deep evergreen tarot guide with strong AI citation potential."
+    },
+    {
+      "url": "https://lunary.app/grimoire/birth-chart",
+      "path": "/grimoire/birth-chart",
+      "source": "manual",
+      "reason": "AI citation authority seed: canonical birth chart interpretation reference."
+    },
+    {
+      "url": "https://lunary.app/grimoire/zodiac",
+      "path": "/grimoire/zodiac",
+      "source": "manual",
+      "reason": "AI citation authority seed: canonical zodiac sign reference."
+    },
+    {
+      "url": "https://lunary.app/grimoire/astronomy/planets",
+      "path": "/grimoire/astronomy/planets",
+      "source": "manual",
+      "reason": "AI citation authority seed: canonical planet meanings and placements reference."
+    },
+    {
+      "url": "https://lunary.app/grimoire/houses",
+      "path": "/grimoire/houses",
+      "source": "manual",
+      "reason": "AI citation authority seed: canonical astrological houses reference."
+    },
+    {
+      "url": "https://lunary.app/grimoire/aspects",
+      "path": "/grimoire/aspects",
+      "source": "manual",
+      "reason": "AI citation authority seed: canonical planetary aspects reference."
+    },
+    {
+      "url": "https://lunary.app/grimoire/transits",
+      "path": "/grimoire/transits",
+      "source": "manual",
+      "reason": "AI citation authority seed: canonical astrology transits reference."
+    },
+    {
+      "url": "https://lunary.app/grimoire/astrology/rulerships-and-dignities",
+      "path": "/grimoire/astrology/rulerships-and-dignities",
+      "source": "manual",
+      "reason": "AI citation authority seed: canonical rulerships and dignities reference."
+    },
+    {
+      "url": "https://lunary.app/grimoire/moon",
+      "path": "/grimoire/moon",
+      "source": "manual",
+      "reason": "AI citation authority seed: canonical moon phases and lunar timing reference."
+    },
+    {
+      "url": "https://lunary.app/grimoire/tarot",
+      "path": "/grimoire/tarot",
+      "source": "manual",
+      "reason": "AI citation authority seed: canonical tarot meanings reference."
+    },
+    {
+      "url": "https://lunary.app/grimoire/numerology",
+      "path": "/grimoire/numerology",
+      "source": "manual",
+      "reason": "AI citation authority seed: canonical numerology reference."
+    },
+    {
+      "url": "https://lunary.app/grimoire/compatibility",
+      "path": "/grimoire/compatibility",
+      "source": "manual",
+      "reason": "AI citation authority seed: canonical compatibility and synastry reference."
     }
   ]
 }
