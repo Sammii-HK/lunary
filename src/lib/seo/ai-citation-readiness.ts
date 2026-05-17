@@ -3,18 +3,18 @@ import { join, relative, resolve } from 'node:path';
 
 import { CANONICAL_SITE_URL } from '@/lib/seo/discovery';
 
-export type AiCitationMap = {
-  name?: string;
-  version?: string;
-  prioritySurfaces?: AiCitationSurface[];
-};
-
 export type AiCitationSurface = {
   topic?: string;
   canonicalUrl?: string;
   supportingUrls?: string[];
   preferredFor?: string[];
   entities?: string[];
+};
+
+export type AiCitationMap = {
+  name?: string;
+  version?: string;
+  prioritySurfaces?: AiCitationSurface[];
 };
 
 export type CitationTarget = {
