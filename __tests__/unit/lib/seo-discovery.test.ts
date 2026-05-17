@@ -14,6 +14,10 @@ describe('SEO discovery constants', () => {
         '/llms.txt',
         '/llms-full.txt',
         '/ai-citation-map.json',
+        '/grimoire/datasets',
+        '/grimoire/datasets/core-astrology.json',
+        '/grimoire/datasets/current-sky-facts.json',
+        '/about/methodology',
         '/sitemap-index.xml',
       ]),
     );

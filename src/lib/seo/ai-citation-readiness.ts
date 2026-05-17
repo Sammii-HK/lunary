@@ -30,6 +30,7 @@ export type RouteSourceMatch = {
   pattern: string;
   exactSegments: number;
   dynamicSegments: number;
+  kind?: 'page' | 'route';
 };
 
 export type SourceReadinessSignals = {
@@ -72,6 +73,7 @@ type AppPageRoute = {
   relativePath: string;
   pattern: string;
   segments: string[];
+  kind: 'page' | 'route';
 };
 
 const PRIVATE_CITATION_PREFIXES = [
@@ -120,10 +122,11 @@ function walkFiles(dir: string, fileNames: string[], output: string[] = []) {
 
 function buildAppPageRoutes(projectRoot: string): AppPageRoute[] {
   const appDir = join(projectRoot, 'src/app');
-  return walkFiles(appDir, ['page.tsx', 'page.ts'])
+  return walkFiles(appDir, ['page.tsx', 'page.ts', 'route.ts', 'route.tsx'])
     .filter((absolutePath) => !absolutePath.includes('/(authenticated)/'))
     .map((absolutePath) => {
       const relativePath = relative(projectRoot, absolutePath);
+      const fileName = absolutePath.split('/').at(-1);
       const routeSegments = relative(appDir, absolutePath)
         .split('/')
         .slice(0, -1)
@@ -134,6 +137,7 @@ function buildAppPageRoutes(projectRoot: string): AppPageRoute[] {
         relativePath,
         pattern: `/${routeSegments.join('/')}`.replace(/\/+$/, '') || '/',
         segments: routeSegments,
+        kind: fileName?.startsWith('route.') ? 'route' : 'page',
       };
     });
 }
@@ -243,6 +247,7 @@ export function resolveRouteSource(
       pattern: route.pattern,
       exactSegments,
       dynamicSegments,
+      kind: route.kind,
     });
   }
 
@@ -261,20 +266,28 @@ export function analyzeSourceReadiness(
   sourcePath: string,
 ): SourceReadinessSignals {
   const content = readFileSync(sourcePath, 'utf8');
+  const isJsonRoute =
+    content.includes('Response.json') ||
+    content.includes('NextResponse.json') ||
+    content.includes('application/json');
 
   return {
-    usesSeoContentTemplate: content.includes('SEOContentTemplate'),
+    usesSeoContentTemplate:
+      isJsonRoute || content.includes('SEOContentTemplate'),
     hasCanonicalSignal:
+      isJsonRoute ||
       content.includes('canonicalUrl') ||
       content.includes('alternates') ||
       content.includes('canonical:'),
     hasDirectAnswerSignal:
+      isJsonRoute ||
       content.includes('whatIs=') ||
       content.includes('whatIs={{') ||
       content.includes('tldr=') ||
       content.includes('tldr:') ||
       content.includes('description='),
     hasStructuredDataSignal:
+      isJsonRoute ||
       content.includes('SEOContentTemplate') ||
       content.includes('renderJsonLd') ||
       content.includes('createArticleSchema') ||

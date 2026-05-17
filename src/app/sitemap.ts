@@ -40,6 +40,7 @@ import { getAllProducts } from '@/lib/shop/generators';
 import { prisma } from '@/lib/prisma';
 import { activeAppPolicySlugs } from '@/data/app-policy-pages';
 import { getSeoProtectedRouteEntries } from '@/lib/seo/protected-pages';
+import { ASTROLOGY_GLOSSARY } from '@/constants/grimoire/glossary';
 
 dayjs.extend(isoWeek);
 import { getAllSynastryAspectSlugs } from '@/constants/seo/synastry-aspects';
@@ -327,6 +328,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       'src/app/grimoire/guides/moon-phases-guide/page.tsx',
     ],
     'grimoire/glossary': ['src/app/grimoire/glossary/page.tsx'],
+    'grimoire/datasets': ['src/app/grimoire/datasets/page.tsx'],
+    'grimoire/datasets/core-astrology.json': [
+      'src/app/grimoire/datasets/core-astrology.json/route.ts',
+      'src/lib/seo/citation-datasets.ts',
+    ],
+    'grimoire/datasets/current-sky-facts.json': [
+      'src/app/grimoire/datasets/current-sky-facts.json/route.ts',
+      'src/lib/seo/citation-datasets.ts',
+    ],
     'about/sammii': ['src/app/about/sammii/page.tsx'],
     'about/editorial-guidelines': [
       'src/app/about/editorial-guidelines/page.tsx',
@@ -500,6 +510,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     { path: 'grimoire/glossary', changeFrequency: 'monthly', priority: 0.7 },
+    {
+      path: 'grimoire/datasets',
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      path: 'grimoire/datasets/core-astrology.json',
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
+    {
+      path: 'grimoire/datasets/current-sky-facts.json',
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
     {
       path: 'about/sammii',
       changeFrequency: 'monthly',
@@ -1279,6 +1304,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  const glossaryTermRoutes = ASTROLOGY_GLOSSARY.map((entry) => ({
+    url: `${baseUrl}/grimoire/glossary/${entry.slug}`,
+    lastModified:
+      getLastModifiedFromPaths([
+        'src/app/grimoire/glossary/[term]/page.tsx',
+        'src/constants/grimoire/glossary.ts',
+      ]) ?? date,
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }));
+
   // Add static grimoire pages (cleaned up - removed old URLs now handled by redirects)
   const additionalGrimoirePageConfigs: RouteConfig[] = [
     { path: 'grimoire/astronomy/planets', priority: 0.8 },
@@ -1416,6 +1452,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...expressionRoutes,
     ...soulUrgeRoutes,
     ...karmicDebtRoutes,
+    ...glossaryTermRoutes,
     synastryGeneratorRoute,
     synastryAspectsIndexRoute,
     ...synastryAspectRoutes,

@@ -66,6 +66,13 @@ pnpm seo:indexnow:discovery
 
 This sends only the homepage, crawl declarations, AI citation map, AI manifests, sitemap index, and curated high-signal sitemap files. It does not touch Neon and does not submit deprioritized scaled families such as birthday, crystals, decans, or broad ritual inventory.
 
+The discovery set also includes the public citation dataset catalog, dataset JSON endpoints, and methodology page:
+
+- `/grimoire/datasets`
+- `/grimoire/datasets/core-astrology.json`
+- `/grimoire/datasets/current-sky-facts.json`
+- `/about/methodology`
+
 ## Verify AI search readiness
 
 Run the AI discovery verifier before submitting the branch:
@@ -80,6 +87,8 @@ This checks the public AI/Bing discovery files, GPT action auth declarations, si
 
 `/ai-citation-map.json` is the compact machine-readable map for answer engines. Keep it focused on canonical public surfaces and do not add private API, profile, checkout, auth, or admin URLs.
 
+Public dataset endpoints are allowed citation surfaces when the answer engine needs structured astrology facts. Pair them with canonical Grimoire entity pages or `/about/methodology` for interpretation and calculation context.
+
 ## Recommended triggers
 
 Submit when these change materially:
@@ -89,5 +98,6 @@ Submit when these change materially:
 - planet overview pages
 - planet in-signs pages
 - rulerships and dignities page
+- public citation datasets or glossary entity pages
 - major horoscope/monthly/yearly pages
 - time-sensitive transit or event pages

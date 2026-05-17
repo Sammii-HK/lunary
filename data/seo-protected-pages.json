@@ -100,6 +100,36 @@
       "path": "/grimoire/compatibility",
       "source": "manual",
       "reason": "AI citation authority seed: canonical compatibility and synastry reference."
+    },
+    {
+      "url": "https://lunary.app/grimoire/glossary",
+      "path": "/grimoire/glossary",
+      "source": "manual",
+      "reason": "AI citation authority seed: canonical astrology glossary and entity definition reference."
+    },
+    {
+      "url": "https://lunary.app/grimoire/glossary/ascendant",
+      "path": "/grimoire/glossary/ascendant",
+      "source": "manual",
+      "reason": "AI citation authority seed: representative glossary entity page for rising sign and chart angle definitions."
+    },
+    {
+      "url": "https://lunary.app/grimoire/glossary/transit",
+      "path": "/grimoire/glossary/transit",
+      "source": "manual",
+      "reason": "AI citation authority seed: representative glossary entity page for transit definitions."
+    },
+    {
+      "url": "https://lunary.app/grimoire/datasets",
+      "path": "/grimoire/datasets",
+      "source": "manual",
+      "reason": "AI citation authority seed: public machine-readable astrology datasets."
+    },
+    {
+      "url": "https://lunary.app/about/methodology",
+      "path": "/about/methodology",
+      "source": "manual",
+      "reason": "AI citation authority seed: calculation methodology and source standards."
     }
   ]
 }

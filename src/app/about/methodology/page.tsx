@@ -182,6 +182,9 @@ const sourceLinks = [
   },
 ];
 
+const tldr: string =
+  'Lunary calculates astrology charts, transits, moon phases, and current sky facts from real astronomical positions, then separates calculation facts from symbolic interpretation.';
+
 export default function MethodologyPage() {
   const faqSchema = createFAQPageSchema(
     faqs.map((faq) => ({
@@ -214,6 +217,9 @@ export default function MethodologyPage() {
             <p className='text-xl text-content-muted leading-relaxed'>
               How Lunary achieves astronomy-grade accuracy in astrological
               calculations.
+            </p>
+            <p className='mt-4 text-sm text-content-muted leading-relaxed'>
+              TL;DR: {tldr}
             </p>
           </header>
 

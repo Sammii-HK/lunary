@@ -14,6 +14,9 @@ import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { GlossaryClient } from './GlossaryClient';
 
+const tldr: string =
+  'The Lunary astrology glossary defines chart, planet, sign, house, aspect, transit, and technique terms with stable entity pages and structured data for citations.';
+
 export const metadata: Metadata = {
   title:
     'Astrology Glossary: Complete Dictionary of 90+ Astrological Terms - Lunary',
@@ -90,6 +93,9 @@ export default function GlossaryPage() {
           Complete dictionary of {ASTROLOGY_GLOSSARY.length} astrological terms.
           Reference guide for understanding birth charts, planetary aspects,
           houses, and more.
+        </p>
+        <p className='mt-4 text-sm text-content-muted leading-relaxed'>
+          TL;DR: {tldr}
         </p>
       </header>
 

@@ -1,15 +1,44 @@
 {
   "summary": {
-    "generatedAt": "2026-05-17T19:48:57.059Z",
+    "generatedAt": "2026-05-17T20:56:47.572Z",
     "source": "public/ai-citation-map.json",
-    "targetCount": 32,
+    "targetCount": 39,
     "averageScore": 95,
-    "excellent": 32,
+    "excellent": 39,
     "good": 0,
     "needsWork": 0,
     "critical": 0
   },
   "results": [
+    {
+      "url": "https://lunary.app/about/methodology",
+      "pathname": "/about/methodology",
+      "topic": "Machine-readable astrology datasets",
+      "role": "supporting",
+      "score": 95,
+      "grade": "excellent",
+      "routeSource": {
+        "absolutePath": "/Users/sammii/development/lunary/src/app/about/methodology/page.tsx",
+        "relativePath": "src/app/about/methodology/page.tsx",
+        "pattern": "/about/methodology",
+        "exactSegments": 2,
+        "dynamicSegments": 0,
+        "kind": "page"
+      },
+      "sourceSignals": {
+        "usesSeoContentTemplate": false,
+        "hasCanonicalSignal": true,
+        "hasDirectAnswerSignal": true,
+        "hasStructuredDataSignal": true,
+        "hasFaqSignal": true
+      },
+      "inSitemap": true,
+      "protectedSeoPage": true,
+      "issues": ["Page does not appear to use SEOContentTemplate."],
+      "recommendations": [
+        "Move this page onto SEOContentTemplate or add equivalent answer/schema blocks."
+      ]
+    },
     {
       "url": "https://lunary.app/birth-chart",
       "pathname": "/birth-chart",
@@ -22,7 +51,8 @@
         "relativePath": "src/app/birth-chart/page.tsx",
         "pattern": "/birth-chart",
         "exactSegments": 1,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": false,
@@ -50,7 +80,8 @@
         "relativePath": "src/app/blog/transits/page.tsx",
         "pattern": "/blog/transits",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": false,
@@ -78,7 +109,8 @@
         "relativePath": "src/app/comparison/personalized-vs-generic-astrology/page.tsx",
         "pattern": "/comparison/personalized-vs-generic-astrology",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": false,
@@ -106,7 +138,8 @@
         "relativePath": "src/app/grimoire/angel-numbers/page.tsx",
         "pattern": "/grimoire/angel-numbers",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -132,7 +165,8 @@
         "relativePath": "src/app/grimoire/aspects/page.tsx",
         "pattern": "/grimoire/aspects",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -158,7 +192,8 @@
         "relativePath": "src/app/grimoire/aspects/types/[aspect]/page.tsx",
         "pattern": "/grimoire/aspects/types/[aspect]",
         "exactSegments": 3,
-        "dynamicSegments": 1
+        "dynamicSegments": 1,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -184,7 +219,8 @@
         "relativePath": "src/app/grimoire/aspects/types/[aspect]/page.tsx",
         "pattern": "/grimoire/aspects/types/[aspect]",
         "exactSegments": 3,
-        "dynamicSegments": 1
+        "dynamicSegments": 1,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -210,7 +246,8 @@
         "relativePath": "src/app/grimoire/astrology/page.tsx",
         "pattern": "/grimoire/astrology",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -236,7 +273,8 @@
         "relativePath": "src/app/grimoire/astrology/rulerships-and-dignities/page.tsx",
         "pattern": "/grimoire/astrology/rulerships-and-dignities",
         "exactSegments": 3,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -262,7 +300,8 @@
         "relativePath": "src/app/grimoire/astronomy/planets/page.tsx",
         "pattern": "/grimoire/astronomy/planets",
         "exactSegments": 3,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -288,7 +327,8 @@
         "relativePath": "src/app/grimoire/astronomy/planets/[planet]/in-signs/page.tsx",
         "pattern": "/grimoire/astronomy/planets/[planet]/in-signs",
         "exactSegments": 4,
-        "dynamicSegments": 1
+        "dynamicSegments": 1,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -314,7 +354,8 @@
         "relativePath": "src/app/grimoire/birth-chart/page.tsx",
         "pattern": "/grimoire/birth-chart",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -340,7 +381,8 @@
         "relativePath": "src/app/grimoire/compatibility/page.tsx",
         "pattern": "/grimoire/compatibility",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": false,
@@ -358,6 +400,178 @@
       ]
     },
     {
+      "url": "https://lunary.app/grimoire/datasets",
+      "pathname": "/grimoire/datasets",
+      "topic": "Machine-readable astrology datasets",
+      "role": "canonical",
+      "score": 90,
+      "grade": "excellent",
+      "routeSource": {
+        "absolutePath": "/Users/sammii/development/lunary/src/app/grimoire/datasets/page.tsx",
+        "relativePath": "src/app/grimoire/datasets/page.tsx",
+        "pattern": "/grimoire/datasets",
+        "exactSegments": 2,
+        "dynamicSegments": 0,
+        "kind": "page"
+      },
+      "sourceSignals": {
+        "usesSeoContentTemplate": false,
+        "hasCanonicalSignal": true,
+        "hasDirectAnswerSignal": true,
+        "hasStructuredDataSignal": true,
+        "hasFaqSignal": false
+      },
+      "inSitemap": true,
+      "protectedSeoPage": true,
+      "issues": ["Page does not appear to use SEOContentTemplate."],
+      "recommendations": [
+        "Move this page onto SEOContentTemplate or add equivalent answer/schema blocks.",
+        "Consider adding tightly scoped FAQs for long-tail answer extraction."
+      ]
+    },
+    {
+      "url": "https://lunary.app/grimoire/datasets/core-astrology.json",
+      "pathname": "/grimoire/datasets/core-astrology.json",
+      "topic": "Astrology glossary definitions",
+      "role": "supporting",
+      "score": 95,
+      "grade": "excellent",
+      "routeSource": {
+        "absolutePath": "/Users/sammii/development/lunary/src/app/grimoire/datasets/core-astrology.json/route.ts",
+        "relativePath": "src/app/grimoire/datasets/core-astrology.json/route.ts",
+        "pattern": "/grimoire/datasets/core-astrology.json",
+        "exactSegments": 3,
+        "dynamicSegments": 0,
+        "kind": "route"
+      },
+      "sourceSignals": {
+        "usesSeoContentTemplate": true,
+        "hasCanonicalSignal": true,
+        "hasDirectAnswerSignal": true,
+        "hasStructuredDataSignal": true,
+        "hasFaqSignal": false
+      },
+      "inSitemap": true,
+      "protectedSeoPage": false,
+      "issues": [],
+      "recommendations": []
+    },
+    {
+      "url": "https://lunary.app/grimoire/datasets/current-sky-facts.json",
+      "pathname": "/grimoire/datasets/current-sky-facts.json",
+      "topic": "Machine-readable astrology datasets",
+      "role": "supporting",
+      "score": 95,
+      "grade": "excellent",
+      "routeSource": {
+        "absolutePath": "/Users/sammii/development/lunary/src/app/grimoire/datasets/current-sky-facts.json/route.ts",
+        "relativePath": "src/app/grimoire/datasets/current-sky-facts.json/route.ts",
+        "pattern": "/grimoire/datasets/current-sky-facts.json",
+        "exactSegments": 3,
+        "dynamicSegments": 0,
+        "kind": "route"
+      },
+      "sourceSignals": {
+        "usesSeoContentTemplate": true,
+        "hasCanonicalSignal": true,
+        "hasDirectAnswerSignal": true,
+        "hasStructuredDataSignal": true,
+        "hasFaqSignal": false
+      },
+      "inSitemap": true,
+      "protectedSeoPage": false,
+      "issues": [],
+      "recommendations": []
+    },
+    {
+      "url": "https://lunary.app/grimoire/glossary",
+      "pathname": "/grimoire/glossary",
+      "topic": "Astrology glossary definitions",
+      "role": "canonical",
+      "score": 90,
+      "grade": "excellent",
+      "routeSource": {
+        "absolutePath": "/Users/sammii/development/lunary/src/app/grimoire/glossary/page.tsx",
+        "relativePath": "src/app/grimoire/glossary/page.tsx",
+        "pattern": "/grimoire/glossary",
+        "exactSegments": 2,
+        "dynamicSegments": 0,
+        "kind": "page"
+      },
+      "sourceSignals": {
+        "usesSeoContentTemplate": false,
+        "hasCanonicalSignal": true,
+        "hasDirectAnswerSignal": true,
+        "hasStructuredDataSignal": true,
+        "hasFaqSignal": false
+      },
+      "inSitemap": true,
+      "protectedSeoPage": true,
+      "issues": ["Page does not appear to use SEOContentTemplate."],
+      "recommendations": [
+        "Move this page onto SEOContentTemplate or add equivalent answer/schema blocks.",
+        "Consider adding tightly scoped FAQs for long-tail answer extraction."
+      ]
+    },
+    {
+      "url": "https://lunary.app/grimoire/glossary/ascendant",
+      "pathname": "/grimoire/glossary/ascendant",
+      "topic": "Astrology glossary definitions",
+      "role": "supporting",
+      "score": 90,
+      "grade": "excellent",
+      "routeSource": {
+        "absolutePath": "/Users/sammii/development/lunary/src/app/grimoire/glossary/[term]/page.tsx",
+        "relativePath": "src/app/grimoire/glossary/[term]/page.tsx",
+        "pattern": "/grimoire/glossary/[term]",
+        "exactSegments": 2,
+        "dynamicSegments": 1,
+        "kind": "page"
+      },
+      "sourceSignals": {
+        "usesSeoContentTemplate": false,
+        "hasCanonicalSignal": true,
+        "hasDirectAnswerSignal": true,
+        "hasStructuredDataSignal": true,
+        "hasFaqSignal": false
+      },
+      "inSitemap": true,
+      "protectedSeoPage": true,
+      "issues": ["Page does not appear to use SEOContentTemplate."],
+      "recommendations": [
+        "Move this page onto SEOContentTemplate or add equivalent answer/schema blocks."
+      ]
+    },
+    {
+      "url": "https://lunary.app/grimoire/glossary/transit",
+      "pathname": "/grimoire/glossary/transit",
+      "topic": "Astrology glossary definitions",
+      "role": "supporting",
+      "score": 90,
+      "grade": "excellent",
+      "routeSource": {
+        "absolutePath": "/Users/sammii/development/lunary/src/app/grimoire/glossary/[term]/page.tsx",
+        "relativePath": "src/app/grimoire/glossary/[term]/page.tsx",
+        "pattern": "/grimoire/glossary/[term]",
+        "exactSegments": 2,
+        "dynamicSegments": 1,
+        "kind": "page"
+      },
+      "sourceSignals": {
+        "usesSeoContentTemplate": false,
+        "hasCanonicalSignal": true,
+        "hasDirectAnswerSignal": true,
+        "hasStructuredDataSignal": true,
+        "hasFaqSignal": false
+      },
+      "inSitemap": true,
+      "protectedSeoPage": true,
+      "issues": ["Page does not appear to use SEOContentTemplate."],
+      "recommendations": [
+        "Move this page onto SEOContentTemplate or add equivalent answer/schema blocks."
+      ]
+    },
+    {
       "url": "https://lunary.app/grimoire/guides/birth-chart-complete-guide",
       "pathname": "/grimoire/guides/birth-chart-complete-guide",
       "topic": "Birth chart interpretation",
@@ -369,7 +583,8 @@
         "relativePath": "src/app/grimoire/guides/birth-chart-complete-guide/page.tsx",
         "pattern": "/grimoire/guides/birth-chart-complete-guide",
         "exactSegments": 3,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": false,
@@ -401,7 +616,8 @@
         "relativePath": "src/app/grimoire/guides/moon-phases-guide/page.tsx",
         "pattern": "/grimoire/guides/moon-phases-guide",
         "exactSegments": 3,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": false,
@@ -433,7 +649,8 @@
         "relativePath": "src/app/grimoire/guides/tarot-complete-guide/page.tsx",
         "pattern": "/grimoire/guides/tarot-complete-guide",
         "exactSegments": 3,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": false,
@@ -465,7 +682,8 @@
         "relativePath": "src/app/grimoire/houses/page.tsx",
         "pattern": "/grimoire/houses",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -491,7 +709,8 @@
         "relativePath": "src/app/grimoire/houses/[slug]/page.tsx",
         "pattern": "/grimoire/houses/[slug]",
         "exactSegments": 2,
-        "dynamicSegments": 1
+        "dynamicSegments": 1,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -519,7 +738,8 @@
         "relativePath": "src/app/grimoire/houses/[slug]/page.tsx",
         "pattern": "/grimoire/houses/[slug]",
         "exactSegments": 2,
-        "dynamicSegments": 1
+        "dynamicSegments": 1,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -547,7 +767,8 @@
         "relativePath": "src/app/grimoire/life-path/page.tsx",
         "pattern": "/grimoire/life-path",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -573,7 +794,8 @@
         "relativePath": "src/app/grimoire/moon/page.tsx",
         "pattern": "/grimoire/moon",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -599,7 +821,8 @@
         "relativePath": "src/app/grimoire/numerology/page.tsx",
         "pattern": "/grimoire/numerology",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -625,7 +848,8 @@
         "relativePath": "src/app/grimoire/placements/page.tsx",
         "pattern": "/grimoire/placements",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -651,7 +875,8 @@
         "relativePath": "src/app/grimoire/synastry/page.tsx",
         "pattern": "/grimoire/synastry",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -677,7 +902,8 @@
         "relativePath": "src/app/grimoire/tarot/page.tsx",
         "pattern": "/grimoire/tarot",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -703,7 +929,8 @@
         "relativePath": "src/app/grimoire/tarot/spreads/page.tsx",
         "pattern": "/grimoire/tarot/spreads",
         "exactSegments": 3,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -729,7 +956,8 @@
         "relativePath": "src/app/grimoire/transits/page.tsx",
         "pattern": "/grimoire/transits",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -755,7 +983,8 @@
         "relativePath": "src/app/grimoire/transits/transit-of-the-day/page.tsx",
         "pattern": "/grimoire/transits/transit-of-the-day",
         "exactSegments": 3,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -781,7 +1010,8 @@
         "relativePath": "src/app/grimoire/zodiac/page.tsx",
         "pattern": "/grimoire/zodiac",
         "exactSegments": 2,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -807,7 +1037,8 @@
         "relativePath": "src/app/grimoire/zodiac/[sign]/page.tsx",
         "pattern": "/grimoire/zodiac/[sign]",
         "exactSegments": 2,
-        "dynamicSegments": 1
+        "dynamicSegments": 1,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -833,7 +1064,8 @@
         "relativePath": "src/app/grimoire/zodiac/[sign]/in-the-chart/page.tsx",
         "pattern": "/grimoire/zodiac/[sign]/in-the-chart",
         "exactSegments": 3,
-        "dynamicSegments": 1
+        "dynamicSegments": 1,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": true,
@@ -859,7 +1091,8 @@
         "relativePath": "src/app/moon-calendar/page.tsx",
         "pattern": "/moon-calendar",
         "exactSegments": 1,
-        "dynamicSegments": 0
+        "dynamicSegments": 0,
+        "kind": "page"
       },
       "sourceSignals": {
         "usesSeoContentTemplate": false,
