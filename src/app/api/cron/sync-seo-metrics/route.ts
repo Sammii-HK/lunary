@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     );
 
     // Get sitemap data
-    const sitemapData = generateSitemap();
+    const sitemapData = await generateSitemap();
     const pagesIndexed = sitemapData.length;
     const articleCount = countArticlesFromSitemap(sitemapData);
 

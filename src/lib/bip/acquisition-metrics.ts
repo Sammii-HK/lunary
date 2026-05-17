@@ -112,8 +112,8 @@ export async function getBipAcquisitionSnapshot(
     sources: {
       google: Boolean(googlePerformance),
       bing: Boolean(bingPerformance),
-      bingAiCitations: aiSnapshot?.totalCitations || 0,
-      bingAiCitedPages: aiSnapshot?.averageCitedPages || 0,
+      bingAiCitations: aiSnapshot.summary.totalCitations,
+      bingAiCitedPages: aiSnapshot.summary.averageCitedPages,
     },
   };
 }

@@ -189,15 +189,13 @@ function aggregateQueryRows(
     const key = row.Query || '';
     if (!key) continue;
 
-    const current =
-      byKey.get(key) ||
-      ({
-        key,
-        clicks: 0,
-        impressions: 0,
-        positionTotal: 0,
-        rows: 0,
-      } as const);
+    const current = byKey.get(key) || {
+      key,
+      clicks: 0,
+      impressions: 0,
+      positionTotal: 0,
+      rows: 0,
+    };
 
     current.clicks += Number(row.Clicks || 0);
     current.impressions += Number(row.Impressions || 0);

@@ -5,6 +5,18 @@ import {
   resolveRelatedTerms,
 } from '@/app/grimoire/glossary/[term]/page';
 
+type GlossaryTermSchema = ReturnType<typeof buildGlossaryTermSchemas>[number];
+type DefinedTermSchema = GlossaryTermSchema & {
+  sameAs?: string[];
+  subjectOf?: Array<Record<string, unknown>>;
+};
+
+function isDefinedTermSchema(
+  schema: GlossaryTermSchema,
+): schema is DefinedTermSchema {
+  return schema['@type'] === 'DefinedTerm';
+}
+
 describe('glossary term page helpers', () => {
   const ascendant = ASTROLOGY_GLOSSARY.find(
     (entry) => entry.slug === 'ascendant',
@@ -36,7 +48,12 @@ describe('glossary term page helpers', () => {
   });
 
   it('uses only absolute valid related-term URLs in DefinedTerm schema', () => {
-    const [definedTermSchema] = buildGlossaryTermSchemas(ascendant);
+    const definedTermSchema =
+      buildGlossaryTermSchemas(ascendant).find(isDefinedTermSchema);
+
+    if (!definedTermSchema) {
+      throw new Error('Expected DefinedTerm schema to exist');
+    }
 
     expect(definedTermSchema).toMatchObject({
       '@type': 'DefinedTerm',

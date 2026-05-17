@@ -62,14 +62,29 @@ jest.mock('@/components/charts/useEphemerisRange', () => {
 });
 
 const birthChart = [
-  { body: 'Sun', sign: 'Aries', degree: 0, minute: 0, eclipticLongitude: 0 },
-  { body: 'Moon', sign: 'Taurus', degree: 0, minute: 0, eclipticLongitude: 30 },
+  {
+    body: 'Sun',
+    sign: 'Aries',
+    degree: 0,
+    minute: 0,
+    eclipticLongitude: 0,
+    retrograde: false,
+  },
+  {
+    body: 'Moon',
+    sign: 'Taurus',
+    degree: 0,
+    minute: 0,
+    eclipticLongitude: 30,
+    retrograde: false,
+  },
   {
     body: 'Mercury',
     sign: 'Gemini',
     degree: 0,
     minute: 0,
     eclipticLongitude: 60,
+    retrograde: false,
   },
   {
     body: 'Venus',
@@ -77,14 +92,23 @@ const birthChart = [
     degree: 0,
     minute: 0,
     eclipticLongitude: 90,
+    retrograde: false,
   },
-  { body: 'Mars', sign: 'Leo', degree: 0, minute: 0, eclipticLongitude: 120 },
+  {
+    body: 'Mars',
+    sign: 'Leo',
+    degree: 0,
+    minute: 0,
+    eclipticLongitude: 120,
+    retrograde: false,
+  },
   {
     body: 'Jupiter',
     sign: 'Virgo',
     degree: 0,
     minute: 0,
     eclipticLongitude: 150,
+    retrograde: false,
   },
   {
     body: 'Saturn',
@@ -92,6 +116,7 @@ const birthChart = [
     degree: 0,
     minute: 0,
     eclipticLongitude: 180,
+    retrograde: false,
   },
   {
     body: 'Uranus',
@@ -99,6 +124,7 @@ const birthChart = [
     degree: 0,
     minute: 0,
     eclipticLongitude: 210,
+    retrograde: false,
   },
   {
     body: 'Neptune',
@@ -106,6 +132,7 @@ const birthChart = [
     degree: 0,
     minute: 0,
     eclipticLongitude: 240,
+    retrograde: false,
   },
   {
     body: 'Pluto',
@@ -113,6 +140,7 @@ const birthChart = [
     degree: 0,
     minute: 0,
     eclipticLongitude: 270,
+    retrograde: false,
   },
   {
     body: 'Ascendant',
@@ -120,6 +148,7 @@ const birthChart = [
     degree: 0,
     minute: 0,
     eclipticLongitude: 0,
+    retrograde: false,
   },
 ] satisfies BirthChartData[];
 

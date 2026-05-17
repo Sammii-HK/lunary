@@ -366,7 +366,8 @@ export function scoreCitationTarget(params: {
     );
   }
 
-  const routeSource = resolveRouteSource(params.target.pathname, projectRoot);
+  const routeSource =
+    resolveRouteSource(params.target.pathname, projectRoot) ?? undefined;
   let sourceSignals: SourceReadinessSignals | undefined;
   if (routeSource) {
     score += 15;
