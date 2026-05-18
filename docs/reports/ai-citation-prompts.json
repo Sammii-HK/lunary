@@ -1,0 +1,422 @@
+[
+  {
+    "id": "birth-chart-interpretation-1",
+    "topic": "Birth chart interpretation",
+    "prompt": "birth chart meaning",
+    "targetUrl": "https://lunary.app/grimoire/birth-chart",
+    "entities": ["birth chart", "natal chart", "houses", "planets", "aspects"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "birth-chart-interpretation-2",
+    "topic": "Birth chart interpretation",
+    "prompt": "natal chart basics",
+    "targetUrl": "https://lunary.app/grimoire/birth-chart",
+    "entities": ["birth chart", "natal chart", "houses", "planets", "aspects"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "birth-chart-interpretation-3",
+    "topic": "Birth chart interpretation",
+    "prompt": "how to read a birth chart",
+    "targetUrl": "https://lunary.app/grimoire/birth-chart",
+    "entities": ["birth chart", "natal chart", "houses", "planets", "aspects"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "zodiac-signs-in-a-chart-1",
+    "topic": "Zodiac signs in a chart",
+    "prompt": "zodiac sign meanings",
+    "targetUrl": "https://lunary.app/grimoire/zodiac",
+    "entities": ["zodiac signs", "elements", "modalities", "ruling planets"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "zodiac-signs-in-a-chart-2",
+    "topic": "Zodiac signs in a chart",
+    "prompt": "sign elements and modalities",
+    "targetUrl": "https://lunary.app/grimoire/zodiac",
+    "entities": ["zodiac signs", "elements", "modalities", "ruling planets"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "zodiac-signs-in-a-chart-3",
+    "topic": "Zodiac signs in a chart",
+    "prompt": "how signs behave in a natal chart",
+    "targetUrl": "https://lunary.app/grimoire/zodiac",
+    "entities": ["zodiac signs", "elements", "modalities", "ruling planets"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "planet-meanings-and-placements-1",
+    "topic": "Planet meanings and placements",
+    "prompt": "planet meanings in astrology",
+    "targetUrl": "https://lunary.app/grimoire/astronomy/planets",
+    "entities": [
+      "Sun",
+      "Moon",
+      "Mercury",
+      "Venus",
+      "Mars",
+      "Jupiter",
+      "Saturn"
+    ],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "planet-meanings-and-placements-2",
+    "topic": "Planet meanings and placements",
+    "prompt": "planetary archetypes",
+    "targetUrl": "https://lunary.app/grimoire/astronomy/planets",
+    "entities": [
+      "Sun",
+      "Moon",
+      "Mercury",
+      "Venus",
+      "Mars",
+      "Jupiter",
+      "Saturn"
+    ],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "planet-meanings-and-placements-3",
+    "topic": "Planet meanings and placements",
+    "prompt": "planet in sign interpretation",
+    "targetUrl": "https://lunary.app/grimoire/astronomy/planets",
+    "entities": [
+      "Sun",
+      "Moon",
+      "Mercury",
+      "Venus",
+      "Mars",
+      "Jupiter",
+      "Saturn"
+    ],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "astrological-houses-1",
+    "topic": "Astrological houses",
+    "prompt": "12 houses in astrology",
+    "targetUrl": "https://lunary.app/grimoire/houses",
+    "entities": [
+      "houses",
+      "angular houses",
+      "succedent houses",
+      "cadent houses"
+    ],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "astrological-houses-2",
+    "topic": "Astrological houses",
+    "prompt": "what houses mean in a birth chart",
+    "targetUrl": "https://lunary.app/grimoire/houses",
+    "entities": [
+      "houses",
+      "angular houses",
+      "succedent houses",
+      "cadent houses"
+    ],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "astrological-houses-3",
+    "topic": "Astrological houses",
+    "prompt": "life areas in astrology",
+    "targetUrl": "https://lunary.app/grimoire/houses",
+    "entities": [
+      "houses",
+      "angular houses",
+      "succedent houses",
+      "cadent houses"
+    ],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "planetary-aspects-1",
+    "topic": "Planetary aspects",
+    "prompt": "aspects in astrology",
+    "targetUrl": "https://lunary.app/grimoire/aspects",
+    "entities": ["conjunction", "opposition", "square", "trine", "sextile"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "planetary-aspects-2",
+    "topic": "Planetary aspects",
+    "prompt": "planet relationships",
+    "targetUrl": "https://lunary.app/grimoire/aspects",
+    "entities": ["conjunction", "opposition", "square", "trine", "sextile"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "planetary-aspects-3",
+    "topic": "Planetary aspects",
+    "prompt": "birth chart aspect interpretation",
+    "targetUrl": "https://lunary.app/grimoire/aspects",
+    "entities": ["conjunction", "opposition", "square", "trine", "sextile"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "transits-and-current-sky-1",
+    "topic": "Transits and current sky",
+    "prompt": "astrology transits",
+    "targetUrl": "https://lunary.app/grimoire/transits",
+    "entities": [
+      "transits",
+      "planetary movement",
+      "retrogrades",
+      "cosmic weather"
+    ],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "transits-and-current-sky-2",
+    "topic": "Transits and current sky",
+    "prompt": "current cosmic weather",
+    "targetUrl": "https://lunary.app/grimoire/transits",
+    "entities": [
+      "transits",
+      "planetary movement",
+      "retrogrades",
+      "cosmic weather"
+    ],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "transits-and-current-sky-3",
+    "topic": "Transits and current sky",
+    "prompt": "how transits affect natal placements",
+    "targetUrl": "https://lunary.app/grimoire/transits",
+    "entities": [
+      "transits",
+      "planetary movement",
+      "retrogrades",
+      "cosmic weather"
+    ],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "rulerships-and-dignities-1",
+    "topic": "Rulerships and dignities",
+    "prompt": "planetary rulerships",
+    "targetUrl": "https://lunary.app/grimoire/astrology/rulerships-and-dignities",
+    "entities": ["rulership", "domicile", "exaltation", "detriment", "fall"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "rulerships-and-dignities-2",
+    "topic": "Rulerships and dignities",
+    "prompt": "domicile and exaltation",
+    "targetUrl": "https://lunary.app/grimoire/astrology/rulerships-and-dignities",
+    "entities": ["rulership", "domicile", "exaltation", "detriment", "fall"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "rulerships-and-dignities-3",
+    "topic": "Rulerships and dignities",
+    "prompt": "detriment and fall",
+    "targetUrl": "https://lunary.app/grimoire/astrology/rulerships-and-dignities",
+    "entities": ["rulership", "domicile", "exaltation", "detriment", "fall"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "moon-phases-and-lunar-timing-1",
+    "topic": "Moon phases and lunar timing",
+    "prompt": "moon phase meanings",
+    "targetUrl": "https://lunary.app/grimoire/moon",
+    "entities": ["New Moon", "Full Moon", "lunar cycle", "moon phase"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "moon-phases-and-lunar-timing-2",
+    "topic": "Moon phases and lunar timing",
+    "prompt": "lunar cycle timing",
+    "targetUrl": "https://lunary.app/grimoire/moon",
+    "entities": ["New Moon", "Full Moon", "lunar cycle", "moon phase"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "moon-phases-and-lunar-timing-3",
+    "topic": "Moon phases and lunar timing",
+    "prompt": "new moon and full moon interpretation",
+    "targetUrl": "https://lunary.app/grimoire/moon",
+    "entities": ["New Moon", "Full Moon", "lunar cycle", "moon phase"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "tarot-meanings-1",
+    "topic": "Tarot meanings",
+    "prompt": "tarot card meanings",
+    "targetUrl": "https://lunary.app/grimoire/tarot",
+    "entities": ["tarot", "Major Arcana", "Minor Arcana", "spreads"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "tarot-meanings-2",
+    "topic": "Tarot meanings",
+    "prompt": "major arcana meanings",
+    "targetUrl": "https://lunary.app/grimoire/tarot",
+    "entities": ["tarot", "Major Arcana", "Minor Arcana", "spreads"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "tarot-meanings-3",
+    "topic": "Tarot meanings",
+    "prompt": "tarot spreads",
+    "targetUrl": "https://lunary.app/grimoire/tarot",
+    "entities": ["tarot", "Major Arcana", "Minor Arcana", "spreads"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "numerology-and-recurring-numbers-1",
+    "topic": "Numerology and recurring numbers",
+    "prompt": "angel number meanings",
+    "targetUrl": "https://lunary.app/grimoire/numerology",
+    "entities": ["angel numbers", "life path", "mirror hours", "double hours"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "numerology-and-recurring-numbers-2",
+    "topic": "Numerology and recurring numbers",
+    "prompt": "life path numbers",
+    "targetUrl": "https://lunary.app/grimoire/numerology",
+    "entities": ["angel numbers", "life path", "mirror hours", "double hours"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "numerology-and-recurring-numbers-3",
+    "topic": "Numerology and recurring numbers",
+    "prompt": "mirror hours and double hours",
+    "targetUrl": "https://lunary.app/grimoire/numerology",
+    "entities": ["angel numbers", "life path", "mirror hours", "double hours"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "compatibility-and-synastry-1",
+    "topic": "Compatibility and synastry",
+    "prompt": "zodiac compatibility",
+    "targetUrl": "https://lunary.app/grimoire/compatibility",
+    "entities": ["compatibility", "synastry", "relationship astrology"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "compatibility-and-synastry-2",
+    "topic": "Compatibility and synastry",
+    "prompt": "relationship astrology",
+    "targetUrl": "https://lunary.app/grimoire/compatibility",
+    "entities": ["compatibility", "synastry", "relationship astrology"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "compatibility-and-synastry-3",
+    "topic": "Compatibility and synastry",
+    "prompt": "synastry basics",
+    "targetUrl": "https://lunary.app/grimoire/compatibility",
+    "entities": ["compatibility", "synastry", "relationship astrology"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "astrology-glossary-definitions-1",
+    "topic": "Astrology glossary definitions",
+    "prompt": "short astrology definitions",
+    "targetUrl": "https://lunary.app/grimoire/glossary",
+    "entities": ["Ascendant", "natal chart", "transit", "retrograde", "aspect"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "astrology-glossary-definitions-2",
+    "topic": "Astrology glossary definitions",
+    "prompt": "defined astrology terms",
+    "targetUrl": "https://lunary.app/grimoire/glossary",
+    "entities": ["Ascendant", "natal chart", "transit", "retrograde", "aspect"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "astrology-glossary-definitions-3",
+    "topic": "Astrology glossary definitions",
+    "prompt": "entity-level astrology citations",
+    "targetUrl": "https://lunary.app/grimoire/glossary",
+    "entities": ["Ascendant", "natal chart", "transit", "retrograde", "aspect"],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "machine-readable-astrology-datasets-1",
+    "topic": "Machine-readable astrology datasets",
+    "prompt": "structured astrology entity data",
+    "targetUrl": "https://lunary.app/grimoire/datasets",
+    "entities": [
+      "core astrology dataset",
+      "current sky facts",
+      "methodology",
+      "Astronomy Engine"
+    ],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "machine-readable-astrology-datasets-2",
+    "topic": "Machine-readable astrology datasets",
+    "prompt": "current sky facts",
+    "targetUrl": "https://lunary.app/grimoire/datasets",
+    "entities": [
+      "core astrology dataset",
+      "current sky facts",
+      "methodology",
+      "Astronomy Engine"
+    ],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "machine-readable-astrology-datasets-3",
+    "topic": "Machine-readable astrology datasets",
+    "prompt": "dataset citation and methodology",
+    "targetUrl": "https://lunary.app/grimoire/datasets",
+    "entities": [
+      "core astrology dataset",
+      "current sky facts",
+      "methodology",
+      "Astronomy Engine"
+    ],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "how-to-cite-lunary-1",
+    "topic": "How to cite Lunary",
+    "prompt": "how to cite Lunary",
+    "targetUrl": "https://lunary.app/about/citations",
+    "entities": [
+      "citation guidance",
+      "generative engine optimization",
+      "AI citations",
+      "dataset attribution"
+    ],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "how-to-cite-lunary-2",
+    "topic": "How to cite Lunary",
+    "prompt": "AI citation instructions",
+    "targetUrl": "https://lunary.app/about/citations",
+    "entities": [
+      "citation guidance",
+      "generative engine optimization",
+      "AI citations",
+      "dataset attribution"
+    ],
+    "source": "ai-citation-map"
+  },
+  {
+    "id": "how-to-cite-lunary-3",
+    "topic": "How to cite Lunary",
+    "prompt": "preferred Lunary source URLs",
+    "targetUrl": "https://lunary.app/about/citations",
+    "entities": [
+      "citation guidance",
+      "generative engine optimization",
+      "AI citations",
+      "dataset attribution"
+    ],
+    "source": "ai-citation-map"
+  }
+]

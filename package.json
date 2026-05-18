@@ -133,6 +133,8 @@
     "seo:verify:ai": "tsx scripts/verify-seo-coverage.ts --ai-discovery-only",
     "seo:audit:citations": "tsx scripts/audit-ai-citation-readiness.ts",
     "seo:audit:citations:fast": "tsx scripts/audit-ai-citation-readiness.ts --skip-sitemap",
+    "seo:citation-radar": "tsx scripts/build-ai-citation-radar.ts",
+    "seo:citation-radar:dry": "tsx scripts/build-ai-citation-radar.ts --skip-live",
     "seo:bing-ai:scrape": "tsx scripts/scrape-bing-ai-performance.ts",
     "seo:bing-ai:scrape:headed": "tsx scripts/scrape-bing-ai-performance.ts --headed",
     "seo:e2e": "playwright test e2e/journeys/18-seo.spec.ts",

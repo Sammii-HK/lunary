@@ -1,0 +1,1297 @@
+{
+  "generatedAt": "2026-05-18T12:18:20.161Z",
+  "window": {
+    "startDate": "2026-04-19",
+    "endDate": "2026-05-17"
+  },
+  "summary": {
+    "promptCount": 42,
+    "browserFindingCount": 0,
+    "browserCitationRate": null,
+    "competitorDomainCount": 0,
+    "bingAiTotalCitations": 333,
+    "bingAiAverageCitedPages": 62,
+    "aiReferralVisits": 294,
+    "opportunityCount": 42
+  },
+  "sources": {
+    "bingAiPerformance": {
+      "generatedAt": "2026-05-15T00:00:00.000Z",
+      "source": "Manual Bing Webmaster Tools AI Performance snapshot. The public Bing Webmaster API does not expose AI Performance citations yet.",
+      "summary": {
+        "totalCitations": 333,
+        "averageCitedPages": 62,
+        "totalClicks": 21,
+        "totalImpressions": 1200,
+        "averageCtr": 0.018
+      },
+      "citedPages": []
+    },
+    "googleSearchConsole": {
+      "available": true,
+      "source": "Google Search Console API",
+      "data": {
+        "topQueries": [
+          {
+            "query": "libra may 2026 horoscope",
+            "clicks": 145,
+            "impressions": 2237,
+            "ctr": 0.06481895395619133,
+            "position": 8.903442109968708
+          },
+          {
+            "query": "taurus may 2026 horoscope",
+            "clicks": 119,
+            "impressions": 1406,
+            "ctr": 0.08463726884779517,
+            "position": 10.076813655761024
+          },
+          {
+            "query": "leo may 2026 horoscope",
+            "clicks": 115,
+            "impressions": 1670,
+            "ctr": 0.0688622754491018,
+            "position": 8.849101796407187
+          },
+          {
+            "query": "aquarius may 2026 horoscope",
+            "clicks": 95,
+            "impressions": 1285,
+            "ctr": 0.07392996108949416,
+            "position": 7.8357976653696495
+          },
+          {
+            "query": "pisces may 2026 horoscope",
+            "clicks": 95,
+            "impressions": 1326,
+            "ctr": 0.07164404223227752,
+            "position": 9.004524886877828
+          },
+          {
+            "query": "leo horoscope may 2026",
+            "clicks": 67,
+            "impressions": 1400,
+            "ctr": 0.047857142857142855,
+            "position": 7.930714285714286
+          },
+          {
+            "query": "aquarius horoscope may 2026",
+            "clicks": 63,
+            "impressions": 1029,
+            "ctr": 0.061224489795918366,
+            "position": 5.709426627793975
+          },
+          {
+            "query": "taurus horoscope may 2026",
+            "clicks": 62,
+            "impressions": 1328,
+            "ctr": 0.046686746987951805,
+            "position": 7.532379518072289
+          },
+          {
+            "query": "taurus season 2026",
+            "clicks": 55,
+            "impressions": 6639,
+            "ctr": 0.00828438017773761,
+            "position": 9.038710649194156
+          },
+          {
+            "query": "libra may 2026",
+            "clicks": 52,
+            "impressions": 706,
+            "ctr": 0.07365439093484419,
+            "position": 8.304532577903682
+          },
+          {
+            "query": "gemini may 2026 horoscope",
+            "clicks": 51,
+            "impressions": 555,
+            "ctr": 0.0918918918918919,
+            "position": 13.787387387387387
+          },
+          {
+            "query": "taurus may 2026",
+            "clicks": 51,
+            "impressions": 640,
+            "ctr": 0.0796875,
+            "position": 8.0609375
+          },
+          {
+            "query": "pisces may 2026",
+            "clicks": 41,
+            "impressions": 596,
+            "ctr": 0.06879194630872483,
+            "position": 7.645973154362416
+          },
+          {
+            "query": "leo may 2026",
+            "clicks": 37,
+            "impressions": 490,
+            "ctr": 0.07551020408163266,
+            "position": 7.912244897959184
+          },
+          {
+            "query": "aquarius may 2026",
+            "clicks": 33,
+            "impressions": 368,
+            "ctr": 0.08967391304347826,
+            "position": 9.269021739130435
+          },
+          {
+            "query": "virgo may 2026",
+            "clicks": 31,
+            "impressions": 293,
+            "ctr": 0.10580204778156997,
+            "position": 11.450511945392492
+          },
+          {
+            "query": "pisces horoscope may 2026",
+            "clicks": 28,
+            "impressions": 657,
+            "ctr": 0.0426179604261796,
+            "position": 8.30593607305936
+          },
+          {
+            "query": "libra horoscope may 2026",
+            "clicks": 26,
+            "impressions": 1014,
+            "ctr": 0.02564102564102564,
+            "position": 8.722879684418146
+          },
+          {
+            "query": "taurus horoscope for may 2026",
+            "clicks": 25,
+            "impressions": 305,
+            "ctr": 0.08196721311475409,
+            "position": 6.967213114754099
+          },
+          {
+            "query": "aries may 2026 horoscope",
+            "clicks": 22,
+            "impressions": 250,
+            "ctr": 0.088,
+            "position": 18.516
+          },
+          {
+            "query": "may 2026 taurus horoscope",
+            "clicks": 22,
+            "impressions": 217,
+            "ctr": 0.10138248847926268,
+            "position": 8.073732718894009
+          },
+          {
+            "query": "789 angel number",
+            "clicks": 19,
+            "impressions": 1933,
+            "ctr": 0.00982928091050181,
+            "position": 8.14536989136058
+          },
+          {
+            "query": "uranus in gemini 2026",
+            "clicks": 19,
+            "impressions": 161,
+            "ctr": 0.11801242236024845,
+            "position": 34.16770186335404
+          },
+          {
+            "query": "capricorn may 2026 horoscope",
+            "clicks": 18,
+            "impressions": 114,
+            "ctr": 0.15789473684210525,
+            "position": 18.86842105263158
+          },
+          {
+            "query": "lunary",
+            "clicks": 18,
+            "impressions": 870,
+            "ctr": 0.020689655172413793,
+            "position": 4.001149425287356
+          }
+        ],
+        "topPages": [
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/leo/2026/may",
+            "clicks": 441,
+            "impressions": 7987,
+            "ctr": 0.05521472392638037,
+            "position": 8.204958056842369
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/taurus/2026/may",
+            "clicks": 423,
+            "impressions": 7786,
+            "ctr": 0.054328281530952996,
+            "position": 8.281659388646288
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/libra/2026/may",
+            "clicks": 366,
+            "impressions": 7811,
+            "ctr": 0.04685699654333632,
+            "position": 8.618870823198055
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/aquarius/2026/may",
+            "clicks": 359,
+            "impressions": 5485,
+            "ctr": 0.06545123062898815,
+            "position": 7.146946216955333
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/pisces/2026/may",
+            "clicks": 316,
+            "impressions": 6142,
+            "ctr": 0.05144903940084663,
+            "position": 7.9260827092152395
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/gemini/2026/may",
+            "clicks": 166,
+            "impressions": 3314,
+            "ctr": 0.05009052504526252,
+            "position": 10.816837658418828
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/virgo/2026/may",
+            "clicks": 106,
+            "impressions": 1925,
+            "ctr": 0.05506493506493507,
+            "position": 9.686753246753247
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/aries/2026/may",
+            "clicks": 81,
+            "impressions": 1355,
+            "ctr": 0.05977859778597786,
+            "position": 11.773431734317343
+          },
+          {
+            "page": "https://lunary.app/grimoire/seasons/2026/taurus",
+            "clicks": 74,
+            "impressions": 11763,
+            "ctr": 0.006290912182266429,
+            "position": 8.688769871631386
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/taurus/2027",
+            "clicks": 61,
+            "impressions": 1485,
+            "ctr": 0.04107744107744108,
+            "position": 5.076767676767677
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/capricorn/2026/may",
+            "clicks": 48,
+            "impressions": 796,
+            "ctr": 0.06030150753768844,
+            "position": 13.361809045226131
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/capricorn/2027",
+            "clicks": 43,
+            "impressions": 1187,
+            "ctr": 0.03622577927548441,
+            "position": 4.0480202190395955
+          },
+          {
+            "page": "https://lunary.app/grimoire/transits/uranus-cancer-2033",
+            "clicks": 43,
+            "impressions": 1712,
+            "ctr": 0.02511682242990654,
+            "position": 5.050817757009346
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/aquarius/2026/june",
+            "clicks": 41,
+            "impressions": 814,
+            "ctr": 0.05036855036855037,
+            "position": 5.76044226044226
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/gemini/2027",
+            "clicks": 39,
+            "impressions": 999,
+            "ctr": 0.03903903903903904,
+            "position": 5.505505505505505
+          },
+          {
+            "page": "https://lunary.app/grimoire/transits/uranus-gemini-2026",
+            "clicks": 38,
+            "impressions": 7090,
+            "ctr": 0.005359661495063469,
+            "position": 8.793511988716503
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/virgo/2027",
+            "clicks": 37,
+            "impressions": 1192,
+            "ctr": 0.03104026845637584,
+            "position": 6.11996644295302
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/libra/2026/april",
+            "clicks": 35,
+            "impressions": 1696,
+            "ctr": 0.020636792452830188,
+            "position": 14.837264150943396
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/scorpio/2027",
+            "clicks": 34,
+            "impressions": 1035,
+            "ctr": 0.03285024154589372,
+            "position": 5.188405797101449
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/aries/2027",
+            "clicks": 32,
+            "impressions": 738,
+            "ctr": 0.04336043360433604,
+            "position": 6.8197831978319785
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/leo/2026/june",
+            "clicks": 31,
+            "impressions": 809,
+            "ctr": 0.038318912237330034,
+            "position": 7.61310259579728
+          },
+          {
+            "page": "https://lunary.app/grimoire/angel-numbers/789",
+            "clicks": 30,
+            "impressions": 3362,
+            "ctr": 0.00892325996430696,
+            "position": 8.03955978584176
+          },
+          {
+            "page": "https://lunary.app/",
+            "clicks": 29,
+            "impressions": 1215,
+            "ctr": 0.023868312757201648,
+            "position": 3.9588477366255144
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/libra/2027",
+            "clicks": 27,
+            "impressions": 866,
+            "ctr": 0.03117782909930716,
+            "position": 6.757505773672055
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/taurus/2026/june",
+            "clicks": 27,
+            "impressions": 638,
+            "ctr": 0.04231974921630094,
+            "position": 7.521943573667712
+          }
+        ]
+      }
+    },
+    "bingWebmaster": {
+      "available": false,
+      "source": "Bing Webmaster API",
+      "reason": "Missing BING_WEBMASTER_API_KEY. Add the Bing Webmaster API key to environment variables."
+    },
+    "posthogAiReferrals": {
+      "available": true,
+      "source": "PostHog API",
+      "data": [
+        {
+          "source": "chatgpt",
+          "visits": 249,
+          "users": 79
+        },
+        {
+          "source": "gemini",
+          "visits": 26,
+          "users": 14
+        },
+        {
+          "source": "copilot",
+          "visits": 10,
+          "users": 4
+        },
+        {
+          "source": "perplexity",
+          "visits": 9,
+          "users": 5
+        }
+      ]
+    },
+    "browserFindings": []
+  },
+  "promptPack": [
+    {
+      "id": "birth-chart-interpretation-1",
+      "topic": "Birth chart interpretation",
+      "prompt": "birth chart meaning",
+      "targetUrl": "https://lunary.app/grimoire/birth-chart",
+      "entities": [
+        "birth chart",
+        "natal chart",
+        "houses",
+        "planets",
+        "aspects"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "birth-chart-interpretation-2",
+      "topic": "Birth chart interpretation",
+      "prompt": "natal chart basics",
+      "targetUrl": "https://lunary.app/grimoire/birth-chart",
+      "entities": [
+        "birth chart",
+        "natal chart",
+        "houses",
+        "planets",
+        "aspects"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "birth-chart-interpretation-3",
+      "topic": "Birth chart interpretation",
+      "prompt": "how to read a birth chart",
+      "targetUrl": "https://lunary.app/grimoire/birth-chart",
+      "entities": [
+        "birth chart",
+        "natal chart",
+        "houses",
+        "planets",
+        "aspects"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "zodiac-signs-in-a-chart-1",
+      "topic": "Zodiac signs in a chart",
+      "prompt": "zodiac sign meanings",
+      "targetUrl": "https://lunary.app/grimoire/zodiac",
+      "entities": ["zodiac signs", "elements", "modalities", "ruling planets"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "zodiac-signs-in-a-chart-2",
+      "topic": "Zodiac signs in a chart",
+      "prompt": "sign elements and modalities",
+      "targetUrl": "https://lunary.app/grimoire/zodiac",
+      "entities": ["zodiac signs", "elements", "modalities", "ruling planets"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "zodiac-signs-in-a-chart-3",
+      "topic": "Zodiac signs in a chart",
+      "prompt": "how signs behave in a natal chart",
+      "targetUrl": "https://lunary.app/grimoire/zodiac",
+      "entities": ["zodiac signs", "elements", "modalities", "ruling planets"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "planet-meanings-and-placements-1",
+      "topic": "Planet meanings and placements",
+      "prompt": "planet meanings in astrology",
+      "targetUrl": "https://lunary.app/grimoire/astronomy/planets",
+      "entities": [
+        "Sun",
+        "Moon",
+        "Mercury",
+        "Venus",
+        "Mars",
+        "Jupiter",
+        "Saturn"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "planet-meanings-and-placements-2",
+      "topic": "Planet meanings and placements",
+      "prompt": "planetary archetypes",
+      "targetUrl": "https://lunary.app/grimoire/astronomy/planets",
+      "entities": [
+        "Sun",
+        "Moon",
+        "Mercury",
+        "Venus",
+        "Mars",
+        "Jupiter",
+        "Saturn"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "planet-meanings-and-placements-3",
+      "topic": "Planet meanings and placements",
+      "prompt": "planet in sign interpretation",
+      "targetUrl": "https://lunary.app/grimoire/astronomy/planets",
+      "entities": [
+        "Sun",
+        "Moon",
+        "Mercury",
+        "Venus",
+        "Mars",
+        "Jupiter",
+        "Saturn"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "astrological-houses-1",
+      "topic": "Astrological houses",
+      "prompt": "12 houses in astrology",
+      "targetUrl": "https://lunary.app/grimoire/houses",
+      "entities": [
+        "houses",
+        "angular houses",
+        "succedent houses",
+        "cadent houses"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "astrological-houses-2",
+      "topic": "Astrological houses",
+      "prompt": "what houses mean in a birth chart",
+      "targetUrl": "https://lunary.app/grimoire/houses",
+      "entities": [
+        "houses",
+        "angular houses",
+        "succedent houses",
+        "cadent houses"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "astrological-houses-3",
+      "topic": "Astrological houses",
+      "prompt": "life areas in astrology",
+      "targetUrl": "https://lunary.app/grimoire/houses",
+      "entities": [
+        "houses",
+        "angular houses",
+        "succedent houses",
+        "cadent houses"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "planetary-aspects-1",
+      "topic": "Planetary aspects",
+      "prompt": "aspects in astrology",
+      "targetUrl": "https://lunary.app/grimoire/aspects",
+      "entities": ["conjunction", "opposition", "square", "trine", "sextile"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "planetary-aspects-2",
+      "topic": "Planetary aspects",
+      "prompt": "planet relationships",
+      "targetUrl": "https://lunary.app/grimoire/aspects",
+      "entities": ["conjunction", "opposition", "square", "trine", "sextile"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "planetary-aspects-3",
+      "topic": "Planetary aspects",
+      "prompt": "birth chart aspect interpretation",
+      "targetUrl": "https://lunary.app/grimoire/aspects",
+      "entities": ["conjunction", "opposition", "square", "trine", "sextile"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "transits-and-current-sky-1",
+      "topic": "Transits and current sky",
+      "prompt": "astrology transits",
+      "targetUrl": "https://lunary.app/grimoire/transits",
+      "entities": [
+        "transits",
+        "planetary movement",
+        "retrogrades",
+        "cosmic weather"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "transits-and-current-sky-2",
+      "topic": "Transits and current sky",
+      "prompt": "current cosmic weather",
+      "targetUrl": "https://lunary.app/grimoire/transits",
+      "entities": [
+        "transits",
+        "planetary movement",
+        "retrogrades",
+        "cosmic weather"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "transits-and-current-sky-3",
+      "topic": "Transits and current sky",
+      "prompt": "how transits affect natal placements",
+      "targetUrl": "https://lunary.app/grimoire/transits",
+      "entities": [
+        "transits",
+        "planetary movement",
+        "retrogrades",
+        "cosmic weather"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "rulerships-and-dignities-1",
+      "topic": "Rulerships and dignities",
+      "prompt": "planetary rulerships",
+      "targetUrl": "https://lunary.app/grimoire/astrology/rulerships-and-dignities",
+      "entities": ["rulership", "domicile", "exaltation", "detriment", "fall"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "rulerships-and-dignities-2",
+      "topic": "Rulerships and dignities",
+      "prompt": "domicile and exaltation",
+      "targetUrl": "https://lunary.app/grimoire/astrology/rulerships-and-dignities",
+      "entities": ["rulership", "domicile", "exaltation", "detriment", "fall"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "rulerships-and-dignities-3",
+      "topic": "Rulerships and dignities",
+      "prompt": "detriment and fall",
+      "targetUrl": "https://lunary.app/grimoire/astrology/rulerships-and-dignities",
+      "entities": ["rulership", "domicile", "exaltation", "detriment", "fall"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "moon-phases-and-lunar-timing-1",
+      "topic": "Moon phases and lunar timing",
+      "prompt": "moon phase meanings",
+      "targetUrl": "https://lunary.app/grimoire/moon",
+      "entities": ["New Moon", "Full Moon", "lunar cycle", "moon phase"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "moon-phases-and-lunar-timing-2",
+      "topic": "Moon phases and lunar timing",
+      "prompt": "lunar cycle timing",
+      "targetUrl": "https://lunary.app/grimoire/moon",
+      "entities": ["New Moon", "Full Moon", "lunar cycle", "moon phase"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "moon-phases-and-lunar-timing-3",
+      "topic": "Moon phases and lunar timing",
+      "prompt": "new moon and full moon interpretation",
+      "targetUrl": "https://lunary.app/grimoire/moon",
+      "entities": ["New Moon", "Full Moon", "lunar cycle", "moon phase"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "tarot-meanings-1",
+      "topic": "Tarot meanings",
+      "prompt": "tarot card meanings",
+      "targetUrl": "https://lunary.app/grimoire/tarot",
+      "entities": ["tarot", "Major Arcana", "Minor Arcana", "spreads"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "tarot-meanings-2",
+      "topic": "Tarot meanings",
+      "prompt": "major arcana meanings",
+      "targetUrl": "https://lunary.app/grimoire/tarot",
+      "entities": ["tarot", "Major Arcana", "Minor Arcana", "spreads"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "tarot-meanings-3",
+      "topic": "Tarot meanings",
+      "prompt": "tarot spreads",
+      "targetUrl": "https://lunary.app/grimoire/tarot",
+      "entities": ["tarot", "Major Arcana", "Minor Arcana", "spreads"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "numerology-and-recurring-numbers-1",
+      "topic": "Numerology and recurring numbers",
+      "prompt": "angel number meanings",
+      "targetUrl": "https://lunary.app/grimoire/numerology",
+      "entities": [
+        "angel numbers",
+        "life path",
+        "mirror hours",
+        "double hours"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "numerology-and-recurring-numbers-2",
+      "topic": "Numerology and recurring numbers",
+      "prompt": "life path numbers",
+      "targetUrl": "https://lunary.app/grimoire/numerology",
+      "entities": [
+        "angel numbers",
+        "life path",
+        "mirror hours",
+        "double hours"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "numerology-and-recurring-numbers-3",
+      "topic": "Numerology and recurring numbers",
+      "prompt": "mirror hours and double hours",
+      "targetUrl": "https://lunary.app/grimoire/numerology",
+      "entities": [
+        "angel numbers",
+        "life path",
+        "mirror hours",
+        "double hours"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "compatibility-and-synastry-1",
+      "topic": "Compatibility and synastry",
+      "prompt": "zodiac compatibility",
+      "targetUrl": "https://lunary.app/grimoire/compatibility",
+      "entities": ["compatibility", "synastry", "relationship astrology"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "compatibility-and-synastry-2",
+      "topic": "Compatibility and synastry",
+      "prompt": "relationship astrology",
+      "targetUrl": "https://lunary.app/grimoire/compatibility",
+      "entities": ["compatibility", "synastry", "relationship astrology"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "compatibility-and-synastry-3",
+      "topic": "Compatibility and synastry",
+      "prompt": "synastry basics",
+      "targetUrl": "https://lunary.app/grimoire/compatibility",
+      "entities": ["compatibility", "synastry", "relationship astrology"],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "astrology-glossary-definitions-1",
+      "topic": "Astrology glossary definitions",
+      "prompt": "short astrology definitions",
+      "targetUrl": "https://lunary.app/grimoire/glossary",
+      "entities": [
+        "Ascendant",
+        "natal chart",
+        "transit",
+        "retrograde",
+        "aspect"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "astrology-glossary-definitions-2",
+      "topic": "Astrology glossary definitions",
+      "prompt": "defined astrology terms",
+      "targetUrl": "https://lunary.app/grimoire/glossary",
+      "entities": [
+        "Ascendant",
+        "natal chart",
+        "transit",
+        "retrograde",
+        "aspect"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "astrology-glossary-definitions-3",
+      "topic": "Astrology glossary definitions",
+      "prompt": "entity-level astrology citations",
+      "targetUrl": "https://lunary.app/grimoire/glossary",
+      "entities": [
+        "Ascendant",
+        "natal chart",
+        "transit",
+        "retrograde",
+        "aspect"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "machine-readable-astrology-datasets-1",
+      "topic": "Machine-readable astrology datasets",
+      "prompt": "structured astrology entity data",
+      "targetUrl": "https://lunary.app/grimoire/datasets",
+      "entities": [
+        "core astrology dataset",
+        "current sky facts",
+        "methodology",
+        "Astronomy Engine"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "machine-readable-astrology-datasets-2",
+      "topic": "Machine-readable astrology datasets",
+      "prompt": "current sky facts",
+      "targetUrl": "https://lunary.app/grimoire/datasets",
+      "entities": [
+        "core astrology dataset",
+        "current sky facts",
+        "methodology",
+        "Astronomy Engine"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "machine-readable-astrology-datasets-3",
+      "topic": "Machine-readable astrology datasets",
+      "prompt": "dataset citation and methodology",
+      "targetUrl": "https://lunary.app/grimoire/datasets",
+      "entities": [
+        "core astrology dataset",
+        "current sky facts",
+        "methodology",
+        "Astronomy Engine"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "how-to-cite-lunary-1",
+      "topic": "How to cite Lunary",
+      "prompt": "how to cite Lunary",
+      "targetUrl": "https://lunary.app/about/citations",
+      "entities": [
+        "citation guidance",
+        "generative engine optimization",
+        "AI citations",
+        "dataset attribution"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "how-to-cite-lunary-2",
+      "topic": "How to cite Lunary",
+      "prompt": "AI citation instructions",
+      "targetUrl": "https://lunary.app/about/citations",
+      "entities": [
+        "citation guidance",
+        "generative engine optimization",
+        "AI citations",
+        "dataset attribution"
+      ],
+      "source": "ai-citation-map"
+    },
+    {
+      "id": "how-to-cite-lunary-3",
+      "topic": "How to cite Lunary",
+      "prompt": "preferred Lunary source URLs",
+      "targetUrl": "https://lunary.app/about/citations",
+      "entities": [
+        "citation guidance",
+        "generative engine optimization",
+        "AI citations",
+        "dataset attribution"
+      ],
+      "source": "ai-citation-map"
+    }
+  ],
+  "competitorDomains": [],
+  "opportunities": [
+    {
+      "promptId": "transits-and-current-sky-1",
+      "prompt": "astrology transits",
+      "topic": "Transits and current sky",
+      "targetUrl": "https://lunary.app/grimoire/transits",
+      "status": "traffic-without-browser-proof",
+      "evidence": [
+        "Google Search Console has 8802 impressions for matching page/query rows."
+      ],
+      "nextAction": "Run this prompt in the Lunary research browser and compare cited competitors against the target page."
+    },
+    {
+      "promptId": "transits-and-current-sky-2",
+      "prompt": "current cosmic weather",
+      "topic": "Transits and current sky",
+      "targetUrl": "https://lunary.app/grimoire/transits",
+      "status": "traffic-without-browser-proof",
+      "evidence": [
+        "Google Search Console has 8802 impressions for matching page/query rows."
+      ],
+      "nextAction": "Run this prompt in the Lunary research browser and compare cited competitors against the target page."
+    },
+    {
+      "promptId": "transits-and-current-sky-3",
+      "prompt": "how transits affect natal placements",
+      "topic": "Transits and current sky",
+      "targetUrl": "https://lunary.app/grimoire/transits",
+      "status": "traffic-without-browser-proof",
+      "evidence": [
+        "Google Search Console has 8802 impressions for matching page/query rows."
+      ],
+      "nextAction": "Run this prompt in the Lunary research browser and compare cited competitors against the target page."
+    },
+    {
+      "promptId": "astrological-houses-1",
+      "prompt": "12 houses in astrology",
+      "topic": "Astrological houses",
+      "targetUrl": "https://lunary.app/grimoire/houses",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"12 houses in astrology\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "astrological-houses-2",
+      "prompt": "what houses mean in a birth chart",
+      "topic": "Astrological houses",
+      "targetUrl": "https://lunary.app/grimoire/houses",
+      "status": "needs-browser-audit",
+      "evidence": [
+        "Prompt not yet sampled: \"what houses mean in a birth chart\""
+      ],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "astrological-houses-3",
+      "prompt": "life areas in astrology",
+      "topic": "Astrological houses",
+      "targetUrl": "https://lunary.app/grimoire/houses",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"life areas in astrology\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "astrology-glossary-definitions-1",
+      "prompt": "short astrology definitions",
+      "topic": "Astrology glossary definitions",
+      "targetUrl": "https://lunary.app/grimoire/glossary",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"short astrology definitions\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "astrology-glossary-definitions-2",
+      "prompt": "defined astrology terms",
+      "topic": "Astrology glossary definitions",
+      "targetUrl": "https://lunary.app/grimoire/glossary",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"defined astrology terms\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "astrology-glossary-definitions-3",
+      "prompt": "entity-level astrology citations",
+      "topic": "Astrology glossary definitions",
+      "targetUrl": "https://lunary.app/grimoire/glossary",
+      "status": "needs-browser-audit",
+      "evidence": [
+        "Prompt not yet sampled: \"entity-level astrology citations\""
+      ],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "birth-chart-interpretation-1",
+      "prompt": "birth chart meaning",
+      "topic": "Birth chart interpretation",
+      "targetUrl": "https://lunary.app/grimoire/birth-chart",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"birth chart meaning\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "birth-chart-interpretation-2",
+      "prompt": "natal chart basics",
+      "topic": "Birth chart interpretation",
+      "targetUrl": "https://lunary.app/grimoire/birth-chart",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"natal chart basics\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "birth-chart-interpretation-3",
+      "prompt": "how to read a birth chart",
+      "topic": "Birth chart interpretation",
+      "targetUrl": "https://lunary.app/grimoire/birth-chart",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"how to read a birth chart\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "compatibility-and-synastry-1",
+      "prompt": "zodiac compatibility",
+      "topic": "Compatibility and synastry",
+      "targetUrl": "https://lunary.app/grimoire/compatibility",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"zodiac compatibility\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "compatibility-and-synastry-2",
+      "prompt": "relationship astrology",
+      "topic": "Compatibility and synastry",
+      "targetUrl": "https://lunary.app/grimoire/compatibility",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"relationship astrology\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "compatibility-and-synastry-3",
+      "prompt": "synastry basics",
+      "topic": "Compatibility and synastry",
+      "targetUrl": "https://lunary.app/grimoire/compatibility",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"synastry basics\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "how-to-cite-lunary-1",
+      "prompt": "how to cite Lunary",
+      "topic": "How to cite Lunary",
+      "targetUrl": "https://lunary.app/about/citations",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"how to cite Lunary\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "how-to-cite-lunary-2",
+      "prompt": "AI citation instructions",
+      "topic": "How to cite Lunary",
+      "targetUrl": "https://lunary.app/about/citations",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"AI citation instructions\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "how-to-cite-lunary-3",
+      "prompt": "preferred Lunary source URLs",
+      "topic": "How to cite Lunary",
+      "targetUrl": "https://lunary.app/about/citations",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"preferred Lunary source URLs\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "machine-readable-astrology-datasets-1",
+      "prompt": "structured astrology entity data",
+      "topic": "Machine-readable astrology datasets",
+      "targetUrl": "https://lunary.app/grimoire/datasets",
+      "status": "needs-browser-audit",
+      "evidence": [
+        "Prompt not yet sampled: \"structured astrology entity data\""
+      ],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "machine-readable-astrology-datasets-2",
+      "prompt": "current sky facts",
+      "topic": "Machine-readable astrology datasets",
+      "targetUrl": "https://lunary.app/grimoire/datasets",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"current sky facts\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "machine-readable-astrology-datasets-3",
+      "prompt": "dataset citation and methodology",
+      "topic": "Machine-readable astrology datasets",
+      "targetUrl": "https://lunary.app/grimoire/datasets",
+      "status": "needs-browser-audit",
+      "evidence": [
+        "Prompt not yet sampled: \"dataset citation and methodology\""
+      ],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "moon-phases-and-lunar-timing-1",
+      "prompt": "moon phase meanings",
+      "topic": "Moon phases and lunar timing",
+      "targetUrl": "https://lunary.app/grimoire/moon",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"moon phase meanings\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "moon-phases-and-lunar-timing-2",
+      "prompt": "lunar cycle timing",
+      "topic": "Moon phases and lunar timing",
+      "targetUrl": "https://lunary.app/grimoire/moon",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"lunar cycle timing\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "moon-phases-and-lunar-timing-3",
+      "prompt": "new moon and full moon interpretation",
+      "topic": "Moon phases and lunar timing",
+      "targetUrl": "https://lunary.app/grimoire/moon",
+      "status": "needs-browser-audit",
+      "evidence": [
+        "Prompt not yet sampled: \"new moon and full moon interpretation\""
+      ],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "numerology-and-recurring-numbers-1",
+      "prompt": "angel number meanings",
+      "topic": "Numerology and recurring numbers",
+      "targetUrl": "https://lunary.app/grimoire/numerology",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"angel number meanings\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "numerology-and-recurring-numbers-2",
+      "prompt": "life path numbers",
+      "topic": "Numerology and recurring numbers",
+      "targetUrl": "https://lunary.app/grimoire/numerology",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"life path numbers\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "numerology-and-recurring-numbers-3",
+      "prompt": "mirror hours and double hours",
+      "topic": "Numerology and recurring numbers",
+      "targetUrl": "https://lunary.app/grimoire/numerology",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"mirror hours and double hours\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "planet-meanings-and-placements-1",
+      "prompt": "planet meanings in astrology",
+      "topic": "Planet meanings and placements",
+      "targetUrl": "https://lunary.app/grimoire/astronomy/planets",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"planet meanings in astrology\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "planet-meanings-and-placements-2",
+      "prompt": "planetary archetypes",
+      "topic": "Planet meanings and placements",
+      "targetUrl": "https://lunary.app/grimoire/astronomy/planets",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"planetary archetypes\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "planet-meanings-and-placements-3",
+      "prompt": "planet in sign interpretation",
+      "topic": "Planet meanings and placements",
+      "targetUrl": "https://lunary.app/grimoire/astronomy/planets",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"planet in sign interpretation\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "planetary-aspects-1",
+      "prompt": "aspects in astrology",
+      "topic": "Planetary aspects",
+      "targetUrl": "https://lunary.app/grimoire/aspects",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"aspects in astrology\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "planetary-aspects-2",
+      "prompt": "planet relationships",
+      "topic": "Planetary aspects",
+      "targetUrl": "https://lunary.app/grimoire/aspects",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"planet relationships\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "planetary-aspects-3",
+      "prompt": "birth chart aspect interpretation",
+      "topic": "Planetary aspects",
+      "targetUrl": "https://lunary.app/grimoire/aspects",
+      "status": "needs-browser-audit",
+      "evidence": [
+        "Prompt not yet sampled: \"birth chart aspect interpretation\""
+      ],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "rulerships-and-dignities-1",
+      "prompt": "planetary rulerships",
+      "topic": "Rulerships and dignities",
+      "targetUrl": "https://lunary.app/grimoire/astrology/rulerships-and-dignities",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"planetary rulerships\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "rulerships-and-dignities-2",
+      "prompt": "domicile and exaltation",
+      "topic": "Rulerships and dignities",
+      "targetUrl": "https://lunary.app/grimoire/astrology/rulerships-and-dignities",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"domicile and exaltation\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "rulerships-and-dignities-3",
+      "prompt": "detriment and fall",
+      "topic": "Rulerships and dignities",
+      "targetUrl": "https://lunary.app/grimoire/astrology/rulerships-and-dignities",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"detriment and fall\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "tarot-meanings-1",
+      "prompt": "tarot card meanings",
+      "topic": "Tarot meanings",
+      "targetUrl": "https://lunary.app/grimoire/tarot",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"tarot card meanings\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "tarot-meanings-2",
+      "prompt": "major arcana meanings",
+      "topic": "Tarot meanings",
+      "targetUrl": "https://lunary.app/grimoire/tarot",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"major arcana meanings\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "tarot-meanings-3",
+      "prompt": "tarot spreads",
+      "topic": "Tarot meanings",
+      "targetUrl": "https://lunary.app/grimoire/tarot",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"tarot spreads\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "zodiac-signs-in-a-chart-1",
+      "prompt": "zodiac sign meanings",
+      "topic": "Zodiac signs in a chart",
+      "targetUrl": "https://lunary.app/grimoire/zodiac",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"zodiac sign meanings\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "zodiac-signs-in-a-chart-2",
+      "prompt": "sign elements and modalities",
+      "topic": "Zodiac signs in a chart",
+      "targetUrl": "https://lunary.app/grimoire/zodiac",
+      "status": "needs-browser-audit",
+      "evidence": ["Prompt not yet sampled: \"sign elements and modalities\""],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    },
+    {
+      "promptId": "zodiac-signs-in-a-chart-3",
+      "prompt": "how signs behave in a natal chart",
+      "topic": "Zodiac signs in a chart",
+      "targetUrl": "https://lunary.app/grimoire/zodiac",
+      "status": "needs-browser-audit",
+      "evidence": [
+        "Prompt not yet sampled: \"how signs behave in a natal chart\""
+      ],
+      "nextAction": "Sample this prompt in the research profile, save cited sources, then upgrade the matching Lunary page if a competitor wins."
+    }
+  ]
+}
