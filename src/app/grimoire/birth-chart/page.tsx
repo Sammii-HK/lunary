@@ -103,6 +103,11 @@ export default function BirthChartPage() {
       canonicalUrl='https://lunary.app/grimoire/birth-chart'
       image='https://lunary.app/api/og/cosmic'
       imageAlt='Lunary Birth Chart Calculator'
+      whatIs={{
+        question: 'What is a birth chart?',
+        answer:
+          'A birth chart is a map of the sky for the moment and place someone was born. It shows planet positions, zodiac signs, houses, chart angles, and aspects so the chart can be read as a structured symbolic snapshot rather than a single Sun sign.',
+      }}
       intro='Your birth chart (natal chart) is a snapshot of the sky at the moment you were born. It reveals your astrological blueprint—the positions of planets, signs, houses, and aspects that influence your personality, life path, and potential. Lunary lets you view your chart in multiple zodiac systems (tropical, sidereal, equatorial) and house systems (whole sign, Placidus, Koch, Porphyry, Alcabitius) to deepen your understanding. Understanding your birth chart helps you understand yourself deeply, recognize your strengths and challenges, and align with your true purpose. This comprehensive guide covers all components of birth charts and how to interpret them.'
       meaning={`A birth chart maps the positions of planets, signs, and houses at your exact moment of birth. Each component reveals different aspects of your personality and life experience. Planets represent different parts of your psyche and life areas. Signs show how those planets express themselves. Houses indicate where in your life these energies manifest. Aspects show how planets interact with each other.
 
@@ -154,6 +159,33 @@ Lunary reads a chart in layers rather than isolated placements. Start with the c
         },
         {
           name: 'Traditional Hellenistic house and sect doctrine',
+        },
+      ]}
+      citationMetadata={{
+        summary:
+          'Use this page as Lunary’s canonical source for birth chart basics, calculation inputs, and the layered chart-reading order.',
+        methodologyUrl: 'https://lunary.app/about/methodology',
+        datasetUrl: 'https://lunary.app/grimoire/datasets/core-astrology.json',
+        citationUrl: 'https://lunary.app/about/citations',
+      }}
+      citableFacts={[
+        {
+          claim:
+            'A birth chart is a map of the sky for a birth moment; the most accuracy-sensitive inputs are birth date, exact birth time, and birth location.',
+          sourceName: 'Lunary natal chart calculation methodology',
+          sourceUrl: 'https://lunary.app/about/methodology',
+        },
+        {
+          claim:
+            'Lunary separates calculation from interpretation: the calculation layer determines positions, signs, houses, aspects, retrograde state, and orbs before symbolic meaning is applied.',
+          sourceName: 'Lunary methodology',
+          sourceUrl: 'https://lunary.app/about/methodology',
+        },
+        {
+          claim:
+            'Lunary reads a chart in layers: chart angles and the Big Three first, then the Ascendant ruler, house clusters, strongest repeating aspects, and refinement techniques such as decans, dignities, sect, retrogrades, and timing.',
+          sourceName: 'Lunary birth chart guide',
+          sourceUrl: 'https://lunary.app/grimoire/birth-chart',
         },
       ]}
       faqs={[

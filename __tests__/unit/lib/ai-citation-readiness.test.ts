@@ -37,6 +37,42 @@ export default function Page() {
   return root;
 }
 
+function createCitationFixtureProject() {
+  const root = mkdtempSync(join(tmpdir(), 'lunary-citation-quality-'));
+  const pageDir = join(root, 'src/app/about/citations');
+  mkdirSync(pageDir, { recursive: true });
+  writeFileSync(
+    join(pageDir, 'page.tsx'),
+    `
+import { renderJsonLd } from '@/lib/schema';
+
+const citableFacts = [{ claim: 'Use the most specific Lunary source.' }];
+
+export default function Page() {
+  const citationWorkSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    citation: ['https://lunary.app/about/methodology'],
+    isBasedOn: 'https://lunary.app/about/methodology',
+  };
+
+  return (
+    <main>
+      {renderJsonLd(citationWorkSchema)}
+      <h1>How to cite Lunary</h1>
+      <section>
+        <h2>Citable Facts</h2>
+        <p>{citableFacts[0].claim}</p>
+      </section>
+    </main>
+  );
+}
+`,
+  );
+
+  return root;
+}
+
 describe('AI citation readiness', () => {
   it('normalizes only Lunary URLs', () => {
     expect(
@@ -108,5 +144,35 @@ describe('AI citation readiness', () => {
         protectedSeoPage: true,
       }),
     );
+  });
+
+  it('recognizes non-template pages with citation-quality schema and facts', () => {
+    const projectRoot = createCitationFixtureProject();
+    const report = createCitationReadinessReport({
+      projectRoot,
+      map: {
+        prioritySurfaces: [
+          {
+            topic: 'How to cite Lunary',
+            canonicalUrl: 'https://lunary.app/about/citations',
+          },
+        ],
+      },
+      sitemapUrls: new Set(['https://lunary.app/about/citations']),
+      protectedSeoPaths: new Set(['/about/citations']),
+    });
+
+    expect(report.results[0].sourceSignals).toEqual(
+      expect.objectContaining({
+        usesSeoContentTemplate: false,
+        hasCitationQualitySignal: true,
+        hasDirectAnswerSignal: true,
+        hasStructuredDataSignal: true,
+      }),
+    );
+    expect(report.results[0].issues).not.toContain(
+      'Page does not appear to use SEOContentTemplate.',
+    );
+    expect(report.results[0].score).toBeGreaterThanOrEqual(95);
   });
 });

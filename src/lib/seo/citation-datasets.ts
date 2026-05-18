@@ -17,6 +17,7 @@ import { planetaryBodies, zodiacSigns } from '../../../utils/zodiac/zodiac';
 
 const BASE_URL = 'https://lunary.app';
 const DATASET_VERSION = '2026-05-17';
+const DATASET_DATE_MODIFIED = '2026-05-17';
 const ZODIAC_ORDER = [
   'Aries',
   'Taurus',
@@ -37,6 +38,21 @@ function slugify(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
+}
+
+function provenance(
+  sourceFile: string,
+  canonicalGuide: string,
+  factType: string,
+) {
+  return {
+    factType,
+    sourceFile,
+    sourceDataset: `${BASE_URL}/grimoire/datasets/core-astrology.json`,
+    sourcePage: canonicalGuide,
+    methodology: `${BASE_URL}/about/methodology`,
+    dateModified: DATASET_DATE_MODIFIED,
+  };
 }
 
 function signFromLongitude(longitude: number) {
@@ -84,13 +100,37 @@ function moonFact(date: Date, time: AstroTime) {
 
 export function buildCoreAstrologyDataset() {
   return {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    '@id': `${BASE_URL}/grimoire/datasets/core-astrology.json#dataset`,
     name: 'Lunary Core Astrology Dataset',
+    description:
+      'Machine-readable astrology definitions for glossary terms, zodiac signs, planets, houses, aspects, moon phases, and annual full moons.',
     schemaVersion: 1,
     version: DATASET_VERSION,
+    identifier: `lunary-core-astrology-${DATASET_VERSION}`,
+    datePublished: DATASET_VERSION,
+    dateModified: DATASET_DATE_MODIFIED,
     license: 'https://lunary.app/terms',
     publisher: 'Lunary',
     url: `${BASE_URL}/grimoire/datasets/core-astrology.json`,
     methodology: `${BASE_URL}/about/methodology`,
+    isBasedOn: `${BASE_URL}/about/methodology`,
+    distribution: {
+      '@type': 'DataDownload',
+      encodingFormat: 'application/json',
+      contentUrl: `${BASE_URL}/grimoire/datasets/core-astrology.json`,
+      name: 'Lunary Core Astrology Dataset JSON',
+    },
+    variableMeasured: [
+      'glossaryTerms',
+      'zodiacSigns',
+      'planets',
+      'houses',
+      'aspects',
+      'moonPhases',
+      'annualFullMoons',
+    ],
     citationGuidance:
       'Use this dataset for concise definitions of common astrology entities, then cite the matching canonical Grimoire page for fuller context.',
     generatedFrom: [
@@ -108,6 +148,11 @@ export function buildCoreAstrologyDataset() {
       example: entry.example,
       relatedTerms: entry.relatedTerms || [],
       url: `${BASE_URL}/grimoire/glossary/${entry.slug}`,
+      ...provenance(
+        'src/constants/grimoire/glossary.ts',
+        `${BASE_URL}/grimoire/glossary/${entry.slug}`,
+        'glossaryTerm',
+      ),
     })),
     zodiacSigns: Object.entries(zodiacSigns).map(([key, sign]) => ({
       id: slugify(key),
@@ -119,6 +164,11 @@ export function buildCoreAstrologyDataset() {
       symbol: sign.symbol,
       keywords: sign.keywords,
       url: `${BASE_URL}/grimoire/zodiac/${slugify(sign.name)}`,
+      ...provenance(
+        'utils/zodiac/zodiac.ts',
+        `${BASE_URL}/grimoire/zodiac/${slugify(sign.name)}`,
+        'zodiacSign',
+      ),
     })),
     planets: Object.entries(planetaryBodies).map(([key, planet]) => ({
       id: slugify(key),
@@ -129,6 +179,11 @@ export function buildCoreAstrologyDataset() {
       detriment: planet.detriment ?? null,
       fall: planet.fall ?? null,
       url: `${BASE_URL}/grimoire/astronomy/planets/${slugify(planet.name)}`,
+      ...provenance(
+        'utils/zodiac/zodiac.ts',
+        `${BASE_URL}/grimoire/astronomy/planets/${slugify(planet.name)}`,
+        'planet',
+      ),
     })),
     houses: Object.values(HOUSES).map((house) => ({
       id: `house-${house.number}`,
@@ -140,6 +195,11 @@ export function buildCoreAstrologyDataset() {
       keywords: house.keywords,
       definition: house.description,
       url: `${BASE_URL}/grimoire/houses/${slugify(house.name)}`,
+      ...provenance(
+        'src/constants/seo/cosmic-ontology.ts',
+        `${BASE_URL}/grimoire/houses/${slugify(house.name)}`,
+        'house',
+      ),
     })),
     aspects: Object.entries(ASPECTS).map(([id, aspect]) => ({
       id,
@@ -150,6 +210,11 @@ export function buildCoreAstrologyDataset() {
       keywords: aspect.keywords,
       definition: aspect.description,
       url: `${BASE_URL}/grimoire/aspects/types/${id}`,
+      ...provenance(
+        'src/constants/seo/cosmic-ontology.ts',
+        `${BASE_URL}/grimoire/aspects/types/${id}`,
+        'aspect',
+      ),
     })),
     moonPhases: Object.entries(monthlyMoonPhases).map(([id, phase]) => ({
       id,
@@ -158,12 +223,22 @@ export function buildCoreAstrologyDataset() {
       definition: phase.information,
       symbol: phase.symbol,
       url: `${BASE_URL}/grimoire/moon/phases#${slugify(id)}`,
+      ...provenance(
+        'utils/moon/monthlyPhases.ts',
+        `${BASE_URL}/grimoire/moon/phases#${slugify(id)}`,
+        'moonPhase',
+      ),
     })),
     annualFullMoons: Object.entries(annualFullMoons).map(([month, moon]) => ({
       month,
       name: moon.name,
       definition: moon.description,
       url: `${BASE_URL}/grimoire/moon/full-moons#${slugify(month)}`,
+      ...provenance(
+        'src/constants/moon/annualFullMoons.ts',
+        `${BASE_URL}/grimoire/moon/full-moons#${slugify(month)}`,
+        'annualFullMoon',
+      ),
     })),
   };
 }
@@ -180,17 +255,55 @@ export function buildCurrentSkyFacts(date = new Date()) {
   ];
 
   return {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    '@id': `${BASE_URL}/grimoire/datasets/current-sky-facts.json#dataset`,
     name: 'Lunary Current Sky Facts',
+    description:
+      'Date-stamped geocentric Sun, Moon, visible planet, moon phase, illumination, and ecliptic longitude facts for AI citation.',
     schemaVersion: 1,
     version: DATASET_VERSION,
+    identifier: `lunary-current-sky-${date.toISOString().slice(0, 10)}`,
     generatedAt: date.toISOString(),
+    referenceTimeUtc: date.toISOString(),
     validForDateUtc: date.toISOString().slice(0, 10),
     refreshCadence: 'daily',
+    datePublished: date.toISOString().slice(0, 10),
+    dateModified: date.toISOString().slice(0, 10),
     license: 'https://lunary.app/terms',
     publisher: 'Lunary',
     methodology: `${BASE_URL}/about/methodology`,
+    isBasedOn: `${BASE_URL}/about/methodology`,
     url: `${BASE_URL}/grimoire/datasets/current-sky-facts.json`,
     calculationEngine: 'astronomy-engine',
+    calculationEngineVersion:
+      'astronomy-engine package version installed at build time',
+    coordinateFrame: 'geocentric ecliptic longitude',
+    observer: 'geocentric',
+    timeScale: 'UTC',
+    units: {
+      eclipticLongitude: 'degrees',
+      degreeInSign: 'degrees',
+      phaseAngleDegrees: 'degrees',
+      illuminationPercent: 'percent',
+    },
+    distribution: {
+      '@type': 'DataDownload',
+      encodingFormat: 'application/json',
+      contentUrl: `${BASE_URL}/grimoire/datasets/current-sky-facts.json`,
+      name: 'Lunary Current Sky Facts JSON',
+    },
+    variableMeasured: [
+      'moon.phase',
+      'moon.sign',
+      'moon.eclipticLongitude',
+      'moon.illuminationPercent',
+      'moon.phaseAngleDegrees',
+      'sun.sign',
+      'sun.eclipticLongitude',
+      'planets.sign',
+      'planets.eclipticLongitude',
+    ],
     moon: moonFact(date, time),
     sun,
     planets: visiblePlanets,

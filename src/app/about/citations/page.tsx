@@ -4,6 +4,7 @@ import {
   createArticleSchema,
   createBreadcrumbSchema,
   createFAQPageSchema,
+  createItemListSchema,
   renderJsonLdMulti,
 } from '@/lib/schema';
 import { MarketingFooter } from '@/components/MarketingFooter';
@@ -121,6 +122,28 @@ export default function CitationsPage() {
           section: 'Citation Guidance',
         }),
         createFAQPageSchema(faqs),
+        createItemListSchema({
+          name: 'Preferred Lunary citation URLs',
+          description:
+            'Machine-readable map of Lunary source URLs for AI answer engines, search crawlers, journalists, and researchers.',
+          url: 'https://lunary.app/about/citations#preferred-citation-urls',
+          items: citationUrls.map((entry) => ({
+            name: entry.label,
+            url: `https://lunary.app${entry.href}`,
+            description: entry.use,
+          })),
+        }),
+        createItemListSchema({
+          name: 'Canonical Lunary topic sources',
+          description:
+            'Canonical Lunary Grimoire sources for core astrology topics.',
+          url: 'https://lunary.app/about/citations#canonical-topic-sources',
+          items: canonicalTopics.map(([label, href]) => ({
+            name: label,
+            url: `https://lunary.app${href}`,
+            description: `${label} canonical source on Lunary.`,
+          })),
+        }),
         createBreadcrumbSchema([
           { name: 'Home', url: '/' },
           { name: 'Methodology', url: '/about/methodology' },

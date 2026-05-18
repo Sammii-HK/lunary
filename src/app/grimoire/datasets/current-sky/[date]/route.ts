@@ -35,9 +35,16 @@ export async function GET(
       ...facts,
       snapshot: true,
       snapshotDate: dateParam,
+      archivedAt: `${dateParam}T12:00:00.000Z`,
+      identifier: `lunary-current-sky-${dateParam}`,
+      isPartOf: 'https://lunary.app/grimoire/datasets/current-sky-facts.json',
       url: `https://lunary.app/grimoire/datasets/current-sky/${dateParam}`,
       latestVersion:
         'https://lunary.app/grimoire/datasets/current-sky-facts.json',
+      sameAs: [
+        `https://lunary.app/grimoire/datasets/current-sky/${dateParam}`,
+        'https://lunary.app/grimoire/datasets/current-sky-facts.json',
+      ],
     },
     {
       headers: {

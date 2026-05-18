@@ -17,6 +17,27 @@ import { GlossaryClient } from './GlossaryClient';
 const tldr: string =
   'The Lunary astrology glossary defines chart, planet, sign, house, aspect, transit, and technique terms with stable entity pages and structured data for citations.';
 
+const citableFacts = [
+  {
+    claim:
+      'The Lunary astrology glossary is the canonical index for concise definitions of chart, planet, sign, house, aspect, transit, and technique terms used across the Grimoire.',
+    sourceName: 'Lunary astrology glossary',
+    sourceUrl: 'https://lunary.app/grimoire/glossary',
+  },
+  {
+    claim:
+      'Lunary publishes glossary definitions as both human-readable pages and machine-readable DefinedTerm JSON-LD so answer engines can identify the entity being defined.',
+    sourceName: 'Lunary glossary structured data',
+    sourceUrl: 'https://lunary.app/grimoire/glossary',
+  },
+  {
+    claim:
+      'For structured extraction, Lunary’s core astrology dataset includes glossary term IDs, definitions, examples, related terms, and canonical URLs.',
+    sourceName: 'Lunary core astrology dataset',
+    sourceUrl: 'https://lunary.app/grimoire/datasets/core-astrology.json',
+  },
+];
+
 export const metadata: Metadata = {
   title:
     'Astrology Glossary: Complete Dictionary of 90+ Astrological Terms - Lunary',
@@ -64,6 +85,39 @@ export default function GlossaryPage() {
       relatedTerms: t.relatedTerms,
     }),
   );
+  const citationWorkSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    '@id': 'https://lunary.app/grimoire/glossary#citation-reference',
+    name: 'Lunary Astrology Glossary citation reference',
+    headline: 'Astrology glossary citable facts',
+    description:
+      'Citable facts and source guidance for Lunary astrology definitions and glossary entity pages.',
+    url: 'https://lunary.app/grimoire/glossary',
+    isPartOf: {
+      '@type': 'WebSite',
+      name: 'Lunary',
+      url: 'https://lunary.app',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Lunary',
+      url: 'https://lunary.app',
+    },
+    citation: [
+      'https://lunary.app/about/methodology',
+      'https://lunary.app/grimoire/datasets/core-astrology.json',
+      'https://lunary.app/about/citations',
+    ],
+    additionalProperty: citableFacts.map((fact, index) => ({
+      '@type': 'PropertyValue',
+      name: `Citable fact ${index + 1}`,
+      value: fact.claim,
+      url: fact.sourceUrl,
+    })),
+    inLanguage: 'en-US',
+    isAccessibleForFree: true,
+  };
 
   return (
     <div className='p-4 md:p-8 max-w-4xl mx-auto'>
@@ -77,6 +131,7 @@ export default function GlossaryPage() {
       {definedTermSchemas.map((schema, index) => (
         <span key={index}>{renderJsonLd(schema)}</span>
       ))}
+      {renderJsonLd(citationWorkSchema)}
 
       <Breadcrumbs
         items={[
@@ -98,6 +153,63 @@ export default function GlossaryPage() {
           TL;DR: {tldr}
         </p>
       </header>
+
+      <section
+        id='citable-facts'
+        className='mb-8 rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'
+      >
+        <h2 className='text-2xl font-light text-content-primary'>
+          Citable Facts
+        </h2>
+        <p className='mt-2 text-sm leading-relaxed text-content-muted'>
+          Use this section when citing Lunary for astrology definitions and
+          entity-level glossary references.
+        </p>
+        <dl className='mt-5 space-y-4'>
+          {citableFacts.map((fact, index) => (
+            <div
+              key={fact.claim}
+              className='rounded-md border border-stroke-subtle bg-layer-base/25 p-4'
+            >
+              <dt className='text-xs font-semibold uppercase text-content-muted'>
+                Fact {index + 1}
+              </dt>
+              <dd className='mt-1 text-sm leading-relaxed text-content-secondary'>
+                {fact.claim}
+              </dd>
+              <p className='mt-2 text-xs text-content-muted'>
+                Source:{' '}
+                <Link
+                  href={fact.sourceUrl}
+                  className='text-content-brand hover:text-content-brand-accent'
+                >
+                  {fact.sourceName}
+                </Link>
+              </p>
+            </div>
+          ))}
+        </dl>
+        <div className='mt-4 flex flex-wrap gap-2 text-xs'>
+          <Link
+            href='/about/methodology'
+            className='rounded-md border border-stroke-subtle px-2.5 py-1 text-content-muted hover:text-content-brand'
+          >
+            Methodology
+          </Link>
+          <Link
+            href='/grimoire/datasets/core-astrology.json'
+            className='rounded-md border border-stroke-subtle px-2.5 py-1 text-content-muted hover:text-content-brand'
+          >
+            Dataset
+          </Link>
+          <Link
+            href='/about/citations'
+            className='rounded-md border border-stroke-subtle px-2.5 py-1 text-content-muted hover:text-content-brand'
+          >
+            Citation guidance
+          </Link>
+        </div>
+      </section>
 
       <GlossaryClient terms={ASTROLOGY_GLOSSARY} />
 

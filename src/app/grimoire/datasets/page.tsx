@@ -20,6 +20,16 @@ const datasets = [
     description:
       'Canonical definitions for glossary terms, signs, planets, houses, aspects, moon phases, and annual full moons.',
     cadence: 'Updated when source Grimoire content changes',
+    version: '2026-05-17',
+    variableMeasured: [
+      'glossaryTerms',
+      'zodiacSigns',
+      'planets',
+      'houses',
+      'aspects',
+      'moonPhases',
+      'annualFullMoons',
+    ],
   },
   {
     name: 'Core Astrology Dataset Snapshot',
@@ -27,6 +37,16 @@ const datasets = [
     description:
       'Versioned snapshot of the core astrology dataset for systems that require a stable, non-moving citation URL.',
     cadence: 'Frozen snapshot',
+    version: '2026-05-17',
+    variableMeasured: [
+      'glossaryTerms',
+      'zodiacSigns',
+      'planets',
+      'houses',
+      'aspects',
+      'moonPhases',
+      'annualFullMoons',
+    ],
   },
   {
     name: 'Current Sky Facts',
@@ -34,6 +54,16 @@ const datasets = [
     description:
       'Date-stamped Sun, Moon, visible planet, moon phase, and lunar illumination facts calculated with Astronomy Engine.',
     cadence: 'Refreshed hourly, intended as a daily citation surface',
+    version: 'daily',
+    temporalCoverage: new Date().toISOString().slice(0, 10),
+    variableMeasured: [
+      'moon.phase',
+      'moon.sign',
+      'moon.illuminationPercent',
+      'moon.phaseAngleDegrees',
+      'sun.sign',
+      'planets.sign',
+    ],
   },
   {
     name: 'Current Sky Snapshot',
@@ -41,6 +71,16 @@ const datasets = [
     description:
       'Stable UTC-date snapshot of current sky facts, useful for archived references and reproducible AI citations.',
     cadence: 'Frozen daily snapshot',
+    version: '2026-05-17',
+    temporalCoverage: '2026-05-17',
+    variableMeasured: [
+      'moon.phase',
+      'moon.sign',
+      'moon.illuminationPercent',
+      'moon.phaseAngleDegrees',
+      'sun.sign',
+      'planets.sign',
+    ],
   },
 ];
 
@@ -60,6 +100,16 @@ export default function DatasetsPage() {
       name: dataset.name,
       description: dataset.description,
       url: `https://lunary.app${dataset.href}`,
+      version: dataset.version,
+      datePublished: dataset.version === 'daily' ? undefined : dataset.version,
+      dateModified:
+        dataset.version === 'daily'
+          ? new Date().toISOString().slice(0, 10)
+          : dataset.version,
+      ...(dataset.temporalCoverage && {
+        temporalCoverage: dataset.temporalCoverage,
+      }),
+      variableMeasured: dataset.variableMeasured,
       license: 'https://lunary.app/terms',
       creator: {
         '@type': 'Organization',
@@ -67,6 +117,12 @@ export default function DatasetsPage() {
         url: 'https://lunary.app',
       },
       isBasedOn: 'https://lunary.app/about/methodology',
+      distribution: {
+        '@type': 'DataDownload',
+        encodingFormat: 'application/json',
+        contentUrl: `https://lunary.app${dataset.href}`,
+        name: `${dataset.name} JSON`,
+      },
     })),
   };
 
@@ -120,6 +176,10 @@ export default function DatasetsPage() {
               </p>
               <p className='mt-3 text-xs uppercase tracking-wide text-content-muted'>
                 {dataset.cadence}
+              </p>
+              <p className='mt-2 text-xs text-content-muted'>
+                Measures: {dataset.variableMeasured.slice(0, 5).join(', ')}
+                {dataset.variableMeasured.length > 5 ? ', ...' : ''}
               </p>
               <Link
                 href={dataset.href}

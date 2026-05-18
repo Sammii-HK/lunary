@@ -38,6 +38,7 @@ export type SourceReadinessSignals = {
   hasCanonicalSignal: boolean;
   hasDirectAnswerSignal: boolean;
   hasStructuredDataSignal: boolean;
+  hasCitationQualitySignal: boolean;
   hasFaqSignal: boolean;
 };
 
@@ -285,14 +286,35 @@ export function analyzeSourceReadiness(
       content.includes('whatIs={{') ||
       content.includes('tldr=') ||
       content.includes('tldr:') ||
-      content.includes('description='),
+      content.includes('description=') ||
+      content.includes('Citable Facts') ||
+      content.includes('Citation rule'),
     hasStructuredDataSignal:
       isJsonRoute ||
       content.includes('SEOContentTemplate') ||
       content.includes('renderJsonLd') ||
       content.includes('createArticleSchema') ||
       content.includes('createDefinedTermSchema') ||
-      content.includes('createFAQPageSchema'),
+      content.includes('createFAQPageSchema') ||
+      content.includes("'@type': 'Dataset'") ||
+      content.includes("'@type': 'DataDownload'") ||
+      content.includes("'@type': 'CreativeWork'") ||
+      content.includes("'@type': 'TechArticle'") ||
+      content.includes('createItemListSchema'),
+    hasCitationQualitySignal:
+      isJsonRoute ||
+      content.includes('citableFacts') ||
+      content.includes('citationMetadata') ||
+      content.includes('Citable Facts') ||
+      content.includes('citationWorkSchema') ||
+      content.includes('methodologyUrl') ||
+      content.includes('datasetUrl') ||
+      content.includes('distribution:') ||
+      content.includes('variableMeasured') ||
+      content.includes('isBasedOn') ||
+      content.includes('citation:') ||
+      content.includes('citationUrls') ||
+      content.includes('createItemListSchema'),
     hasFaqSignal:
       content.includes('faqs=') ||
       content.includes('faqs:') ||
@@ -401,12 +423,15 @@ export function scoreCitationTarget(params: {
     );
   }
 
-  if (sourceSignals?.usesSeoContentTemplate) {
+  if (
+    sourceSignals?.usesSeoContentTemplate ||
+    sourceSignals?.hasCitationQualitySignal
+  ) {
     score += 15;
   } else if (routeSource) {
     issues.push('Page does not appear to use SEOContentTemplate.');
     recommendations.push(
-      'Move this page onto SEOContentTemplate or add equivalent answer/schema blocks.',
+      'Move this page onto SEOContentTemplate or add equivalent citation-quality answer/schema blocks.',
     );
   }
 
