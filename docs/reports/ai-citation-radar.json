@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-05-18T12:18:20.161Z",
+  "generatedAt": "2026-05-18T12:58:29.687Z",
   "window": {
     "startDate": "2026-04-19",
     "endDate": "2026-05-17"
   },
   "summary": {
     "promptCount": 42,
-    "browserFindingCount": 0,
-    "browserCitationRate": null,
-    "competitorDomainCount": 0,
+    "browserFindingCount": 3,
+    "browserCitationRate": 0,
+    "competitorDomainCount": 22,
     "bingAiTotalCitations": 333,
     "bingAiAverageCitedPages": 62,
     "aiReferralVisits": 294,
@@ -418,7 +418,250 @@
         }
       ]
     },
-    "browserFindings": []
+    "browserFindings": [
+      {
+        "capturedAt": "2026-05-18T12:53:39.639Z",
+        "engine": "perplexity",
+        "query": "astrology transits",
+        "promptId": "transits-and-current-sky-1",
+        "topic": "Transits and current sky",
+        "locale": "en-GB",
+        "country": "GB",
+        "citedSources": [
+          {
+            "url": "https://astro-charts.com/tools/new/transits/",
+            "title": "astro-charts https://astro-charts.com/tools/new/transits/ Transit Chart — Today's Planets - Astro Charts Beautiful, free astrology charts. Birth charts, synastry, composites, and transits explained simply.",
+            "domain": "astro-charts.com",
+            "snippet": "",
+            "position": 1
+          },
+          {
+            "url": "https://www.reddit.com/r/astrology/comments/1abjv31/how_to_interpret_current_transits/",
+            "title": "reddit https://www.reddit.com/r/astrology/comments/1abjv31/how_to_interpret_current_transits/ How to interpret current transits? How to interpret current transits?",
+            "domain": "reddit.com",
+            "snippet": "",
+            "position": 2
+          },
+          {
+            "url": "https://www.astrosage.com/free/transit-today.asp",
+            "title": "astrosage https://www.astrosage.com/free/transit-today.asp Free Transit Today Report - AstroSage Get Planetary Transit Report Based on Vedic Astrology - Gochar Phalam free.",
+            "domain": "astrosage.com",
+            "snippet": "",
+            "position": 3
+          },
+          {
+            "url": "https://astro.cafeastrology.com/astro.php?page=prev",
+            "title": "astro.cafeastrology https://astro.cafeastrology.com/astro.php?page=prev Transits - Free Astrology Report & Horoscope - astro cafe Use this form for birthdates when the time is unknown. This tool produces a list of 14 day",
+            "domain": "astro.cafeastrology.com",
+            "snippet": "",
+            "position": 4
+          },
+          {
+            "url": "https://horoscopes.astro-seek.com/transit-chart-planetary-transits",
+            "title": "horoscopes.astro-seek https://horoscopes.astro-seek.com/transit-chart-planetary-transits Transit Chart Calculator, Astrology Transits online www.Astro-Seek.com - Seek and meet people born on the same date as you",
+            "domain": "horoscopes.astro-seek.com",
+            "snippet": "",
+            "position": 5
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Astrological_transit",
+            "title": "en.wikipedia https://en.wikipedia.org/wiki/Astrological_transit Astrological transit - Wikipedia",
+            "domain": "en.wikipedia.org",
+            "snippet": "",
+            "position": 6
+          },
+          {
+            "url": "https://www.youtube.com/watch?v=MY_xzvznEhE",
+            "title": "youtube https://www.youtube.com/watch?v=MY_xzvznEhE Transits in Astrology: An Introduction to Timing & Prediction An introduction to transits in astrology, which is one of the most important timing techniques that astrol",
+            "domain": "youtube.com",
+            "snippet": "",
+            "position": 7
+          },
+          {
+            "url": "https://www.astrosage.com/transits/default.asp",
+            "title": "astrosage https://www.astrosage.com/transits/default.asp Transits: Predictions, Dates and Timings - AstroSage Transits and their timings- you can get all the necessary information here. Also, predictions for 12 zodiac si",
+            "domain": "astrosage.com",
+            "snippet": "",
+            "position": 8
+          },
+          {
+            "url": "https://horoscopes.astro-seek.com/current-planets-astrology-transits-planetary-positions",
+            "title": "horoscopes.astro-seek https://horoscopes.astro-seek.com/current-planets-astrology-transits-planetary-positions Current Planets, Astrology Planet Positions | Astro-Seek.com www.Astro-Seek.com - Seek and meet people born o",
+            "domain": "horoscopes.astro-seek.com",
+            "snippet": "",
+            "position": 9
+          },
+          {
+            "url": "https://www.astro.com/astrowiki/en/Transit",
+            "title": "astro https://www.astro.com/astrowiki/en/Transit Interpretation",
+            "domain": "astro.com",
+            "snippet": "",
+            "position": 10
+          }
+        ],
+        "screenshotPath": "data/ai-citation-radar/screenshots/2026-05-18T12-53-39-402Z-perplexity-transits-and-current-sky-1.png",
+        "notes": "Captured from Perplexity Links tab in the lunary-research Cloak profile. Result URL: https://www.perplexity.ai/search/e1053960-236e-4309-912e-b347126fe88f?sm=r. Citation labels: "
+      },
+      {
+        "capturedAt": "2026-05-18T12:54:03.286Z",
+        "engine": "perplexity",
+        "query": "current cosmic weather",
+        "promptId": "transits-and-current-sky-2",
+        "topic": "Transits and current sky",
+        "locale": "en-GB",
+        "country": "GB",
+        "citedSources": [
+          {
+            "url": "https://www.spaceweatherlive.com/",
+            "title": "spaceweatherlive https://www.spaceweatherlive.com SpaceWeatherLive.com | Real-time data and plots auroral activity ... Real-Time solar activity and auroral activity data website",
+            "domain": "spaceweatherlive.com",
+            "snippet": "",
+            "position": 1
+          },
+          {
+            "url": "https://www.spaceweather.gov/",
+            "title": "spaceweather https://www.spaceweather.gov Homepage | NOAA / NWS Space Weather Prediction Center on NOAA Scales 24-Hour Observed Maximums R no data S no data G no data Latest Observed R ... S1 or greater ... Current Space",
+            "domain": "spaceweather.gov",
+            "snippet": "",
+            "position": 2
+          },
+          {
+            "url": "https://www.swpc.noaa.gov/",
+            "title": "swpc.noaa https://www.swpc.noaa.gov Homepage | NOAA / NWS Space Weather Prediction Center on NOAA Scales 24-Hour Observed Maximums R no data S no data G no data Latest Observed R ... S1 or greater ... Current Space Weath",
+            "domain": "swpc.noaa.gov",
+            "snippet": "",
+            "position": 3
+          },
+          {
+            "url": "https://geomag.bgs.ac.uk/education/current_activity.html",
+            "title": "geomag.bgs https://geomag.bgs.ac.uk/education/current_activity.html Current geomagnetic activity in the UK and across the globe If there has been an alert issued and we expect something to arrive in the next day or two y",
+            "domain": "geomag.bgs.ac.uk",
+            "snippet": "",
+            "position": 4
+          },
+          {
+            "url": "https://www.spaceweather.com/",
+            "title": "spaceweather https://www.spaceweather.com Space Weather",
+            "domain": "spaceweather.com",
+            "snippet": "",
+            "position": 5
+          },
+          {
+            "url": "https://swe.ssa.esa.int/",
+            "title": "swe.ssa.esa https://swe.ssa.esa.int Current Space Weather - Space Weather",
+            "domain": "swe.ssa.esa.int",
+            "snippet": "",
+            "position": 6
+          },
+          {
+            "url": "https://spaceweather.surrey.ac.uk/livespaceweather.php",
+            "title": "spaceweather.surrey https://spaceweather.surrey.ac.uk/livespaceweather.php Live Space Weather",
+            "domain": "spaceweather.surrey.ac.uk",
+            "snippet": "",
+            "position": 7
+          },
+          {
+            "url": "https://soho.nascom.nasa.gov/spaceweather/",
+            "title": "soho.nascom.nasa https://soho.nascom.nasa.gov/spaceweather/ SOHO Space Weather",
+            "domain": "soho.nascom.nasa.gov",
+            "snippet": "",
+            "position": 8
+          },
+          {
+            "url": "https://clearoutside.com/",
+            "title": "clearoutside https://clearoutside.com Clear Outside v1.0 - International Weather Forecasts For Astronomers",
+            "domain": "clearoutside.com",
+            "snippet": "",
+            "position": 9
+          },
+          {
+            "url": "http://www.swpc.noaa.gov/products/alerts-watches-and-warnings",
+            "title": "swpc.noaa http://www.swpc.noaa.gov/products/alerts-watches-and-warnings Alerts, Watches and Warnings | NOAA / NWS Space Weather ...",
+            "domain": "swpc.noaa.gov",
+            "snippet": "",
+            "position": 10
+          }
+        ],
+        "screenshotPath": "data/ai-citation-radar/screenshots/2026-05-18T12-54-02-930Z-perplexity-transits-and-current-sky-2.png",
+        "notes": "Captured from Perplexity Links tab in the lunary-research Cloak profile. Result URL: https://www.perplexity.ai/search/2128a660-2d3f-4e54-ba1a-5aef659074a1?sm=r. Citation labels: "
+      },
+      {
+        "capturedAt": "2026-05-18T12:54:22.580Z",
+        "engine": "perplexity",
+        "query": "how transits affect natal placements",
+        "promptId": "transits-and-current-sky-3",
+        "topic": "Transits and current sky",
+        "locale": "en-GB",
+        "country": "GB",
+        "citedSources": [
+          {
+            "url": "https://www.reddit.com/r/astrology/comments/nq9on0/how_does_a_transit_aspect_influence_a_natal_aspect/",
+            "title": "reddit https://www.reddit.com/r/astrology/comments/nq9on0/how_does_a_transit_aspect_influence_a_natal_aspect/ How does a transit aspect influence a natal aspect? - Reddit It activates it. That’s the short answer. The tra",
+            "domain": "reddit.com",
+            "snippet": "",
+            "position": 1
+          },
+          {
+            "url": "https://www.saturnandhoney.com/blog/how-to-read-your-own-transits-a-beginners-guide",
+            "title": "saturnandhoney https://www.saturnandhoney.com/blog/how-to-read-your-own-transits-a-beginners-guide How to read your own transits: a beginners guide - saturn and honey This is a guide for anyone who is learning how to pre",
+            "domain": "saturnandhoney.com",
+            "snippet": "",
+            "position": 2
+          },
+          {
+            "url": "https://theastrologyplacemembership.com/2025/01/do-transits-impact-progressions-as-strongly-as-natal-placements/",
+            "title": "theastrologyplacemembership https://theastrologyplacemembership.com/2025/01/do-transits-impact-progressions-as-strongly-as-natal-placements/ Do Transits Impact Progressions as Strongly as Natal Placements? Transits are t",
+            "domain": "theastrologyplacemembership.com",
+            "snippet": "",
+            "position": 3
+          },
+          {
+            "url": "https://mynitya.com/blog/transits-natal-chart-planetary-movements-guide",
+            "title": "mynitya https://mynitya.com/blog/transits-natal-chart-planetary-movements-guide Understanding Transits in Your Natal Chart - MyNitya Understand transits in your natal chart. Learn how planetary movements trigger life eve",
+            "domain": "mynitya.com",
+            "snippet": "",
+            "position": 4
+          },
+          {
+            "url": "https://www.youtube.com/watch?v=ui-IyP8oV_Q",
+            "title": "youtube https://www.youtube.com/watch?v=ui-IyP8oV_Q How to Find Where Current Transits Affects You in Your Birth Chart.. Hope this guide helps you. Love & blessings!",
+            "domain": "youtube.com",
+            "snippet": "",
+            "position": 5
+          },
+          {
+            "url": "https://mr-izo.com/astrology/the-impact-of-transits-in-astrology-understanding-how-the-current-planetary-alignments-affect-your-life/",
+            "title": "mr-izo https://mr-izo.com/astrology/the-impact-of-transits-in-astrology-understanding-how-the-current-planetary-alignments-affect-your-life/ Astrology Transits: How Current Planetary Alignments Affect Your Life Discover ",
+            "domain": "mr-izo.com",
+            "snippet": "",
+            "position": 6
+          },
+          {
+            "url": "https://astrobutterfly.com/2017/09/25/how-to-read-transits-in-your-natal-chart-step-by-step-instructions/",
+            "title": "astrobutterfly https://astrobutterfly.com/2017/09/25/how-to-read-transits-in-your-natal-chart-step-by-step-instructions/ How To Read Transits In Your Natal Chart – Step By Step Instructions Astrology can be confusing and",
+            "domain": "astrobutterfly.com",
+            "snippet": "",
+            "position": 7
+          },
+          {
+            "url": "https://www.reddit.com/r/beginnerastrology/comments/zwiv26/when_a_transiting_planet_aspects_your_natal/",
+            "title": "reddit https://www.reddit.com/r/beginnerastrology/comments/zwiv26/when_a_transiting_planet_aspects_your_natal/ When a transiting planet aspects your natal placement, does it matter which planet is the one transiting? Doe",
+            "domain": "reddit.com",
+            "snippet": "",
+            "position": 8
+          },
+          {
+            "url": "https://www.youtube.com/watch?v=RLR_4aVyb60",
+            "title": "youtube https://www.youtube.com/watch?v=RLR_4aVyb60 Natal Chart vs Transits Explained (Why Nothing Happens… Until It Does) Welcome to Celestial Zodiac, your home for clear and grounded astrology. If you’ve ever looked at",
+            "domain": "youtube.com",
+            "snippet": "",
+            "position": 9
+          }
+        ],
+        "screenshotPath": "data/ai-citation-radar/screenshots/2026-05-18T12-54-22-154Z-perplexity-transits-and-current-sky-3.png",
+        "notes": "Captured from Perplexity Links tab in the lunary-research Cloak profile. Result URL: https://www.perplexity.ai/search/7e02a153-9d65-4e06-b1ad-c8309c75fa27?sm=r. Citation labels: "
+      }
+    ]
   },
   "promptPack": [
     {
@@ -893,40 +1136,208 @@
       "source": "ai-citation-map"
     }
   ],
-  "competitorDomains": [],
+  "competitorDomains": [
+    {
+      "domain": "reddit.com",
+      "citations": 3,
+      "engines": ["perplexity"],
+      "exampleUrls": [
+        "https://www.reddit.com/r/astrology/comments/1abjv31/how_to_interpret_current_transits/",
+        "https://www.reddit.com/r/astrology/comments/nq9on0/how_does_a_transit_aspect_influence_a_natal_aspect/",
+        "https://www.reddit.com/r/beginnerastrology/comments/zwiv26/when_a_transiting_planet_aspects_your_natal/"
+      ]
+    },
+    {
+      "domain": "youtube.com",
+      "citations": 3,
+      "engines": ["perplexity"],
+      "exampleUrls": [
+        "https://www.youtube.com/watch?v=MY_xzvznEhE",
+        "https://www.youtube.com/watch?v=ui-IyP8oV_Q",
+        "https://www.youtube.com/watch?v=RLR_4aVyb60"
+      ]
+    },
+    {
+      "domain": "astrosage.com",
+      "citations": 2,
+      "engines": ["perplexity"],
+      "exampleUrls": [
+        "https://www.astrosage.com/free/transit-today.asp",
+        "https://www.astrosage.com/transits/default.asp"
+      ]
+    },
+    {
+      "domain": "horoscopes.astro-seek.com",
+      "citations": 2,
+      "engines": ["perplexity"],
+      "exampleUrls": [
+        "https://horoscopes.astro-seek.com/transit-chart-planetary-transits",
+        "https://horoscopes.astro-seek.com/current-planets-astrology-transits-planetary-positions"
+      ]
+    },
+    {
+      "domain": "swpc.noaa.gov",
+      "citations": 2,
+      "engines": ["perplexity"],
+      "exampleUrls": [
+        "https://www.swpc.noaa.gov/",
+        "http://www.swpc.noaa.gov/products/alerts-watches-and-warnings"
+      ]
+    },
+    {
+      "domain": "astro-charts.com",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": ["https://astro-charts.com/tools/new/transits/"]
+    },
+    {
+      "domain": "astro.cafeastrology.com",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": ["https://astro.cafeastrology.com/astro.php?page=prev"]
+    },
+    {
+      "domain": "astro.com",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": ["https://www.astro.com/astrowiki/en/Transit"]
+    },
+    {
+      "domain": "astrobutterfly.com",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": [
+        "https://astrobutterfly.com/2017/09/25/how-to-read-transits-in-your-natal-chart-step-by-step-instructions/"
+      ]
+    },
+    {
+      "domain": "clearoutside.com",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": ["https://clearoutside.com/"]
+    },
+    {
+      "domain": "en.wikipedia.org",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": ["https://en.wikipedia.org/wiki/Astrological_transit"]
+    },
+    {
+      "domain": "geomag.bgs.ac.uk",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": [
+        "https://geomag.bgs.ac.uk/education/current_activity.html"
+      ]
+    },
+    {
+      "domain": "mr-izo.com",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": [
+        "https://mr-izo.com/astrology/the-impact-of-transits-in-astrology-understanding-how-the-current-planetary-alignments-affect-your-life/"
+      ]
+    },
+    {
+      "domain": "mynitya.com",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": [
+        "https://mynitya.com/blog/transits-natal-chart-planetary-movements-guide"
+      ]
+    },
+    {
+      "domain": "saturnandhoney.com",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": [
+        "https://www.saturnandhoney.com/blog/how-to-read-your-own-transits-a-beginners-guide"
+      ]
+    },
+    {
+      "domain": "soho.nascom.nasa.gov",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": ["https://soho.nascom.nasa.gov/spaceweather/"]
+    },
+    {
+      "domain": "spaceweather.com",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": ["https://www.spaceweather.com/"]
+    },
+    {
+      "domain": "spaceweather.gov",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": ["https://www.spaceweather.gov/"]
+    },
+    {
+      "domain": "spaceweather.surrey.ac.uk",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": ["https://spaceweather.surrey.ac.uk/livespaceweather.php"]
+    },
+    {
+      "domain": "spaceweatherlive.com",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": ["https://www.spaceweatherlive.com/"]
+    },
+    {
+      "domain": "swe.ssa.esa.int",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": ["https://swe.ssa.esa.int/"]
+    },
+    {
+      "domain": "theastrologyplacemembership.com",
+      "citations": 1,
+      "engines": ["perplexity"],
+      "exampleUrls": [
+        "https://theastrologyplacemembership.com/2025/01/do-transits-impact-progressions-as-strongly-as-natal-placements/"
+      ]
+    }
+  ],
   "opportunities": [
     {
       "promptId": "transits-and-current-sky-1",
       "prompt": "astrology transits",
       "topic": "Transits and current sky",
       "targetUrl": "https://lunary.app/grimoire/transits",
-      "status": "traffic-without-browser-proof",
+      "status": "competitor-cited",
       "evidence": [
+        "perplexity: \"astrology transits\"",
+        "Competitors cited: astro-charts.com, reddit.com, astrosage.com, astro.cafeastrology.com, horoscopes.astro-seek.com, en.wikipedia.org, youtube.com, astro.com",
         "Google Search Console has 8802 impressions for matching page/query rows."
       ],
-      "nextAction": "Run this prompt in the Lunary research browser and compare cited competitors against the target page."
+      "nextAction": "Upgrade the target page against the cited competitors: direct answer first, citeable facts, methodology/source links, and fresher supporting data."
     },
     {
       "promptId": "transits-and-current-sky-2",
       "prompt": "current cosmic weather",
       "topic": "Transits and current sky",
       "targetUrl": "https://lunary.app/grimoire/transits",
-      "status": "traffic-without-browser-proof",
+      "status": "competitor-cited",
       "evidence": [
+        "perplexity: \"current cosmic weather\"",
+        "Competitors cited: spaceweatherlive.com, spaceweather.gov, swpc.noaa.gov, geomag.bgs.ac.uk, spaceweather.com, swe.ssa.esa.int, spaceweather.surrey.ac.uk, soho.nascom.nasa.gov",
         "Google Search Console has 8802 impressions for matching page/query rows."
       ],
-      "nextAction": "Run this prompt in the Lunary research browser and compare cited competitors against the target page."
+      "nextAction": "Upgrade the target page against the cited competitors: direct answer first, citeable facts, methodology/source links, and fresher supporting data."
     },
     {
       "promptId": "transits-and-current-sky-3",
       "prompt": "how transits affect natal placements",
       "topic": "Transits and current sky",
       "targetUrl": "https://lunary.app/grimoire/transits",
-      "status": "traffic-without-browser-proof",
+      "status": "competitor-cited",
       "evidence": [
+        "perplexity: \"how transits affect natal placements\"",
+        "Competitors cited: reddit.com, saturnandhoney.com, theastrologyplacemembership.com, mynitya.com, youtube.com, mr-izo.com, astrobutterfly.com",
         "Google Search Console has 8802 impressions for matching page/query rows."
       ],
-      "nextAction": "Run this prompt in the Lunary research browser and compare cited competitors against the target page."
+      "nextAction": "Upgrade the target page against the cited competitors: direct answer first, citeable facts, methodology/source links, and fresher supporting data."
     },
     {
       "promptId": "astrological-houses-1",

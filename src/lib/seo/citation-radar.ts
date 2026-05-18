@@ -81,6 +81,7 @@ export type CitationRadarOpportunity = {
   status:
     | 'cited'
     | 'bing-cited'
+    | 'competitor-cited'
     | 'traffic-without-browser-proof'
     | 'needs-browser-audit';
   evidence: string[];
@@ -225,7 +226,7 @@ function promptMatchesFinding(
   prompt: CitationRadarPrompt,
   finding: CitationFinding,
 ) {
-  if (finding.promptId && finding.promptId === prompt.id) return true;
+  if (finding.promptId) return finding.promptId === prompt.id;
   if (finding.topic && finding.topic === prompt.topic) return true;
 
   const query = finding.query.toLowerCase();
@@ -364,6 +365,36 @@ function createOpportunities(params: {
       continue;
     }
 
+    if (matchingFindings.length > 0) {
+      const competitorDomains = Array.from(
+        new Set(
+          matchingFindings.flatMap((finding) =>
+            finding.citedSources
+              .filter((source) => !isLunaryCitationUrl(source.url))
+              .map((source) => source.domain || domainFromUrl(source.url))
+              .filter(Boolean),
+          ),
+        ),
+      ).slice(0, 8);
+      opportunities.push({
+        promptId: prompt.id,
+        prompt: prompt.prompt,
+        topic: prompt.topic,
+        targetUrl: prompt.targetUrl,
+        status: 'competitor-cited',
+        evidence: [
+          ...matchingFindings.map(
+            (finding) => `${finding.engine}: "${finding.query}"`,
+          ),
+          `Competitors cited: ${competitorDomains.join(', ') || 'unknown'}`,
+          ...trafficEvidence,
+        ],
+        nextAction:
+          'Upgrade the target page against the cited competitors: direct answer first, citeable facts, methodology/source links, and fresher supporting data.',
+      });
+      continue;
+    }
+
     if (trafficEvidence.length > 0) {
       opportunities.push({
         promptId: prompt.id,
@@ -391,10 +422,11 @@ function createOpportunities(params: {
   }
 
   const priority: Record<CitationRadarOpportunity['status'], number> = {
-    'traffic-without-browser-proof': 0,
-    'needs-browser-audit': 1,
-    'bing-cited': 2,
-    cited: 3,
+    'competitor-cited': 0,
+    'traffic-without-browser-proof': 1,
+    'needs-browser-audit': 2,
+    'bing-cited': 3,
+    cited: 4,
   };
 
   return opportunities.sort(

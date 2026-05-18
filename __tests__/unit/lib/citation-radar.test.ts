@@ -111,7 +111,7 @@ describe('citation radar', () => {
         }),
         expect.objectContaining({
           topic: 'Transits and current sky',
-          status: 'needs-browser-audit',
+          status: 'competitor-cited',
         }),
       ]),
     );
