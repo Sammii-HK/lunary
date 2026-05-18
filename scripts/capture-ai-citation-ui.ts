@@ -315,6 +315,24 @@ function delay(ms: number) {
   return new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
 }
 
+async function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number,
+  message: string,
+) {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        timeout = setTimeout(() => reject(new Error(message)), ms);
+      }),
+    ]);
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
+}
+
 function parsePerplexityLink(
   link: { text: string; href: string },
   index: number,
@@ -355,90 +373,92 @@ async function capturePerplexity(params: {
   screenshotDir: string;
 }) {
   const { targetId, sessionId } = await createPage(params.cdp);
-  const searchUrl = `https://www.perplexity.ai/search?q=${encodeURIComponent(
-    params.prompt.prompt,
-  )}`;
+  try {
+    const searchUrl = `https://www.perplexity.ai/search?q=${encodeURIComponent(
+      params.prompt.prompt,
+    )}`;
 
-  await params.cdp.send('Page.navigate', { url: searchUrl }, sessionId);
-  await delay(params.waitMs);
+    await params.cdp.send('Page.navigate', { url: searchUrl }, sessionId);
+    await delay(params.waitMs);
 
-  await evaluate<boolean>(
-    params.cdp,
-    sessionId,
-    `(() => {
-      const tab = Array.from(document.querySelectorAll('button,[role="tab"]'))
-        .find((node) => (node.textContent || '').trim() === 'Links');
-      if (!tab) return false;
-      tab.click();
-      return true;
-    })()`,
-  ).catch(() => false);
+    await evaluate<boolean>(
+      params.cdp,
+      sessionId,
+      `(() => {
+        const tab = Array.from(document.querySelectorAll('button,[role="tab"]'))
+          .find((node) => (node.textContent || '').trim() === 'Links');
+        if (!tab) return false;
+        tab.click();
+        return true;
+      })()`,
+    ).catch(() => false);
 
-  await delay(3000);
+    await delay(3000);
 
-  const capture = await evaluate<PerplexityCapture>(
-    params.cdp,
-    sessionId,
-    `(() => {
-      const clean = (value, limit = 800) => String(value || '')
-        .replace(/\\s+/g, ' ')
-        .trim()
-        .slice(0, limit);
-      const links = Array.from(document.querySelectorAll('a[href]'))
-        .map((node) => ({
-          text: clean(node.innerText || node.textContent || '', 900),
-          href: node.href,
-        }))
-        .filter((item) => item.href && !item.href.includes('perplexity.ai'))
-        .slice(0, 20);
-      const citationLabels = Array.from(document.querySelectorAll('.citation'))
-        .map((node) => clean(node.textContent || '', 120))
-        .filter(Boolean);
-      return {
-        href: location.href,
-        title: document.title,
-        bodyText: clean(document.body?.innerText || '', 12000),
-        citationLabels,
-        links,
-      };
-    })()`,
-  );
+    const capture = await evaluate<PerplexityCapture>(
+      params.cdp,
+      sessionId,
+      `(() => {
+        const clean = (value, limit = 800) => String(value || '')
+          .replace(/\\s+/g, ' ')
+          .trim()
+          .slice(0, limit);
+        const links = Array.from(document.querySelectorAll('a[href]'))
+          .map((node) => ({
+            text: clean(node.innerText || node.textContent || '', 900),
+            href: node.href,
+          }))
+          .filter((item) => item.href && !item.href.includes('perplexity.ai'))
+          .slice(0, 20);
+        const citationLabels = Array.from(document.querySelectorAll('.citation'))
+          .map((node) => clean(node.textContent || '', 120))
+          .filter(Boolean);
+        return {
+          href: location.href,
+          title: document.title,
+          bodyText: clean(document.body?.innerText || '', 12000),
+          citationLabels,
+          links,
+        };
+      })()`,
+    );
 
-  mkdirSync(params.screenshotDir, { recursive: true });
-  const screenshotPath = resolve(
-    params.screenshotDir,
-    `${new Date().toISOString().replace(/[:.]/g, '-')}-perplexity-${params.prompt.id}.png`,
-  );
-  const screenshot = await params.cdp.send<{ data: string }>(
-    'Page.captureScreenshot',
-    { format: 'png' },
-    sessionId,
-  );
-  writeFileSync(screenshotPath, Buffer.from(screenshot.data, 'base64'));
+    mkdirSync(params.screenshotDir, { recursive: true });
+    const screenshotPath = resolve(
+      params.screenshotDir,
+      `${new Date().toISOString().replace(/[:.]/g, '-')}-perplexity-${params.prompt.id}.png`,
+    );
+    const screenshot = await params.cdp.send<{ data: string }>(
+      'Page.captureScreenshot',
+      { format: 'png' },
+      sessionId,
+    );
+    writeFileSync(screenshotPath, Buffer.from(screenshot.data, 'base64'));
 
-  await params.cdp
-    .send('Target.closeTarget', { targetId })
-    .catch(() => undefined);
+    const citedSources = capture.links
+      .map(parsePerplexityLink)
+      .filter(isUsefulSource)
+      .slice(0, 10);
 
-  const citedSources = capture.links
-    .map(parsePerplexityLink)
-    .filter(isUsefulSource)
-    .slice(0, 10);
-
-  return {
-    capturedAt: new Date().toISOString(),
-    engine: 'perplexity',
-    query: params.prompt.prompt,
-    promptId: params.prompt.id,
-    topic: params.prompt.topic,
-    locale: 'en-GB',
-    country: 'GB',
-    citedSources,
-    screenshotPath: screenshotPath.replace(`${process.cwd()}/`, ''),
-    notes: `Captured from Perplexity Links tab in the ${DEFAULT_PROFILE} Cloak profile. Result URL: ${capture.href}. Citation labels: ${capture.citationLabels
-      .slice(0, 12)
-      .join(', ')}`,
-  } satisfies CitationFinding;
+    return {
+      capturedAt: new Date().toISOString(),
+      engine: 'perplexity',
+      query: params.prompt.prompt,
+      promptId: params.prompt.id,
+      topic: params.prompt.topic,
+      locale: 'en-GB',
+      country: 'GB',
+      citedSources,
+      screenshotPath: screenshotPath.replace(`${process.cwd()}/`, ''),
+      notes: `Captured from Perplexity Links tab in the ${DEFAULT_PROFILE} Cloak profile. Result URL: ${capture.href}. Citation labels: ${capture.citationLabels
+        .slice(0, 12)
+        .join(', ')}`,
+    } satisfies CitationFinding;
+  } finally {
+    await params.cdp
+      .send('Target.closeTarget', { targetId })
+      .catch(() => undefined);
+  }
 }
 
 function selectPrompts(params: {
@@ -492,6 +512,14 @@ function mergeFindings(
   );
 }
 
+function writeMergedFindings(path: string, findings: CitationFinding[]) {
+  mkdirSync(dirname(path), { recursive: true });
+  const existing = readJson<CitationFinding[]>(path, []);
+  const merged = mergeFindings(existing, findings);
+  writeFileSync(path, `${JSON.stringify(merged, null, 2)}\n`);
+  return merged;
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const manager = stringArg(args, 'manager', DEFAULT_MANAGER).replace(
@@ -519,6 +547,7 @@ async function main() {
   const promptIds = listArg(args, 'prompt-id');
   const limit = numberArg(args, 'limit', promptIds.length || 3);
   const waitMs = numberArg(args, 'wait-ms', 14000);
+  const promptTimeoutMs = numberArg(args, 'prompt-timeout-ms', waitMs + 60000);
 
   if (engine !== 'perplexity') {
     throw new Error('Only --engine perplexity is implemented so far');
@@ -536,28 +565,37 @@ async function main() {
 
   const token = readCloakToken();
   const profileId = await resolveProfileId(manager, profile, token);
-  const cdp = await CdpClient.connect(managerWsUrl(manager, profileId), token);
 
   const findings: CitationFinding[] = [];
-  try {
-    for (const prompt of selectedPrompts) {
-      findings.push(
-        await capturePerplexity({
+  const errors: Array<{ promptId: string; query: string; error: string }> = [];
+  for (const prompt of selectedPrompts) {
+    let cdp: CdpClient | undefined;
+    try {
+      cdp = await CdpClient.connect(managerWsUrl(manager, profileId), token);
+      const finding = await withTimeout(
+        capturePerplexity({
           cdp,
           prompt,
           waitMs,
           screenshotDir,
         }),
+        promptTimeoutMs,
+        `Prompt timed out after ${promptTimeoutMs}ms`,
       );
+      findings.push(finding);
+      writeMergedFindings(findingsPath, [finding]);
+    } catch (error) {
+      errors.push({
+        promptId: prompt.id,
+        query: prompt.prompt,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      cdp?.close();
     }
-  } finally {
-    cdp.close();
   }
 
-  mkdirSync(dirname(findingsPath), { recursive: true });
-  const existing = readJson<CitationFinding[]>(findingsPath, []);
-  const merged = mergeFindings(existing, findings);
-  writeFileSync(findingsPath, `${JSON.stringify(merged, null, 2)}\n`);
+  const merged = writeMergedFindings(findingsPath, findings);
 
   console.log(
     JSON.stringify(
@@ -575,6 +613,8 @@ async function main() {
             url: source.url,
           })),
         })),
+        errors,
+        totalStoredFindings: merged.length,
       },
       null,
       2,
