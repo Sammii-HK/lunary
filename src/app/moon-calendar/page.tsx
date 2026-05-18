@@ -1,7 +1,11 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Moon, ArrowRight, Calendar } from 'lucide-react';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createFAQPageSchema,
+  createItemListSchema,
+  renderJsonLdMulti,
+} from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
 export const metadata: Metadata = {
@@ -40,6 +44,22 @@ const years = [
   { year: 2030, description: 'Extended lunar calendar projections' },
 ];
 
+const moonCalendarFaqs = [
+  {
+    question: 'What is a moon calendar?',
+    answer:
+      'A moon calendar tracks the lunar cycle, including new moons, full moons, quarter moons, and the waxing and waning phases between them.',
+  },
+  {
+    question: 'How long is a lunar cycle?',
+    answer:
+      'A lunar cycle lasts about 29.5 days from one new moon to the next, moving through eight visible phases.',
+  },
+];
+
+const tldr: string =
+  'A moon calendar shows the dates and timing of each lunar phase so you can plan around new moons, full moons, and the 29.5-day lunar cycle.';
+
 export default function MoonCalendarHubPage() {
   const itemListSchema = createItemListSchema({
     name: 'Moon Calendar by Year',
@@ -55,7 +75,10 @@ export default function MoonCalendarHubPage() {
 
   return (
     <div className='min-h-screen bg-surface-base text-content-primary'>
-      {renderJsonLd(itemListSchema)}
+      {renderJsonLdMulti([
+        itemListSchema,
+        createFAQPageSchema(moonCalendarFaqs),
+      ])}
       <div className='max-w-5xl mx-auto px-4 py-8 md:py-12'>
         <Breadcrumbs items={[{ label: 'Moon Calendar' }]} />
 
@@ -68,6 +91,9 @@ export default function MoonCalendarHubPage() {
             Track the lunar cycle with complete moon phase calendars from 2025
             through 2030. Know when every new moon, full moon, and quarter phase
             occurs to align your intentions with lunar energy.
+          </p>
+          <p className='mt-4 text-sm text-content-muted leading-relaxed max-w-3xl'>
+            TL;DR: {tldr}
           </p>
         </header>
 

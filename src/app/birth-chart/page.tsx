@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import { Metadata } from 'next';
 import { auth } from '@/lib/auth';
 import Link from 'next/link';
 import {
@@ -29,6 +30,15 @@ import {
   createBreadcrumbSchema,
   createSoftwareAppSchema,
 } from '@/lib/schema';
+
+export const metadata: Metadata = {
+  title: 'Free Birth Chart Calculator & Natal Chart Reading | Lunary',
+  description:
+    'Calculate a complete natal chart with 24+ celestial bodies, houses, aspects, dignities, and personalized astrology interpretations.',
+  alternates: {
+    canonical: 'https://lunary.app/birth-chart',
+  },
+};
 
 const faqs = [
   {
@@ -67,6 +77,9 @@ const faqs = [
       'Lunary uses the traditional Hellenistic day/night sect formula for the Part of Fortune. If you were born at night, your Part of Fortune will differ from apps that use a single formula regardless. This is the original calculation method, used by astrologers for over 2,000 years. Learn more on our methodology page.',
   },
 ];
+
+const tldr: string =
+  'A birth chart is a map of planetary positions at your exact birth time and location, used to interpret signs, houses, aspects, and personal astrological patterns.';
 
 const comparisonFeatures = [
   { feature: 'Celestial bodies tracked', lunary: '24+', others: '10' },
@@ -158,6 +171,7 @@ export default async function BirthChartLandingPage() {
           <Heading as='h1' variant='h1'>
             Free Birth Chart Calculator
           </Heading>
+          <p className='text-content-muted max-w-2xl mx-auto'>TL;DR: {tldr}</p>
           <p className='text-content-muted max-w-2xl mx-auto'>
             Discover your cosmic blueprint with 24+ celestial bodies, planetary
             aspects, dignities, and personalized interpretations — all

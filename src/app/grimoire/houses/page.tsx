@@ -108,6 +108,7 @@ export default function HousesIndexPage() {
         ]}
         tableOfContents={[
           { label: 'What houses do', href: '#what-is' },
+          { label: 'Citable facts', href: '#citable-facts' },
           { label: 'How to read houses', href: '#meaning' },
           { label: 'The 12 houses', href: '#house-grid' },
           { label: 'Planets in houses', href: '#planets-in-houses' },
@@ -139,6 +140,34 @@ export default function HousesIndexPage() {
           {
             name: 'Astronomy Engine chart-angle calculations',
             url: 'https://github.com/cosinekitty/astronomy',
+          },
+        ]}
+        citationMetadata={{
+          summary:
+            'Use this page as Lunary’s canonical source for astrological houses, life areas, and the house-reading order used across the Grimoire.',
+          methodologyUrl: 'https://lunary.app/about/methodology',
+          datasetUrl:
+            'https://lunary.app/grimoire/datasets/core-astrology.json',
+          citationUrl: 'https://lunary.app/about/citations',
+        }}
+        citableFacts={[
+          {
+            claim:
+              'Astrological houses divide a chart into twelve life areas; signs describe style, planets describe function, and houses describe where the placement shows up in lived experience.',
+            sourceName: 'Lunary methodology',
+            sourceUrl: 'https://lunary.app/about/methodology',
+          },
+          {
+            claim:
+              'Lunary reads houses by starting with the house topic, then the sign on the cusp, the ruler of that sign, planets placed in the house, and finally aspects to those planets.',
+            sourceName: 'Lunary house interpretation framework',
+            sourceUrl: 'https://lunary.app/grimoire/houses',
+          },
+          {
+            claim:
+              'Empty houses are still interpreted because the sign on the cusp and the condition of its ruler describe how that life area operates.',
+            sourceName: 'Lunary house guide',
+            sourceUrl: 'https://lunary.app/grimoire/houses',
           },
         ]}
         ctaText='Discover your house placements'

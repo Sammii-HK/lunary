@@ -1,0 +1,25 @@
+[
+  {
+    "capturedAt": "2026-05-18T12:00:00.000Z",
+    "engine": "perplexity",
+    "query": "what does venus retrograde mean in astrology",
+    "promptId": "transits-and-current-sky-1",
+    "topic": "Transits and current sky",
+    "locale": "en-GB",
+    "country": "GB",
+    "citedSources": [
+      {
+        "url": "https://lunary.app/grimoire/transits",
+        "title": "Astrology Transits",
+        "position": 1
+      },
+      {
+        "url": "https://example.com/venus-retrograde",
+        "title": "Competitor Venus Retrograde Guide",
+        "position": 2
+      }
+    ],
+    "screenshotPath": "research/citations/2026-05-18-perplexity-venus-retrograde.png",
+    "notes": "Example only. Copy this shape into data/ai-citation-radar/findings.json and replace rows with real browser captures."
+  }
+]

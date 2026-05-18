@@ -3,6 +3,10 @@
  */
 
 import robots from '@/app/robots';
+import {
+  AI_CRAWLER_USER_AGENTS,
+  AI_DISCOVERY_PATHS,
+} from '@/lib/seo/discovery';
 
 describe('robots metadata', () => {
   it('keeps protected app and API areas blocked for general crawlers', () => {
@@ -21,22 +25,26 @@ describe('robots metadata', () => {
   it('lets AI crawlers reach public declaration and discovery files', () => {
     const metadata = robots();
     const rules = Array.isArray(metadata.rules) ? metadata.rules : [];
-    const gptBotRule = rules.find((rule) => rule.userAgent === 'GPTBot');
-
-    expect(gptBotRule).toBeDefined();
-    expect(gptBotRule?.allow).toEqual(
-      expect.arrayContaining([
-        '/llms.txt',
-        '/llms-full.txt',
-        '/.well-known/ai-plugin.json',
-        '/.well-known/openapi.json',
-        '/.well-known/lunary-gpt-openapi.yaml',
-        '/sitemap-index.xml',
-        '/sitemap.xml',
-      ]),
+    const oaiSearchBotRule = rules.find(
+      (rule) => rule.userAgent === 'OAI-SearchBot',
     );
-    expect(gptBotRule?.disallow).toEqual(
+
+    expect(oaiSearchBotRule).toBeDefined();
+    expect(oaiSearchBotRule?.allow).toEqual(
+      expect.arrayContaining(Array.from(AI_DISCOVERY_PATHS)),
+    );
+    expect(oaiSearchBotRule?.disallow).toEqual(
       expect.arrayContaining(['/api/', '/profile/', '/admin/']),
+    );
+  });
+
+  it('has explicit rules for the current Bing and AI citation crawlers', () => {
+    const metadata = robots();
+    const rules = Array.isArray(metadata.rules) ? metadata.rules : [];
+    const userAgents = rules.map((rule) => rule.userAgent);
+
+    expect(userAgents).toEqual(
+      expect.arrayContaining(Array.from(AI_CRAWLER_USER_AGENTS)),
     );
   });
 });

@@ -31,7 +31,7 @@ export default async function WeekAheadPage() {
     .catch(() => null);
 
   if (!session?.user?.id) {
-    redirect('/login?next=/app/week-ahead');
+    redirect('/auth?returnTo=/app/week-ahead');
   }
 
   const userId = session.user.id;

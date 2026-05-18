@@ -7,6 +7,7 @@ import {
   resolveDateRange,
 } from '@/lib/analytics/date-range';
 import { getSearchConsoleData } from '@/lib/google/search-console';
+import { getBingWebmasterPerformance } from '@/lib/bing/webmaster';
 import {
   getStripeSubscriptionSnapshot,
   type StripeSubscriptionSnapshot,
@@ -293,18 +294,44 @@ export async function GET(request: NextRequest) {
     let searchChange = 0;
 
     try {
-      const searchConsoleData = await getSearchConsoleData(startDate, endDate);
-      searchImpressions = searchConsoleData.totalImpressions;
-      searchClicks = searchConsoleData.totalClicks;
-      searchCtr = searchConsoleData.averageCtr * 100; // Convert to percentage
+      const [googleSearchResult, bingSearchResult] = await Promise.allSettled([
+        getSearchConsoleData(startDate, endDate),
+        getBingWebmasterPerformance(startDate, endDate),
+      ]);
+
+      const googleSearchData =
+        googleSearchResult.status === 'fulfilled'
+          ? googleSearchResult.value
+          : null;
+      const bingSearchData =
+        bingSearchResult.status === 'fulfilled' ? bingSearchResult.value : null;
+
+      if (!googleSearchData && !bingSearchData) {
+        throw new Error('No search performance source available');
+      }
+
+      searchImpressions =
+        (googleSearchData?.totalImpressions || 0) +
+        (bingSearchData?.totalImpressions || 0);
+      searchClicks =
+        (googleSearchData?.totalClicks || 0) +
+        (bingSearchData?.totalClicks || 0);
+      searchCtr =
+        searchImpressions > 0 ? (searchClicks / searchImpressions) * 100 : 0;
 
       // Previous period for trend
-      const prevSearchConsoleData = await getSearchConsoleData(
-        formatDate(prevRangeStart),
-        formatDate(prevRangeEnd),
-      );
-      const prevSearchImpressions = prevSearchConsoleData.totalImpressions;
-      const prevSearchClicks = prevSearchConsoleData.totalClicks;
+      const previousStart = formatDate(prevRangeStart);
+      const previousEnd = formatDate(prevRangeEnd);
+      const [prevGoogleResult, prevBingResult] = await Promise.allSettled([
+        getSearchConsoleData(previousStart, previousEnd),
+        getBingWebmasterPerformance(previousStart, previousEnd),
+      ]);
+      const prevGoogleData =
+        prevGoogleResult.status === 'fulfilled' ? prevGoogleResult.value : null;
+      const prevBingData =
+        prevBingResult.status === 'fulfilled' ? prevBingResult.value : null;
+      const prevSearchClicks =
+        (prevGoogleData?.totalClicks || 0) + (prevBingData?.totalClicks || 0);
 
       searchTrend =
         searchClicks > prevSearchClicks

@@ -1,6 +1,11 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Check, ArrowRight, Star } from 'lucide-react';
+import {
+  createArticleSchema,
+  createFAQPageSchema,
+  renderJsonLdMulti,
+} from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'Personalized vs Generic Astrology: Which is More Accurate? - Lunary',
@@ -26,9 +31,43 @@ export const metadata: Metadata = {
   },
 };
 
+const comparisonFaqs = [
+  {
+    question: 'Is personalized astrology more specific than generic astrology?',
+    answer:
+      'Yes. Personalized astrology uses birth time, birth date, location, planetary placements, houses, aspects, and current transits. Generic astrology usually relies on sun sign alone.',
+  },
+  {
+    question: 'What makes a birth chart reading different from a horoscope?',
+    answer:
+      'A birth chart reading interprets the full natal chart structure, while a generic horoscope is written for a broad audience sharing one zodiac sign.',
+  },
+];
+
+const tldr: string =
+  'Personalized astrology is more specific than generic astrology because it interprets the full birth chart: exact time, date, location, planetary placements, houses, aspects, and current transits. Generic astrology usually describes broad sun-sign themes.';
+
 export default function PersonalizedVsGenericAstrologyPage() {
   return (
     <div className='min-h-screen bg-surface-base text-content-primary'>
+      {renderJsonLdMulti([
+        createArticleSchema({
+          headline:
+            'Personalized vs Generic Astrology: Which is More Accurate?',
+          description:
+            'A comparison of personalized birth-chart astrology and generic sun-sign horoscopes, including calculation method, relevance, and chart specificity.',
+          url: 'https://lunary.app/comparison/personalized-vs-generic-astrology',
+          keywords: [
+            'personalized astrology',
+            'generic astrology',
+            'birth chart accuracy',
+            'natal chart astrology',
+            'sun sign horoscopes',
+          ],
+          section: 'Astrology Education',
+        }),
+        createFAQPageSchema(comparisonFaqs),
+      ])}
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <div className='mb-8'>
           <h1 className='text-4xl font-light text-content-primary mb-4'>
@@ -39,6 +78,15 @@ export default function PersonalizedVsGenericAstrologyPage() {
             astrology and generic zodiac horoscopes.
           </p>
         </div>
+
+        <section className='mb-8 p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
+          <h2 className='text-xl font-medium text-content-primary mb-3'>
+            TL;DR
+          </h2>
+          <p className='text-sm text-content-secondary leading-relaxed'>
+            {tldr}
+          </p>
+        </section>
 
         <div className='mb-8 p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
           <p className='text-sm text-content-secondary leading-relaxed'>

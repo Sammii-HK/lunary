@@ -170,6 +170,11 @@ export default async function MoonPage() {
         'moon rituals',
       ]}
       canonicalUrl='https://lunary.app/grimoire/moon'
+      whatIs={{
+        question: 'What are moon phases?',
+        answer:
+          'Moon phases are the visible stages of the lunar cycle created by the changing Sun-Moon angle as seen from Earth. Lunary uses calculated lunar phase facts for timing, then explains the symbolic meaning of each phase in the Grimoire.',
+      }}
       tableOfContents={[
         { label: 'What the Moon tracks', href: '#what-is' },
         { label: 'How to read lunar timing', href: '#meaning' },
@@ -206,6 +211,35 @@ For chart reading, the Moon matters in two distinct ways. Your natal Moon sign d
         'Work with moon signs for daily guidance and compare them to your natal Moon placement',
         'Use full moon names for seasonal magic',
         'Honor eclipses as powerful transformation times',
+      ]}
+      citationMetadata={{
+        summary:
+          'Use this page as Lunary’s canonical source for moon phase meanings, lunar timing, and the distinction between natal Moon meaning and current Moon weather.',
+        methodologyUrl: 'https://lunary.app/about/methodology',
+        datasetUrl:
+          'https://lunary.app/grimoire/datasets/current-sky-facts.json',
+        citationUrl: 'https://lunary.app/about/citations',
+      }}
+      citableFacts={[
+        {
+          claim:
+            'Lunary’s moon phase pages are based on calculated Sun-Moon angular relationships, including New Moon, First Quarter, Full Moon, and Last Quarter phase geometry.',
+          sourceName: 'Lunary methodology',
+          sourceUrl: 'https://lunary.app/about/methodology',
+        },
+        {
+          claim:
+            'Lunary treats natal Moon meaning and current Moon weather as separate layers: the natal Moon describes an emotional baseline, while the current Moon describes temporary sky mood.',
+          sourceName: 'Lunary moon guide',
+          sourceUrl: 'https://lunary.app/grimoire/moon',
+        },
+        {
+          claim:
+            'Lunary current sky facts expose date-stamped Moon phase, Moon sign, ecliptic longitude, illumination percentage, and phase angle for machine-readable citation.',
+          sourceName: 'Lunary current sky facts',
+          sourceUrl:
+            'https://lunary.app/grimoire/datasets/current-sky-facts.json',
+        },
       ]}
       internalLinks={[
         {

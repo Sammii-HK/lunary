@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { createFAQPageSchema, renderJsonLd } from '@/lib/schema';
+import { createFAQPageSchema, renderJsonLdMulti } from '@/lib/schema';
 import { MarketingFooter } from '@/components/MarketingFooter';
 
 export const metadata: Metadata = {
@@ -182,6 +182,9 @@ const sourceLinks = [
   },
 ];
 
+const tldr: string =
+  'Lunary calculates astrology charts, transits, moon phases, and current sky facts from real astronomical positions, then separates calculation facts from symbolic interpretation.';
+
 export default function MethodologyPage() {
   const faqSchema = createFAQPageSchema(
     faqs.map((faq) => ({
@@ -189,11 +192,49 @@ export default function MethodologyPage() {
       answer: faq.answer,
     })),
   );
+  const methodologySchema = {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    '@id': 'https://lunary.app/about/methodology#methodology',
+    headline: 'How Lunary Calculates Charts and Transits',
+    description:
+      'Technical methodology for Lunary astrology calculations, including Astronomy Engine, coordinate systems, house systems, transits, moon phases, and interpretation boundaries.',
+    url: 'https://lunary.app/about/methodology',
+    datePublished: '2026-05-17',
+    dateModified: '2026-05-18',
+    author: {
+      '@type': 'Organization',
+      name: 'Lunary',
+      url: 'https://lunary.app',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Lunary',
+      url: 'https://lunary.app',
+    },
+    inLanguage: 'en-US',
+    isAccessibleForFree: true,
+    about: [
+      'Astrological calculations',
+      'Birth charts',
+      'Planetary transits',
+      'Moon phases',
+      'Astronomy Engine',
+    ],
+    citation: sourceLinks.map((source) =>
+      source.href.startsWith('http')
+        ? source.href
+        : `https://lunary.app${source.href}`,
+    ),
+    isBasedOn: sourceLinks
+      .filter((source) => source.href.startsWith('http'))
+      .map((source) => source.href),
+  };
 
   return (
     <>
       <div className='min-h-screen bg-surface-base text-content-primary flex flex-col'>
-        {renderJsonLd(faqSchema)}
+        {renderJsonLdMulti([methodologySchema, faqSchema])}
         <div className='flex-1 max-w-4xl mx-auto px-4 py-12'>
           <nav className='flex items-center gap-2 text-sm text-content-muted mb-8'>
             <Link href='/' className='hover:text-content-secondary'>
@@ -214,6 +255,9 @@ export default function MethodologyPage() {
             <p className='text-xl text-content-muted leading-relaxed'>
               How Lunary achieves astronomy-grade accuracy in astrological
               calculations.
+            </p>
+            <p className='mt-4 text-sm text-content-muted leading-relaxed'>
+              TL;DR: {tldr}
             </p>
           </header>
 

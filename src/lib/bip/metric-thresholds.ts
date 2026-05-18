@@ -15,6 +15,7 @@ const VISIBILITY_THRESHOLDS: Record<string, number> = {
   subscriberCount: 1, // Show when at least 1
   impressionsPerDay: 1000, // Show when meaningful
   clicksPerDay: 50, // Show when meaningful
+  aiCitations: 1, // Bing AI citation count is meaningful early
   dau: 10, // Hide when single digits
   newSignups: 1, // Show when at least 1
 };
@@ -30,6 +31,7 @@ export interface RawMetrics {
   impressionsPerDay?: number;
   impressionsDelta?: number;
   clicksPerDay?: number;
+  aiCitations?: number;
   dau?: number;
   newSignups?: number;
 }
@@ -76,7 +78,8 @@ const METRIC_CONFIG: Record<
     label: 'active subscribers (early access)',
     format: (n) => String(n),
   },
-  clicksPerDay: { label: 'clicks/day from Google', format: (n) => String(n) },
+  clicksPerDay: { label: 'organic clicks/day', format: (n) => String(n) },
+  aiCitations: { label: 'Bing AI citations', format: (n) => String(n) },
   dau: { label: 'DAU', format: (n) => String(n) },
   newSignups: {
     label: `new signup${1 !== 1 ? 's' : ''} this week`,

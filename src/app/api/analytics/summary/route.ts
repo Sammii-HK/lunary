@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { formatDate, formatTimestamp } from '@/lib/analytics/date-range';
 import { getSearchConsoleData, getTopPages } from '@/lib/google/search-console';
+import {
+  getBingTopPages,
+  getBingWebmasterPerformance,
+} from '@/lib/bing/webmaster';
 import generateSitemap from '@/app/sitemap';
 
 export const dynamic = 'force-dynamic';
@@ -919,21 +923,47 @@ export async function GET(request: NextRequest) {
             .slice(0, 10);
         }
       } else {
-        // Fallback to API if no database data
-        const searchConsoleData = await getSearchConsoleData(
-          thirtyDaysAgoDate,
-          endDate,
-        );
-        monthlyClicks = searchConsoleData.totalClicks;
-        monthlyImpressions = searchConsoleData.totalImpressions;
-        seoCtr = searchConsoleData.averageCtr * 100; // Convert to percentage
+        // Fallback to live APIs if no database data. Pull Bing alongside Google
+        // so SEO counts still work when Google Search Console is unavailable.
+        const [googleResult, bingResult] = await Promise.allSettled([
+          getSearchConsoleData(thirtyDaysAgoDate, endDate),
+          getBingWebmasterPerformance(thirtyDaysAgoDate, endDate),
+        ]);
+        const googleData =
+          googleResult.status === 'fulfilled' ? googleResult.value : null;
+        const bingData =
+          bingResult.status === 'fulfilled' ? bingResult.value : null;
+        monthlyClicks =
+          (googleData?.totalClicks || 0) + (bingData?.totalClicks || 0);
+        monthlyImpressions =
+          (googleData?.totalImpressions || 0) +
+          (bingData?.totalImpressions || 0);
+        seoCtr =
+          monthlyImpressions > 0
+            ? (monthlyClicks / monthlyImpressions) * 100
+            : 0;
 
         // Get top 10 pages
-        const topPagesData = await getTopPages(thirtyDaysAgoDate, endDate, 10);
-        topPages = topPagesData.map((page) => ({
-          url: page.page,
-          clicks: page.clicks,
-        }));
+        const [googleTopPagesResult, bingTopPagesResult] =
+          await Promise.allSettled([
+            getTopPages(thirtyDaysAgoDate, endDate, 10),
+            getBingTopPages(thirtyDaysAgoDate, endDate, 10),
+          ]);
+        const googleTopPages =
+          googleTopPagesResult.status === 'fulfilled'
+            ? googleTopPagesResult.value
+            : [];
+        const bingTopPages =
+          bingTopPagesResult.status === 'fulfilled'
+            ? bingTopPagesResult.value
+            : [];
+        topPages = [...bingTopPages, ...googleTopPages]
+          .map((page) => ({
+            url: page.page,
+            clicks: page.clicks,
+          }))
+          .sort((a, b) => b.clicks - a.clicks)
+          .slice(0, 10);
       }
     } catch (error) {
       // If Search Console API is not configured, use defaults

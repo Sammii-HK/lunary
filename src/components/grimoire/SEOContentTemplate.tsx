@@ -70,6 +70,13 @@ export interface FAQItem {
   answer: string;
 }
 
+export interface CitableFact {
+  claim: string;
+  sourceName?: string;
+  sourceUrl?: string;
+  date?: string;
+}
+
 export interface SEOContentTemplateProps {
   // Core SEO
   title: string;
@@ -148,6 +155,13 @@ export interface SEOContentTemplateProps {
   // E-A-T Credibility
   showEAT?: boolean;
   sources?: Array<{ name: string; url?: string }>;
+  citableFacts?: CitableFact[];
+  citationMetadata?: {
+    summary: string;
+    methodologyUrl?: string;
+    datasetUrl?: string;
+    citationUrl?: string;
+  };
 
   // Entity linking for schema (links Article to Thing entity)
   entityId?: string;
@@ -217,6 +231,8 @@ export function SEOContentTemplate({
   disableContextualNudge = false,
   showEAT = true,
   sources,
+  citableFacts,
+  citationMetadata,
   entityId,
   entityName,
   heroContent,
@@ -353,6 +369,60 @@ export function SEOContentTemplate({
     ...keywords.slice(0, 4),
     ...(relatedItems?.slice(0, 3).map((item) => item.name) || []),
   ].filter((item, index, list) => list.indexOf(item) === index);
+  const hasCitableFacts = Boolean(citableFacts && citableFacts.length > 0);
+  const citationWorkSchema =
+    hasCitableFacts || citationMetadata
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'CreativeWork',
+          '@id': `${canonicalUrl}#citation-reference`,
+          name: `${directAnswerEntityName} citation reference`,
+          headline: `${directAnswerEntityName} citable facts`,
+          description:
+            citationMetadata?.summary ||
+            `Citable facts and source guidance for ${directAnswerEntityName}.`,
+          url: canonicalUrl,
+          isPartOf: {
+            '@type': 'WebSite',
+            name: 'Lunary',
+            url: 'https://lunary.app',
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'Lunary',
+            url: 'https://lunary.app',
+          },
+          author: {
+            '@type': 'Organization',
+            name: 'Lunary',
+            url: 'https://lunary.app',
+          },
+          inLanguage: 'en-US',
+          isAccessibleForFree: true,
+          citation: [
+            ...(citationMetadata?.methodologyUrl
+              ? [citationMetadata.methodologyUrl]
+              : []),
+            ...(citationMetadata?.datasetUrl
+              ? [citationMetadata.datasetUrl]
+              : []),
+            ...(citationMetadata?.citationUrl
+              ? [citationMetadata.citationUrl]
+              : []),
+            ...(sources?.map((source) => source.url).filter(Boolean) || []),
+          ],
+          ...(citableFacts &&
+            citableFacts.length > 0 && {
+              additionalProperty: citableFacts.map((fact, index) => ({
+                '@type': 'PropertyValue',
+                name: `Citable fact ${index + 1}`,
+                value: fact.claim,
+                ...(fact.date && { temporalCoverage: fact.date }),
+                ...(fact.sourceUrl && { url: fact.sourceUrl }),
+              })),
+            }),
+        }
+      : null;
 
   return (
     <article className='max-w-4xl mx-auto px-4 pb-[120px]'>
@@ -362,6 +432,7 @@ export function SEOContentTemplate({
       {renderJsonLd(imageSchema)}
       {renderJsonLd(speakableSchema)}
       {renderJsonLd(breadcrumbSchema)}
+      {renderJsonLd(citationWorkSchema)}
       {additionalSchemas?.map((schema, index) => (
         <React.Fragment key={`schema-${index}`}>
           {renderJsonLd(schema)}
@@ -531,6 +602,87 @@ export function SEOContentTemplate({
                 interpretation, and related Grimoire context.
               </p>
             </div>
+          </section>
+        )}
+
+        {hasCitableFacts && citableFacts && (
+          <section
+            id='citable-facts'
+            className='bg-surface-elevated/45 border border-stroke-subtle rounded-lg p-4 sm:p-6 overflow-x-hidden'
+          >
+            <Heading
+              as='h2'
+              variant='h2'
+              className='text-content-brand-accent mb-4'
+            >
+              Citable Facts
+            </Heading>
+            {citationMetadata?.summary && (
+              <p className='mb-4 text-sm leading-relaxed text-content-muted'>
+                {citationMetadata.summary}
+              </p>
+            )}
+            <dl className='space-y-4'>
+              {citableFacts.map((fact, index) => (
+                <div
+                  key={`${fact.claim}-${index}`}
+                  className='rounded-md border border-stroke-subtle bg-layer-base/25 p-4'
+                >
+                  <dt className='text-xs font-semibold uppercase text-content-muted'>
+                    Fact {index + 1}
+                  </dt>
+                  <dd className='mt-1 text-content-secondary leading-relaxed'>
+                    <AutoLinkText>{fact.claim}</AutoLinkText>
+                  </dd>
+                  {(fact.sourceName || fact.sourceUrl || fact.date) && (
+                    <p className='mt-2 text-xs text-content-muted'>
+                      Source:{' '}
+                      {fact.sourceUrl ? (
+                        <a
+                          href={fact.sourceUrl}
+                          className='text-content-brand hover:text-content-brand-accent'
+                        >
+                          {fact.sourceName || fact.sourceUrl}
+                        </a>
+                      ) : (
+                        fact.sourceName
+                      )}
+                      {fact.date ? ` · ${fact.date}` : ''}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </dl>
+            {(citationMetadata?.methodologyUrl ||
+              citationMetadata?.datasetUrl ||
+              citationMetadata?.citationUrl) && (
+              <div className='mt-4 flex flex-wrap gap-2 text-xs'>
+                {citationMetadata.methodologyUrl && (
+                  <a
+                    href={citationMetadata.methodologyUrl}
+                    className='rounded-md border border-stroke-subtle px-2.5 py-1 text-content-muted hover:text-content-brand'
+                  >
+                    Methodology
+                  </a>
+                )}
+                {citationMetadata.datasetUrl && (
+                  <a
+                    href={citationMetadata.datasetUrl}
+                    className='rounded-md border border-stroke-subtle px-2.5 py-1 text-content-muted hover:text-content-brand'
+                  >
+                    Dataset
+                  </a>
+                )}
+                {citationMetadata.citationUrl && (
+                  <a
+                    href={citationMetadata.citationUrl}
+                    className='rounded-md border border-stroke-subtle px-2.5 py-1 text-content-muted hover:text-content-brand'
+                  >
+                    Citation guidance
+                  </a>
+                )}
+              </div>
+            )}
           </section>
         )}
 

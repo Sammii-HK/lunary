@@ -11,10 +11,27 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import robotsMetadata from '@/app/robots';
 import {
+  AI_CRAWLER_USER_AGENTS,
+  AI_DISCOVERY_PATHS,
   CURATED_DISCOVERY_SITEMAPS,
   DEPRIORITIZED_DISCOVERY_SITEMAPS,
 } from '@/lib/seo/discovery';
+
+type AiCitationMap = {
+  crawlEntryPoints?: string[];
+  prioritySurfaces?: Array<{
+    topic?: string;
+    canonicalUrl?: string;
+    supportingUrls?: string[];
+  }>;
+};
+
+function toStringArray(value?: string | string[]) {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+}
 
 // Import retrogradeInfo to verify sitemap coverage
 async function verifyRetrogradeSitemapCoverage() {
@@ -178,6 +195,7 @@ function verifyAISearchDiscovery() {
   const requiredPublicFiles = [
     'llms.txt',
     'llms-full.txt',
+    'ai-citation-map.json',
     '.well-known/ai-plugin.json',
     '.well-known/openapi.json',
     '.well-known/lunary-gpt-openapi.yaml',
@@ -191,13 +209,13 @@ function verifyAISearchDiscovery() {
 
   const llmsPath = path.join(publicDir, 'llms.txt');
   const llmsFullPath = path.join(publicDir, 'llms-full.txt');
+  const citationMapPath = path.join(publicDir, 'ai-citation-map.json');
   const pluginPath = path.join(publicDir, '.well-known/ai-plugin.json');
   const openapiPath = path.join(publicDir, '.well-known/openapi.json');
   const openapiYamlPath = path.join(
     publicDir,
     '.well-known/lunary-gpt-openapi.yaml',
   );
-  const robotsPath = path.join(process.cwd(), 'src/app/robots.ts');
   const sitemapIndexPath = path.join(
     process.cwd(),
     'src/app/sitemap-index.xml/route.ts',
@@ -212,6 +230,9 @@ function verifyAISearchDiscovery() {
     if (!llms.includes('https://lunary.app/sitemap-index.xml')) {
       issues.push('llms.txt does not reference sitemap-index.xml');
     }
+    if (!llms.includes('https://lunary.app/ai-citation-map.json')) {
+      issues.push('llms.txt does not reference ai-citation-map.json');
+    }
     if (!llms.includes('Authorization: Bearer <LUNARY_GPT_SECRET>')) {
       issues.push('llms.txt does not explain authenticated GPT action access');
     }
@@ -221,6 +242,9 @@ function verifyAISearchDiscovery() {
     const llmsFull = fs.readFileSync(llmsFullPath, 'utf-8');
     if (!llmsFull.includes('AI Search Guidance')) {
       issues.push('llms-full.txt is missing AI Search Guidance');
+    }
+    if (!llmsFull.includes('https://lunary.app/ai-citation-map.json')) {
+      issues.push('llms-full.txt does not reference ai-citation-map.json');
     }
     if (!llmsFull.includes('Authorization: Bearer <LUNARY_GPT_SECRET>')) {
       issues.push(
@@ -278,20 +302,65 @@ function verifyAISearchDiscovery() {
     }
   }
 
-  if (fs.existsSync(robotsPath)) {
-    const robots = fs.readFileSync(robotsPath, 'utf-8');
-    [
-      '/llms.txt',
-      '/llms-full.txt',
-      '/.well-known/ai-plugin.json',
-      '/.well-known/openapi.json',
-      '/sitemap-index.xml',
-    ].forEach((pathToCheck) => {
-      if (!robots.includes(pathToCheck)) {
-        issues.push(`robots.ts does not explicitly allow ${pathToCheck}`);
+  if (fs.existsSync(citationMapPath)) {
+    const citationMap = JSON.parse(
+      fs.readFileSync(citationMapPath, 'utf-8'),
+    ) as AiCitationMap;
+
+    if (
+      !citationMap.crawlEntryPoints?.includes(
+        'https://lunary.app/sitemap-index.xml',
+      )
+    ) {
+      issues.push('ai-citation-map.json does not reference sitemap-index.xml');
+    }
+    if ((citationMap.prioritySurfaces?.length || 0) < 8) {
+      issues.push('ai-citation-map.json has too few priority surfaces');
+    }
+
+    citationMap.prioritySurfaces?.forEach((surface) => {
+      if (!surface.topic || !surface.canonicalUrl) {
+        issues.push('ai-citation-map.json has an incomplete priority surface');
+        return;
       }
+
+      const urls = [surface.canonicalUrl, ...(surface.supportingUrls || [])];
+      urls.forEach((url) => {
+        if (!url.startsWith('https://lunary.app/')) {
+          issues.push(`ai-citation-map.json contains non-Lunary URL: ${url}`);
+        }
+        if (/https:\/\/lunary\.app\/(api|admin|profile|auth)\//.test(url)) {
+          issues.push(`ai-citation-map.json cites a private URL: ${url}`);
+        }
+      });
     });
   }
+
+  const robots = robotsMetadata();
+  const robotRules = Array.isArray(robots.rules)
+    ? robots.rules
+    : robots.rules
+      ? [robots.rules]
+      : [];
+  const ruleForAgent = (agent: string) =>
+    robotRules.find((rule) => toStringArray(rule.userAgent).includes(agent));
+
+  AI_CRAWLER_USER_AGENTS.forEach((agent) => {
+    const rule = ruleForAgent(agent);
+    if (!rule) {
+      issues.push(`robots metadata is missing ${agent}`);
+      return;
+    }
+
+    const allowedPaths = toStringArray(rule.allow);
+    AI_DISCOVERY_PATHS.forEach((pathToCheck) => {
+      if (!allowedPaths.includes(pathToCheck)) {
+        issues.push(
+          `robots metadata does not allow ${pathToCheck} for ${agent}`,
+        );
+      }
+    });
+  });
 
   if (fs.existsSync(sitemapIndexPath)) {
     const sitemapIndex = fs.readFileSync(sitemapIndexPath, 'utf-8');

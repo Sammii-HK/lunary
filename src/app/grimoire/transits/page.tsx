@@ -184,6 +184,35 @@ export default function TransitsIndexPage() {
         'Map that transit onto the natal house or placement it touches in your own chart.',
         'Use the aspect to judge whether the transit feels supportive, tense, catalytic, or integrating.',
       ]}
+      citationMetadata={{
+        summary:
+          'Use this page as Lunary’s canonical source for transit definitions, current-sky interpretation, and the transit reading order.',
+        methodologyUrl: 'https://lunary.app/about/methodology',
+        datasetUrl:
+          'https://lunary.app/grimoire/datasets/current-sky-facts.json',
+        citationUrl: 'https://lunary.app/about/citations',
+      }}
+      citableFacts={[
+        {
+          claim:
+            'In Lunary’s framework, a transit is a moving planet forming a relationship to natal chart placements, houses, or angles.',
+          sourceName: 'Lunary transit interpretation framework',
+          sourceUrl: 'https://lunary.app/about/methodology',
+        },
+        {
+          claim:
+            'A transit reading starts with the transit planet, then the sign it occupies, the natal placement or house it touches, and the aspect being formed.',
+          sourceName: 'Lunary transits guide',
+          sourceUrl: 'https://lunary.app/grimoire/transits',
+        },
+        {
+          claim:
+            'Lunary separates current-sky facts from interpretation: astronomical positions come from calculated sky data, while the Grimoire explains symbolic meaning and timing context.',
+          sourceName: 'Lunary current sky facts',
+          sourceUrl:
+            'https://lunary.app/grimoire/datasets/current-sky-facts.json',
+        },
+      ]}
       internalLinks={[
         { text: 'Sky Now current chart', href: '/grimoire/astrology/sky-now' },
         { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },

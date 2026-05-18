@@ -3,6 +3,7 @@
 import { getTarotCard } from './tarot';
 import { tarotCards } from './tarot-cards';
 import dayjs from 'dayjs';
+import { getDateStringInTimeZone, getWeeklySeedForDate } from './seed-date';
 
 type TarotCard = {
   name: string;
@@ -427,26 +428,11 @@ export const getImprovedTarotReading = async (
   timeFrameDays: number = 30,
   userBirthday?: string,
   userReadings?: TarotCard[] | null,
+  now: Date = new Date(),
+  timeZone: string = 'Europe/London',
 ): Promise<ImprovedReading> => {
-  const today = new Date();
-  const todayString = today.toISOString().split('T')[0];
-
-  // Calculate week start and week number for unique weekly seed
-  const weekStart = new Date(today);
-  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-
-  // Get ISO week number and year for unique weekly seed
-  const weekStartYear = weekStart.getFullYear();
-  const weekStartMonth = weekStart.getMonth() + 1; // 1-based
-  const weekStartDate = weekStart.getDate();
-  const dayOfYear = Math.floor(
-    (weekStart.getTime() - new Date(weekStartYear, 0, 0).getTime()) / 86400000,
-  );
-  const weekNumber = Math.floor(dayOfYear / 7);
-
-  // Create UNIQUE weekly seed - must be completely different from daily seed
-  // Include "weekly" prefix to ensure it's different from daily
-  const weeklySeed = `weekly-${weekStartYear}-W${weekNumber}-${weekStartMonth}-${weekStartDate}`;
+  const todayString = getDateStringInTimeZone(now, timeZone);
+  const weeklySeed = getWeeklySeedForDate(now, timeZone);
 
   // Get cards - daily uses todayString, weekly uses weeklySeed
   const daily = getTarotCard(`daily-${todayString}`, userName, userBirthday);

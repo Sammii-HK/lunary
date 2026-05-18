@@ -62,6 +62,7 @@ prisma/migrations/*/migration.sql.tmp
 # Substack cookies
 .substack-cookies.json
 .playwright-browser/
+.playwright-bing-webmaster/
 
 # Repomix audit exports
 project-audit.txt

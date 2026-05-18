@@ -1,5 +1,24 @@
 export const CANONICAL_SITE_URL = 'https://lunary.app';
 
+export const AI_CRAWLER_USER_AGENTS = [
+  'Bingbot',
+  'DuckDuckBot',
+  'OAI-SearchBot',
+  'GPTBot',
+  'ChatGPT-User',
+  'ClaudeBot',
+  'Claude-SearchBot',
+  'Claude-User',
+  'Claude-Web',
+  'Anthropic-AI',
+  'PerplexityBot',
+  'Perplexity-User',
+  'Google-Extended',
+  'Applebot',
+  'Applebot-Extended',
+  'CCBot',
+] as const;
+
 // Keep this curated. Do not re-promote weak scaled families such as birthday,
 // crystals, empty decans, or broad ritual inventory from the discovery index.
 export const CURATED_DISCOVERY_SITEMAPS = [
@@ -33,6 +52,14 @@ export const AI_DISCOVERY_PATHS = [
   '/robots.txt',
   '/llms.txt',
   '/llms-full.txt',
+  '/ai-citation-map.json',
+  '/about/citations',
+  '/grimoire/datasets',
+  '/grimoire/datasets/core-astrology.json',
+  '/grimoire/datasets/core-astrology-2026-05-17.json',
+  '/grimoire/datasets/current-sky-facts.json',
+  '/grimoire/datasets/current-sky/2026-05-17',
+  '/about/methodology',
   '/.well-known/ai-plugin.json',
   '/.well-known/openapi.json',
   '/.well-known/lunary-gpt-openapi.yaml',

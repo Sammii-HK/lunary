@@ -1,4 +1,16 @@
 import { MetadataRoute } from 'next';
+import {
+  AI_CRAWLER_USER_AGENTS,
+  AI_DISCOVERY_PATHS,
+} from '@/lib/seo/discovery';
+
+const PUBLIC_AI_CONTENT_PATHS = [
+  '/grimoire/',
+  '/comparison/',
+  '/blog/',
+  '/horoscope/',
+  ...AI_DISCOVERY_PATHS,
+];
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -9,33 +21,9 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin/', '/api/', '/profile/'],
       },
       // Allow AI crawlers to index content for retrieval and citation
-      ...[
-        'GPTBot',
-        'ChatGPT-User',
-        'OAI-SearchBot',
-        'ClaudeBot',
-        'Claude-Web',
-        'Anthropic-AI',
-        'PerplexityBot',
-        'Google-Extended',
-        'Applebot-Extended',
-        'CCBot',
-      ].map((bot) => ({
+      ...AI_CRAWLER_USER_AGENTS.map((bot) => ({
         userAgent: bot,
-        allow: [
-          '/grimoire/',
-          '/comparison/',
-          '/blog/',
-          '/horoscope/',
-          '/robots.txt',
-          '/llms.txt',
-          '/llms-full.txt',
-          '/.well-known/ai-plugin.json',
-          '/.well-known/openapi.json',
-          '/.well-known/lunary-gpt-openapi.yaml',
-          '/sitemap-index.xml',
-          '/sitemap.xml',
-        ],
+        allow: PUBLIC_AI_CONTENT_PATHS,
         disallow: ['/api/', '/profile/', '/admin/'],
       })),
     ],

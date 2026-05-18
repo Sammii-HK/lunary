@@ -31,7 +31,7 @@ export default async function CouplePage() {
     .catch(() => null);
 
   if (!session?.user?.id) {
-    redirect('/login?next=/app/couple');
+    redirect('/auth?returnTo=/app/couple');
   }
 
   const userId = session.user.id;
