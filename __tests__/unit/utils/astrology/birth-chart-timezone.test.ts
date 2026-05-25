@@ -1,6 +1,9 @@
-import { __test__ } from 'utils/astrology/birthChart';
+import {
+  __test__,
+  generateBirthChartWithHouses,
+} from 'utils/astrology/birthChart';
 
-const { toUtcFromTimeZone } = __test__;
+const { timezoneForCoordinates, toUtcFromTimeZone } = __test__;
 
 describe('birth chart timezone conversion', () => {
   // --- US Timezones ---
@@ -91,6 +94,28 @@ describe('birth chart timezone conversion', () => {
   it('converts BST (London summer, UTC+1) correctly', () => {
     const date = toUtcFromTimeZone(1994, 7, 20, 14, 0, 'Europe/London');
     expect(date.toISOString()).toBe('1994-07-20T13:00:00.000Z');
+  });
+
+  it('infers timezone from birth coordinates when no timezone is provided', async () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    try {
+      expect(timezoneForCoordinates(51.5074, -0.1278)).toBe('Europe/London');
+
+      await generateBirthChartWithHouses(
+        '1994-07-20',
+        '14:00',
+        '51.5074,-0.1278',
+      );
+
+      expect(
+        warnSpy.mock.calls.some((call) =>
+          String(call[0]).includes('No timezone provided'),
+        ),
+      ).toBe(false);
+    } finally {
+      warnSpy.mockRestore();
+    }
   });
 
   it('converts JST (Japan Standard, UTC+9, no DST) correctly', () => {

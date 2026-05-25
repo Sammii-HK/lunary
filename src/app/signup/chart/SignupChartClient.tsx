@@ -8,6 +8,7 @@ import { Heading } from '@/components/ui/Heading';
 import { trackCtaImpression, conversionTracking } from '@/lib/analytics';
 import { captureEvent } from '@/lib/posthog-client';
 import { getABTestVariantClient } from '@/lib/ab-tests-client';
+import { setOnboardingPrefill } from '@/lib/onboarding/prefill';
 
 const FEATURES = [
   'Your full birth chart with all placements and aspects',
@@ -38,6 +39,10 @@ export default function SignupChartClient() {
   const sign = searchParams.get('sign') || '';
   const proposition = searchParams.get('proposition') || '';
   const upsellVariant = searchParams.get('upsellVariant') || '';
+  const funnel = searchParams.get('funnel') || '';
+  const birthDate = searchParams.get('birthDate') || '';
+  const birthTime = searchParams.get('birthTime') || '';
+  const birthLocation = searchParams.get('birthLocation') || '';
 
   // Redirect authenticated users to /app
   useEffect(() => {
@@ -69,14 +74,34 @@ export default function SignupChartClient() {
       sign: sign || undefined,
       proposition: proposition || undefined,
       upsellVariant: upsellVariant || undefined,
+      funnel: funnel || undefined,
     });
-  }, [abVariant, hub, location, pagePath, proposition, sign, upsellVariant]);
+  }, [
+    abVariant,
+    funnel,
+    hub,
+    location,
+    pagePath,
+    proposition,
+    sign,
+    upsellVariant,
+  ]);
 
   const handleAuthSuccess = () => {
     // Mark source for onboarding
     try {
-      sessionStorage.setItem(SIGNUP_SOURCE_KEY, 'grimoire');
+      sessionStorage.setItem(SIGNUP_SOURCE_KEY, hub || 'grimoire');
     } catch {}
+
+    if (birthDate) {
+      setOnboardingPrefill({
+        birthday: birthDate,
+        birthTime: birthTime || undefined,
+        birthLocation: birthLocation || undefined,
+        autoAdvance: true,
+        source: hub || 'signup-chart',
+      });
+    }
 
     // Track signup completion — use trackCtaImpression instead of trackCtaClick
     // so we don't overwrite the original CTA attribution in sessionStorage
@@ -101,6 +126,10 @@ export default function SignupChartClient() {
       sign: sign || undefined,
       proposition: proposition || undefined,
       upsellVariant: upsellVariant || undefined,
+      funnel: funnel || undefined,
+      hasBirthDate: Boolean(birthDate),
+      hasBirthTime: Boolean(birthTime),
+      hasBirthLocation: Boolean(birthLocation),
     });
 
     // Redirect to app — onboarding flow triggers automatically for new users
@@ -150,6 +179,7 @@ export default function SignupChartClient() {
           <AuthComponent
             compact={false}
             defaultToSignUp
+            birthDate={birthDate || undefined}
             onSuccess={handleAuthSuccess}
           />
         </div>

@@ -16,7 +16,13 @@ import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-export const dynamicParams = true;
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return PLANETS.flatMap((planet1) =>
+    ASPECTS.map((aspect) => ({ planet1, aspect })),
+  );
+}
 
 const aspectReadMethods: Record<Aspect, string> = {
   conjunct:

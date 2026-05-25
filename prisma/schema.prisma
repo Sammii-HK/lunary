@@ -473,6 +473,20 @@ model cosmic_snapshots {
   @@index([user_id], map: "idx_cosmic_snapshots_user_id")
 }
 
+model citation_dataset_snapshots {
+  dataset_key   String
+  snapshot_date DateTime @db.Date
+  version       String
+  payload       Json
+  generated_at  DateTime @default(now()) @db.Timestamptz(6)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@id([dataset_key, snapshot_date])
+  @@index([dataset_key, snapshot_date(sort: Desc)], map: "idx_citation_dataset_snapshots_key_date")
+  @@index([generated_at], map: "idx_citation_dataset_snapshots_generated_at")
+}
+
 model daily_horoscopes {
   id             Int       @id @default(autoincrement())
   user_id        String    @db.VarChar(255)

@@ -2,13 +2,25 @@ const DEFAULT_BASE_URL = 'https://lunary.app';
 const INDEXNOW_ENDPOINT = 'https://api.indexnow.org/indexnow';
 const DEFAULT_KEY_PATH = '/indexnow-key.txt';
 
+function normalizeEnvSecret(value: string | undefined) {
+  const normalized = value?.replace(/\s+/g, '') || '';
+  return normalized || undefined;
+}
+
+function normalizeEnvUrl(value: string | undefined) {
+  const normalized = value?.trim();
+  return normalized || undefined;
+}
+
 export function getIndexNowConfig() {
-  const key = process.env.INDEXNOW_KEY;
+  const key = normalizeEnvSecret(process.env.INDEXNOW_KEY);
   const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, '') || DEFAULT_BASE_URL;
+    normalizeEnvUrl(process.env.NEXT_PUBLIC_SITE_URL)?.replace(/\/+$/, '') ||
+    DEFAULT_BASE_URL;
   const keyLocation =
-    process.env.INDEXNOW_KEY_LOCATION || `${baseUrl}${DEFAULT_KEY_PATH}`;
-  const publishSecret = process.env.INDEXNOW_PUBLISH_SECRET;
+    normalizeEnvUrl(process.env.INDEXNOW_KEY_LOCATION) ||
+    `${baseUrl}${DEFAULT_KEY_PATH}`;
+  const publishSecret = normalizeEnvSecret(process.env.INDEXNOW_PUBLISH_SECRET);
 
   return {
     key,

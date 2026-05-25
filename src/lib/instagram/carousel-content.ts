@@ -8,6 +8,41 @@ const SHARE_BASE_URL = (
   process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app'
 ).replace(/\/+$/, '');
 
+function inferSlideStyle(
+  variant: IGCarouselSlide['variant'],
+  subtitle = '',
+  content = '',
+): string {
+  if (variant === 'cover') return 'title_hero';
+  if (variant === 'cta') return 'save_cta';
+
+  const blob = `${subtitle} ${content}`.toLowerCase();
+  if (/\b(myth|reality|truth|mistake|not this|read this)\b/.test(blob)) {
+    return 'myth_vs_reality';
+  }
+  if (/\b(house|chart|placement|rising|where it lands)\b/.test(blob)) {
+    return 'chart_check';
+  }
+  if (/\b(conjunct|square|trine|sextile|opposition|aspect)\b/.test(blob)) {
+    return 'transit_aspect';
+  }
+  if (/\b(transit|timing|event|exact|degree|window)\b/.test(blob)) {
+    return 'transit_receipt';
+  }
+  if (/\b(compare|versus|vs|love|career|difference)\b/.test(blob)) {
+    return 'split_explainer';
+  }
+  if (/\b(how to|step|use|practice|ritual|check|find|notice)\b/.test(blob)) {
+    return 'checklist';
+  }
+  if (
+    /\b(keywords|strengths|ingredients|associations|alignments)\b/.test(blob)
+  ) {
+    return 'symbol_cards';
+  }
+  return 'diagram_check';
+}
+
 // --- Hook text for cover slides (Fix 3) ---
 
 const ZODIAC_HOOKS: Record<string, string[]> = {
@@ -920,6 +955,7 @@ function makeSlide(
   // For body slides, fall back to category symbol if none provided
   const resolvedSymbol =
     symbol ?? (variant === 'body' ? CATEGORY_SYMBOL[category] : undefined);
+  const slideStyle = inferSlideStyle(variant, subtitle, content);
   return {
     slideIndex,
     totalSlides,
@@ -929,6 +965,8 @@ function makeSlide(
     category,
     variant,
     symbol: resolvedSymbol,
+    slideStyle,
+    visualStyle: slideStyle,
   };
 }
 
@@ -954,6 +992,10 @@ export function getCarouselImageUrls(
     });
     if (slide.subtitle) params.set('subtitle', slide.subtitle);
     if (slide.symbol) params.set('symbol', slide.symbol);
+    if (slide.visualStyle) params.set('visualStyle', slide.visualStyle);
+    if (slide.slideStyle) params.set('slideStyle', slide.slideStyle);
+    if (slide.slideRole) params.set('slideRole', slide.slideRole);
+    if (slide.styleVariant) params.set('styleVariant', slide.styleVariant);
     // Add next slide teaser for body slides when next slide is also a body slide
     if (slide.variant === 'body') {
       const nextSlide = carousel.slides[i + 1];

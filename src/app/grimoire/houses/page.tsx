@@ -98,6 +98,80 @@ export default function HousesIndexPage() {
             'The houses divide the chart into twelve life areas. A planet tells you what function is acting, the sign tells you how it acts, and the house tells you where that action shows up in lived experience.',
         }}
         tldr='Houses answer where. The 1st house describes identity and approach, the 7th partnership, the 10th career and public life, and the 12th the hidden and unconscious layers behind the chart.'
+        structuredSummary={[
+          {
+            label: 'Definition',
+            value: 'Astrological houses divide a chart into twelve life areas.',
+          },
+          {
+            label: 'Core question',
+            value:
+              'Where does a planet or placement show up in lived experience?',
+          },
+          {
+            label: 'Reading order',
+            value:
+              'Start with the house topic, then the sign on the cusp, the ruler, planets in the house, and aspects.',
+          },
+          {
+            label: 'Anchor point',
+            value:
+              'The rising sign sets the first house and frames the whole house structure.',
+            href: '/grimoire/rising',
+          },
+        ]}
+        conceptComparisons={[
+          {
+            label: 'House vs sign',
+            description:
+              'A sign describes style; a house describes the arena of life where that style is expressed.',
+            href: '/grimoire/zodiac',
+          },
+          {
+            label: 'Planet in a house vs house ruler',
+            description:
+              'A planet in a house acts directly there. The house ruler shows how that life area is managed, even when the house is empty.',
+          },
+          {
+            label: 'Empty house vs occupied house',
+            description:
+              'An occupied house is louder, but an empty house is still read through its cusp sign and ruling planet.',
+          },
+        ]}
+        whyThisWorks={{
+          title: 'Why houses ground interpretation',
+          points: [
+            'Houses stop astrology from becoming vague by locating a symbol in a concrete life area.',
+            'The Ascendant starts the house system, so house interpretation is tied to the chart’s exact time and location.',
+            'House rulers connect separate parts of a chart, showing how one life area depends on another.',
+          ],
+        }}
+        learningPath={[
+          {
+            title: 'Start with rising sign',
+            href: '/grimoire/rising',
+            description:
+              'Understand the Ascendant because it frames the house system.',
+          },
+          {
+            title: 'Read the 12 houses',
+            href: '/grimoire/houses',
+            description:
+              'Learn each life area before interpreting planets inside it.',
+          },
+          {
+            title: 'Add planetary placements',
+            href: '/grimoire/placements',
+            description:
+              'Combine planet, sign, and house into a complete statement.',
+          },
+          {
+            title: 'Layer in aspects',
+            href: '/grimoire/aspects',
+            description:
+              'See how planets in different houses interact across the chart.',
+          },
+        ]}
         intro='The houses in astrology represent different areas of life, from self and identity to spirituality and the unconscious. Each house is a stage where planets perform their roles.'
         meaning={`Houses tell you where a placement lands in lived experience. A Venus placement describes love style and values; the house tells you whether that plays out through career, friendships, home, money, or partnership. Without the houses, chart interpretation gets vague very fast.\n\nA useful house reading starts with the house topic itself. Then you check the sign on the cusp, the ruler of that sign, and any planets placed in the house. After that, you read the aspects affecting those planets. That order keeps the interpretation grounded instead of turning the chart into disconnected symbols.`}
         howToWorkWith={[

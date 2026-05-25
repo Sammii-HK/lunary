@@ -1,88 +1,31 @@
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Sun } from 'lucide-react';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
+import { ZODIAC_SEASONS, getSeasonDates } from '@/constants/seo/zodiac-seasons';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-const VALID_YEARS = ['2024', '2025', '2026'];
+const CURRENT_YEAR = new Date().getFullYear();
+const MIN_YEAR = 2024;
+const MAX_YEAR = CURRENT_YEAR + 1;
 
-const seasons = [
-  {
-    slug: 'aries-season',
-    name: 'Aries Season',
-    dates: 'March 20 - April 19',
-    element: 'Fire',
-  },
-  {
-    slug: 'taurus-season',
-    name: 'Taurus Season',
-    dates: 'April 20 - May 20',
-    element: 'Earth',
-  },
-  {
-    slug: 'gemini-season',
-    name: 'Gemini Season',
-    dates: 'May 21 - June 20',
-    element: 'Air',
-  },
-  {
-    slug: 'cancer-season',
-    name: 'Cancer Season',
-    dates: 'June 21 - July 22',
-    element: 'Water',
-  },
-  {
-    slug: 'leo-season',
-    name: 'Leo Season',
-    dates: 'July 23 - August 22',
-    element: 'Fire',
-  },
-  {
-    slug: 'virgo-season',
-    name: 'Virgo Season',
-    dates: 'August 23 - September 22',
-    element: 'Earth',
-  },
-  {
-    slug: 'libra-season',
-    name: 'Libra Season',
-    dates: 'September 23 - October 22',
-    element: 'Air',
-  },
-  {
-    slug: 'scorpio-season',
-    name: 'Scorpio Season',
-    dates: 'October 23 - November 21',
-    element: 'Water',
-  },
-  {
-    slug: 'sagittarius-season',
-    name: 'Sagittarius Season',
-    dates: 'November 22 - December 21',
-    element: 'Fire',
-  },
-  {
-    slug: 'capricorn-season',
-    name: 'Capricorn Season',
-    dates: 'December 22 - January 19',
-    element: 'Earth',
-  },
-  {
-    slug: 'aquarius-season',
-    name: 'Aquarius Season',
-    dates: 'January 20 - February 18',
-    element: 'Air',
-  },
-  {
-    slug: 'pisces-season',
-    name: 'Pisces Season',
-    dates: 'February 19 - March 19',
-    element: 'Water',
-  },
-];
+function isValidSeasonYear(year: string) {
+  const yearNum = Number(year);
+
+  return (
+    /^\d{4}$/.test(year) &&
+    Number.isInteger(yearNum) &&
+    yearNum >= MIN_YEAR &&
+    yearNum <= MAX_YEAR
+  );
+}
+
+function getLegacySeasonBySlug(slug: string) {
+  return ZODIAC_SEASONS.find((season) => `${season.sign}-season` === slug);
+}
 
 // Removed generateStaticParams - using pure ISR for faster builds
 // Pages are generated on-demand and cached with 30-day revalidation
@@ -93,8 +36,19 @@ export async function generateMetadata({
   params: Promise<{ year: string }>;
 }): Promise<Metadata> {
   const { year } = await params;
+  const legacySeason = getLegacySeasonBySlug(year);
 
-  if (!VALID_YEARS.includes(year)) {
+  if (legacySeason) {
+    return {
+      title: `${legacySeason.displayName} Season | Lunary`,
+      alternates: {
+        canonical: `https://lunary.app/grimoire/seasons/${CURRENT_YEAR}/${legacySeason.sign}`,
+      },
+      robots: { index: false, follow: true },
+    };
+  }
+
+  if (!isValidSeasonYear(year)) {
     return { title: 'Year Not Found | Lunary' };
   }
 
@@ -127,11 +81,17 @@ export default async function YearSeasonsPage({
   params: Promise<{ year: string }>;
 }) {
   const { year } = await params;
+  const legacySeason = getLegacySeasonBySlug(year);
 
-  if (!VALID_YEARS.includes(year)) {
+  if (legacySeason) {
+    permanentRedirect(`/grimoire/seasons/${CURRENT_YEAR}/${legacySeason.sign}`);
+  }
+
+  if (!isValidSeasonYear(year)) {
     notFound();
   }
 
+  const yearNum = Number(year);
   const breadcrumbItems = [
     { name: 'Grimoire', url: '/grimoire' },
     { name: 'Seasons', url: '/grimoire/seasons' },
@@ -167,23 +127,27 @@ export default async function YearSeasonsPage({
 
         <section className='mb-12'>
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-            {seasons.map((season) => (
-              <Link
-                key={season.slug}
-                href={`/grimoire/seasons/${year}/${season.slug}`}
-                className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-amber-700/50 transition-all'
-              >
-                <h3 className='font-medium text-content-primary group-hover:text-amber-300 transition-colors mb-2'>
-                  {season.name}
-                </h3>
-                <p className='text-sm text-content-muted mb-1'>
-                  {season.dates}
-                </p>
-                <p className='text-xs text-content-muted'>
-                  {season.element} Season
-                </p>
-              </Link>
-            ))}
+            {ZODIAC_SEASONS.map((season) => {
+              const dates = getSeasonDates(season.sign, yearNum);
+
+              return (
+                <Link
+                  key={season.sign}
+                  href={`/grimoire/seasons/${year}/${season.sign}`}
+                  className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-amber-700/50 transition-all'
+                >
+                  <h3 className='font-medium text-content-primary group-hover:text-amber-300 transition-colors mb-2'>
+                    {season.displayName} Season
+                  </h3>
+                  <p className='text-sm text-content-muted mb-1'>
+                    {dates.start.split(',')[0]} - {dates.end.split(',')[0]}
+                  </p>
+                  <p className='text-xs text-content-muted'>
+                    {season.element} Season
+                  </p>
+                </Link>
+              );
+            })}
           </div>
         </section>
 

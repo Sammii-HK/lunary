@@ -47,6 +47,10 @@ export interface IGCarouselSlide {
   content: string;
   subtitle?: string;
   symbol?: string;
+  visualStyle?: string;
+  slideStyle?: string;
+  slideRole?: string;
+  styleVariant?: string;
   category: ThemeCategory;
   variant: CarouselSlideVariant;
 }

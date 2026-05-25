@@ -143,6 +143,104 @@ export default function MoonPhasesIndexPage() {
             answer:
               'Moon phases are the different appearances of the moon as seen from Earth during its 29.5-day orbital cycle. As the moon orbits Earth, the angle between the Sun, Earth, and Moon changes, creating 8 distinct phases from New Moon to Full Moon and back. Each phase carries unique energetic qualities that practitioners use to time their magical and spiritual work.',
           }}
+          structuredSummary={[
+            {
+              label: 'Astronomy',
+              value:
+                'Moon phases come from the changing Sun-Earth-Moon angle during the lunar cycle.',
+            },
+            {
+              label: 'Cycle length',
+              value:
+                'The full lunar phase cycle is approximately 29.5 days from New Moon to New Moon.',
+            },
+            {
+              label: 'Interpretive model',
+              value:
+                'Waxing phases build, Full Moon peaks, waning phases release, and New Moon resets.',
+            },
+            {
+              label: 'Today’s data',
+              value:
+                'Use Lunary current-sky facts for today’s calculated phase, illumination, and Moon sign.',
+              href: '/grimoire/facts/moon-phase-today',
+            },
+          ]}
+          conceptComparisons={[
+            {
+              label: 'Astronomical phase vs symbolic meaning',
+              description:
+                'The astronomical phase describes illumination and geometry; the symbolic meaning interprets that timing for ritual, emotion, and reflection.',
+            },
+            {
+              label: 'Waxing vs waning Moon',
+              description:
+                'Waxing phases increase light and support building; waning phases decrease light and support release.',
+            },
+            {
+              label: 'Moon phase vs Moon sign',
+              description:
+                'The phase describes the lunar cycle stage; the Moon sign describes the zodiac style of the Moon at that time.',
+              href: '/grimoire/moon-in',
+            },
+          ]}
+          whyThisWorks={{
+            title: 'Why lunar meaning follows the light cycle',
+            points: [
+              'Astrology ties lunar symbolism to visible change: increasing light maps to growth, fullness maps to culmination, and decreasing light maps to release.',
+              'The phase is collective timing, while the Moon sign adds emotional tone and element.',
+              'Separating astronomy from symbolism makes the page usable as both a factual reference and an interpretation guide.',
+            ],
+          }}
+          learningPath={[
+            {
+              title: 'Check today’s Moon phase',
+              href: '/grimoire/facts/moon-phase-today',
+              description:
+                'Start with the calculated current phase and illumination.',
+            },
+            {
+              title: 'Learn all eight phases',
+              href: '/grimoire/moon/phases',
+              description:
+                'Understand the full cycle from New Moon to Waning Crescent.',
+            },
+            {
+              title: 'Add Moon signs',
+              href: '/grimoire/moon-in',
+              description:
+                'Layer in the zodiac style of the Moon’s current sign.',
+            },
+            {
+              title: 'Plan with moon dates',
+              href: '/grimoire/moon',
+              description:
+                'Use yearly moon pages for full moons, new moons, and timing.',
+            },
+          ]}
+          citationMetadata={{
+            summary:
+              'Use this page for a direct definition of the eight Moon phases and their interpretive timing. Use current-sky facts for today’s calculated Moon phase and methodology for calculation notes.',
+            methodologyUrl: 'https://lunary.app/about/methodology',
+            datasetUrl:
+              'https://lunary.app/grimoire/datasets/current-sky-facts.json',
+            citationUrl: 'https://lunary.app/about/citations',
+          }}
+          citableFacts={[
+            {
+              claim:
+                'The Moon phase cycle is organized here as eight phases: New Moon, Waxing Crescent, First Quarter, Waxing Gibbous, Full Moon, Waning Gibbous, Last Quarter, and Waning Crescent.',
+              sourceName: 'Lunary Moon phases guide',
+              sourceUrl: 'https://lunary.app/grimoire/moon/phases',
+            },
+            {
+              claim:
+                'Lunary current-sky facts expose the calculated Moon phase, Moon sign, illumination percentage, ecliptic longitude, and phase angle for today.',
+              sourceName: 'Lunary current-sky facts',
+              sourceUrl:
+                'https://lunary.app/grimoire/datasets/current-sky-facts.json',
+            },
+          ]}
           tldr='New Moon: new beginnings. Waxing phases: growth and building. Full Moon: peak energy and manifestation. Waning phases: release and banishing. Work with the lunar cycle to align your magic with cosmic rhythms.'
           meaning={`The lunar cycle has been observed and utilized by humans for thousands of years. Every 29.5-day orbit brings eight distinct phases—New Moon, Waxing Crescent, First Quarter, Waxing Gibbous, Full Moon, Waning Gibbous, Last Quarter, and Waning Crescent—each carrying its own tone for intention, action, celebration, release, and rest.
 
@@ -153,6 +251,38 @@ As the moon waxes, lean into building, attracting, and grateful manifestation wo
             'Build energy and take action during the waxing phases',
             'Celebrate, charge tools, and do powerful magic at the Full Moon',
             'Release, banish, and rest during the waning phases',
+          ]}
+          followUpIntent={[
+            {
+              title: 'Moon phase today',
+              description:
+                'Check the calculated current phase, illumination, Moon sign, and sky facts.',
+              href: '/grimoire/facts/moon-phase-today',
+            },
+            {
+              title: 'Waxing vs waning',
+              description:
+                'Use the light cycle to decide whether to build, peak, release, or rest.',
+              href: '/grimoire/moon/phases/first-quarter',
+            },
+            {
+              title: 'Moon signs',
+              description:
+                'Layer the phase with the Moon’s zodiac sign for emotional tone and element.',
+              href: '/grimoire/moon-in',
+            },
+            {
+              title: 'Dates and timing',
+              description:
+                'Use yearly moon pages for upcoming new moons, full moons, and phase timing.',
+              href: '/grimoire/moon',
+            },
+            {
+              title: 'What to do with it',
+              description:
+                'Turn phase meaning into ritual timing, reflection, release, and intention work.',
+              href: '/grimoire/moon/rituals',
+            },
           ]}
           tables={[
             {
@@ -196,6 +326,15 @@ As the moon waxes, lean into building, attracting, and grateful manifestation wo
           internalLinks={[
             { text: 'Full Moon Calendar', href: '/grimoire/moon' },
             { text: 'Current Moon Phase', href: '/grimoire/moon' },
+            {
+              text: 'Moon Phase Today',
+              href: '/grimoire/facts/moon-phase-today',
+            },
+            {
+              text: 'Current Sky Dataset',
+              href: '/grimoire/datasets/current-sky-facts.json',
+            },
+            { text: 'Methodology', href: '/about/methodology' },
             { text: 'Moon in Zodiac Signs', href: '/grimoire/moon-in' },
             { text: 'Moon Rituals', href: '/grimoire/moon/rituals' },
           ]}

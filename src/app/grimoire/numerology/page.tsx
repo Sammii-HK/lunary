@@ -186,9 +186,123 @@ export default function NumerologyIndexPage() {
           'soul urge number',
           'numerology forecast',
         ]}
+        whatIs={{
+          question: 'What is numerology?',
+          answer:
+            'Numerology is a symbolic system that interprets numbers as patterns of meaning, timing, and personal themes. In Lunary, numerology pages separate core-number interpretation, clock-number meanings, angel-number messages, and yearly timing so readers can move from a quick meaning into a fuller personal context.',
+        }}
+        structuredSummary={[
+          {
+            label: 'Core numbers',
+            value:
+              'Life Path, Expression, Soul Urge, Birthday, and Personality numbers describe different parts of a numerology profile.',
+          },
+          {
+            label: 'Timing numbers',
+            value:
+              'Universal Year and Personal Year numbers frame collective and personal timing themes.',
+          },
+          {
+            label: 'Number messages',
+            value:
+              'Angel numbers, mirror hours, and double hours are interpreted as repeated-number signals.',
+            href: '/grimoire/angel-numbers',
+          },
+          {
+            label: 'Current year',
+            value: `${currentYear} is Universal Year ${currentUniversalYear}: ${NUMEROLOGY_MEANINGS[currentUniversalYear].theme}.`,
+            href: `/grimoire/numerology/year/${currentYear}`,
+          },
+        ]}
+        conceptComparisons={[
+          {
+            label: 'Life Path vs angel number',
+            description:
+              'A Life Path number comes from birth date calculation; an angel number is a repeated sequence noticed in daily life.',
+            href: '/grimoire/life-path',
+          },
+          {
+            label: 'Universal Year vs Personal Year',
+            description:
+              'A Universal Year describes the collective calendar vibration, while a Personal Year adapts timing to an individual birth date.',
+            href: `/grimoire/numerology/year/${currentYear}`,
+          },
+          {
+            label: 'Mirror hours vs double hours',
+            description:
+              'Mirror hours reverse digits across the clock, while double hours repeat the same number pair.',
+            href: '/grimoire/mirror-hours',
+          },
+        ]}
+        whyThisWorks={{
+          title: 'Why numerology needs context',
+          points: [
+            'The same number can describe identity, timing, or a repeated signal depending on how it is calculated or encountered.',
+            'Pairing a number meaning with its source keeps quick interpretations from flattening into generic advice.',
+            'Yearly and personal timing pages help readers turn symbolic meaning into a practical cycle.',
+          ],
+        }}
+        learningPath={[
+          {
+            title: 'Start with Life Path',
+            href: '/grimoire/life-path',
+            description:
+              'Use the birth date calculation before layering in other core numbers.',
+          },
+          {
+            title: 'Read the current year',
+            href: `/grimoire/numerology/year/${currentYear}`,
+            description:
+              'Understand the collective timing theme for the calendar year.',
+          },
+          {
+            title: 'Explore angel numbers',
+            href: '/grimoire/angel-numbers',
+            description:
+              'Interpret repeated sequences with a clearer symbolic framework.',
+          },
+          {
+            title: 'Compare clock signs',
+            href: '/grimoire/mirror-hours',
+            description:
+              'Use mirror hours and double hours for clock-based number meanings.',
+          },
+        ]}
         intro='Numerology is the mystical study of numbers and the vibrations they carry, revealing your talents, challenges, and timing. Use this hub to uncover angel numbers, calculate your Life Path, Expression, and Soul Urge, and follow the current Universal Year energy.'
         tldr='Quick numerology reference: angel numbers, life path, expression, soul urge, karmic debt, universal year meanings, clock-based numerology, and calculators all in one hub.'
         meaning={`This hub explains the vibrations of Universal Year ${currentUniversalYear} and how it shapes collective themes, while also supplying calculators, clock-based numerology links, and number meaning grids so you can track your own cycles.`}
+        followUpIntent={[
+          {
+            title: 'Life Path examples',
+            description:
+              'Move from number calculation into personality themes, strengths, and growth edges.',
+            href: '/grimoire/life-path',
+          },
+          {
+            title: 'Dates and timing',
+            description:
+              'Use Universal Year pages to understand the calendar cycle behind numerology forecasts.',
+            href: `/grimoire/numerology/year/${currentYear}`,
+          },
+          {
+            title: 'Angel number meanings',
+            description:
+              'Compare repeated sequences and keep each number meaning grounded in context.',
+            href: '/grimoire/angel-numbers',
+          },
+          {
+            title: 'Mirror hour meanings',
+            description:
+              'Read clock-based signs when the follow-up intent is a specific time pattern.',
+            href: '/grimoire/mirror-hours',
+          },
+          {
+            title: 'Double hour meanings',
+            description:
+              'Use repeated clock numbers for a quick meaning and the deeper symbolic layer.',
+            href: '/grimoire/double-hours',
+          },
+        ]}
         faqs={faqs}
         internalLinks={[
           { text: 'Angel Numbers', href: '/grimoire/angel-numbers' },

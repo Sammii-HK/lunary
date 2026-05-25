@@ -16,7 +16,11 @@ import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-export const dynamicParams = true;
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return PLANETS.map((planet1) => ({ planet1 }));
+}
 
 const PLANET_METHOD: Record<Planet, string> = {
   sun: 'identity, vitality, visibility, and the conscious direction of the chart',

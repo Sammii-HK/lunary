@@ -134,6 +134,24 @@ Understanding the moon's phases helps you align your spiritual practice, rituals
       intro={intro}
       meaning={meaning}
       tldr={`The ${year} moon calendar includes ${fullMoons.length} full moons and ${newMoons.length} new moons, each occurring in different zodiac signs with unique energetic qualities.`}
+      citationMetadata={{
+        summary: `Use this page for a quotable ${year} Moon calendar overview, then cite the annual astrology calendar JSON for machine-readable event dates and signs.`,
+        methodologyUrl: 'https://lunary.app/about/methodology',
+        datasetUrl: `https://lunary.app/grimoire/datasets/astrology-calendar/${year}.json`,
+        citationUrl: 'https://lunary.app/about/citations',
+      }}
+      citableFacts={[
+        {
+          claim: `The ${year} Moon calendar includes ${fullMoons.length} full moons and ${newMoons.length} new moons in Lunary’s generated event list.`,
+          sourceName: `${year} Moon Calendar`,
+          sourceUrl: `https://lunary.app/grimoire/moon/${year}`,
+        },
+        {
+          claim: `Lunary publishes machine-readable ${year} astrology calendar data at /grimoire/datasets/astrology-calendar/${year}.json for annual Moon phase citations.`,
+          sourceName: 'Lunary astrology calendar dataset',
+          sourceUrl: `https://lunary.app/grimoire/datasets/astrology-calendar/${year}.json`,
+        },
+      ]}
       sources={[
         {
           name: 'Lunary lunar calendar methodology',
@@ -151,6 +169,15 @@ Understanding the moon's phases helps you align your spiritual practice, rituals
         { label: 'Grimoire', href: '/grimoire' },
         { label: 'Moon', href: '/grimoire/moon' },
         { label: year, href: `/grimoire/moon/${year}` },
+      ]}
+      internalLinks={[
+        {
+          text: `${year} Astrology Calendar JSON`,
+          href: `/grimoire/datasets/astrology-calendar/${year}.json`,
+        },
+        { text: 'Next Full Moon Fact', href: '/grimoire/facts/next-full-moon' },
+        { text: 'Next New Moon Fact', href: '/grimoire/facts/next-new-moon' },
+        { text: 'Methodology', href: '/about/methodology' },
       ]}
       cosmicConnections={
         <CosmicConnections

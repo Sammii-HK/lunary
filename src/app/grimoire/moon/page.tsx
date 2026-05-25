@@ -240,6 +240,11 @@ For chart reading, the Moon matters in two distinct ways. Your natal Moon sign d
           sourceUrl:
             'https://lunary.app/grimoire/datasets/current-sky-facts.json',
         },
+        {
+          claim: `Lunary publishes annual astrology calendar JSON for year-specific Moon event dates, including ${currentYear} at /grimoire/datasets/astrology-calendar/${currentYear}.json.`,
+          sourceName: `${currentYear} astrology calendar dataset`,
+          sourceUrl: `https://lunary.app/grimoire/datasets/astrology-calendar/${currentYear}.json`,
+        },
       ]}
       internalLinks={[
         {
@@ -247,6 +252,18 @@ For chart reading, the Moon matters in two distinct ways. Your natal Moon sign d
           href: '/grimoire/guides/moon-phases-guide',
         },
         { text: 'Moon in Signs', href: '/grimoire/moon-in' },
+        { text: 'Moon Phase Today', href: '/grimoire/facts/moon-phase-today' },
+        {
+          text: 'Current Moon Sign',
+          href: '/grimoire/facts/current-moon-sign',
+        },
+        { text: 'Next Full Moon', href: '/grimoire/facts/next-full-moon' },
+        { text: 'Next New Moon', href: '/grimoire/facts/next-new-moon' },
+        {
+          text: `${currentYear} Astrology Calendar JSON`,
+          href: `/grimoire/datasets/astrology-calendar/${currentYear}.json`,
+        },
+        { text: 'Methodology', href: '/about/methodology' },
         { text: 'New Moon Phase', href: '/grimoire/moon/phases/new-moon' },
         { text: 'Full Moon Phase', href: '/grimoire/moon/phases/full-moon' },
       ]}

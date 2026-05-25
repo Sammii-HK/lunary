@@ -166,6 +166,88 @@ export default function TransitsIndexPage() {
       canonicalUrl='https://lunary.app/grimoire/transits'
       additionalSchemas={[transitsListSchema]}
       faqs={faqs}
+      whatIs={{
+        question: 'What are transits in astrology?',
+        answer:
+          'Transits are the current positions of moving planets compared with a natal chart. They show timing by identifying which planet is moving, which sign it occupies, which natal placement or house it activates, and what aspect is formed.',
+      }}
+      tldr='Transits are astrology’s timing layer. Read the transit planet, sign, house or natal placement, aspect, and exact date before turning the symbolism into practical guidance.'
+      structuredSummary={[
+        {
+          label: 'Definition',
+          value:
+            'A transit is a moving planet forming a relationship to natal chart placements, houses, or angles.',
+        },
+        {
+          label: 'Reading order',
+          value:
+            'Transit planet, transit sign, natal house or placement, aspect, orb, and exact timing.',
+        },
+        {
+          label: 'High-interest pages',
+          value:
+            'Long-horizon pages such as Jupiter transit 2027 are educational forecasting references, not disposable future placeholders.',
+          href: '/grimoire/transits/year/2027',
+        },
+        {
+          label: 'Current sky layer',
+          value:
+            'Lunary separates calculated current-sky facts from symbolic interpretation.',
+          href: '/grimoire/datasets/current-sky-facts.json',
+        },
+      ]}
+      conceptComparisons={[
+        {
+          label: 'Natal placement vs transit',
+          description:
+            'A natal placement is fixed in the birth chart. A transit is the moving sky temporarily activating that chart.',
+          href: '/grimoire/birth-chart',
+        },
+        {
+          label: 'Ingress vs aspect',
+          description:
+            'An ingress is a planet entering a sign; an aspect is a geometric relationship between a moving planet and another point.',
+          href: '/grimoire/aspects',
+        },
+        {
+          label: 'Forecast vs fate',
+          description:
+            'A transit describes timing and pressure. It does not remove agency; it gives context for choices.',
+        },
+      ]}
+      whyThisWorks={{
+        title: 'Why transits are useful',
+        points: [
+          'A transit gives symbolic timing because the live sky is compared to the fixed natal chart.',
+          'Slow planets such as Jupiter, Saturn, Uranus, Neptune, and Pluto create longer windows that people search for and AI systems retrieve as future context.',
+          'Exact dates matter because interpretation changes when an influence is applying, exact, separating, retrograde, or repeating.',
+        ],
+      }}
+      learningPath={[
+        {
+          title: 'Understand the birth chart',
+          href: '/grimoire/birth-chart',
+          description:
+            'Know the natal map before reading what the current sky activates.',
+        },
+        {
+          title: 'Learn aspects',
+          href: '/grimoire/aspects',
+          description:
+            'Use aspect type and orb to judge the quality of activation.',
+        },
+        {
+          title: 'Check the current sky',
+          href: '/grimoire/astrology/sky-now',
+          description: 'See today’s planetary positions and retrograde state.',
+        },
+        {
+          title: 'Read yearly transits',
+          href: `/grimoire/transits/year/${currentYear}`,
+          description:
+            'Move from the general method into exact year-specific timing.',
+        },
+      ]}
       intro='Transits are the moving planets making angles to your natal placements. This hub catalogues their influence, timing, and practical meaning. Transits gain meaning through relationship, not isolation.'
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
@@ -183,6 +265,38 @@ export default function TransitsIndexPage() {
         'Check the sign it is moving through to understand the style of expression.',
         'Map that transit onto the natal house or placement it touches in your own chart.',
         'Use the aspect to judge whether the transit feels supportive, tense, catalytic, or integrating.',
+      ]}
+      followUpIntent={[
+        {
+          title: 'Natal vs transit',
+          description:
+            'Separate the fixed birth chart from the moving sky before interpreting timing.',
+          href: '/grimoire/birth-chart',
+        },
+        {
+          title: 'Dates and timing',
+          description:
+            'Use yearly transit pages for exact windows, retrograde repeats, and long-horizon forecasting.',
+          href: `/grimoire/transits/year/${currentYear}`,
+        },
+        {
+          title: 'How it affects each house',
+          description:
+            'Map the same transit into life areas such as identity, money, relationships, work, and home.',
+          href: '/grimoire/houses',
+        },
+        {
+          title: 'Transit examples',
+          description:
+            'Read the transit of the day to see how current-sky symbolism becomes usable guidance.',
+          href: '/grimoire/transits/transit-of-the-day',
+        },
+        {
+          title: 'What to do with it',
+          description:
+            'Use aspects to decide whether a transit asks for action, patience, integration, or release.',
+          href: '/grimoire/aspects',
+        },
       ]}
       citationMetadata={{
         summary:

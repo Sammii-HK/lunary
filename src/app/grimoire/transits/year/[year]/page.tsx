@@ -296,6 +296,8 @@ export default async function TransitsYearPage({
 
   const minYear = START_YEAR;
   const maxYear = END_YEAR;
+  const datasetUrl = `https://lunary.app/grimoire/datasets/astrology-calendar/${year}.json`;
+  const methodologyUrl = 'https://lunary.app/about/methodology';
   if (yearNum < minYear || yearNum > maxYear) {
     notFound();
   }
@@ -360,6 +362,80 @@ export default async function TransitsYearPage({
       tableOfContents={content.tableOfContents}
       faqs={content.faqs}
       sources={content.sources}
+      internalLinks={[
+        {
+          text: `${year} astrology calendar JSON`,
+          href: `/grimoire/datasets/astrology-calendar/${year}.json`,
+        },
+        { text: 'Lunary methodology', href: '/about/methodology' },
+        {
+          text: 'Planetary positions today fact page',
+          href: '/grimoire/facts/planetary-positions-today',
+        },
+        {
+          text: `${year} astrology events calendar`,
+          href: `/grimoire/events/${year}`,
+        },
+      ]}
+      internalLinksTitle='Citation and Fact Sources'
+      citableFacts={[
+        {
+          claim: `${year} has ${transits.length} listed astrology transit entries in this yearly transit guide.`,
+          sourceName: `${year} astrology transits`,
+          sourceUrl: `https://lunary.app/grimoire/transits/year/${year}`,
+          date: year,
+        },
+        {
+          claim: `Lunary's ${year} astrology calendar JSON includes major transit, ingress, conjunction, retrograde, eclipse, moon phase, equinox, and solstice data with canonical URLs.`,
+          sourceName: `${year} astrology calendar JSON`,
+          sourceUrl: datasetUrl,
+          date: year,
+        },
+        {
+          claim:
+            'Lunary transit dates are based on astronomical calculations, with interpretation added as editorial astrology context.',
+          sourceName: 'Lunary methodology',
+          sourceUrl: methodologyUrl,
+        },
+      ]}
+      citationMetadata={{
+        summary: `Citation sources for ${year} transit dates, yearly transit counts, and calculation methodology.`,
+        methodologyUrl,
+        datasetUrl,
+        citationUrl: `https://lunary.app/grimoire/transits/year/${year}`,
+      }}
+      followUpIntent={[
+        {
+          title: 'Dates and timing',
+          description:
+            'Use the listed windows to distinguish applying, exact, separating, and repeat transit periods.',
+          href: `/grimoire/events/${year}`,
+        },
+        {
+          title: 'Natal vs transit',
+          description:
+            'Read how a general yearly transit becomes personal when it touches a birth chart.',
+          href: '/grimoire/transits',
+        },
+        {
+          title: 'How it affects each house',
+          description:
+            'Map each major transit into the chart houses to understand the life area involved.',
+          href: '/grimoire/houses',
+        },
+        {
+          title: 'Examples',
+          description:
+            'Start with the transit of the day to see how Lunary turns current-sky facts into interpretation.',
+          href: '/grimoire/transits/transit-of-the-day',
+        },
+        {
+          title: 'Source data',
+          description:
+            'Open the machine-readable calendar data behind this yearly transit reference.',
+          href: `/grimoire/datasets/astrology-calendar/${year}.json`,
+        },
+      ]}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
         { label: 'Transits', href: '/grimoire/transits' },

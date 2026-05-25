@@ -15,7 +15,11 @@ import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-export const dynamicParams = true;
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return ZODIAC_SIGNS.map((sign) => ({ sign }));
+}
 
 export async function generateMetadata({
   params,

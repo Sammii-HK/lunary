@@ -76,7 +76,7 @@ export function TransitBirthdayInput() {
         hub: 'horoscope',
         ctaId: 'transit_teaser_input',
         location: 'seo_transit_teaser',
-        label: 'Show my transits',
+        label: 'Explore your chart CTA',
         pagePath: pathname,
       });
     }
@@ -95,7 +95,7 @@ export function TransitBirthdayInput() {
       hub: 'horoscope',
       ctaId: 'transit_teaser_input',
       location: 'seo_transit_teaser',
-      label: 'Show my transits',
+      label: 'Preview my chart',
       pagePath: pathname,
     });
 
@@ -125,7 +125,7 @@ export function TransitBirthdayInput() {
       hub: 'horoscope',
       ctaId: 'transit_teaser_unlock',
       location: 'seo_transit_teaser',
-      label: 'See your full chart',
+      label: 'Open Lunary',
       pagePath: pathname,
     });
 
@@ -133,11 +133,12 @@ export function TransitBirthdayInput() {
       if (signupPageVariant === 'value-prop') {
         const params = new URLSearchParams({
           hub: 'horoscope',
-          headline: 'See your full birth chart',
+          headline: 'See how this shows up in your chart',
           subline:
-            'All your placements, houses, and aspects with detailed readings',
+            'Open Lunary to map this forecast against your placements, houses, and active transits.',
           location: 'seo_transit_teaser',
           pagePath: pathname,
+          funnel: 'cited_page_chart_cta',
           ...(birthDate ? { birthDate } : {}),
         });
         router.push(`/signup/chart?${params.toString()}`);
@@ -156,7 +157,7 @@ export function TransitBirthdayInput() {
         onClick={() => router.push('/horoscope')}
         className='w-full text-left text-xs text-lunary-accent-400 hover:text-content-brand-accent transition-colors'
       >
-        See how these transits hit your chart →
+        Open Lunary to see how these transits hit your chart →
       </button>
     );
   }
@@ -165,8 +166,8 @@ export function TransitBirthdayInput() {
     return (
       <>
         <p className='text-xs text-content-muted mb-3'>
-          These transits affect all suns differently depending on your birth
-          chart.
+          Want to see how this shows up in your chart? Enter your birthday for a
+          quick preview.
         </p>
         <div className='flex flex-col sm:flex-row gap-2'>
           <input
@@ -193,7 +194,7 @@ export function TransitBirthdayInput() {
             ) : (
               <span className='flex items-center gap-2'>
                 <Sparkles className='w-3.5 h-3.5' />
-                Show my transits
+                Preview my chart
               </span>
             )}
           </Button>

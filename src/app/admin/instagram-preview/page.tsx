@@ -699,8 +699,8 @@ export default function InstagramPreviewPage() {
                     </div>
                     <div className='p-4'>
                       <div className='aspect-[4/5] rounded-lg overflow-hidden border border-stroke-strong'>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         {/* lgtm[js/xss-through-dom] — admin-only page, URL validated by sanitizeImageUrl, sign from <select> allow-list */}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={sanitizeImageUrl(url)}
                           alt={altText}

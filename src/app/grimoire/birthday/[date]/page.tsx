@@ -15,7 +15,18 @@ import {
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-export const dynamicParams = true;
+export const dynamicParams = false;
+
+const DAYS_PER_MONTH = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+export function generateStaticParams() {
+  return MONTH_NAMES.flatMap((monthName, monthIndex) =>
+    Array.from({ length: DAYS_PER_MONTH[monthIndex] }, (_, dayIndex) => ({
+      date: `${monthName.toLowerCase()}-${dayIndex + 1}`,
+    })),
+  );
+}
+
 interface BirthdayData {
   month: number;
   day: number;
@@ -33,7 +44,7 @@ function parseDateSlug(slug: string): BirthdayData | null {
   if (parts.length !== 2) return null;
 
   const monthName = parts[0];
-  const day = parseInt(parts[1]);
+  const day = parseInt(parts[1], 10);
 
   const monthIndex = MONTH_NAMES.findIndex(
     (m) => m.toLowerCase() === monthName,
@@ -41,8 +52,7 @@ function parseDateSlug(slug: string): BirthdayData | null {
   if (monthIndex === -1) return null;
 
   const month = monthIndex + 1;
-  const daysPerMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  if (day < 1 || day > daysPerMonth[monthIndex]) return null;
+  if (day < 1 || day > DAYS_PER_MONTH[monthIndex]) return null;
 
   return {
     month,

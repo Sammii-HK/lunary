@@ -71,11 +71,15 @@ export type ConversionEvent =
   | 'notification_preference_changed'
   | 'birth_data_completed'
   | 'birth_location_updated'
+  | 'quiz_started'
+  | 'quiz_result_viewed'
+  | 'quiz_signup_clicked'
   | 'payment_failed'
   | 'payment_retry_attempted'
   | 'payment_retry_success'
   | 'payment_method_added'
   | 'checkout_started'
+  | 'checkout_completed'
   | 'checkout_abandoned'
   | 'trial_countdown_view'
   | 'trial_countdown_cta_click'
@@ -110,10 +114,15 @@ export interface ConversionEventData {
   trialDaysRemaining?: number;
   featureName?: string;
   pagePath?: string;
+  entityType?: string;
+  entityId?: string;
   cta_id?: string;
   cta_location?: string;
   cta_label?: string;
   cta_href?: string;
+  funnel_version?: string;
+  funnelVersion?: string;
+  step?: string;
   metadata?: Record<string, any>;
 }
 
@@ -428,7 +437,7 @@ export function getAnonymousId(): string | undefined {
   }
 }
 
-function getAnalyticsSessionId(): string | undefined {
+export function getAnalyticsSessionId(): string | undefined {
   if (typeof window === 'undefined') {
     return undefined;
   }
@@ -644,6 +653,8 @@ type CtaClickPayload = {
   label?: string;
   href?: string;
   pagePath?: string;
+  funnelVersion?: string;
+  step?: string;
   exampleType?: string;
   exampleText?: string;
   ctaVariant?: string;
@@ -739,6 +750,8 @@ function storeCtaAttribution(payload: CtaClickPayload): void {
         ctaVariant: payload.ctaVariant,
         abTest: payload.abTest,
         abVariant: payload.abVariant,
+        funnelVersion: payload.funnelVersion,
+        step: payload.step,
         timestamp: Date.now(),
       }),
     );
@@ -768,6 +781,8 @@ export function getCtaAttribution(): Record<string, string> | null {
     if (data.ctaVariant) result.cta_variant = data.ctaVariant;
     if (data.abTest) result.cta_ab_test = data.abTest;
     if (data.abVariant) result.cta_ab_variant = data.abVariant;
+    if (data.funnelVersion) result.cta_funnel_version = data.funnelVersion;
+    if (data.step) result.cta_step = data.step;
     return result;
   } catch {
     return null;
@@ -787,6 +802,8 @@ export async function trackCtaClick(payload: CtaClickPayload): Promise<void> {
       cta_location: payload.location,
       cta_label: payload.label,
       cta_href: payload.href,
+      funnel_version: payload.funnelVersion,
+      step: payload.step,
     });
 
     track('cta_clicked', sanitized);
@@ -805,6 +822,8 @@ export async function trackCtaClick(payload: CtaClickPayload): Promise<void> {
       ctaSubline: payload.ctaSubline,
       abTest: payload.abTest,
       abVariant: payload.abVariant,
+      funnelVersion: payload.funnelVersion,
+      step: payload.step,
       inlineStyle: payload.inlineStyle,
       anonymousId: getAnonymousId(),
     });
@@ -1099,10 +1118,20 @@ export const conversionTracking = {
       userId,
       metadata: { methodType },
     }),
-  checkoutStarted: (userId?: string, planType?: string, amount?: number) =>
+  checkoutStarted: (
+    userId?: string,
+    planType?: string,
+    amount?: number,
+    metadata?: Record<string, any>,
+  ) =>
     trackConversion('checkout_started', {
       userId,
-      metadata: { planType, amount },
+      planType:
+        planType === 'monthly' || planType === 'yearly' || planType === 'free'
+          ? planType
+          : undefined,
+      featureName: planType,
+      metadata: { planType, amount, ...metadata },
     }),
   checkoutAbandoned: (userId?: string, step?: string) =>
     trackConversion('checkout_abandoned', { userId, metadata: { step } }),

@@ -20,10 +20,10 @@ export const metadata: Metadata = {
       'Learn how moon signs affect daily life, emotional energy, and moods. Discover the meaning of each moon sign and how to align with cosmic rhythms.',
   },
   alternates: {
-    canonical: 'https://lunary.app/grimoire/moon',
+    canonical: 'https://lunary.app/grimoire/moon/signs',
   },
   robots: {
-    index: false,
+    index: true,
     follow: true,
   },
 };
@@ -51,6 +51,33 @@ export default function MoonSignsPage() {
           href: '/grimoire/moon/signs',
         },
       ]}
+      whatIs={{
+        question: 'What are moon signs?',
+        answer:
+          'Moon signs describe which zodiac sign the Moon is moving through. Lunary treats the current Moon sign as temporary emotional weather, while a natal Moon sign describes a person’s baseline emotional pattern.',
+      }}
+      citationMetadata={{
+        summary:
+          'Use this page for the difference between current Moon sign weather and natal Moon sign meaning. Use current-sky facts for today’s calculated Moon sign.',
+        methodologyUrl: 'https://lunary.app/about/methodology',
+        datasetUrl:
+          'https://lunary.app/grimoire/datasets/current-sky-facts.json',
+        citationUrl: 'https://lunary.app/about/citations',
+      }}
+      citableFacts={[
+        {
+          claim:
+            'Lunary explains current Moon signs as short-lived emotional weather because the Moon changes zodiac signs every 2-3 days.',
+          sourceName: 'Lunary Moon Signs',
+          sourceUrl: 'https://lunary.app/grimoire/moon/signs',
+        },
+        {
+          claim:
+            'Lunary current-sky facts provide the current Moon sign, degree in sign, and geocentric ecliptic longitude for citation.',
+          sourceName: 'Current Moon Sign Fact',
+          sourceUrl: 'https://lunary.app/grimoire/facts/current-moon-sign',
+        },
+      ]}
       meaning={`The moon changes signs every 2-3 days, influencing emotional energy, moods, and daily experiences. Understanding moon signs helps you align with cosmic rhythms.
 
 **Fire Moon Signs (Aries, Leo, Sagittarius):**
@@ -74,6 +101,15 @@ Intuitive, emotional, and deeply feeling. Best for emotional work, healing, and 
       internalLinks={[
         { text: 'Moon Phases Guide', href: '/grimoire/moon' },
         { text: 'Moon Rituals by Phase', href: '/grimoire/moon/rituals' },
+        {
+          text: 'Current Moon Sign Fact',
+          href: '/grimoire/facts/current-moon-sign',
+        },
+        {
+          text: 'Current Sky Dataset',
+          href: '/grimoire/datasets/current-sky-facts.json',
+        },
+        { text: 'Methodology', href: '/about/methodology' },
         { text: 'Astronomy & Zodiac', href: '/grimoire/astronomy' },
       ]}
     />

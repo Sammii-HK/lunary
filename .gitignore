@@ -67,6 +67,10 @@ prisma/migrations/*/migration.sql.tmp
 # Repomix audit exports
 project-audit.txt
 
+# CodeQL local analysis output
+codeql-db/
+codeql-results.sarif
+
 # Internal TODO docs (not for git)
 PRESS-KIT-TODO.md
 

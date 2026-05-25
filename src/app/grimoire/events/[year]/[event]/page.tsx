@@ -296,6 +296,9 @@ export default async function EventsYearEventPage({
   const { year, event } = await params;
   const yearNum = parseInt(year, 10);
   const config = DEFAULT_EVENT_COPY[event];
+  const eventLabel = config?.title ?? event;
+  const datasetUrl = `https://lunary.app/grimoire/datasets/astrology-calendar/${year}.json`;
+  const methodologyUrl = 'https://lunary.app/about/methodology';
 
   if (!config || !AVAILABLE_YEARS.includes(yearNum)) {
     notFound();
@@ -449,6 +452,18 @@ export default async function EventsYearEventPage({
 
   const pageTitle = content.title ?? `${config.title} ${yearNum}`;
   const pageH1 = content.h1 ?? pageTitle;
+  const eventCount =
+    event === 'eclipses'
+      ? stats.eclipseCount
+      : event === 'retrogrades'
+        ? stats.retrogradeCount
+        : event === 'mercury-retrograde'
+          ? stats.mercuryRxCount
+          : event === 'venus-retrograde'
+            ? stats.venusRxCount
+            : event === 'mars-retrograde'
+              ? stats.marsRxCount
+              : entries.length;
 
   return (
     <SEOContentTemplate
@@ -484,6 +499,59 @@ export default async function EventsYearEventPage({
       signsMostAffected={content.signsMostAffected}
       faqs={content.faqs}
       sources={content.sources}
+      internalLinks={[
+        {
+          text: `${year} astrology calendar JSON`,
+          href: `/grimoire/datasets/astrology-calendar/${year}.json`,
+        },
+        { text: 'Lunary methodology', href: '/about/methodology' },
+        ...(event === 'eclipses'
+          ? [
+              {
+                text: 'Next eclipse fact page',
+                href: '/grimoire/facts/next-eclipse',
+              },
+            ]
+          : event === 'mercury-retrograde'
+            ? [
+                {
+                  text: 'Next Mercury retrograde fact page',
+                  href: '/grimoire/facts/next-mercury-retrograde',
+                },
+                {
+                  text: 'Mercury retrograde status today',
+                  href: '/grimoire/facts/mercury-retrograde-status',
+                },
+              ]
+            : []),
+      ]}
+      internalLinksTitle='Citation and Fact Sources'
+      citableFacts={[
+        {
+          claim: `${eventLabel} has ${eventCount} listed ${eventCount === 1 ? 'entry' : 'entries'} in Lunary's ${year} astrology calendar view.`,
+          sourceName: `${year} astrology calendar JSON`,
+          sourceUrl: datasetUrl,
+          date: year,
+        },
+        {
+          claim: `This page is the canonical Grimoire interpretation page for ${eventLabel.toLowerCase()} in ${year}.`,
+          sourceName: `${eventLabel} ${year}`,
+          sourceUrl: `https://lunary.app/grimoire/events/${year}/${event}`,
+          date: year,
+        },
+        {
+          claim:
+            'Lunary separates computed event timing from editorial astrology interpretation in its methodology.',
+          sourceName: 'Lunary methodology',
+          sourceUrl: methodologyUrl,
+        },
+      ]}
+      citationMetadata={{
+        summary: `Citation sources for ${eventLabel.toLowerCase()} dates and interpretation in ${year}.`,
+        methodologyUrl,
+        datasetUrl,
+        citationUrl: `https://lunary.app/grimoire/events/${year}/${event}`,
+      }}
       cosmicConnections={
         <CosmicConnections
           entityType='hub-events'

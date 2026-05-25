@@ -935,27 +935,31 @@ function serialiseDate(d: Date): string {
   return `new Date('${d.toISOString()}')`;
 }
 
+function serialiseStringLiteral(value: string): string {
+  return JSON.stringify(value);
+}
+
 function serialiseStringArray(arr: string[]): string {
-  return `[${arr.map((s) => `'${s.replace(/'/g, "\\'")}'`).join(', ')}]`;
+  return `[${arr.map(serialiseStringLiteral).join(', ')}]`;
 }
 
 function serialiseTransit(t: YearlyTransit, indent = '  '): string {
   const i = indent;
   const lines: string[] = [
     `${i}{`,
-    `${i}  id: '${t.id}',`,
+    `${i}  id: ${serialiseStringLiteral(t.id)},`,
     `${i}  year: ${t.year},`,
-    `${i}  planet: '${t.planet}',`,
-    `${i}  transitType: '${t.transitType}',`,
-    `${i}  title: '${t.title.replace(/'/g, "\\'")}',`,
-    `${i}  dates: '${t.dates.replace(/'/g, "\\'")}',`,
+    `${i}  planet: ${serialiseStringLiteral(t.planet)},`,
+    `${i}  transitType: ${serialiseStringLiteral(t.transitType)},`,
+    `${i}  title: ${serialiseStringLiteral(t.title)},`,
+    `${i}  dates: ${serialiseStringLiteral(t.dates)},`,
     `${i}  signs: ${serialiseStringArray(t.signs)},`,
     `${i}  description:`,
-    `${i}    '${t.description.replace(/'/g, "\\'")}',`,
+    `${i}    ${serialiseStringLiteral(t.description)},`,
     `${i}  themes: ${serialiseStringArray(t.themes)},`,
     `${i}  doList: ${serialiseStringArray(t.doList)},`,
     `${i}  avoidList: ${serialiseStringArray(t.avoidList)},`,
-    `${i}  tone: '${t.tone.replace(/'/g, "\\'")}',`,
+    `${i}  tone: ${serialiseStringLiteral(t.tone)},`,
   ];
 
   if (t.startDate)

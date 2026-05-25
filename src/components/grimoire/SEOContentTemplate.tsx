@@ -77,6 +77,30 @@ export interface CitableFact {
   date?: string;
 }
 
+export interface StructuredSummaryItem {
+  label: string;
+  value: string;
+  href?: string;
+}
+
+export interface ConceptComparison {
+  label: string;
+  description: string;
+  href?: string;
+}
+
+export interface LearningPathStep {
+  title: string;
+  href: string;
+  description: string;
+}
+
+export interface FollowUpIntentItem {
+  title: string;
+  description: string;
+  href: string;
+}
+
 export interface SEOContentTemplateProps {
   // Core SEO
   title: string;
@@ -98,6 +122,14 @@ export interface SEOContentTemplateProps {
     question: string;
     answer: string;
   };
+  structuredSummary?: StructuredSummaryItem[];
+  conceptComparisons?: ConceptComparison[];
+  whyThisWorks?: {
+    title?: string;
+    points: string[];
+  };
+  learningPath?: LearningPathStep[];
+  followUpIntent?: FollowUpIntentItem[];
 
   // Full Guide
   fullGuide?: {
@@ -202,6 +234,11 @@ export function SEOContentTemplate({
   imageAlt,
   articleSection,
   whatIs,
+  structuredSummary,
+  conceptComparisons,
+  whyThisWorks,
+  learningPath,
+  followUpIntent,
   intro,
   tldr,
   meaning,
@@ -369,7 +406,33 @@ export function SEOContentTemplate({
     ...keywords.slice(0, 4),
     ...(relatedItems?.slice(0, 3).map((item) => item.name) || []),
   ].filter((item, index, list) => list.indexOf(item) === index);
-  const hasCitableFacts = Boolean(citableFacts && citableFacts.length > 0);
+  const sanitizedCitableFacts =
+    citableFacts
+      ?.map((fact) => ({
+        claim: fact.claim.trim(),
+        sourceName: fact.sourceName?.trim(),
+        sourceUrl: fact.sourceUrl?.trim(),
+        date: fact.date?.trim(),
+      }))
+      .filter((fact) => fact.claim.length > 0) ?? [];
+  const hasCitableFacts = sanitizedCitableFacts.length > 0;
+  const learningPathSchema =
+    learningPath && learningPath.length > 0
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'ItemList',
+          name: `${directAnswerEntityName} learning path`,
+          description: `Recommended reading order for ${directAnswerEntityName}.`,
+          url: canonicalUrl,
+          itemListElement: learningPath.map((step, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: step.title,
+            description: step.description,
+            url: new URL(step.href, canonicalUrl).toString(),
+          })),
+        }
+      : null;
   const citationWorkSchema =
     hasCitableFacts || citationMetadata
       ? {
@@ -411,16 +474,15 @@ export function SEOContentTemplate({
               : []),
             ...(sources?.map((source) => source.url).filter(Boolean) || []),
           ],
-          ...(citableFacts &&
-            citableFacts.length > 0 && {
-              additionalProperty: citableFacts.map((fact, index) => ({
-                '@type': 'PropertyValue',
-                name: `Citable fact ${index + 1}`,
-                value: fact.claim,
-                ...(fact.date && { temporalCoverage: fact.date }),
-                ...(fact.sourceUrl && { url: fact.sourceUrl }),
-              })),
-            }),
+          ...(hasCitableFacts && {
+            additionalProperty: sanitizedCitableFacts.map((fact, index) => ({
+              '@type': 'PropertyValue',
+              name: `Citable fact ${index + 1}`,
+              value: fact.claim,
+              ...(fact.date && { temporalCoverage: fact.date }),
+              ...(fact.sourceUrl && { url: fact.sourceUrl }),
+            })),
+          }),
         }
       : null;
 
@@ -432,6 +494,7 @@ export function SEOContentTemplate({
       {renderJsonLd(imageSchema)}
       {renderJsonLd(speakableSchema)}
       {renderJsonLd(breadcrumbSchema)}
+      {renderJsonLd(learningPathSchema)}
       {renderJsonLd(citationWorkSchema)}
       {additionalSchemas?.map((schema, index) => (
         <React.Fragment key={`schema-${index}`}>
@@ -502,6 +565,38 @@ export function SEOContentTemplate({
       <div className='space-y-8 p-2 md:p-4'>
         {heroContent && <div className='mb-8'>{heroContent}</div>}
 
+        {directAnswer && (
+          <section
+            id='direct-answer'
+            itemScope
+            itemType='https://schema.org/DefinedTerm'
+            className='direct-answer-summary bg-surface-elevated/55 border border-stroke-subtle rounded-lg p-4 sm:p-6 overflow-x-hidden'
+          >
+            <meta itemProp='name' content={directAnswerEntityName} />
+            <meta itemProp='description' content={directAnswer} />
+            {directAnswerRelationships.map((relationship) => (
+              <meta
+                key={`direct-answer-keyword-${relationship}`}
+                itemProp='keywords'
+                content={relationship}
+              />
+            ))}
+            <Heading
+              as='h2'
+              variant='h2'
+              className='text-content-brand-accent mb-3'
+            >
+              Quick Answer
+            </Heading>
+            <AutoLinkText
+              as='p'
+              className='text-content-secondary leading-relaxed break-words'
+            >
+              {directAnswer}
+            </AutoLinkText>
+          </section>
+        )}
+
         {/* Table of Contents */}
         {tableOfContents && tableOfContents.length > 0 && (
           <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-4 sm:p-6 mb-12'>
@@ -531,83 +626,12 @@ export function SEOContentTemplate({
           </div>
         )}
 
-        {directAnswer && (
+        {(structuredSummary?.length ||
+          conceptComparisons?.length ||
+          whyThisWorks?.points.length ||
+          learningPath?.length) && (
           <section
-            id='direct-answer'
-            itemScope
-            itemType='https://schema.org/DefinedTerm'
-            className='direct-answer-summary bg-surface-elevated/55 border border-stroke-subtle rounded-lg p-4 sm:p-6 overflow-x-hidden'
-          >
-            <meta itemProp='name' content={directAnswerEntityName} />
-            <meta itemProp='description' content={directAnswer} />
-            {directAnswerRelationships.map((relationship) => (
-              <meta
-                key={`direct-answer-keyword-${relationship}`}
-                itemProp='keywords'
-                content={relationship}
-              />
-            ))}
-            <Heading
-              as='h2'
-              variant='h2'
-              className='text-content-brand-accent mb-4'
-            >
-              {directAnswerEntityName} at a Glance
-            </Heading>
-            <div className='space-y-4'>
-              <div>
-                <h3 className='text-sm font-semibold text-content-primary mb-1'>
-                  Direct answer
-                </h3>
-                <AutoLinkText
-                  as='p'
-                  className='text-content-secondary leading-relaxed break-words'
-                >
-                  {directAnswer}
-                </AutoLinkText>
-              </div>
-              {intro && intro !== directAnswer && (
-                <div>
-                  <h3 className='text-sm font-semibold text-content-primary mb-1'>
-                    How to read it
-                  </h3>
-                  <AutoLinkText
-                    as='p'
-                    className='text-content-secondary leading-relaxed break-words'
-                  >
-                    {intro}
-                  </AutoLinkText>
-                </div>
-              )}
-              {directAnswerRelationships.length > 0 && (
-                <div>
-                  <h3 className='text-sm font-semibold text-content-primary mb-2'>
-                    Related concepts
-                  </h3>
-                  <div className='flex flex-wrap gap-2'>
-                    {directAnswerRelationships.map((relationship) => (
-                      <span
-                        key={relationship}
-                        className='rounded-md border border-stroke-subtle bg-layer-base/30 px-2.5 py-1 text-xs text-content-muted break-words'
-                      >
-                        {relationship}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <p className='text-xs text-content-muted leading-relaxed'>
-                Use this page as Lunary's canonical reference for{' '}
-                {directAnswerEntityName}, including definitions, chart
-                interpretation, and related Grimoire context.
-              </p>
-            </div>
-          </section>
-        )}
-
-        {hasCitableFacts && citableFacts && (
-          <section
-            id='citable-facts'
+            id='reference-map'
             className='bg-surface-elevated/45 border border-stroke-subtle rounded-lg p-4 sm:p-6 overflow-x-hidden'
           >
             <Heading
@@ -615,72 +639,123 @@ export function SEOContentTemplate({
               variant='h2'
               className='text-content-brand-accent mb-4'
             >
-              Citable Facts
+              Reference Map
             </Heading>
-            {citationMetadata?.summary && (
-              <p className='mb-4 text-sm leading-relaxed text-content-muted'>
-                {citationMetadata.summary}
-              </p>
+
+            {structuredSummary && structuredSummary.length > 0 && (
+              <dl className='grid gap-3 sm:grid-cols-2 mb-6'>
+                {structuredSummary.map((item) => (
+                  <div
+                    key={`${item.label}-${item.value}`}
+                    className='rounded-md border border-stroke-subtle bg-layer-base/25 p-4'
+                  >
+                    <div>
+                      <dt className='text-xs font-semibold uppercase tracking-[0.18em] text-content-muted'>
+                        {item.label}
+                      </dt>
+                      <dd className='mt-1 text-sm leading-relaxed text-content-secondary'>
+                        {item.href ? (
+                          <NavParamLink
+                            href={item.href}
+                            className='text-content-secondary hover:text-content-brand transition-colors'
+                          >
+                            <AutoLinkText>{item.value}</AutoLinkText>
+                          </NavParamLink>
+                        ) : (
+                          <AutoLinkText>{item.value}</AutoLinkText>
+                        )}
+                      </dd>
+                    </div>
+                  </div>
+                ))}
+              </dl>
             )}
-            <dl className='space-y-4'>
-              {citableFacts.map((fact, index) => (
-                <div
-                  key={`${fact.claim}-${index}`}
-                  className='rounded-md border border-stroke-subtle bg-layer-base/25 p-4'
-                >
-                  <dt className='text-xs font-semibold uppercase text-content-muted'>
-                    Fact {index + 1}
-                  </dt>
-                  <dd className='mt-1 text-content-secondary leading-relaxed'>
-                    <AutoLinkText>{fact.claim}</AutoLinkText>
-                  </dd>
-                  {(fact.sourceName || fact.sourceUrl || fact.date) && (
-                    <p className='mt-2 text-xs text-content-muted'>
-                      Source:{' '}
-                      {fact.sourceUrl ? (
-                        <a
-                          href={fact.sourceUrl}
-                          className='text-content-brand hover:text-content-brand-accent'
+
+            {conceptComparisons && conceptComparisons.length > 0 && (
+              <div className='mb-6'>
+                <h3 className='text-sm font-semibold text-content-primary mb-3'>
+                  Important distinctions
+                </h3>
+                <div className='space-y-3'>
+                  {conceptComparisons.map((item) => {
+                    const content = (
+                      <>
+                        <span className='block text-sm font-medium text-content-primary'>
+                          {item.label}
+                        </span>
+                        <AutoLinkText
+                          as='span'
+                          className='mt-1 block text-sm leading-relaxed text-content-muted'
                         >
-                          {fact.sourceName || fact.sourceUrl}
-                        </a>
-                      ) : (
-                        fact.sourceName
-                      )}
-                      {fact.date ? ` · ${fact.date}` : ''}
-                    </p>
-                  )}
+                          {item.description}
+                        </AutoLinkText>
+                      </>
+                    );
+
+                    return item.href ? (
+                      <NavParamLink
+                        key={`${item.label}-${item.description}`}
+                        href={item.href}
+                        className='block rounded-md border border-stroke-subtle bg-layer-base/20 p-4 hover:border-lunary-primary-600 transition-colors'
+                      >
+                        {content}
+                      </NavParamLink>
+                    ) : (
+                      <div
+                        key={`${item.label}-${item.description}`}
+                        className='rounded-md border border-stroke-subtle bg-layer-base/20 p-4'
+                      >
+                        {content}
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
-            </dl>
-            {(citationMetadata?.methodologyUrl ||
-              citationMetadata?.datasetUrl ||
-              citationMetadata?.citationUrl) && (
-              <div className='mt-4 flex flex-wrap gap-2 text-xs'>
-                {citationMetadata.methodologyUrl && (
-                  <a
-                    href={citationMetadata.methodologyUrl}
-                    className='rounded-md border border-stroke-subtle px-2.5 py-1 text-content-muted hover:text-content-brand'
-                  >
-                    Methodology
-                  </a>
-                )}
-                {citationMetadata.datasetUrl && (
-                  <a
-                    href={citationMetadata.datasetUrl}
-                    className='rounded-md border border-stroke-subtle px-2.5 py-1 text-content-muted hover:text-content-brand'
-                  >
-                    Dataset
-                  </a>
-                )}
-                {citationMetadata.citationUrl && (
-                  <a
-                    href={citationMetadata.citationUrl}
-                    className='rounded-md border border-stroke-subtle px-2.5 py-1 text-content-muted hover:text-content-brand'
-                  >
-                    Citation guidance
-                  </a>
-                )}
+              </div>
+            )}
+
+            {whyThisWorks && whyThisWorks.points.length > 0 && (
+              <div className='mb-6'>
+                <h3 className='text-sm font-semibold text-content-primary mb-3'>
+                  {whyThisWorks.title || 'Why astrology reads it this way'}
+                </h3>
+                <ul className='space-y-2'>
+                  {whyThisWorks.points.map((point) => (
+                    <li
+                      key={point}
+                      className='text-sm leading-relaxed text-content-secondary'
+                    >
+                      <AutoLinkText>{point}</AutoLinkText>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {learningPath && learningPath.length > 0 && (
+              <div>
+                <h3 className='text-sm font-semibold text-content-primary mb-3'>
+                  Learning path
+                </h3>
+                <ol className='grid gap-3 sm:grid-cols-2'>
+                  {learningPath.map((step, index) => (
+                    <li key={`${step.title}-${step.href}`}>
+                      <NavParamLink
+                        href={step.href}
+                        className='block h-full rounded-md border border-stroke-subtle bg-layer-base/25 p-4 hover:border-lunary-primary-600 transition-colors'
+                      >
+                        <span className='text-xs font-semibold uppercase tracking-[0.18em] text-content-muted'>
+                          Step {index + 1}
+                        </span>
+                        <span className='mt-1 block text-sm font-medium text-content-primary'>
+                          {step.title}
+                        </span>
+                        <span className='mt-1 block text-sm leading-relaxed text-content-muted'>
+                          {step.description}
+                        </span>
+                      </NavParamLink>
+                    </li>
+                  ))}
+                </ol>
               </div>
             )}
           </section>
@@ -1073,6 +1148,33 @@ export function SEOContentTemplate({
           </section>
         )}
 
+        {followUpIntent && followUpIntent.length > 0 && (
+          <section id='follow-up-intent' className='overflow-x-hidden'>
+            <Heading as='h2' variant='h2'>
+              Explore the Next Layer
+            </Heading>
+            <div className='grid gap-3 sm:grid-cols-2'>
+              {followUpIntent.map((item) => (
+                <NavParamLink
+                  key={`${item.title}-${item.href}`}
+                  href={item.href}
+                  className='block h-full rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-4 transition-colors hover:border-lunary-primary-600'
+                >
+                  <span className='block text-sm font-semibold text-content-primary'>
+                    {item.title}
+                  </span>
+                  <AutoLinkText
+                    as='span'
+                    className='mt-1 block text-sm leading-relaxed text-content-muted'
+                  >
+                    {item.description}
+                  </AutoLinkText>
+                </NavParamLink>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* FAQs */}
         {faqs && faqs.length > 0 && (
           <section id='faq' className='overflow-x-hidden sentence'>
@@ -1126,6 +1228,91 @@ export function SEOContentTemplate({
 
         {/* Universal Grimoire Exploration - always shown */}
         <ExploreGrimoire />
+
+        {hasCitableFacts && (
+          <section
+            id='citable-facts'
+            className='bg-surface-elevated/45 border border-stroke-subtle rounded-lg p-4 sm:p-6 overflow-x-hidden'
+          >
+            <Heading
+              as='h2'
+              variant='h2'
+              className='text-content-brand-accent mb-4'
+            >
+              Citable Facts
+            </Heading>
+            {citationMetadata?.summary && (
+              <p className='mb-4 text-sm leading-relaxed text-content-muted'>
+                {citationMetadata.summary}
+              </p>
+            )}
+            <dl className='space-y-4'>
+              {sanitizedCitableFacts.map((fact, index) => {
+                const sourceLabel = fact.sourceName || fact.sourceUrl;
+
+                return (
+                  <div
+                    key={`${fact.claim}-${index}`}
+                    className='rounded-md border border-stroke-subtle bg-layer-base/25 p-4'
+                  >
+                    <dt className='text-xs font-semibold uppercase text-content-muted'>
+                      Fact {index + 1}
+                    </dt>
+                    <dd className='mt-1 text-content-secondary leading-relaxed'>
+                      {fact.claim}
+                    </dd>
+                    {(sourceLabel || fact.date) && (
+                      <p className='mt-2 text-xs text-content-muted'>
+                        Source:{' '}
+                        {sourceLabel && fact.sourceUrl ? (
+                          <a
+                            href={fact.sourceUrl}
+                            className='text-content-brand hover:text-content-brand-accent'
+                          >
+                            {sourceLabel}
+                          </a>
+                        ) : (
+                          sourceLabel
+                        )}
+                        {fact.date ? ` · ${fact.date}` : ''}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </dl>
+            {(citationMetadata?.methodologyUrl ||
+              citationMetadata?.datasetUrl ||
+              citationMetadata?.citationUrl) && (
+              <div className='mt-4 flex flex-wrap gap-2 text-xs'>
+                {citationMetadata.methodologyUrl && (
+                  <a
+                    href={citationMetadata.methodologyUrl}
+                    className='rounded-md border border-stroke-subtle px-2.5 py-1 text-content-muted hover:text-content-brand'
+                  >
+                    Methodology
+                  </a>
+                )}
+                {citationMetadata.datasetUrl && (
+                  <a
+                    href={citationMetadata.datasetUrl}
+                    className='rounded-md border border-stroke-subtle px-2.5 py-1 text-content-muted hover:text-content-brand'
+                  >
+                    Dataset
+                  </a>
+                )}
+                {citationMetadata.citationUrl && (
+                  <a
+                    href={citationMetadata.citationUrl}
+                    className='rounded-md border border-stroke-subtle px-2.5 py-1 text-content-muted hover:text-content-brand'
+                  >
+                    Citation guidance
+                  </a>
+                )}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* E-A-T Credibility Section */}
         {showEAT && (

@@ -79,7 +79,10 @@ export default function PersonalizedVsGenericAstrologyPage() {
           </p>
         </div>
 
-        <section className='mb-8 p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
+        <section
+          data-citation-answer='true'
+          className='mb-8 p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'
+        >
           <h2 className='text-xl font-medium text-content-primary mb-3'>
             TL;DR
           </h2>

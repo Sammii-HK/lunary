@@ -44,13 +44,13 @@ export const metadata: Metadata = {
     images: ['/api/og/cosmic'],
   },
   alternates: {
-    canonical: 'https://lunary.app/grimoire/moon',
+    canonical: 'https://lunary.app/grimoire/moon/full-moons',
   },
   robots: {
-    index: false,
+    index: true,
     follow: true,
     googleBot: {
-      index: false,
+      index: true,
       follow: true,
       'max-video-preview': -1,
       'max-image-preview': 'large',
@@ -127,6 +127,27 @@ export default function FullMoonsIndexPage() {
             answer:
               "Full moon names are traditional names given to each month's full moon based on seasonal activities, weather, or natural phenomena. These names helped early cultures track time before modern calendars. Most commonly used names come from Native American (primarily Algonquin) and Colonial American traditions, though many cultures worldwide have their own naming systems.",
           }}
+          citationMetadata={{
+            summary:
+              'Use this page as Lunary’s quotable guide to monthly full moon names. Use annual astrology calendar data for exact dated full moon events by year.',
+            methodologyUrl: 'https://lunary.app/about/methodology',
+            datasetUrl: `https://lunary.app/grimoire/datasets/astrology-calendar/${new Date().getUTCFullYear()}.json`,
+            citationUrl: 'https://lunary.app/about/citations',
+          }}
+          citableFacts={[
+            {
+              claim:
+                'Lunary lists the monthly full moon names as Wolf, Snow, Worm, Pink, Flower, Strawberry, Buck, Sturgeon, Harvest, Hunter, Beaver, and Cold Moon.',
+              sourceName: 'Lunary Full Moon Names',
+              sourceUrl: 'https://lunary.app/grimoire/moon/full-moons',
+            },
+            {
+              claim:
+                'Exact full moon dates vary by year, so Lunary links annual full moon timing to the astrology calendar dataset for the relevant year.',
+              sourceName: 'Lunary astrology calendar dataset',
+              sourceUrl: `https://lunary.app/grimoire/datasets/astrology-calendar/${new Date().getUTCFullYear()}.json`,
+            },
+          ]}
           tldr='Each month has a named full moon: Wolf (Jan), Snow (Feb), Worm (Mar), Pink (Apr), Flower (May), Strawberry (Jun), Buck (Jul), Sturgeon (Aug), Harvest (Sep), Hunter (Oct), Beaver (Nov), Cold (Dec).'
           meaning={`Full moon names connect us to the rhythms of nature and the wisdom of our ancestors. Understanding these names deepens your lunar practice.
 
@@ -211,6 +232,15 @@ Each named moon carries specific energy for your practice. Align your rituals wi
           internalLinks={[
             { text: 'Moon Calendar', href: '/grimoire/moon' },
             { text: 'Moon Phases', href: '/grimoire/moon/phases' },
+            {
+              text: 'Next Full Moon Fact',
+              href: '/grimoire/facts/next-full-moon',
+            },
+            {
+              text: 'Annual Astrology Dataset',
+              href: `/grimoire/datasets/astrology-calendar/${new Date().getUTCFullYear()}.json`,
+            },
+            { text: 'Methodology', href: '/about/methodology' },
             { text: 'Moon Rituals', href: '/grimoire/moon/rituals' },
             { text: 'Sabbats', href: '/grimoire/wheel-of-the-year' },
           ]}

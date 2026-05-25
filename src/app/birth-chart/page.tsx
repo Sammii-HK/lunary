@@ -171,7 +171,12 @@ export default async function BirthChartLandingPage() {
           <Heading as='h1' variant='h1'>
             Free Birth Chart Calculator
           </Heading>
-          <p className='text-content-muted max-w-2xl mx-auto'>TL;DR: {tldr}</p>
+          <p
+            data-citation-answer='true'
+            className='text-content-muted max-w-2xl mx-auto'
+          >
+            TL;DR: {tldr}
+          </p>
           <p className='text-content-muted max-w-2xl mx-auto'>
             Discover your cosmic blueprint with 24+ celestial bodies, planetary
             aspects, dignities, and personalized interpretations — all
@@ -182,7 +187,7 @@ export default async function BirthChartLandingPage() {
             Lilith, Part of Fortune, Vertex, and more.
           </p>
           <div className='flex flex-col sm:flex-row gap-3 justify-center pt-2'>
-            <Link href='/auth'>
+            <Link href='/signup/chart?hub=birth-chart&location=birth_chart_hero&pagePath=/birth-chart'>
               <Button className='gap-2'>
                 Calculate Your Birth Chart
                 <ArrowRight className='w-4 h-4' />
@@ -383,7 +388,7 @@ export default async function BirthChartLandingPage() {
             </div>
           </div>
           <div className='text-center mt-6'>
-            <Link href='/auth'>
+            <Link href='/signup/chart?hub=birth-chart&location=birth_chart_steps&pagePath=/birth-chart'>
               <Button className='gap-2'>
                 Get Started Free
                 <ArrowRight className='w-4 h-4' />
@@ -497,7 +502,7 @@ export default async function BirthChartLandingPage() {
             Your birth chart calculation is free. Upgrade to Lunary+ for
             personalised horoscopes, transit tracking, and more.
           </p>
-          <Link href='/auth'>
+          <Link href='/signup/chart?hub=birth-chart&location=birth_chart_final&pagePath=/birth-chart'>
             <Button size='lg' className='gap-2'>
               Calculate Your Birth Chart
               <ArrowRight className='w-4 h-4' />

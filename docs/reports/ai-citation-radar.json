@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-05-18T14:38:10.013Z",
+  "generatedAt": "2026-05-20T09:20:33.301Z",
   "window": {
-    "startDate": "2026-04-19",
-    "endDate": "2026-05-17"
+    "startDate": "2026-04-21",
+    "endDate": "2026-05-19"
   },
   "summary": {
     "promptCount": 42,
@@ -11,7 +11,7 @@
     "competitorDomainCount": 257,
     "bingAiTotalCitations": 333,
     "bingAiAverageCitedPages": 62,
-    "aiReferralVisits": 294,
+    "aiReferralVisits": 314,
     "opportunityCount": 42
   },
   "sources": {
@@ -34,164 +34,150 @@
         "topQueries": [
           {
             "query": "libra may 2026 horoscope",
-            "clicks": 145,
-            "impressions": 2237,
-            "ctr": 0.06481895395619133,
-            "position": 8.903442109968708
+            "clicks": 131,
+            "impressions": 1975,
+            "ctr": 0.06632911392405064,
+            "position": 8.901772151898733
           },
           {
             "query": "taurus may 2026 horoscope",
-            "clicks": 119,
-            "impressions": 1406,
-            "ctr": 0.08463726884779517,
-            "position": 10.076813655761024
+            "clicks": 101,
+            "impressions": 1202,
+            "ctr": 0.08402662229617304,
+            "position": 10.153078202995008
           },
           {
             "query": "leo may 2026 horoscope",
-            "clicks": 115,
-            "impressions": 1670,
-            "ctr": 0.0688622754491018,
-            "position": 8.849101796407187
-          },
-          {
-            "query": "aquarius may 2026 horoscope",
-            "clicks": 95,
-            "impressions": 1285,
-            "ctr": 0.07392996108949416,
-            "position": 7.8357976653696495
+            "clicks": 86,
+            "impressions": 1357,
+            "ctr": 0.06337509211495947,
+            "position": 9.358879882092852
           },
           {
             "query": "pisces may 2026 horoscope",
-            "clicks": 95,
-            "impressions": 1326,
-            "ctr": 0.07164404223227752,
-            "position": 9.004524886877828
+            "clicks": 80,
+            "impressions": 1144,
+            "ctr": 0.06993006993006994,
+            "position": 9.157342657342657
+          },
+          {
+            "query": "aquarius may 2026 horoscope",
+            "clicks": 78,
+            "impressions": 1118,
+            "ctr": 0.06976744186046512,
+            "position": 7.754025044722719
           },
           {
             "query": "leo horoscope may 2026",
-            "clicks": 67,
-            "impressions": 1400,
-            "ctr": 0.047857142857142855,
-            "position": 7.930714285714286
+            "clicks": 55,
+            "impressions": 1123,
+            "ctr": 0.048975957257346395,
+            "position": 8.378450578806767
           },
           {
             "query": "aquarius horoscope may 2026",
-            "clicks": 63,
-            "impressions": 1029,
-            "ctr": 0.061224489795918366,
-            "position": 5.709426627793975
+            "clicks": 52,
+            "impressions": 885,
+            "ctr": 0.05875706214689266,
+            "position": 5.758192090395481
           },
           {
             "query": "taurus horoscope may 2026",
-            "clicks": 62,
-            "impressions": 1328,
-            "ctr": 0.046686746987951805,
-            "position": 7.532379518072289
-          },
-          {
-            "query": "taurus season 2026",
-            "clicks": 55,
-            "impressions": 6639,
-            "ctr": 0.00828438017773761,
-            "position": 9.038710649194156
-          },
-          {
-            "query": "libra may 2026",
-            "clicks": 52,
-            "impressions": 706,
-            "ctr": 0.07365439093484419,
-            "position": 8.304532577903682
+            "clicks": 51,
+            "impressions": 1124,
+            "ctr": 0.045373665480427046,
+            "position": 7.698398576512456
           },
           {
             "query": "gemini may 2026 horoscope",
-            "clicks": 51,
-            "impressions": 555,
-            "ctr": 0.0918918918918919,
-            "position": 13.787387387387387
+            "clicks": 47,
+            "impressions": 518,
+            "ctr": 0.09073359073359073,
+            "position": 13.808880308880308
+          },
+          {
+            "query": "libra may 2026",
+            "clicks": 42,
+            "impressions": 599,
+            "ctr": 0.07011686143572621,
+            "position": 8.230383973288815
           },
           {
             "query": "taurus may 2026",
-            "clicks": 51,
-            "impressions": 640,
-            "ctr": 0.0796875,
-            "position": 8.0609375
-          },
-          {
-            "query": "pisces may 2026",
             "clicks": 41,
-            "impressions": 596,
-            "ctr": 0.06879194630872483,
-            "position": 7.645973154362416
-          },
-          {
-            "query": "leo may 2026",
-            "clicks": 37,
-            "impressions": 490,
-            "ctr": 0.07551020408163266,
-            "position": 7.912244897959184
-          },
-          {
-            "query": "aquarius may 2026",
-            "clicks": 33,
-            "impressions": 368,
-            "ctr": 0.08967391304347826,
-            "position": 9.269021739130435
+            "impressions": 547,
+            "ctr": 0.07495429616087751,
+            "position": 8.219378427787934
           },
           {
             "query": "virgo may 2026",
-            "clicks": 31,
-            "impressions": 293,
-            "ctr": 0.10580204778156997,
-            "position": 11.450511945392492
+            "clicks": 30,
+            "impressions": 267,
+            "ctr": 0.11235955056179775,
+            "position": 11.707865168539326
           },
           {
-            "query": "pisces horoscope may 2026",
+            "query": "aquarius may 2026",
+            "clicks": 29,
+            "impressions": 333,
+            "ctr": 0.08708708708708708,
+            "position": 9.09009009009009
+          },
+          {
+            "query": "pisces may 2026",
+            "clicks": 29,
+            "impressions": 502,
+            "ctr": 0.05776892430278884,
+            "position": 7.924302788844622
+          },
+          {
+            "query": "leo may 2026",
             "clicks": 28,
-            "impressions": 657,
-            "ctr": 0.0426179604261796,
-            "position": 8.30593607305936
+            "impressions": 422,
+            "ctr": 0.06635071090047394,
+            "position": 8.151658767772512
+          },
+          {
+            "query": "taurus season 2026",
+            "clicks": 28,
+            "impressions": 2647,
+            "ctr": 0.010578012844729883,
+            "position": 8.70306006800151
           },
           {
             "query": "libra horoscope may 2026",
-            "clicks": 26,
-            "impressions": 1014,
-            "ctr": 0.02564102564102564,
-            "position": 8.722879684418146
+            "clicks": 25,
+            "impressions": 913,
+            "ctr": 0.027382256297918947,
+            "position": 8.704271631982476
+          },
+          {
+            "query": "pisces horoscope may 2026",
+            "clicks": 23,
+            "impressions": 541,
+            "ctr": 0.04251386321626617,
+            "position": 8.942698706099815
           },
           {
             "query": "taurus horoscope for may 2026",
-            "clicks": 25,
-            "impressions": 305,
-            "ctr": 0.08196721311475409,
-            "position": 6.967213114754099
+            "clicks": 21,
+            "impressions": 269,
+            "ctr": 0.07806691449814127,
+            "position": 7.219330855018588
           },
           {
             "query": "aries may 2026 horoscope",
-            "clicks": 22,
-            "impressions": 250,
-            "ctr": 0.088,
-            "position": 18.516
-          },
-          {
-            "query": "may 2026 taurus horoscope",
-            "clicks": 22,
-            "impressions": 217,
-            "ctr": 0.10138248847926268,
-            "position": 8.073732718894009
+            "clicks": 20,
+            "impressions": 196,
+            "ctr": 0.10204081632653061,
+            "position": 19.571428571428573
           },
           {
             "query": "789 angel number",
             "clicks": 19,
-            "impressions": 1933,
-            "ctr": 0.00982928091050181,
-            "position": 8.14536989136058
-          },
-          {
-            "query": "uranus in gemini 2026",
-            "clicks": 19,
-            "impressions": 161,
-            "ctr": 0.11801242236024845,
-            "position": 34.16770186335404
+            "impressions": 1485,
+            "ctr": 0.012794612794612794,
+            "position": 8.105723905723906
           },
           {
             "query": "capricorn may 2026 horoscope",
@@ -201,188 +187,202 @@
             "position": 18.86842105263158
           },
           {
-            "query": "lunary",
+            "query": "may 2026 taurus horoscope",
             "clicks": 18,
-            "impressions": 870,
-            "ctr": 0.020689655172413793,
-            "position": 4.001149425287356
+            "impressions": 173,
+            "ctr": 0.10404624277456648,
+            "position": 8.335260115606935
+          },
+          {
+            "query": "lunary",
+            "clicks": 16,
+            "impressions": 798,
+            "ctr": 0.020050125313283207,
+            "position": 3.8796992481203008
+          },
+          {
+            "query": "uranus in cancer 2033",
+            "clicks": 16,
+            "impressions": 147,
+            "ctr": 0.10884353741496598,
+            "position": 2.4081632653061225
           }
         ],
         "topPages": [
           {
             "page": "https://lunary.app/grimoire/horoscopes/leo/2026/may",
-            "clicks": 441,
-            "impressions": 7987,
-            "ctr": 0.05521472392638037,
-            "position": 8.204958056842369
+            "clicks": 340,
+            "impressions": 6565,
+            "ctr": 0.05178979436405179,
+            "position": 8.571210967250572
           },
           {
             "page": "https://lunary.app/grimoire/horoscopes/taurus/2026/may",
-            "clicks": 423,
-            "impressions": 7786,
-            "ctr": 0.054328281530952996,
-            "position": 8.281659388646288
+            "clicks": 339,
+            "impressions": 6564,
+            "ctr": 0.051645338208409504,
+            "position": 8.453382084095065
           },
           {
             "page": "https://lunary.app/grimoire/horoscopes/libra/2026/may",
-            "clicks": 366,
-            "impressions": 7811,
-            "ctr": 0.04685699654333632,
-            "position": 8.618870823198055
+            "clicks": 318,
+            "impressions": 6782,
+            "ctr": 0.0468888233559422,
+            "position": 8.68976703037452
           },
           {
             "page": "https://lunary.app/grimoire/horoscopes/aquarius/2026/may",
-            "clicks": 359,
-            "impressions": 5485,
-            "ctr": 0.06545123062898815,
-            "position": 7.146946216955333
+            "clicks": 302,
+            "impressions": 4712,
+            "ctr": 0.06409168081494057,
+            "position": 7.1502546689303905
           },
           {
             "page": "https://lunary.app/grimoire/horoscopes/pisces/2026/may",
-            "clicks": 316,
-            "impressions": 6142,
-            "ctr": 0.05144903940084663,
-            "position": 7.9260827092152395
+            "clicks": 247,
+            "impressions": 5077,
+            "ctr": 0.04865077801851487,
+            "position": 8.270435296434902
           },
           {
             "page": "https://lunary.app/grimoire/horoscopes/gemini/2026/may",
-            "clicks": 166,
-            "impressions": 3314,
-            "ctr": 0.05009052504526252,
-            "position": 10.816837658418828
+            "clicks": 140,
+            "impressions": 2862,
+            "ctr": 0.04891684136967156,
+            "position": 11.051013277428371
           },
           {
             "page": "https://lunary.app/grimoire/horoscopes/virgo/2026/may",
-            "clicks": 106,
-            "impressions": 1925,
-            "ctr": 0.05506493506493507,
-            "position": 9.686753246753247
+            "clicks": 85,
+            "impressions": 1566,
+            "ctr": 0.05427841634738186,
+            "position": 10.238186462324393
           },
           {
             "page": "https://lunary.app/grimoire/horoscopes/aries/2026/may",
-            "clicks": 81,
-            "impressions": 1355,
-            "ctr": 0.05977859778597786,
-            "position": 11.773431734317343
-          },
-          {
-            "page": "https://lunary.app/grimoire/seasons/2026/taurus",
-            "clicks": 74,
-            "impressions": 11763,
-            "ctr": 0.006290912182266429,
-            "position": 8.688769871631386
+            "clicks": 64,
+            "impressions": 1050,
+            "ctr": 0.06095238095238095,
+            "position": 12.395238095238096
           },
           {
             "page": "https://lunary.app/grimoire/horoscopes/taurus/2027",
-            "clicks": 61,
-            "impressions": 1485,
-            "ctr": 0.04107744107744108,
-            "position": 5.076767676767677
+            "clicks": 48,
+            "impressions": 1148,
+            "ctr": 0.041811846689895474,
+            "position": 5.196864111498257
           },
           {
             "page": "https://lunary.app/grimoire/horoscopes/capricorn/2026/may",
-            "clicks": 48,
-            "impressions": 796,
-            "ctr": 0.06030150753768844,
-            "position": 13.361809045226131
-          },
-          {
-            "page": "https://lunary.app/grimoire/horoscopes/capricorn/2027",
-            "clicks": 43,
-            "impressions": 1187,
-            "ctr": 0.03622577927548441,
-            "position": 4.0480202190395955
+            "clicks": 44,
+            "impressions": 688,
+            "ctr": 0.06395348837209303,
+            "position": 13.48546511627907
           },
           {
             "page": "https://lunary.app/grimoire/transits/uranus-cancer-2033",
-            "clicks": 43,
-            "impressions": 1712,
-            "ctr": 0.02511682242990654,
-            "position": 5.050817757009346
+            "clicks": 40,
+            "impressions": 1491,
+            "ctr": 0.02682763246143528,
+            "position": 5.078470824949698
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/capricorn/2027",
+            "clicks": 35,
+            "impressions": 929,
+            "ctr": 0.03767491926803014,
+            "position": 4.1001076426264795
+          },
+          {
+            "page": "https://lunary.app/grimoire/seasons/2026/taurus",
+            "clicks": 35,
+            "impressions": 4518,
+            "ctr": 0.007746790615316512,
+            "position": 8.42740150509075
           },
           {
             "page": "https://lunary.app/grimoire/horoscopes/aquarius/2026/june",
-            "clicks": 41,
-            "impressions": 814,
-            "ctr": 0.05036855036855037,
-            "position": 5.76044226044226
+            "clicks": 34,
+            "impressions": 657,
+            "ctr": 0.0517503805175038,
+            "position": 5.797564687975647
           },
           {
             "page": "https://lunary.app/grimoire/horoscopes/gemini/2027",
-            "clicks": 39,
-            "impressions": 999,
-            "ctr": 0.03903903903903904,
-            "position": 5.505505505505505
-          },
-          {
-            "page": "https://lunary.app/grimoire/transits/uranus-gemini-2026",
-            "clicks": 38,
-            "impressions": 7090,
-            "ctr": 0.005359661495063469,
-            "position": 8.793511988716503
-          },
-          {
-            "page": "https://lunary.app/grimoire/horoscopes/virgo/2027",
-            "clicks": 37,
-            "impressions": 1192,
-            "ctr": 0.03104026845637584,
-            "position": 6.11996644295302
+            "clicks": 32,
+            "impressions": 803,
+            "ctr": 0.039850560398505604,
+            "position": 5.724782067247821
           },
           {
             "page": "https://lunary.app/grimoire/horoscopes/libra/2026/april",
-            "clicks": 35,
-            "impressions": 1696,
-            "ctr": 0.020636792452830188,
-            "position": 14.837264150943396
+            "clicks": 32,
+            "impressions": 1241,
+            "ctr": 0.0257856567284448,
+            "position": 15.439161966156325
+          },
+          {
+            "page": "https://lunary.app/grimoire/transits/uranus-gemini-2026",
+            "clicks": 30,
+            "impressions": 4900,
+            "ctr": 0.006122448979591836,
+            "position": 9.405714285714286
           },
           {
             "page": "https://lunary.app/grimoire/horoscopes/scorpio/2027",
-            "clicks": 34,
-            "impressions": 1035,
-            "ctr": 0.03285024154589372,
-            "position": 5.188405797101449
-          },
-          {
-            "page": "https://lunary.app/grimoire/horoscopes/aries/2027",
-            "clicks": 32,
-            "impressions": 738,
-            "ctr": 0.04336043360433604,
-            "position": 6.8197831978319785
-          },
-          {
-            "page": "https://lunary.app/grimoire/horoscopes/leo/2026/june",
-            "clicks": 31,
-            "impressions": 809,
-            "ctr": 0.038318912237330034,
-            "position": 7.61310259579728
-          },
-          {
-            "page": "https://lunary.app/grimoire/angel-numbers/789",
-            "clicks": 30,
-            "impressions": 3362,
-            "ctr": 0.00892325996430696,
-            "position": 8.03955978584176
+            "clicks": 28,
+            "impressions": 820,
+            "ctr": 0.03414634146341464,
+            "position": 5.174390243902439
           },
           {
             "page": "https://lunary.app/",
-            "clicks": 29,
-            "impressions": 1215,
-            "ctr": 0.023868312757201648,
-            "position": 3.9588477366255144
+            "clicks": 26,
+            "impressions": 1153,
+            "ctr": 0.022549869904596703,
+            "position": 3.98438855160451
+          },
+          {
+            "page": "https://lunary.app/grimoire/angel-numbers/789",
+            "clicks": 26,
+            "impressions": 2596,
+            "ctr": 0.010015408320493066,
+            "position": 8.005007704160246
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/aries/2027",
+            "clicks": 25,
+            "impressions": 541,
+            "ctr": 0.04621072088724584,
+            "position": 7.035120147874307
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/leo/2026/june",
+            "clicks": 25,
+            "impressions": 676,
+            "ctr": 0.03698224852071006,
+            "position": 7.664201183431953
+          },
+          {
+            "page": "https://lunary.app/grimoire/horoscopes/virgo/2027",
+            "clicks": 25,
+            "impressions": 929,
+            "ctr": 0.02691065662002153,
+            "position": 6.191603875134553
           },
           {
             "page": "https://lunary.app/grimoire/horoscopes/libra/2027",
-            "clicks": 27,
-            "impressions": 866,
-            "ctr": 0.03117782909930716,
-            "position": 6.757505773672055
+            "clicks": 24,
+            "impressions": 663,
+            "ctr": 0.03619909502262444,
+            "position": 6.868778280542986
           },
           {
-            "page": "https://lunary.app/grimoire/horoscopes/taurus/2026/june",
-            "clicks": 27,
-            "impressions": 638,
-            "ctr": 0.04231974921630094,
-            "position": 7.521943573667712
+            "page": "https://lunary.app/grimoire/horoscopes/virgo/2026/april",
+            "clicks": 22,
+            "impressions": 1053,
+            "ctr": 0.020892687559354226,
+            "position": 18.255460588793923
           }
         ]
       }
@@ -398,13 +398,13 @@
       "data": [
         {
           "source": "chatgpt",
-          "visits": 249,
-          "users": 79
+          "visits": 248,
+          "users": 76
         },
         {
           "source": "gemini",
-          "visits": 26,
-          "users": 14
+          "visits": 51,
+          "users": 24
         },
         {
           "source": "copilot",
@@ -413,8 +413,8 @@
         },
         {
           "source": "perplexity",
-          "visits": 9,
-          "users": 5
+          "visits": 5,
+          "users": 3
         }
       ]
     },
@@ -6760,7 +6760,7 @@
       "evidence": [
         "perplexity: \"astrology transits\"",
         "Competitors cited: en.wikipedia.org, astro.com, natalcharts.net, astronectar.com, horoscopes.astro-seek.com, cafeastrology.com, astro-charts.com, astrosage.com",
-        "Google Search Console has 8802 impressions for matching page/query rows."
+        "Google Search Console has 6391 impressions for matching page/query rows."
       ],
       "nextAction": "Upgrade the target page against the cited competitors: direct answer first, citeable facts, methodology/source links, and fresher supporting data."
     },
@@ -6773,7 +6773,7 @@
       "evidence": [
         "perplexity: \"current cosmic weather\"",
         "Competitors cited: spaceweather.com, spaceweatherlive.com, swpc.noaa.gov, spaceweather.gov, spaceweather.gc.ca, swe.ssa.esa.int",
-        "Google Search Console has 8802 impressions for matching page/query rows."
+        "Google Search Console has 6391 impressions for matching page/query rows."
       ],
       "nextAction": "Upgrade the target page against the cited competitors: direct answer first, citeable facts, methodology/source links, and fresher supporting data."
     },
@@ -6786,7 +6786,7 @@
       "evidence": [
         "perplexity: \"how transits affect natal placements\"",
         "Competitors cited: morinus-astrology.com, spiritofjoy.com, astrobutterfly.com, mynitya.com, youtube.com, astroclub.com, cafeastrology.com, astrostyle.com",
-        "Google Search Console has 8802 impressions for matching page/query rows."
+        "Google Search Console has 6391 impressions for matching page/query rows."
       ],
       "nextAction": "Upgrade the target page against the cited competitors: direct answer first, citeable facts, methodology/source links, and fresher supporting data."
     },

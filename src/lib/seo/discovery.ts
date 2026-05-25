@@ -27,6 +27,7 @@ export const CURATED_DISCOVERY_SITEMAPS = [
   'sitemap-yearly-transits.xml',
   'sitemap-transits.xml',
   'sitemap-transit-blog.xml',
+  'sitemap-datasets.xml',
   'sitemap-aspects.xml',
   'sitemap-numerology.xml',
   'sitemap-planets.xml',
@@ -48,6 +49,8 @@ export const DEPRIORITIZED_DISCOVERY_SITEMAPS = [
   'sitemap-rituals.xml',
 ] as const;
 
+const currentDiscoveryYear = new Date().getUTCFullYear();
+
 export const AI_DISCOVERY_PATHS = [
   '/robots.txt',
   '/llms.txt',
@@ -58,7 +61,18 @@ export const AI_DISCOVERY_PATHS = [
   '/grimoire/datasets/core-astrology.json',
   '/grimoire/datasets/core-astrology-2026-05-17.json',
   '/grimoire/datasets/current-sky-facts.json',
+  '/grimoire/datasets/current-sky',
   '/grimoire/datasets/current-sky/2026-05-17',
+  `/grimoire/datasets/astrology-calendar/${currentDiscoveryYear}.json`,
+  `/grimoire/datasets/astrology-calendar/${currentDiscoveryYear + 1}.json`,
+  '/grimoire/facts/moon-phase-today',
+  '/grimoire/facts/current-moon-sign',
+  '/grimoire/facts/planetary-positions-today',
+  '/grimoire/facts/mercury-retrograde-status',
+  '/grimoire/facts/next-full-moon',
+  '/grimoire/facts/next-new-moon',
+  '/grimoire/facts/next-eclipse',
+  '/grimoire/facts/next-mercury-retrograde',
   '/about/methodology',
   '/.well-known/ai-plugin.json',
   '/.well-known/openapi.json',

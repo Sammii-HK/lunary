@@ -136,6 +136,77 @@ export async function GET(request: NextRequest) {
           HAVING COUNT(DISTINCT ua.user_id) > 0
           ORDER BY paying_users DESC`;
 
+    const checkoutFunnelBySource = hasDateRange
+      ? await sql`
+          WITH source_events AS (
+            SELECT
+              COALESCE(
+                NULLIF(ce.metadata->>'first_touch_source', ''),
+                NULLIF(ce.metadata->>'utm_source', ''),
+                NULLIF(ua.first_touch_source, ''),
+                'direct'
+              ) AS source,
+              ce.event_type,
+              ce.user_id
+            FROM conversion_events ce
+            LEFT JOIN user_attribution ua ON ua.user_id = ce.user_id
+            WHERE ce.event_type IN (
+              'signup_completed',
+              'checkout_started',
+              'checkout_completed',
+              'trial_started',
+              'subscription_started'
+            )
+              AND ce.created_at >= ${safeStartDate}::date
+              AND ce.created_at <= ${safeEndDate}::date + INTERVAL '1 day'
+              AND (ce.user_email IS NULL OR ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN})
+          )
+          SELECT
+            source,
+            COUNT(DISTINCT CASE WHEN event_type = 'signup_completed' THEN user_id END) as signups,
+            COUNT(DISTINCT CASE WHEN event_type = 'checkout_started' THEN user_id END) as checkout_started,
+            COUNT(DISTINCT CASE WHEN event_type = 'checkout_completed' THEN user_id END) as checkout_completed,
+            COUNT(DISTINCT CASE WHEN event_type = 'trial_started' THEN user_id END) as trial_started,
+            COUNT(DISTINCT CASE WHEN event_type = 'subscription_started' THEN user_id END) as subscription_started
+          FROM source_events
+          GROUP BY source
+          ORDER BY checkout_completed DESC, checkout_started DESC, signups DESC
+          LIMIT 30`
+      : await sql`
+          WITH source_events AS (
+            SELECT
+              COALESCE(
+                NULLIF(ce.metadata->>'first_touch_source', ''),
+                NULLIF(ce.metadata->>'utm_source', ''),
+                NULLIF(ua.first_touch_source, ''),
+                'direct'
+              ) AS source,
+              ce.event_type,
+              ce.user_id
+            FROM conversion_events ce
+            LEFT JOIN user_attribution ua ON ua.user_id = ce.user_id
+            WHERE ce.event_type IN (
+              'signup_completed',
+              'checkout_started',
+              'checkout_completed',
+              'trial_started',
+              'subscription_started'
+            )
+              AND ce.created_at >= NOW() - INTERVAL '90 days'
+              AND (ce.user_email IS NULL OR ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN})
+          )
+          SELECT
+            source,
+            COUNT(DISTINCT CASE WHEN event_type = 'signup_completed' THEN user_id END) as signups,
+            COUNT(DISTINCT CASE WHEN event_type = 'checkout_started' THEN user_id END) as checkout_started,
+            COUNT(DISTINCT CASE WHEN event_type = 'checkout_completed' THEN user_id END) as checkout_completed,
+            COUNT(DISTINCT CASE WHEN event_type = 'trial_started' THEN user_id END) as trial_started,
+            COUNT(DISTINCT CASE WHEN event_type = 'subscription_started' THEN user_id END) as subscription_started
+          FROM source_events
+          GROUP BY source
+          ORDER BY checkout_completed DESC, checkout_started DESC, signups DESC
+          LIMIT 30`;
+
     const totalMrrGbp = revenueBySource.rows.reduce(
       (sum, r) => sum + Number(r.mrr_gbp ?? 0),
       0,
@@ -171,6 +242,14 @@ export async function GET(request: NextRequest) {
           signups: Number(r.signups ?? 0),
           paying_users: Number(r.paying_users ?? 0),
           conversion_pct: Number(r.conversion_pct ?? 0),
+        })),
+        checkout_funnel_by_source: checkoutFunnelBySource.rows.map((r) => ({
+          source: r.source,
+          signups: Number(r.signups ?? 0),
+          checkout_started: Number(r.checkout_started ?? 0),
+          checkout_completed: Number(r.checkout_completed ?? 0),
+          trial_started: Number(r.trial_started ?? 0),
+          subscription_started: Number(r.subscription_started ?? 0),
         })),
       },
       {

@@ -13,7 +13,7 @@ import { PlacementSelector } from '@/components/grimoire/PlacementSelector';
 import { buildTransitWindowSnapshot } from '@/lib/horoscope/monthly-forecast';
 
 export const revalidate = 604800;
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 const signs = [
   { name: 'Aries', symbol: '♈', dates: 'Mar 21 - Apr 19', element: 'Fire' },
@@ -39,6 +39,10 @@ const signs = [
   { name: 'Aquarius', symbol: '♒', dates: 'Jan 20 - Feb 18', element: 'Air' },
   { name: 'Pisces', symbol: '♓', dates: 'Feb 19 - Mar 20', element: 'Water' },
 ];
+
+export function generateStaticParams() {
+  return signs.map((sign) => ({ sign: sign.name.toLowerCase() }));
+}
 
 export async function generateMetadata({
   params,

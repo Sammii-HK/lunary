@@ -35,6 +35,50 @@ function getWebhookSecret() {
   return process.env.STRIPE_WEBHOOK_SECRET;
 }
 
+const CHECKOUT_SOURCE_METADATA_KEYS = [
+  'cta_id',
+  'cta_location',
+  'cta_label',
+  'cta_href',
+  'cta_funnel_version',
+  'cta_step',
+  'funnel_version',
+  'step',
+  'page_path',
+  'analytics_session_id',
+  'anonymous_id',
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_content',
+  'utm_term',
+  'first_touch_source',
+  'first_touch_medium',
+  'first_touch_campaign',
+  'first_touch_keyword',
+  'first_touch_page',
+  'first_touch_referrer',
+  'first_touch_at',
+] as const;
+
+function checkoutSourceMetadata(
+  metadata?: Stripe.Metadata | null,
+): Record<string, string> {
+  if (!metadata) return {};
+  const out: Record<string, string> = {};
+  for (const key of CHECKOUT_SOURCE_METADATA_KEYS) {
+    const value = metadata[key];
+    if (typeof value === 'string' && value.trim().length > 0) {
+      out[key] = value.trim();
+    }
+  }
+  return out;
+}
+
+function checkoutTriggerFeature(metadata?: Stripe.Metadata | null) {
+  return metadata?.triggerFeature || metadata?.trigger_feature || null;
+}
+
 function getPlanTypeFromSubscription(
   subscription: Stripe.Subscription,
 ): string {
@@ -330,6 +374,8 @@ async function handleSubscriptionChange(
   // Get userId from customer or subscription metadata
   let userId = subscription.metadata?.userId || null;
   let userEmail: string | null = null;
+  const sourceMetadata = checkoutSourceMetadata(subscription.metadata);
+  const triggerFeature = checkoutTriggerFeature(subscription.metadata);
 
   try {
     const customer = await stripe.customers.retrieve(customerId);
@@ -700,9 +746,9 @@ async function handleSubscriptionChange(
         conversionType,
         fromPlan: 'free',
         toPlan: planType,
-        triggerFeature: subscription.metadata?.triggerFeature || null,
+        triggerFeature,
         daysToConvert: null,
-        metadata: { stripeSubscriptionId: subscription.id },
+        metadata: { stripeSubscriptionId: subscription.id, ...sourceMetadata },
       });
 
       captureEvent(userId, 'subscription_started', {
@@ -713,6 +759,8 @@ async function handleSubscriptionChange(
         discount_percent: discountInfo.discountPercent,
         monthly_amount: discountInfo.monthlyAmountDue,
         referral_code: subscription.metadata?.referralCode || null,
+        trigger_feature: triggerFeature,
+        ...sourceMetadata,
       });
 
       // Send welcome email for paid subscriptions (not trial starts)
@@ -770,9 +818,9 @@ async function handleSubscriptionChange(
         conversionType: 'trial_to_paid',
         fromPlan: 'trial',
         toPlan: planType,
-        triggerFeature: subscription.metadata?.triggerFeature || null,
+        triggerFeature,
         daysToConvert,
-        metadata: { stripeSubscriptionId: subscription.id },
+        metadata: { stripeSubscriptionId: subscription.id, ...sourceMetadata },
       });
 
       // Write a canonical trial_converted row to conversion_events so the
@@ -810,7 +858,7 @@ async function handleSubscriptionChange(
               ${userId},
               ${userEmail},
               ${planType},
-              ${subscription.metadata?.triggerFeature || null},
+              ${triggerFeature},
               ${JSON.stringify({
                 stripeSubscriptionId: subscription.id,
                 amount: effectivePaidAmount,
@@ -818,6 +866,7 @@ async function handleSubscriptionChange(
                 daysToConvert,
                 discountPercent: discountInfo.discountPercent || 0,
                 hasDiscount: discountInfo.hasDiscount,
+                ...sourceMetadata,
               })}
             )
             ON CONFLICT (event_id) DO NOTHING
@@ -974,18 +1023,92 @@ async function handleCheckoutSessionCompleted(
 
   if (!subscription) return;
 
-  if (userIdFromSession && !subscription.metadata?.userId) {
+  const sessionMetadata = Object.fromEntries(
+    Object.entries(session.metadata || {}).filter(
+      ([, value]) => typeof value === 'string' && value.trim().length > 0,
+    ),
+  ) as Record<string, string>;
+  const mergedSubscriptionMetadata: Record<string, string> = {
+    ...sessionMetadata,
+    ...(subscription.metadata || {}),
+  };
+  if (userIdFromSession) {
+    mergedSubscriptionMetadata.userId = userIdFromSession;
+  }
+
+  if (
+    Object.keys(mergedSubscriptionMetadata).some(
+      (key) =>
+        subscription?.metadata?.[key] !== mergedSubscriptionMetadata[key],
+    )
+  ) {
     try {
       await stripe.subscriptions.update(subscriptionId, {
-        metadata: {
-          ...(subscription.metadata || {}),
-          userId: userIdFromSession,
-        },
+        metadata: mergedSubscriptionMetadata,
       });
       subscription = await stripe.subscriptions.retrieve(subscriptionId);
     } catch (error) {
       console.error(
         'Failed to update subscription metadata from checkout:',
+        error,
+      );
+    }
+  }
+
+  const checkoutUserId =
+    mergedSubscriptionMetadata.userId || userIdFromSession || null;
+
+  if (checkoutUserId) {
+    const sourceMetadata = checkoutSourceMetadata(mergedSubscriptionMetadata);
+    const triggerFeature = checkoutTriggerFeature(mergedSubscriptionMetadata);
+    const price = subscription.items.data[0]?.price;
+    const checkoutCompletedEventId = deterministicEventId(
+      'checkout_completed',
+      checkoutUserId,
+      session.id,
+    );
+    const checkoutCustomerEmail =
+      session.customer_details?.email ||
+      session.customer_email ||
+      customer?.email ||
+      null;
+
+    try {
+      await sql`
+        INSERT INTO conversion_events (
+          event_type,
+          event_id,
+          user_id,
+          user_email,
+          plan_type,
+          feature_name,
+          metadata
+        ) VALUES (
+          'checkout_completed',
+          ${checkoutCompletedEventId}::uuid,
+          ${checkoutUserId},
+          ${checkoutCustomerEmail},
+          ${getPlanTypeFromSubscription(subscription)},
+          ${triggerFeature},
+          ${JSON.stringify({
+            stripeSessionId: session.id,
+            stripeSubscriptionId: subscription.id,
+            stripeCustomerId: customerId,
+            paymentStatus: session.payment_status,
+            mode: session.mode,
+            amountSubtotal: session.amount_subtotal,
+            amountTotal: session.amount_total,
+            currency:
+              price?.currency?.toUpperCase() || session.currency || null,
+            triggerFeature,
+            ...sourceMetadata,
+          })}
+        )
+        ON CONFLICT (event_id) DO NOTHING
+      `;
+    } catch (error) {
+      console.error(
+        '[Webhook] Failed to write checkout_completed conversion event:',
         error,
       );
     }

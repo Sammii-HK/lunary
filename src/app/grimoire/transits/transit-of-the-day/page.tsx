@@ -1,38 +1,8 @@
 import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import { getImageBaseUrl } from '@/lib/urls';
+import { getTransitOfDay } from '@/lib/astro/transit-of-day';
 
 export const dynamic = 'force-dynamic';
-
-type TransitOfDayData = {
-  date?: string;
-  primaryEvent?: {
-    name?: string;
-    energy?: string;
-  };
-  highlights?: string[];
-  horoscopeSnippet?: string;
-};
-
-async function getTransitOfDay(): Promise<TransitOfDayData | null> {
-  const baseUrl = getImageBaseUrl();
-  const dateStr = new Date().toISOString().split('T')[0];
-
-  try {
-    const response = await fetch(`${baseUrl}/api/og/cosmic-post/${dateStr}`, {
-      next: { revalidate: 3600 },
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    return response.json();
-  } catch (error) {
-    console.error('TransitOfDay fetch failed:', error);
-    return null;
-  }
-}
 
 export const metadata: Metadata = {
   title: 'Today’s Astrology Transit: Planetary Highlights & Guidance | Lunary',
@@ -66,20 +36,12 @@ export const metadata: Metadata = {
 
 export default async function TransitOfTheDayPage() {
   const data = await getTransitOfDay();
-  const headline = data?.primaryEvent?.name || 'Transit of the Day';
-  const energy = data?.primaryEvent?.energy || 'Daily cosmic timing';
-  const highlights = data?.highlights ?? [];
-  const guidance =
-    data?.horoscopeSnippet ||
-    'Use today’s transit as a timing cue and check back for updated daily context.';
-  const dateLabel =
-    data?.date ||
-    new Date().toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    });
+  const headline = data.primaryEvent.name;
+  const energy = data.primaryEvent.energy;
+  const highlights = data.highlights;
+  const guidance = data.horoscopeSnippet;
+  const dateLabel = data.date;
+  const introEnergy = energy.replace(/[.!?]+$/, '');
 
   return (
     <div className='min-h-fit bg-surface-base text-content-primary'>
@@ -96,7 +58,7 @@ export default async function TransitOfTheDayPage() {
             'planetary transits',
           ]}
           canonicalUrl='https://lunary.app/grimoire/transits/transit-of-the-day'
-          intro={`${headline} — ${energy}. Updated daily with the most relevant transit for timing and awareness.`}
+          intro={`${headline} — ${introEnergy}. Updated daily with the most relevant transit for timing and awareness.`}
           breadcrumbs={[
             { label: 'Grimoire', href: '/grimoire' },
             { label: 'Transits', href: '/grimoire/transits' },

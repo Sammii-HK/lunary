@@ -245,6 +245,27 @@ export default async function MoonPhasePage({
         tldr={`The ${phaseName} Moon represents ${phaseData.keywords
           .join(', ')
           .toLowerCase()}.`}
+        citationMetadata={{
+          summary: `Use this page as Lunary’s direct answer for the ${phaseName} Moon meaning and ritual timing. Use current-sky facts for today’s calculated phase.`,
+          methodologyUrl: 'https://lunary.app/about/methodology',
+          datasetUrl:
+            'https://lunary.app/grimoire/datasets/current-sky-facts.json',
+          citationUrl: 'https://lunary.app/about/citations',
+        }}
+        citableFacts={[
+          {
+            claim: `The ${phaseName} Moon represents ${phaseData.keywords.join(', ').toLowerCase()} in Lunary’s Moon phase guide.`,
+            sourceName: `${phaseName} Moon guide`,
+            sourceUrl: `https://lunary.app/grimoire/moon/phases/${phase}`,
+          },
+          {
+            claim:
+              'Lunary current-sky facts provide today’s calculated Moon phase, illumination percentage, Moon sign, ecliptic longitude, and phase angle.',
+            sourceName: 'Lunary current-sky facts',
+            sourceUrl:
+              'https://lunary.app/grimoire/datasets/current-sky-facts.json',
+          },
+        ]}
         meaning={`The ${phaseName} Moon is one of the eight phases in the lunar cycle, each representing different energies and opportunities for magical and spiritual work.
 
 ${phaseData.information}
@@ -280,7 +301,15 @@ During the ${phaseName} Moon, the energy is focused on ${phaseData.keywords
           { label: phaseName, href: `/grimoire/moon/phases/${phase}` },
         ]}
         internalLinks={[
-          { text: "View Today's Moon Phase", href: '/horoscope' },
+          {
+            text: "View Today's Moon Phase",
+            href: '/grimoire/facts/moon-phase-today',
+          },
+          {
+            text: 'Current Sky Dataset',
+            href: '/grimoire/datasets/current-sky-facts.json',
+          },
+          { text: 'Methodology', href: '/about/methodology' },
           { text: 'Explore Moon Rituals', href: '/grimoire/moon/rituals' },
           { text: 'Calculate Birth Chart', href: '/birth-chart' },
           { text: 'Grimoire Home', href: '/grimoire' },

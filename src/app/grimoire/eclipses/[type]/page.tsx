@@ -84,6 +84,9 @@ export default async function EclipsePage({
 }) {
   const { type } = await params;
   const eclipseData = eclipseInfo[type as keyof typeof eclipseInfo];
+  const year = new Date().getFullYear();
+  const datasetUrl = `https://lunary.app/grimoire/datasets/astrology-calendar/${year}.json`;
+  const methodologyUrl = 'https://lunary.app/about/methodology';
 
   if (!eclipseData) {
     notFound();
@@ -109,7 +112,6 @@ export default async function EclipsePage({
   ];
 
   // Event schema for eclipses - helps appear in Google's event search
-  const year = new Date().getFullYear();
   const eclipseSchema = createEventSchema({
     name: `${eclipseData.name} ${year}`,
     description: `${eclipseData.name}: ${eclipseData.description.slice(0, 150)}...`,
@@ -184,11 +186,50 @@ Eclipses occur in cycles, typically in pairs (solar and lunar), and their effect
           },
         ]}
         internalLinks={[
+          {
+            text: `${year} astrology calendar JSON`,
+            href: `/grimoire/datasets/astrology-calendar/${year}.json`,
+          },
+          {
+            text: 'Next eclipse fact page',
+            href: '/grimoire/facts/next-eclipse',
+          },
+          { text: 'Lunary methodology', href: '/about/methodology' },
+          {
+            text: `${year} eclipse calendar`,
+            href: `/grimoire/events/${year}/eclipses`,
+          },
           { text: "View Today's Horoscope", href: '/horoscope' },
           { text: 'Explore Moon Phases', href: '/grimoire/moon' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
+        internalLinksTitle='Citation and Fact Sources'
         faqs={faqs}
+        citableFacts={[
+          {
+            claim: `A ${eclipseData.name} is a ${eclipseData.type} that occurs when ${type === 'solar' ? 'the Moon passes between Earth and the Sun' : 'Earth passes between the Sun and the Moon'}.`,
+            sourceName: `${eclipseData.name} guide`,
+            sourceUrl: `https://lunary.app/grimoire/eclipses/${type}`,
+          },
+          {
+            claim: `Lunary publishes ${year} ${type} eclipse dates, signs, canonical URLs, and methodology links in the annual astrology calendar JSON dataset.`,
+            sourceName: `${year} astrology calendar JSON`,
+            sourceUrl: datasetUrl,
+            date: String(year),
+          },
+          {
+            claim:
+              'The next eclipse fact page gives a direct current answer for the next solar or lunar eclipse.',
+            sourceName: 'Next eclipse fact page',
+            sourceUrl: 'https://lunary.app/grimoire/facts/next-eclipse',
+          },
+        ]}
+        citationMetadata={{
+          summary: `Citation sources for ${eclipseData.name.toLowerCase()} definitions, date-level eclipse facts, and calculation methodology.`,
+          methodologyUrl,
+          datasetUrl,
+          citationUrl: 'https://lunary.app/grimoire/facts/next-eclipse',
+        }}
       />
     </div>
   );

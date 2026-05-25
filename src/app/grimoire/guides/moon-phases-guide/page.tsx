@@ -282,6 +282,9 @@ const faqs = [
   },
 ];
 
+const moonPhasesDirectAnswer =
+  'The Moon phase describes how much of the Moon is illuminated from Earth during the 29.5-day lunar cycle. Lunary reads each phase as a timing signal for intention, action, culmination, release, and rest.';
+
 export default function MoonPhasesGuidePage() {
   const articleSchema = createArticleWithSpeakableSchema({
     headline: 'Moon Phases: The Complete Guide to Lunar Cycles & Rituals',
@@ -349,6 +352,16 @@ export default function MoonPhasesGuidePage() {
           you the meaning of each lunar phase, how to work with moon energy, and
           rituals for every part of the cycle.
         </p>
+        <section
+          aria-label='Direct answer'
+          data-citation-answer='true'
+          className='mb-6 rounded-xl border border-stroke-subtle bg-surface-elevated/40 p-5'
+        >
+          <h2 className='sr-only'>Direct answer</h2>
+          <p className='text-sm leading-relaxed text-content-muted'>
+            TL;DR: {moonPhasesDirectAnswer}
+          </p>
+        </section>
         <div className='flex flex-wrap gap-4'>
           <Button asChild variant='lunary-solid' size='lg'>
             <Link href='/app'>Today&apos;s Moon Phase</Link>

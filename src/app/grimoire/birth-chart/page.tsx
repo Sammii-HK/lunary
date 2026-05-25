@@ -108,6 +108,81 @@ export default function BirthChartPage() {
         answer:
           'A birth chart is a map of the sky for the moment and place someone was born. It shows planet positions, zodiac signs, houses, chart angles, and aspects so the chart can be read as a structured symbolic snapshot rather than a single Sun sign.',
       }}
+      structuredSummary={[
+        {
+          label: 'Inputs needed',
+          value:
+            'Birth date, exact birth time, and birth location give the most accurate chart angles, houses, and rising sign.',
+        },
+        {
+          label: 'Core pieces',
+          value:
+            'A birth chart combines planets, signs, houses, aspects, chart angles, rulers, and timing layers.',
+        },
+        {
+          label: 'Reading order',
+          value:
+            'Start with the Big Three and chart angles, then the Ascendant ruler, house clusters, strongest aspects, and timing.',
+        },
+        {
+          label: 'Calculation method',
+          value:
+            'Lunary calculates chart positions first, then applies interpretation separately.',
+          href: '/about/methodology',
+        },
+      ]}
+      conceptComparisons={[
+        {
+          label: 'Birth chart vs horoscope',
+          description:
+            'A birth chart is fixed to a birth moment; a horoscope reads current or future sky patterns against signs or chart placements.',
+          href: '/grimoire/horoscopes',
+        },
+        {
+          label: 'Sun sign vs full chart',
+          description:
+            'A Sun sign describes one placement. A full chart includes Moon, Rising, houses, aspects, rulers, and timing.',
+          href: '/grimoire/guides/birth-chart-complete-guide',
+        },
+        {
+          label: 'Tropical vs sidereal',
+          description:
+            'Tropical astrology anchors the zodiac to the equinox; sidereal astrology accounts for the precession of fixed stars.',
+        },
+      ]}
+      whyThisWorks={{
+        title: 'Why a chart needs layers',
+        points: [
+          'A planet without a house can describe a theme, but not where that theme shows up in life.',
+          'A sign without a planet can describe style, but not what function is expressing that style.',
+          'Aspects turn isolated placements into a pattern, showing which parts of the chart cooperate or create pressure.',
+        ],
+      }}
+      learningPath={[
+        {
+          title: 'Learn the Big Three',
+          href: '/grimoire/guides/learn-birth-chart',
+          description:
+            'Start with Sun, Moon, Rising, and the chart-reading order.',
+        },
+        {
+          title: 'Study planets',
+          href: '/grimoire/astronomy/planets',
+          description: 'Understand what each planet contributes to the chart.',
+        },
+        {
+          title: 'Map houses',
+          href: '/grimoire/houses',
+          description:
+            'Connect placements to life areas before interpreting details.',
+        },
+        {
+          title: 'Read aspects',
+          href: '/grimoire/aspects',
+          description:
+            'Find the relationships and repeated patterns in the chart.',
+        },
+      ]}
       intro='Your birth chart (natal chart) is a snapshot of the sky at the moment you were born. It reveals your astrological blueprint—the positions of planets, signs, houses, and aspects that influence your personality, life path, and potential. Lunary lets you view your chart in multiple zodiac systems (tropical, sidereal, equatorial) and house systems (whole sign, Placidus, Koch, Porphyry, Alcabitius) to deepen your understanding. Understanding your birth chart helps you understand yourself deeply, recognize your strengths and challenges, and align with your true purpose. This comprehensive guide covers all components of birth charts and how to interpret them.'
       meaning={`A birth chart maps the positions of planets, signs, and houses at your exact moment of birth. Each component reveals different aspects of your personality and life experience. Planets represent different parts of your psyche and life areas. Signs show how those planets express themselves. Houses indicate where in your life these energies manifest. Aspects show how planets interact with each other.
 
@@ -133,6 +208,38 @@ Lunary reads a chart in layers rather than isolated placements. Start with the c
         'Understand planetary retrogrades in your chart',
         'Use your chart for timing important decisions',
         'Build your reading from the chart structure first, then add intuition and symbolism',
+      ]}
+      followUpIntent={[
+        {
+          title: 'Planets',
+          description:
+            'Learn what each planet represents before reading its sign, house, and aspect pattern.',
+          href: '/grimoire/astronomy/planets',
+        },
+        {
+          title: 'Houses',
+          description:
+            'Use houses to locate where a chart theme shows up in lived experience.',
+          href: '/grimoire/houses',
+        },
+        {
+          title: 'Aspects',
+          description:
+            'Read the relationships between placements so the chart becomes a coherent pattern.',
+          href: '/grimoire/aspects',
+        },
+        {
+          title: 'Natal vs transit',
+          description:
+            'Compare your fixed birth chart with the current sky to understand timing.',
+          href: '/grimoire/transits',
+        },
+        {
+          title: 'Chart examples',
+          description:
+            'Move from single placements into a full reading order with examples and nuance.',
+          href: '/grimoire/guides/birth-chart-complete-guide',
+        },
       ]}
       internalLinks={[
         {

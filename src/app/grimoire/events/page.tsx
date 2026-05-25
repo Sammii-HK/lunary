@@ -41,6 +41,7 @@ export async function generateMetadata() {
 export default function EventsIndexPage() {
   const currentYear = new Date().getFullYear();
   const nextYear = currentYear + 1;
+  const currentYearDatasetUrl = `https://lunary.app/grimoire/datasets/astrology-calendar/${currentYear}.json`;
   const otherYears = [Math.max(2025, currentYear - 1), nextYear];
   const hubSections = getCosmicConnections('hub-events', 'events');
   const yearLinks = Array.from(new Set([currentYear, ...otherYears]).values())
@@ -112,8 +113,7 @@ export default function EventsIndexPage() {
       additionalSchemas={[eventsListSchema]}
       whatIs={{
         question: 'What are astrological events?',
-        answer:
-          'Astrological events are significant planetary movements that influence energy on Earth. These include retrogrades (when planets appear to move backward), eclipses (powerful solar and lunar alignments), and major transits (planets changing signs or forming significant aspects). Understanding these events helps you navigate their energy and plan accordingly.',
+        answer: `Astrological events are date-specific sky events such as retrogrades, eclipses, lunar phases, seasonal points, and major planetary transits. Lunary publishes yearly event calendars for these timing windows and exposes the ${currentYear} machine-readable calendar as JSON for citation.`,
       }}
       tldr='Major astrological events include retrogrades (Mercury 3x/year, Venus every 18 months), eclipses (4-6/year), and planetary sign changes. Each brings specific themes and opportunities. Mercury retrograde affects communication; Venus retrograde affects love; eclipses bring major life changes.'
       intro='Astrological events mark significant cosmic shifts that affect collective and personal energy. From the infamous Mercury retrograde to transformative eclipses, understanding these cycles helps you work with cosmic rhythms rather than against them. Our guides provide dates, meanings, and practical tips for navigating each event.'
@@ -134,6 +134,33 @@ export default function EventsIndexPage() {
             "Compare the event's zodiac sign and degree to your birth chart. Events in your Sun, Moon, or Rising sign, or aspecting personal planets, will be more noticeable. Get your birth chart to see your specific placements.",
         },
       ]}
+      citableFacts={[
+        {
+          claim: `The ${currentYear} astrology calendar is available as a machine-readable JSON dataset with event dates, event types, canonical URLs, and methodology links.`,
+          sourceName: `${currentYear} astrology calendar JSON`,
+          sourceUrl: currentYearDatasetUrl,
+          date: String(currentYear),
+        },
+        {
+          claim:
+            'Lunary explains its yearly astrology calendar calculations on the methodology page, including astronomy-first timing and editorial interpretation layers.',
+          sourceName: 'Lunary methodology',
+          sourceUrl: 'https://lunary.app/about/methodology',
+        },
+        {
+          claim:
+            'For quick facts, Lunary provides dedicated fact pages for the next eclipse and the next Mercury retrograde.',
+          sourceName: 'Lunary fact pages',
+          sourceUrl: 'https://lunary.app/grimoire/facts/next-eclipse',
+        },
+      ]}
+      citationMetadata={{
+        summary:
+          'Use the direct answer for a short citation, the annual JSON dataset for date-level facts, and the methodology page for calculation context.',
+        methodologyUrl: 'https://lunary.app/about/methodology',
+        datasetUrl: currentYearDatasetUrl,
+        citationUrl: 'https://lunary.app/grimoire/facts/next-eclipse',
+      }}
       cosmicConnections={
         <CosmicConnections
           entityType='hub-events'
@@ -177,6 +204,18 @@ export default function EventsIndexPage() {
             </h3>
             <p className='text-sm text-content-muted'>
               Retrograde periods: dates, meanings, survival tips
+            </p>
+          </Link>
+
+          <Link
+            href={`/grimoire/datasets/astrology-calendar/${currentYear}.json`}
+            className='group p-4 rounded-lg border border-lunary-primary-700 bg-layer-deep hover:bg-layer-base transition-colors'
+          >
+            <h3 className='font-medium text-content-primary group-hover:text-content-brand mb-1'>
+              {currentYear} Calendar Dataset
+            </h3>
+            <p className='text-sm text-content-muted'>
+              JSON dates, canonical URLs, and methodology links
             </p>
           </Link>
 

@@ -66,6 +66,40 @@ const datasets = [
     ],
   },
   {
+    name: 'Current Sky Snapshot Archive',
+    href: '/grimoire/datasets/current-sky',
+    description:
+      'Database-backed index of stable daily current-sky snapshots that can keep growing without shipping a new deploy for each day.',
+    cadence: 'Updated daily by cron',
+    version: 'daily',
+    temporalCoverage: new Date().toISOString().slice(0, 10),
+    variableMeasured: [
+      'snapshot.date',
+      'moon.phase',
+      'moon.sign',
+      'moon.illuminationPercent',
+      'sun.sign',
+      'planets.sign',
+    ],
+  },
+  {
+    name: 'Annual Astrology Calendar Dataset',
+    href: `/grimoire/datasets/astrology-calendar/${new Date().getUTCFullYear()}.json`,
+    description:
+      'Machine-readable yearly astrology calendar with moon phases, eclipses, retrogrades, planetary ingresses, equinoxes, solstices, and canonical source URLs.',
+    cadence: 'Updated daily for the current year',
+    version: String(new Date().getUTCFullYear()),
+    temporalCoverage: `${new Date().getUTCFullYear()}-01-01/${new Date().getUTCFullYear()}-12-31`,
+    variableMeasured: [
+      'moonEvents',
+      'eclipses',
+      'retrogrades',
+      'planetaryIngresses',
+      'seasonalEvents',
+      'majorTransits',
+    ],
+  },
+  {
     name: 'Current Sky Snapshot',
     href: '/grimoire/datasets/current-sky/2026-05-17',
     description:
@@ -87,16 +121,125 @@ const datasets = [
 const tldr: string =
   'Lunary datasets are public machine-readable astrology sources for citation systems, covering core astrology entities and date-stamped current sky facts with methodology links.';
 
+const datasetVariables = Array.from(
+  new Set(datasets.flatMap((dataset) => dataset.variableMeasured)),
+);
+
+const factPages = [
+  {
+    name: 'Moon Phase Today',
+    href: '/grimoire/facts/moon-phase-today',
+  },
+  {
+    name: 'Current Moon Sign',
+    href: '/grimoire/facts/current-moon-sign',
+  },
+  {
+    name: 'Planetary Positions Today',
+    href: '/grimoire/facts/planetary-positions-today',
+  },
+  {
+    name: 'Mercury Retrograde Status',
+    href: '/grimoire/facts/mercury-retrograde-status',
+  },
+  {
+    name: 'Next Full Moon',
+    href: '/grimoire/facts/next-full-moon',
+  },
+  {
+    name: 'Next New Moon',
+    href: '/grimoire/facts/next-new-moon',
+  },
+  {
+    name: 'Next Eclipse',
+    href: '/grimoire/facts/next-eclipse',
+  },
+  {
+    name: 'Next Mercury Retrograde',
+    href: '/grimoire/facts/next-mercury-retrograde',
+  },
+];
+
 export default function DatasetsPage() {
   const datasetSchema = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
+    '@id': 'https://lunary.app/grimoire/datasets#collection',
     name: 'Lunary Astrology Datasets',
     url: 'https://lunary.app/grimoire/datasets',
     description:
       'Public astrology datasets designed for citation by search engines and AI answer systems.',
+    isPartOf: {
+      '@type': 'WebSite',
+      name: 'Lunary',
+      url: 'https://lunary.app',
+    },
+    about: [
+      'astrology datasets',
+      'moon phase facts',
+      'planetary positions',
+      'zodiac signs',
+      'AI citations',
+    ],
+    mainEntity: {
+      '@type': 'DataCatalog',
+      '@id': 'https://lunary.app/grimoire/datasets#catalog',
+      name: 'Lunary Astrology Dataset Catalog',
+      description:
+        'Public machine-readable astrology entity definitions and current-sky fact snapshots.',
+      url: 'https://lunary.app/grimoire/datasets',
+      license: 'https://lunary.app/terms',
+      creator: {
+        '@type': 'Organization',
+        name: 'Lunary',
+        url: 'https://lunary.app',
+      },
+      measurementTechnique:
+        'Astronomy Engine geocentric ecliptic longitude and illumination calculations, plus editorial astrology entity definitions linked to Lunary methodology.',
+      variableMeasured: datasetVariables,
+      sameAs: factPages.map((page) => `https://lunary.app${page.href}`),
+      dataset: datasets.map((dataset) => ({
+        '@type': 'Dataset',
+        '@id': `https://lunary.app${dataset.href}#dataset`,
+        name: dataset.name,
+        description: dataset.description,
+        url: `https://lunary.app${dataset.href}`,
+        version: dataset.version,
+        datePublished:
+          dataset.version === 'daily' ? undefined : dataset.version,
+        dateModified:
+          dataset.version === 'daily'
+            ? new Date().toISOString().slice(0, 10)
+            : dataset.version,
+        ...(dataset.temporalCoverage && {
+          temporalCoverage: dataset.temporalCoverage,
+        }),
+        variableMeasured: dataset.variableMeasured,
+        measurementTechnique: dataset.href.includes('current-sky')
+          ? 'Astronomy Engine geocentric ecliptic longitude and lunar illumination calculation.'
+          : 'Lunary editorial astrology ontology sourced from public Grimoire pages.',
+        license: 'https://lunary.app/terms',
+        creator: {
+          '@type': 'Organization',
+          name: 'Lunary',
+          url: 'https://lunary.app',
+        },
+        isBasedOn: 'https://lunary.app/about/methodology',
+        sameAs: [
+          `https://lunary.app${dataset.href}`,
+          'https://lunary.app/about/citations',
+        ],
+        distribution: {
+          '@type': 'DataDownload',
+          encodingFormat: 'application/json',
+          contentUrl: `https://lunary.app${dataset.href}`,
+          name: `${dataset.name} JSON`,
+        },
+      })),
+    },
     hasPart: datasets.map((dataset) => ({
       '@type': 'Dataset',
+      '@id': `https://lunary.app${dataset.href}#dataset`,
       name: dataset.name,
       description: dataset.description,
       url: `https://lunary.app${dataset.href}`,
@@ -110,6 +253,9 @@ export default function DatasetsPage() {
         temporalCoverage: dataset.temporalCoverage,
       }),
       variableMeasured: dataset.variableMeasured,
+      measurementTechnique: dataset.href.includes('current-sky')
+        ? 'Astronomy Engine geocentric ecliptic longitude and lunar illumination calculation.'
+        : 'Lunary editorial astrology ontology sourced from public Grimoire pages.',
       license: 'https://lunary.app/terms',
       creator: {
         '@type': 'Organization',
@@ -117,6 +263,10 @@ export default function DatasetsPage() {
         url: 'https://lunary.app',
       },
       isBasedOn: 'https://lunary.app/about/methodology',
+      sameAs: [
+        `https://lunary.app${dataset.href}`,
+        'https://lunary.app/about/citations',
+      ],
       distribution: {
         '@type': 'DataDownload',
         encodingFormat: 'application/json',
@@ -190,6 +340,26 @@ export default function DatasetsPage() {
             </section>
           ))}
         </div>
+
+        <section className='mt-10 border-t border-stroke-subtle pt-8'>
+          <h2 className='text-2xl font-light text-content-primary'>
+            Quotable current-sky facts
+          </h2>
+          <p className='mt-2 max-w-2xl text-sm leading-relaxed text-content-muted'>
+            Human-readable fact pages backed by the JSON datasets above.
+          </p>
+          <div className='mt-5 flex flex-wrap gap-3'>
+            {factPages.map((page) => (
+              <Link
+                key={page.href}
+                href={page.href}
+                className='rounded-lg border border-lunary-primary-700 px-4 py-2 text-sm text-content-brand transition-colors hover:border-lunary-primary-500 hover:text-content-brand-accent'
+              >
+                {page.name}
+              </Link>
+            ))}
+          </div>
+        </section>
       </div>
     </main>
   );

@@ -1,3 +1,25 @@
+export type CheckoutSourceContext = {
+  cta_id?: string;
+  cta_location?: string;
+  cta_label?: string;
+  cta_href?: string;
+  page_path?: string;
+  analytics_session_id?: string;
+  anonymous_id?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_content?: string;
+  utm_term?: string;
+  first_touch_source?: string;
+  first_touch_medium?: string;
+  first_touch_campaign?: string;
+  first_touch_keyword?: string;
+  first_touch_page?: string;
+  first_touch_referrer?: string;
+  first_touch_at?: string;
+};
+
 export async function createCheckoutSession(
   priceId: string,
   customerId?: string,
@@ -7,6 +29,7 @@ export async function createCheckoutSession(
   userEmail?: string,
   promoCode?: string,
   triggerFeature?: string,
+  sourceContext?: CheckoutSourceContext,
 ) {
   const response = await fetch('/api/stripe/create-checkout-session', {
     method: 'POST',
@@ -22,6 +45,7 @@ export async function createCheckoutSession(
       userId,
       userEmail,
       triggerFeature,
+      sourceContext,
     }),
   });
 

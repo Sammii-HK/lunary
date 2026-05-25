@@ -250,6 +250,9 @@ const faqs = [
   },
 ];
 
+const tarotDirectAnswer =
+  'Tarot is a 78-card symbolic system made of 22 Major Arcana cards and 56 Minor Arcana cards. Lunary reads tarot by combining card meaning, suit, number, spread position, and the question context.';
+
 export default function TarotCompleteGuidePage() {
   const articleSchema = createArticleWithSpeakableSchema({
     headline: `Tarot: The Complete 78-Card Guide (${currentYear} Edition)`,
@@ -318,6 +321,16 @@ export default function TarotCompleteGuidePage() {
           looking to deepen your practice, discover the rich symbolism and
           meaning behind every card.
         </p>
+        <section
+          aria-label='Direct answer'
+          data-citation-answer='true'
+          className='mb-6 rounded-xl border border-stroke-subtle bg-surface-elevated/40 p-5'
+        >
+          <h2 className='sr-only'>Direct answer</h2>
+          <p className='text-sm leading-relaxed text-content-muted'>
+            TL;DR: {tarotDirectAnswer}
+          </p>
+        </section>
         <div className='flex flex-wrap gap-4'>
           <Button asChild variant='lunary-solid' size='lg'>
             <Link href='/tarot'>Get a Free Tarot Reading</Link>

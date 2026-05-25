@@ -12,6 +12,10 @@ Set these in the deployment environment:
 - `INDEXNOW_KEY`
 - `INDEXNOW_PUBLISH_SECRET`
 
+The app strips whitespace from both values before using them, so pasted keys
+with spaces, line breaks, or carriage returns are normalized before the key file,
+manual submission endpoint, and cron submissions use them.
+
 Optional:
 
 - `INDEXNOW_KEY_LOCATION`

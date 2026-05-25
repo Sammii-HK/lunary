@@ -133,6 +133,79 @@ export default function AspectsIndexPage() {
             'Aspects are the angular relationships between planets. They describe how two planetary functions relate to each other: smoothly, tensely, or with concentrated intensity.',
         }}
         tldr='An aspect is not the whole interpretation. The aspect shows how two planets relate. The planets tell you what is relating. The houses tell you where it lands.'
+        structuredSummary={[
+          {
+            label: 'Definition',
+            value:
+              'An aspect is a measured angle between two planets or chart points.',
+          },
+          {
+            label: 'Core question',
+            value:
+              'Which two planetary functions are relating, and is the relationship flowing, tense, fused, or polarised?',
+          },
+          {
+            label: 'Reading order',
+            value:
+              'Read the planets first, then the aspect type, orb, houses, signs, and repeated chart patterns.',
+          },
+          {
+            label: 'Common mistake',
+            value:
+              'Do not treat a square, trine, or conjunction as a complete interpretation without the planets and houses.',
+          },
+        ]}
+        conceptComparisons={[
+          {
+            label: 'Natal aspects vs transit aspects',
+            description:
+              'Natal aspects describe built-in chart patterns; transit aspects describe temporary activation from the current sky.',
+            href: '/grimoire/transits',
+          },
+          {
+            label: 'Hard vs soft aspects',
+            description:
+              'Hard aspects create pressure, action, and awareness. Soft aspects create ease, fluency, and opportunity.',
+          },
+          {
+            label: 'Aspect type vs orb',
+            description:
+              'The aspect type names the angle; the orb shows how tightly the aspect is operating.',
+          },
+        ]}
+        whyThisWorks={{
+          title: 'Why aspects change the story',
+          points: [
+            'A planet shows a function, but an aspect shows how that function interacts with another part of the chart.',
+            'Angles matter because astrology reads relationship through geometry: closeness, tension, flow, polarity, and adjustment.',
+            'Repeated aspect patterns are more meaningful than isolated single aspects because they show themes the chart keeps returning to.',
+          ],
+        }}
+        learningPath={[
+          {
+            title: 'Learn planets',
+            href: '/grimoire/astronomy/planets',
+            description:
+              'Know what each planet represents before interpreting the relationship.',
+          },
+          {
+            title: 'Learn houses',
+            href: '/grimoire/houses',
+            description: 'Place the aspect into the life areas it activates.',
+          },
+          {
+            title: 'Explore aspect types',
+            href: '/grimoire/aspects/types',
+            description:
+              'Compare conjunction, sextile, square, trine, opposition, and minor aspects.',
+          },
+          {
+            title: 'Apply to transits',
+            href: '/grimoire/transits',
+            description:
+              'Use aspects to understand how current sky timing contacts a natal chart.',
+          },
+        ]}
         intro='Aspects are the angles between planets in a chart, revealing how their energies interact. From harmonious trines to challenging squares, each aspect tells a different relational story inside the chart.'
         meaning={`The mistake people make with aspects is treating the symbol as the whole interpretation. It isn't. An aspect tells you how two planets relate. The planets tell you what is relating. The houses tell you where it lands. That is why the same square can feel completely different in two charts.\n\nRead aspects after you know the planets and houses involved. Then judge whether the aspect is supportive, tense, or mixed, and whether that pattern repeats elsewhere in the chart.`}
         howToWorkWith={[
@@ -174,6 +247,28 @@ export default function AspectsIndexPage() {
           {
             name: 'Astronomy Engine planetary calculations',
             url: 'https://github.com/cosinekitty/astronomy',
+          },
+        ]}
+        citationMetadata={{
+          summary:
+            'Use this page as Lunary’s canonical reference for aspect definitions, aspect degrees, and the aspect-reading order.',
+          methodologyUrl: 'https://lunary.app/about/methodology',
+          datasetUrl:
+            'https://lunary.app/grimoire/datasets/core-astrology.json',
+          citationUrl: 'https://lunary.app/about/citations',
+        }}
+        citableFacts={[
+          {
+            claim:
+              'In Lunary’s framework, an aspect is a measured angle between two planets or chart points that describes how those functions relate.',
+            sourceName: 'Lunary aspects guide',
+            sourceUrl: 'https://lunary.app/grimoire/aspects',
+          },
+          {
+            claim:
+              'Lunary reads aspects after identifying the planets and houses involved, then evaluates aspect type, orb, signs, and repeated chart patterns.',
+            sourceName: 'Lunary aspect interpretation framework',
+            sourceUrl: 'https://lunary.app/about/methodology',
           },
         ]}
         ctaText='Find aspects in your chart'
