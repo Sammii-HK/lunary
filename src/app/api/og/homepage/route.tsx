@@ -125,10 +125,10 @@ export async function GET(): Promise<Response> {
               }}
             >
               <span style={{ display: 'flex', justifyContent: 'center' }}>
-                Personalised astrology for clarity
+                Astrology that actually
               </span>
               <span style={{ display: 'flex', justifyContent: 'center' }}>
-                and self understanding
+                understands your life
               </span>
             </div>
 
@@ -143,8 +143,8 @@ export async function GET(): Promise<Response> {
                 display: 'flex',
               }}
             >
-              Lunary brings together your birth chart, today's sky, tarot and
-              lunar cycles to give you calm and personal daily guidance.
+              Lunary connects today's sky to your full birth chart with real
+              astronomy, transits, tarot and moon phases.
             </div>
           </div>
         </div>

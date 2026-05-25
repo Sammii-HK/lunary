@@ -14,6 +14,8 @@ interface RevealProps {
   className?: string;
   /** Render as a different element (default: div) */
   as?: ElementType;
+  /** Disable reveal animation for above-the-fold content that should never flash hidden */
+  animate?: boolean;
   /** Vertical translate distance in px (default 28) */
   distance?: number;
   /**
@@ -49,6 +51,7 @@ export function Reveal({
   delayMs = 0,
   className,
   as: Tag = 'div',
+  animate = true,
   distance = 28,
   rootMargin = '0px 0px -25% 0px',
 }: RevealProps) {
@@ -70,7 +73,7 @@ export function Reveal({
     return () => window.clearTimeout(timeout);
   }, [inView, settled, delayMs]);
 
-  if (!motionEnabled) {
+  if (!animate || !motionEnabled) {
     const StaticTag = Tag as ElementType;
     return <StaticTag className={className}>{children}</StaticTag>;
   }

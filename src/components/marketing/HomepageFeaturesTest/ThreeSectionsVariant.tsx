@@ -138,7 +138,7 @@ export function ThreeSectionsVariant() {
       {/* Overall CTA */}
       <Reveal className='text-center pt-8'>
         <Button variant='lunary' size='lg' asChild>
-          <Link href='/auth?signup=true'>Start your free trial</Link>
+          <Link href='/auth?signup=true'>Create your free birth chart</Link>
         </Button>
       </Reveal>
     </div>

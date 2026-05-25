@@ -20,6 +20,8 @@ interface OptimizedDemoIframeProps {
   preload?: boolean;
 }
 
+const DEMO_PREVIEW_URL = '/demo-preview?v=2';
+
 export function OptimizedDemoIframe({
   loading = 'eager',
   preload = true,
@@ -32,7 +34,7 @@ export function OptimizedDemoIframe({
   const { ref: observerRef, inView } = useInView({
     threshold: 0,
     triggerOnce: true,
-    rootMargin: '200px', // Start loading 200px before visible
+    rootMargin: '0px 0px -65% 0px',
   });
 
   // Scroll isolation for iframe
@@ -59,14 +61,14 @@ export function OptimizedDemoIframe({
     // Add preload link to head
     const link = document.createElement('link');
     link.rel = 'preload';
-    link.href = '/demo-preview';
+    link.href = DEMO_PREVIEW_URL;
     link.as = 'document';
     document.head.appendChild(link);
 
     // Also prefetch for even faster subsequent loads
     const prefetchLink = document.createElement('link');
     prefetchLink.rel = 'prefetch';
-    prefetchLink.href = '/demo-preview';
+    prefetchLink.href = DEMO_PREVIEW_URL;
     document.head.appendChild(prefetchLink);
 
     return () => {
@@ -148,7 +150,7 @@ export function OptimizedDemoIframe({
         {shouldLoad ? (
           <iframe
             ref={iframeRef}
-            src='/demo-preview?v=2'
+            src={DEMO_PREVIEW_URL}
             title='Interactive personalised birth chart demo showing real-time planetary positions, moon phase, and daily transit insights'
             width='393'
             height='750'
@@ -168,9 +170,31 @@ export function OptimizedDemoIframe({
           />
         ) : (
           // Placeholder while lazy loading
-          <div className='flex items-center justify-center h-full bg-surface-base'>
-            <div className='animate-pulse text-content-muted text-sm'>
-              Loading demo...
+          <div className='h-full bg-surface-base px-5 pt-8'>
+            <div className='text-center space-y-1'>
+              <p className='text-[10px] uppercase tracking-[0.2em] text-content-muted'>
+                Live preview
+              </p>
+              <p className='text-sm text-content-primary'>
+                Today&apos;s sky, your chart
+              </p>
+            </div>
+            <div className='mt-6 space-y-3'>
+              <div className='rounded-lg border border-stroke-subtle/60 bg-surface-elevated/40 p-3'>
+                <p className='text-xs text-content-muted'>Transit focus</p>
+                <p className='mt-1 text-sm text-content-secondary'>
+                  Moon phase and chart timing
+                </p>
+              </div>
+              <div className='rounded-lg border border-stroke-subtle/60 bg-surface-elevated/40 p-3'>
+                <p className='text-xs text-content-muted'>Daily practice</p>
+                <p className='mt-1 text-sm text-content-secondary'>
+                  Tarot, reflection and patterns
+                </p>
+              </div>
+              <p className='pt-1 text-center text-xs text-content-muted'>
+                Interactive demo loads as you scroll.
+              </p>
             </div>
           </div>
         )}

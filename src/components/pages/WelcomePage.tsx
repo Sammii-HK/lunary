@@ -3,18 +3,14 @@
 import { useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import Link from 'next/link';
+import { useInView } from 'react-intersection-observer';
 import {
   Telescope,
   Sparkles,
-  NotebookPen,
   Calendar,
   Map,
   MessagesSquare,
-  X,
   Check,
-  Users,
-  Heart,
-  Moon,
 } from 'lucide-react';
 import { MarketingFooter } from '@/components/MarketingFooter';
 import { Button } from '@/components/ui/button';
@@ -32,7 +28,6 @@ import { ScrollProgressBar } from '@/components/marketing/ScrollProgressBar';
 import {
   useABTestTracking,
   useABTestConversion,
-  useABTestVariants,
 } from '@/hooks/useABTestTracking';
 import { Heading } from '../ui/Heading';
 import { Testimonials } from '@/components/marketing/Testimonials';
@@ -43,13 +38,64 @@ const structuredData = {
   name: 'Lunary',
   url: 'https://lunary.app',
   description:
-    'A calm astrology companion grounded in real astronomy. Create your birth chart, explore today’s horoscopes, moon phase, tarot and transits, and learn through the Grimoire. Upgrade for personalised insights connected to your chart.',
+    "A personal astrology companion for understanding why today feels the way it does. Lunary connects today's sky to your full birth chart with real astronomy, reflection, tarot, transits, moon phases and free astrology education.",
   publisher: {
     '@type': 'Organization',
     name: 'Lunary',
     url: 'https://lunary.app',
   },
 };
+
+function toPlainText(value: string) {
+  return value
+    .replace(/\*\*/g, '')
+    .replace(/\n+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function LazyTestimonials() {
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    rootMargin: '400px 0px',
+  });
+
+  return (
+    <div ref={ref}>
+      {inView ? (
+        <Reveal>
+          <Testimonials />
+        </Reveal>
+      ) : (
+        <div className='h-24' aria-hidden='true' />
+      )}
+    </div>
+  );
+}
+
+function LazyNewsletter() {
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    rootMargin: '400px 0px',
+  });
+
+  return (
+    <div ref={ref}>
+      {inView ? (
+        <NewsletterSignupForm
+          source='welcome_page'
+          headline='Weekly cosmic recap, delivered'
+          description='A calm weekly digest of the most meaningful sky events, written for people who want clarity without noise.'
+          ctaLabel='Join the newsletter'
+          successMessage='Check your inbox to confirm your subscription.'
+          align='center'
+        />
+      ) : (
+        <div className='h-40' aria-hidden='true' />
+      )}
+    </div>
+  );
+}
 
 export default function WelcomePage() {
   const router = useRouter();
@@ -68,18 +114,23 @@ export default function WelcomePage() {
   useABTestTracking('welcome', 'page_viewed', [
     'homepage-features-test',
     'cta-copy-test',
-    'hero-subhead-test',
-    'hero_value_stack_v1',
-    'sticky_free_card_v1',
   ]);
 
   // Get conversion tracker with A/B test metadata
   const { trackConversion } = useABTestConversion();
 
-  const { heroSubhead, heroValueStack, stickyFreeCard } = useABTestVariants();
-  const isCondensedHero = heroSubhead === 'condensed';
-  const showFullProductStack = heroValueStack === 'full-product';
-  const showStickyFreeCard = stickyFreeCard === 'sticky-card';
+  const homepageFaqStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: homepageFAQs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: toPlainText(faq.answer),
+      },
+    })),
+  };
 
   // CTA click handler with A/B tracking
   const handleCtaClick = (location: string, label: string, href: string) => {
@@ -97,26 +148,23 @@ export default function WelcomePage() {
   return (
     <>
       {renderJsonLd(structuredData)}
+      {renderJsonLd(homepageFaqStructuredData)}
       <ScrollProgressBar />
 
       <div className='min-h-screen bg-surface-base text-content-primary flex flex-col'>
-        {/* Referral Banner */}
+        {/* Offer Banner */}
         <div className='bg-gradient-to-r from-layer-base/40 to-layer-raised/40 border-b border-lunary-primary-700/30 py-2 px-4'>
-          <div className='flex items-center justify-center gap-2'>
-            <Users className='w-4 h-4 text-content-secondary' />
-            <p className='text-xs md:text-sm text-content-secondary'>
-              Give a friend{' '}
-              <span className='font-semibold text-content-secondary'>
-                30 days of Pro free
-              </span>{' '}
-              — earn a bonus week for every referral
-            </p>
-          </div>
+          <p className='mx-auto max-w-xl text-center text-xs md:text-sm leading-relaxed text-content-secondary'>
+            Free birth chart • Daily sky updates • No credit card required
+          </p>
         </div>
 
         {/* Section 1: Hero */}
         <section className='relative px-4 md:px-6 pt-4 md:pt-16 pb-10 md:pb-16 bg-surface-base'>
-          <Reveal className='max-w-3xl mx-auto text-center space-y-6'>
+          <Reveal
+            animate={false}
+            className='max-w-3xl mx-auto text-center space-y-6'
+          >
             <p className='text-xs uppercase tracking-[0.2em] text-content-muted'>
               Personal astrology grounded in real astronomy
             </p>
@@ -125,39 +173,17 @@ export default function WelcomePage() {
               variant='h1'
               className='max-w-md md:max-w-2xl mx-auto'
             >
-              Unlock the Secrets of the Stars with Lunary
+              Astrology that actually understands your life.
             </Heading>
-            <p className='text-xs md:text-sm text-content-muted leading-relaxed max-w-md mx-auto'>
-              Track how planets affect YOU specifically.
+            <p className='text-sm md:text-base text-content-secondary leading-relaxed max-w-xl mx-auto'>
+              When you wonder why you feel like this, Lunary checks today&apos;s
+              sky against your full birth chart, not just your zodiac sign.
             </p>
             <p className='text-xs md:text-sm text-content-muted leading-relaxed max-w-lg mx-auto mt-[0.25rem]'>
-              After 2-3 months, you'll recognize patterns and interpret transits
-              without depending on generic predictions.
+              Today&apos;s sky affects your chart differently than everyone
+              else&apos;s. Lunary helps you notice those patterns, learn what
+              they mean, and stop relying on generic horoscopes.
             </p>
-            {showFullProductStack && (
-              <ul className='mx-auto max-w-md text-left text-xs md:text-sm text-content-secondary space-y-1.5 pt-2'>
-                <li className='flex gap-2 items-start'>
-                  <Check className='w-4 h-4 text-lunary-primary-400 shrink-0 mt-0.5' />
-                  <span>Your full birth chart with every placement</span>
-                </li>
-                <li className='flex gap-2 items-start'>
-                  <Check className='w-4 h-4 text-lunary-primary-400 shrink-0 mt-0.5' />
-                  <span>Compatibility with anyone you care about</span>
-                </li>
-                <li className='flex gap-2 items-start'>
-                  <Check className='w-4 h-4 text-lunary-primary-400 shrink-0 mt-0.5' />
-                  <span>Daily tarot and today's horoscope — always free</span>
-                </li>
-                <li className='flex gap-2 items-start'>
-                  <Check className='w-4 h-4 text-lunary-primary-400 shrink-0 mt-0.5' />
-                  <span>Real-time transits and moon phase for your chart</span>
-                </li>
-                <li className='flex gap-2 items-start'>
-                  <Check className='w-4 h-4 text-lunary-primary-400 shrink-0 mt-0.5' />
-                  <span>Astral Guide — ask questions about your chart</span>
-                </li>
-              </ul>
-            )}
             <div className='flex flex-col gap-3 justify-center items-center pt-2 pb-0 md:pb-6'>
               <Button variant='lunary-soft' size='lg' asChild>
                 <Link
@@ -183,8 +209,7 @@ export default function WelcomePage() {
                 </Link>
               </p>
               <p className='text-xs text-content-muted mt-2'>
-                Start with 7 days free • Give a friend 30 days of Pro, earn a
-                bonus week
+                No credit card required. 7 days of Pro included.
               </p>
             </div>
           </Reveal>
@@ -194,57 +219,22 @@ export default function WelcomePage() {
             delayMs={120}
             className='mt-8 mx-3 md:mx-0 md:mt-[33px] flex justify-center'
           >
-            <OptimizedDemoIframe
-              loading='eager' // Above-the-fold
-              preload={true} // Max performance
-            />
+            <OptimizedDemoIframe loading='lazy' preload={false} />
           </Reveal>
-
-          {showStickyFreeCard && (
-            <Reveal delayMs={180} className='mt-8 max-w-md mx-auto'>
-              <div className='rounded-xl border border-lunary-primary-700/40 bg-layer-raised/60 backdrop-blur-sm px-4 py-3 flex items-center gap-3 shadow-[0_8px_20px_rgba(178,126,255,0.12)]'>
-                <Sparkles className='w-5 h-5 text-lunary-primary-400 shrink-0' />
-                <div className='flex-1 min-w-0'>
-                  <p className='text-sm font-medium text-content-primary'>
-                    Daily tarot + today's horoscope, always free
-                  </p>
-                  <p className='text-xs text-content-muted mt-0.5'>
-                    Start with 7 days of Pro free for the personalised version.
-                  </p>
-                </div>
-                <Button variant='lunary-soft' size='sm' asChild>
-                  <Link
-                    href='/auth?signup=true'
-                    onClick={() =>
-                      handleCtaClick(
-                        'sticky_free_card',
-                        'Start free',
-                        '/auth?signup=true',
-                      )
-                    }
-                  >
-                    Start free
-                  </Link>
-                </Button>
-              </div>
-            </Reveal>
-          )}
         </section>
 
         <section className='py-2 px-4 md:py-8 leading-relaxed max-w-3xl mx-auto text-center'>
           <p className='text-sm text-content-muted mb-6'>
-            See Lunary in action with today's actual planetary positions.
+            See Lunary in action with today&apos;s actual planetary positions.
             <br />
-            This demo uses real cosmic data. Everything updates daily based on
-            current transits and moon phases.
+            Everything updates daily because the sky keeps moving, and your
+            chart receives that timing in its own way.
           </p>
-          {!isCondensedHero && (
-            <p className='text-content-muted leading-relaxed max-w-3xl mx-auto'>
-              Lunary is designed for reflection rather than prediction. Instead
-              of offering fixed meanings or one-size-fits-all readings, it helps
-              you understand patterns, timing, and cycles as they unfold.
-            </p>
-          )}
+          <p className='text-content-muted leading-relaxed max-w-3xl mx-auto'>
+            Lunary is designed for reflection rather than prediction. It helps
+            you understand patterns, timing, and cycles as they unfold in your
+            actual life.
+          </p>
           <Link
             href='/features'
             className='text-sm text-lunary-primary-400 hover:text-content-secondary transition-colors inline-block mt-4'
@@ -269,55 +259,35 @@ export default function WelcomePage() {
                 </span>
               </Heading>
             </Reveal>
-            <div className='max-w-2xl mx-auto text-left md:text-center space-y-3'>
+            <div className='max-w-2xl mx-auto text-left md:text-center space-y-4'>
               <Reveal delayMs={0}>
                 <p className='text-content-muted'>
-                  <span className='text-content-muted'>Generic apps:</span> Sun
-                  sign horoscopes for millions
+                  <span className='text-content-muted'>Generic apps:</span> Tell
+                  millions of people the same thing
                 </p>
                 <p className='text-content-secondary'>
-                  <span className='text-lunary-primary-400'>Lunary:</span> Your
-                  full chart analyzed daily
+                  <span className='text-lunary-primary-400'>Lunary:</span>{' '}
+                  Checks today&apos;s sky against your full chart
                 </p>
               </Reveal>
               <Reveal delayMs={80}>
                 <p className='text-content-muted'>
-                  <span className='text-content-muted'>Generic apps:</span>{' '}
-                  Predict what will happen
+                  <span className='text-content-muted'>Generic apps:</span> Keep
+                  you dependent on daily predictions
                 </p>
                 <p className='text-content-secondary'>
-                  <span className='text-lunary-primary-400'>Lunary:</span> Track
-                  your own patterns over time
+                  <span className='text-lunary-primary-400'>Lunary:</span>{' '}
+                  Teaches you to read your own chart
                 </p>
               </Reveal>
               <Reveal delayMs={160}>
                 <p className='text-content-muted'>
                   <span className='text-content-muted'>Generic apps:</span>{' '}
-                  Built for virality
+                  Flatten astrology into fate
                 </p>
                 <p className='text-content-secondary'>
-                  <span className='text-lunary-primary-400'>Lunary:</span> Built
-                  for depth and learning
-                </p>
-              </Reveal>
-              <Reveal delayMs={240}>
-                <p className='text-content-muted'>
-                  <span className='text-content-muted'>Generic apps:</span>{' '}
-                  Basic sun sign compatibility
-                </p>
-                <p className='text-content-secondary'>
-                  <span className='text-lunary-primary-400'>Lunary:</span> Full
-                  synastry analysis + Best Times to Connect
-                </p>
-              </Reveal>
-              <Reveal delayMs={320}>
-                <p className='text-content-muted'>
-                  <span className='text-content-muted'>Generic apps:</span> Tell
-                  you what transits mean
-                </p>
-                <p className='text-content-secondary'>
-                  <span className='text-lunary-primary-400'>Lunary:</span> Show
-                  you YOUR patterns over time so you become the expert
+                  <span className='text-lunary-primary-400'>Lunary:</span> Uses
+                  astrology for reflection, timing, and pattern recognition
                 </p>
               </Reveal>
             </div>
@@ -325,9 +295,31 @@ export default function WelcomePage() {
               <p className='text-xs text-content-muted mb-4'>
                 Plus: 2,000+ free education articles
               </p>
-              <Button variant='outline' asChild>
-                <Link href='/features'>See all features</Link>
-              </Button>
+              <div className='flex flex-col items-center gap-3'>
+                <Button variant='lunary-soft' asChild>
+                  <Link
+                    href='/auth?signup=true'
+                    onClick={() =>
+                      handleCtaClick(
+                        'differentiation',
+                        CTA_COPY.auth.createChart,
+                        '/auth?signup=true',
+                      )
+                    }
+                  >
+                    {CTA_COPY.auth.createChart}
+                  </Link>
+                </Button>
+                <p className='text-xs text-content-muted'>
+                  No credit card required. 7 days of Pro included.
+                </p>
+                <Link
+                  href='/features'
+                  className='text-xs text-content-brand hover:text-content-secondary transition-colors'
+                >
+                  See all features
+                </Link>
+              </div>
             </Reveal>
           </div>
         </section>
@@ -349,15 +341,16 @@ export default function WelcomePage() {
                 variant='h1'
                 className='text-lg text-content-primary'
               >
-                Built by someone who wanted better astrology tools
+                Built by someone tired of shallow astrology apps
               </Heading>
             </Reveal>
             <Reveal delayMs={240}>
               <p className='text-sm text-content-muted leading-relaxed max-w-2xl mx-auto'>
-                "I got tired of generic sun sign horoscopes. So I built Lunary:
-                personal astrology that actually uses your full chart and tracks
-                your patterns over time. Small team, focused on quality over
-                scale."
+                "I wanted astrology that could answer the question underneath
+                the horoscope: why does this feel so specific right now? Lunary
+                started from that frustration: a solo build blending real
+                astronomy, chart literacy, tarot, journaling, and pattern
+                tracking into something calmer and more useful."
               </p>
             </Reveal>
             <Reveal delayMs={360}>
@@ -376,7 +369,7 @@ export default function WelcomePage() {
               />
             </div>
             <Heading as='h2' variant='h2' className='text-content-primary'>
-              Real astronomy, not guesswork
+              The sky data is real. The point is self-understanding.
             </Heading>
             <p className='text-sm text-content-muted leading-relaxed max-w-2xl mx-auto'>
               Lunary&apos;s calculations are powered by Astronomy Engine — the
@@ -384,9 +377,9 @@ export default function WelcomePage() {
               within ±1 arcminute of the US Naval Observatory&apos;s data.
             </p>
             <p className='text-sm text-content-muted leading-relaxed max-w-2xl mx-auto'>
-              No AI-generated predictions. No simplified sun-sign algorithms.
-              Real astronomical calculations, applied to your complete birth
-              chart.
+              No simplified sun-sign algorithms. No vague cosmic weather. The
+              current sky is interpreted through your complete birth chart so
+              the guidance has context.
             </p>
           </Reveal>
         </section>
@@ -396,7 +389,7 @@ export default function WelcomePage() {
           <div className='max-w-4xl mx-auto px-4 md:px-6 text-center space-y-6'>
             <Reveal>
               <Heading as='h2' variant='h2' className='text-content-primary'>
-                Learn astrology through your own experience
+                Learn astrology through your own life
               </Heading>
               <p className='text-content-muted max-w-2xl mx-auto leading-relaxed mt-4'>
                 Most apps keep you dependent on daily horoscopes.
@@ -442,8 +435,9 @@ export default function WelcomePage() {
 
             <Reveal delayMs={120} className='pt-6'>
               <p className='text-sm text-content-muted mb-2'>
-                After 3-6 months of daily practice, most users can confidently
-                interpret their own transits.
+                Open Lunary when the day feels unusually intense, clear, tender,
+                restless, or strange. Then see what the sky is touching in your
+                chart.
               </p>
               <p className='text-xs text-content-brand font-medium'>
                 Free grimoire: 2,000+ articles explaining everything
@@ -457,93 +451,6 @@ export default function WelcomePage() {
           </div>
         </section>
 
-        {/* Section 4b: Connect with Your Cosmic Circle */}
-        <section className='py-12 md:py-16 px-4 md:px-6 bg-surface-elevated/20'>
-          <div className='max-w-4xl mx-auto'>
-            <Reveal className='text-center space-y-4 mb-8'>
-              <div className='inline-flex items-center justify-center w-14 h-14 rounded-full bg-layer-raised/50 mb-2'>
-                <Users className='w-7 h-7 text-content-brand-accent' />
-              </div>
-              <Heading as='h2' variant='h2' className='text-content-primary'>
-                Connect with Your Cosmic Circle
-              </Heading>
-              <p className='text-content-muted max-w-2xl mx-auto leading-relaxed'>
-                See how your charts interact. Track compatibility. Get alerts
-                when cosmic timing is perfect for connection.
-              </p>
-            </Reveal>
-
-            <div className='grid md:grid-cols-3 gap-4 mb-8'>
-              <Reveal
-                delayMs={0}
-                className='rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 space-y-3 transition-transform duration-300 hover:-translate-y-0.5'
-              >
-                <div className='flex items-center gap-2 align-middle'>
-                  <Heart className='w-5 h-5 text-lunary-primary-400' />
-                  <Heading
-                    as='h3'
-                    variant='h3'
-                    className='mb-0 ml-2 text-lunary-primary-400'
-                  >
-                    Full Synastry Analysis
-                  </Heading>
-                </div>
-                <p className='text-sm text-content-muted'>
-                  See exactly how your charts interact with full aspect
-                  analysis. Element and modality balance comparisons.
-                </p>
-              </Reveal>
-              <Reveal
-                delayMs={100}
-                className='rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 space-y-3 transition-transform duration-300 hover:-translate-y-0.5'
-              >
-                <div className='flex items-center gap-2 align-middle'>
-                  <Calendar className='w-5 h-5 text-content-brand' />
-                  <Heading as='h3' variant='h3' className='mb-0 ml-2'>
-                    Best Times to Connect
-                  </Heading>
-                </div>
-                <p className='text-sm text-content-muted'>
-                  Know when cosmic timing supports connection. Analyzes BOTH
-                  charts to find optimal windows.
-                </p>
-              </Reveal>
-              <Reveal
-                delayMs={200}
-                className='rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 space-y-3 transition-transform duration-300 hover:-translate-y-0.5'
-              >
-                <div className='flex items-center gap-2 align-middle'>
-                  <Moon className='w-5 h-5 text-blue-400/70' />
-                  <Heading
-                    as='h3'
-                    variant='h3'
-                    className='mb-0 ml-2 text-blue-400/70'
-                  >
-                    Shared Cosmic Events
-                  </Heading>
-                </div>
-                <p className='text-sm text-content-muted'>
-                  Moon phases that activate compatible houses for both of you.
-                  Never miss cosmically significant moments together.
-                </p>
-              </Reveal>
-            </div>
-
-            <Reveal delayMs={120} className='text-center space-y-3'>
-              <div className='flex flex-wrap justify-center gap-4 text-xs text-content-muted mb-2'>
-                <span>Free: 5 friends with basic compatibility</span>
-                <span className='text-content-muted hidden md:inline'>•</span>
-                <span>Lunary+: Unlimited + full synastry</span>
-                <span className='text-content-muted hidden md:inline'>•</span>
-                <span>Pro: Best Times + Shared Events</span>
-              </div>
-              <Button variant='outline' asChild>
-                <Link href='/circle'>Explore Circle features</Link>
-              </Button>
-            </Reveal>
-          </div>
-        </section>
-
         {/* Section 5: Who Lunary Is For */}
         <section className='py-12 md:py-20 px-4 md:px-6 bg-surface-elevated/30'>
           <div className='max-w-5xl mx-auto'>
@@ -552,8 +459,8 @@ export default function WelcomePage() {
                 Who Lunary is for
               </Heading>
               <p className='md:text-lg text-content-muted leading-relaxed max-w-2xl mx-auto'>
-                Designed for people who want personal astrology that feels
-                grounded, gentle and useful.
+                For the moments when astrology is not entertainment. It is a way
+                to make sense of what is moving through you.
               </p>
             </Reveal>
             <div className='grid md:grid-cols-2 gap-6 md:gap-8 text-sm'>
@@ -562,11 +469,11 @@ export default function WelcomePage() {
                 className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-2 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
               >
                 <p className='text-sm md:text-base text-content-brand'>
-                  "I want to understand myself better"
+                  "Why am I feeling like this lately?"
                 </p>
                 <p className='text-content-muted text-sm'>
-                  Track patterns across time. Notice which transits affect you.
-                  Build self-awareness through cosmic timing.
+                  Track the transits, moon phases, and repeating themes that
+                  actually touch your chart.
                 </p>
               </Reveal>
               <Reveal
@@ -574,11 +481,11 @@ export default function WelcomePage() {
                 className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-2 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
               >
                 <p className='text-sm md:text-base text-content-brand'>
-                  "I'm learning astrology"
+                  "Why do some transits hit harder than others?"
                 </p>
                 <p className='text-content-muted text-sm'>
-                  2,000+ free articles. Daily practice with your own chart.
-                  Hands-on education, not theory.
+                  Learn which placements and houses are being activated, then
+                  connect the symbolism to lived experience.
                 </p>
               </Reveal>
               <Reveal
@@ -586,11 +493,11 @@ export default function WelcomePage() {
                 className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-2 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
               >
                 <p className='text-sm md:text-base text-content-brand'>
-                  "I'm tired of generic horoscopes"
+                  "Generic horoscopes never feel accurate"
                 </p>
                 <p className='text-content-muted text-sm'>
-                  Your full birth chart matters. Personal insights, not sun sign
-                  predictions. See what's actually happening in YOUR life.
+                  Your full birth chart matters. Lunary reads context before it
+                  offers meaning.
                 </p>
               </Reveal>
               <Reveal
@@ -598,11 +505,11 @@ export default function WelcomePage() {
                 className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5 md:p-6 space-y-2 transition-transform duration-300 motion-safe:hover:-translate-y-0.5'
               >
                 <p className='text-sm md:text-base text-content-brand'>
-                  "I journal and track my cycles"
+                  "I want a practice, not another feed"
                 </p>
                 <p className='text-content-muted text-sm'>
-                  Connect reflections to moon phases. Track patterns over time.
-                  Your journal becomes your astrology textbook.
+                  Connect reflection, tarot, lunar cycles, and personal timing
+                  without turning self-discovery into noise.
                 </p>
               </Reveal>
               <Reveal
@@ -613,62 +520,9 @@ export default function WelcomePage() {
                   "I want to understand my relationships better"
                 </p>
                 <p className='text-content-muted text-sm'>
-                  Connect with friends who get it. See how your charts interact
-                  with full synastry. Get alerts when cosmic timing supports
-                  connection—like "New Moon in Pisces activates your 5th and
-                  their 7th houses: great for starting new creative projects
-                  together."
-                </p>
-              </Reveal>
-            </div>
-          </div>
-        </section>
-
-        {/* Section 6: Three Pillars */}
-        <section className='py-12 md:py-20 px-4 md:px-6 bg-surface-elevated/30'>
-          <div className='max-w-5xl mx-auto'>
-            <div className='grid md:grid-cols-3 gap-8 md:gap-10'>
-              <Reveal delayMs={0} className='text-center space-y-3'>
-                <Telescope
-                  className='w-8 h-8 text-lunary-primary-400 mx-auto'
-                  strokeWidth={1.5}
-                />
-                <Heading as='h2' variant='h2'>
-                  Based on real astronomy
-                </Heading>
-                <p className='text-sm text-content-muted leading-relaxed'>
-                  Every insight starts with the actual planetary positions and
-                  your precise chart.
-                </p>
-                <p className='text-xs text-content-muted leading-relaxed'>
-                  Every insight is interpreted through your full chart, not
-                  isolated meanings.
-                </p>
-              </Reveal>
-              <Reveal delayMs={120} className='text-center space-y-3'>
-                <Sparkles
-                  className='w-8 h-8 text-content-brand mx-auto'
-                  strokeWidth={1.5}
-                />
-                <Heading as='h2' variant='h2'>
-                  Connected & Contextual
-                </Heading>
-                <p className='text-sm text-content-muted leading-relaxed'>
-                  Tarot, transits, and moon cycles work together. Each insight
-                  connects to your full chart and current timing.
-                </p>
-              </Reveal>
-              <Reveal delayMs={240} className='text-center space-y-3'>
-                <NotebookPen
-                  className='w-8 h-8 text-blue-400/70 mx-auto'
-                  strokeWidth={1.5}
-                />
-                <Heading as='h2' variant='h2'>
-                  Designed as a daily practice
-                </Heading>
-                <p className='text-sm text-content-muted leading-relaxed'>
-                  Calm and reflective guidance that supports self understanding
-                  rather than predicting your fate.
+                  See how your chart responds in love, friendship, family, and
+                  creative partnerships without reducing connection to a simple
+                  match score.
                 </p>
               </Reveal>
             </div>
@@ -681,9 +535,7 @@ export default function WelcomePage() {
         </section>
 
         {/* Testimonials */}
-        <Reveal>
-          <Testimonials />
-        </Reveal>
+        <LazyTestimonials />
 
         {/* Section 8: Learn & Explore */}
         <section className='py-12 md:py-20 px-4 md:px-6 bg-surface-elevated/30'>
@@ -874,116 +726,13 @@ export default function WelcomePage() {
           </div>
         </section>
 
-        {/* Section 10: Comparison */}
-        <section className='py-12 md:py-20 px-4 md:px-6'>
-          <div className='max-w-3xl mx-auto'>
-            <div className='grid md:grid-cols-2 gap-4 md:gap-6'>
-              {/* Other Apps */}
-              <Reveal
-                delayMs={0}
-                className='rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/30 p-5 md:p-6'
-              >
-                <h3 className='text-sm font-medium text-content-muted uppercase tracking-wider mb-5'>
-                  Other apps
-                </h3>
-                <ul className='space-y-3'>
-                  <li className='flex items-start gap-3'>
-                    <X
-                      className='w-4 h-4 text-content-muted mt-0.5 flex-shrink-0'
-                      strokeWidth={2}
-                    />
-                    <span className='text-sm text-content-muted'>
-                      AI-generated or simplified calculations
-                    </span>
-                  </li>
-                  <li className='flex items-start gap-3'>
-                    <X
-                      className='w-4 h-4 text-content-muted mt-0.5 flex-shrink-0'
-                      strokeWidth={2}
-                    />
-                    <span className='text-sm text-content-muted'>
-                      Sun sign horoscopes for millions
-                    </span>
-                  </li>
-                  <li className='flex items-start gap-3'>
-                    <X
-                      className='w-4 h-4 text-content-muted mt-0.5 flex-shrink-0'
-                      strokeWidth={2}
-                    />
-                    <span className='text-sm text-content-muted'>
-                      Paywalled basics, limited free content
-                    </span>
-                  </li>
-                  <li className='flex items-start gap-3'>
-                    <X
-                      className='w-4 h-4 text-content-muted mt-0.5 flex-shrink-0'
-                      strokeWidth={2}
-                    />
-                    <span className='text-sm text-content-muted'>
-                      Notification spam and aggressive upsells
-                    </span>
-                  </li>
-                </ul>
-              </Reveal>
-
-              {/* Lunary */}
-              <Reveal
-                delayMs={120}
-                className='rounded-2xl border border-lunary-primary-700 bg-surface-elevated/50 p-5 md:p-6'
-              >
-                <h3 className='text-sm font-medium text-lunary-primary-400 uppercase tracking-wider mb-5'>
-                  Lunary
-                </h3>
-                <ul className='space-y-3'>
-                  <li className='flex items-start gap-3'>
-                    <Check
-                      className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0'
-                      strokeWidth={2}
-                    />
-                    <span className='text-sm text-content-primary'>
-                      Accurate calculations, not AI guesswork
-                    </span>
-                  </li>
-                  <li className='flex items-start gap-3'>
-                    <Check
-                      className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0'
-                      strokeWidth={2}
-                    />
-                    <span className='text-sm text-content-primary'>
-                      Your complete birth chart, not just your sun sign
-                    </span>
-                  </li>
-                  <li className='flex items-start gap-3'>
-                    <Check
-                      className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0'
-                      strokeWidth={2}
-                    />
-                    <span className='text-sm text-content-primary'>
-                      2,000+ free educational articles
-                    </span>
-                  </li>
-                  <li className='flex items-start gap-3'>
-                    <Check
-                      className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0'
-                      strokeWidth={2}
-                    />
-                    <span className='text-sm text-content-primary'>
-                      A daily practice, not a notification machine
-                    </span>
-                  </li>
-                </ul>
-              </Reveal>
-            </div>
-          </div>
-        </section>
-
         {/* Section 11: Pricing Teaser */}
         <section className='py-12 md:py-20 px-4 md:px-6 bg-surface-elevated/30'>
           <div className='max-w-2xl mx-auto text-center space-y-5'>
             <Reveal>
               <p className='text-sm text-content-muted'>
-                Free to begin. <br /> Upgrade only if you want deeper,
-                chart-specific insight.
+                Create your free birth chart. <br /> Upgrade only if you want
+                deeper, chart-specific insight.
               </p>
               <Heading
                 as='h2'
@@ -1073,32 +822,31 @@ export default function WelcomePage() {
               </Reveal>
             </div>
             <Reveal delayMs={120} className='pt-2'>
-              <Button variant='outline' asChild>
+              <Button variant='lunary-soft' asChild>
                 <Link
-                  href='/pricing'
+                  href='/auth?signup=true'
                   onClick={() =>
-                    handleCtaClick('promo-banner', 'View plans', '/pricing')
+                    handleCtaClick(
+                      'pricing-teaser',
+                      CTA_COPY.auth.createChart,
+                      '/auth?signup=true',
+                    )
                   }
                 >
-                  View plans
+                  {CTA_COPY.auth.createChart}
                 </Link>
               </Button>
+              <p className='text-xs text-content-muted mt-3'>
+                No credit card required.{' '}
+                <Link
+                  href='/pricing'
+                  className='text-content-brand hover:text-content-secondary transition-colors'
+                >
+                  Explore plans
+                </Link>
+              </p>
             </Reveal>
           </div>
-        </section>
-
-        {/* Section 12: Why Lunary Feels Different */}
-        <section className='py-12 md:py-16 px-4 md:px-6'>
-          <Reveal className='max-w-2xl mx-auto text-center space-y-4'>
-            <Heading as='h2' variant='h2'>
-              Why Lunary feels different
-            </Heading>
-            <p className='text-sm md:text-base text-content-muted leading-relaxed'>
-              Lunary uses real astronomical data, your natal placements and the
-              current sky to build a deeper, personalised understanding over
-              time.
-            </p>
-          </Reveal>
         </section>
 
         {/* Section 13: FAQs */}
@@ -1234,14 +982,7 @@ export default function WelcomePage() {
         {/* Section 15: Newsletter */}
         <section className='py-12 md:py-20 px-4 md:px-6'>
           <Reveal className='max-w-4xl mx-auto'>
-            <NewsletterSignupForm
-              source='welcome_page'
-              headline='Weekly cosmic recap, delivered'
-              description='A calm weekly digest of the most meaningful sky events, written for people who want clarity without noise.'
-              ctaLabel='Join the newsletter'
-              successMessage='Check your inbox to confirm your subscription.'
-              align='center'
-            />
+            <LazyNewsletter />
           </Reveal>
         </section>
 
