@@ -4,6 +4,7 @@ import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { requireAdminAuth } from '@/lib/admin-auth';
 import { ACTIVATION_EVENTS } from '@/lib/analytics/activation-events';
+import { mapActivationBySourceRows } from '@/lib/analytics/source-labelled-activation';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,12 @@ const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 const PLAN_CHANGE_EVENTS = [
   'trial_started',
   'trial_converted',
+  'subscription_started',
+];
+const SOURCE_OUTCOME_EVENTS = [
+  'trial_started',
+  'checkout_started',
+  'checkout_completed',
   'subscription_started',
 ];
 
@@ -39,6 +46,9 @@ export async function GET(request: NextRequest) {
         activatedUsers: 0,
         totalSignups: 0,
         activationBreakdown: {},
+        activationBreakdownByPlan: {},
+        activationBySource: [],
+        activationByUtm: [],
         trends: [],
       });
     }
@@ -107,6 +117,79 @@ export async function GET(request: NextRequest) {
     );
 
     const activationRows = activationRowsResult.rows ?? [];
+    const activationBySourceResult = await sql.query(
+      `
+        WITH signups AS (
+          SELECT id as user_id, "createdAt" as signup_at
+          FROM "user"
+          WHERE "createdAt" >= $1
+            AND "createdAt" <= $2
+            AND (email IS NULL OR (email NOT LIKE $3 AND email != $4))
+        ),
+        source_labels AS (
+          SELECT
+            s.user_id,
+            s.signup_at,
+            COALESCE(NULLIF(ua.utm_source, ''), NULLIF(ua.first_touch_source, ''), 'direct') as source,
+            COALESCE(NULLIF(ua.utm_medium, ''), NULLIF(ua.first_touch_medium, ''), 'unknown') as medium,
+            COALESCE(NULLIF(ua.utm_campaign, ''), NULLIF(ua.first_touch_campaign, ''), 'unknown') as campaign,
+            COALESCE(NULLIF(ua.utm_content, ''), 'unknown') as content
+          FROM signups s
+          LEFT JOIN user_attribution ua ON ua.user_id = s.user_id
+        ),
+        cohort_events AS (
+          SELECT
+            sl.user_id,
+            sl.signup_at,
+            sl.source,
+            sl.medium,
+            sl.campaign,
+            sl.content,
+            ce.event_type,
+            ce.created_at
+          FROM source_labels sl
+          LEFT JOIN conversion_events ce ON ce.user_id = sl.user_id
+            AND ce.created_at >= sl.signup_at
+            AND ce.created_at <= sl.signup_at + INTERVAL '7 days'
+            AND (
+              ce.event_type = ANY($5::text[])
+              OR ce.event_type = ANY($6::text[])
+            )
+        )
+        SELECT
+          source,
+          medium,
+          campaign,
+          content,
+          COUNT(DISTINCT user_id) as signups,
+          COUNT(DISTINCT CASE
+            WHEN event_type = ANY($5::text[])
+              AND created_at <= signup_at + INTERVAL '24 hours'
+            THEN user_id END) as activated_24h,
+          COUNT(DISTINCT CASE
+            WHEN event_type = ANY($5::text[])
+            THEN user_id END) as activated_7d,
+          COUNT(DISTINCT CASE WHEN event_type = 'trial_started' THEN user_id END) as trial_started,
+          COUNT(DISTINCT CASE WHEN event_type = 'checkout_started' THEN user_id END) as checkout_started,
+          COUNT(DISTINCT CASE WHEN event_type = 'checkout_completed' THEN user_id END) as checkout_completed,
+          COUNT(DISTINCT CASE WHEN event_type = 'subscription_started' THEN user_id END) as subscription_started
+        FROM cohort_events
+        GROUP BY source, medium, campaign, content
+        ORDER BY activated_7d DESC, signups DESC, source ASC, medium ASC, campaign ASC, content ASC
+        LIMIT 50
+      `,
+      [
+        formatTimestamp(range.start),
+        formatTimestamp(range.end),
+        TEST_EMAIL_PATTERN,
+        TEST_EMAIL_EXACT,
+        ACTIVATION_EVENTS,
+        SOURCE_OUTCOME_EVENTS,
+      ],
+    );
+    const activationBySource = mapActivationBySourceRows(
+      activationBySourceResult.rows ?? [],
+    );
     const activatedUsers = new Set<string>();
     const activationBreakdown: Record<string, number> = {};
     const activationBreakdownByPlan: Record<
@@ -201,6 +284,8 @@ export async function GET(request: NextRequest) {
       totalSignups: signups.length,
       activationBreakdown,
       activationBreakdownByPlan,
+      activationBySource,
+      activationByUtm: activationBySource,
       trends,
     });
     response.headers.set(
@@ -217,6 +302,9 @@ export async function GET(request: NextRequest) {
         activatedUsers: 0,
         totalSignups: 0,
         activationBreakdown: {},
+        activationBreakdownByPlan: {},
+        activationBySource: [],
+        activationByUtm: [],
         trends: [],
       },
       { status: 500 },

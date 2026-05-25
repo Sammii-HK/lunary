@@ -3,6 +3,10 @@ export type CheckoutSourceContext = {
   cta_location?: string;
   cta_label?: string;
   cta_href?: string;
+  cta_funnel_version?: string;
+  cta_step?: string;
+  funnel_version?: string;
+  step?: string;
   page_path?: string;
   analytics_session_id?: string;
   anonymous_id?: string;

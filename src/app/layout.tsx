@@ -30,7 +30,10 @@ import { AuthStatusProvider } from '@/components/AuthStatus';
 import { UserProvider } from '@/context/UserContext';
 import { CookieConsent } from '@/components/CookieConsent';
 import { AppOpenedTracker } from '@/components/AppOpenedTracker';
-import { AttributionCapture } from '@/components/AttributionCapture';
+import {
+  AttributionCapture,
+  AttributionSync,
+} from '@/components/AttributionCapture';
 import { AstronomyProviderWrapper } from '@/components/AstronomyProviderWrapper';
 import { PostHogProvider } from '@/components/PostHogProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
@@ -254,6 +257,7 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <AttributionCapture />
             <AuthStatusProvider>
+              <AttributionSync />
               <PostHogProvider>
                 <ErrorBoundaryWrapper>
                   <UserProvider>
