@@ -177,6 +177,15 @@ export function FreeChartClient() {
   const [emailError, setEmailError] = useState('');
   const [hydrated, setHydrated] = useState(false);
   const resultRef = useRef<HTMLDivElement | null>(null);
+  const queryPrefill = useMemo(
+    () => ({
+      name: cleanParam(searchParams.get('name')) || '',
+      birthDate: cleanParam(searchParams.get('birthDate')) || '',
+      birthTime: cleanParam(searchParams.get('birthTime')) || '',
+      birthLocation: cleanParam(searchParams.get('birthLocation')) || '',
+    }),
+    [searchParams],
+  );
 
   const source = useMemo(() => pageSource(searchParams), [searchParams]);
   const keyword = searchParams.get('keyword') || searchParams.get('kw') || '';
@@ -283,6 +292,19 @@ export function FreeChartClient() {
 
     window.addEventListener(REPORT_EVENT_NAME, handleReportReady);
 
+    if (
+      queryPrefill.name ||
+      queryPrefill.birthDate ||
+      queryPrefill.birthTime ||
+      queryPrefill.birthLocation
+    ) {
+      setForm((current) => ({
+        ...current,
+        ...queryPrefill,
+        skipTime: queryPrefill.birthTime ? false : current.skipTime,
+      }));
+    }
+
     try {
       const raw = sessionStorage.getItem(REPORT_STORAGE_KEY);
       if (!raw)
@@ -301,7 +323,7 @@ export function FreeChartClient() {
     return () => {
       window.removeEventListener(REPORT_EVENT_NAME, handleReportReady);
     };
-  }, []);
+  }, [queryPrefill]);
 
   useEffect(() => {
     if (phase === 'result' && report) {

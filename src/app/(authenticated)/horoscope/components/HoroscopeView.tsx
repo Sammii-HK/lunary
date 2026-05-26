@@ -21,6 +21,7 @@ import { UnifiedTransitList } from './UnifiedTransitList';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { ShareRetrogradeBadge } from '@/components/share/ShareRetrogradeBadge';
 import { ShareHoroscope } from '@/components/share/ShareHoroscope';
+import { ShareTransitReply } from '@/components/share/ShareTransitReply';
 import { HoroscopeReflectionPrompts } from '@/components/horoscope/HoroscopeReflectionPrompts';
 import { HoroscopeSeasonReading } from '@/components/horoscope/HoroscopeSeasonReading';
 import { HoroscopeRitualForDay } from '@/components/horoscope/HoroscopeRitualForDay';
@@ -367,6 +368,9 @@ export function HoroscopeView({
             </p>
           </div>
           <div className='flex items-center gap-2'>
+            {birthChart && birthChart.length > 0 && (
+              <ShareTransitReply birthChart={birthChart} compact />
+            )}
             <ShareRetrogradeBadge compact />
             {horoscope ? (
               <ShareHoroscope
