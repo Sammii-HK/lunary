@@ -74,6 +74,36 @@ const SIGN_INDEX = Object.fromEntries(
   SIGNS.map((sign, index) => [sign.toLowerCase(), index]),
 ) as Record<string, number>;
 
+const SIGN_GLYPHS: Record<string, (typeof SIGNS)[number]> = {
+  '♈': 'Aries',
+  '♉': 'Taurus',
+  '♊': 'Gemini',
+  '♋': 'Cancer',
+  '♌': 'Leo',
+  '♍': 'Virgo',
+  '♎': 'Libra',
+  '♏': 'Scorpio',
+  '♐': 'Sagittarius',
+  '♑': 'Capricorn',
+  '♒': 'Aquarius',
+  '♓': 'Pisces',
+};
+
+const SIGN_ALIASES: Record<string, (typeof SIGNS)[number]> = {
+  ari: 'Aries',
+  tau: 'Taurus',
+  gem: 'Gemini',
+  can: 'Cancer',
+  leo: 'Leo',
+  vir: 'Virgo',
+  lib: 'Libra',
+  sco: 'Scorpio',
+  sag: 'Sagittarius',
+  cap: 'Capricorn',
+  aqu: 'Aquarius',
+  pis: 'Pisces',
+};
+
 const BODY_ALIASES: Record<string, string> = {
   sun: 'Sun',
   moon: 'Moon',
@@ -565,18 +595,25 @@ export function parsePlacementsText(input: string): BirthChartData[] {
       .find(([alias]) =>
         new RegExp(`\\b${escapeRegExp(alias)}\\b`, 'i').test(lower),
       )?.[1];
-    const sign = SIGNS.find((candidate) =>
-      new RegExp(`\\b${candidate}\\b`, 'i').test(line),
-    );
+    const sign = findSignInLine(line);
     if (!body || !sign || usedBodies.has(body)) continue;
 
     const degreeMatch =
       line.match(/(\d{1,2})(?:\s*°|\s+deg|\s+degrees?)/i) ||
+      line.match(
+        /\b(\d{1,2})\s+(?:ari|tau|gem|can|leo|vir|lib|sco|sag|cap|aqu|pis)\b/i,
+      ) ||
       line.match(new RegExp(`${sign}\\D{0,12}(\\d{1,2})`, 'i')) ||
       line.match(new RegExp(`(\\d{1,2})\\D{0,12}${sign}`, 'i'));
     const minuteMatch = line.match(/[°\s](\d{1,2})['’]/);
+    const numericColumns = [...line.matchAll(/\b\d{1,2}\b/g)].map((match) =>
+      Number(match[0]),
+    );
     const degree = Math.min(29, Math.max(0, Number(degreeMatch?.[1] ?? 0)));
-    const minute = Math.min(59, Math.max(0, Number(minuteMatch?.[1] ?? 0)));
+    const minute = Math.min(
+      59,
+      Math.max(0, Number(minuteMatch?.[1] ?? numericColumns[1] ?? 0)),
+    );
     const eclipticLongitude =
       SIGN_INDEX[sign.toLowerCase()] * 30 + degree + minute / 60;
 
@@ -587,11 +624,34 @@ export function parsePlacementsText(input: string): BirthChartData[] {
       minute,
       eclipticLongitude,
       retrograde: /\b(rx|r|retrograde|℞)\b/i.test(line),
+      house: parseHouseColumn(line),
     });
     usedBodies.add(body);
   }
 
   return placements;
+}
+
+function findSignInLine(line: string) {
+  const namedSign = SIGNS.find((candidate) =>
+    new RegExp(`\\b${candidate}\\b`, 'i').test(line),
+  );
+  if (namedSign) return namedSign;
+
+  const glyphSign = Object.entries(SIGN_GLYPHS).find(([glyph]) =>
+    line.includes(glyph),
+  )?.[1];
+  if (glyphSign) return glyphSign;
+
+  return Object.entries(SIGN_ALIASES).find(([candidate]) =>
+    new RegExp(`\\b${candidate}\\b`, 'i').test(line),
+  )?.[1];
+}
+
+function parseHouseColumn(line: string) {
+  const houseMatch = line.match(/(?:^|\s)(1[0-2]|[1-9])\s*$/);
+  if (!houseMatch) return undefined;
+  return Number(houseMatch[1]);
 }
 
 function escapeRegExp(value: string) {
