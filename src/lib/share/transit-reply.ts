@@ -100,6 +100,10 @@ export function transitReplyImageUrl(shareId: string, baseUrl: string) {
   )}`;
 }
 
+export function transitReplyPublicUrl(shareId: string, baseUrl: string) {
+  return `${baseUrl}/insights/chart/${encodeURIComponent(shareId)}`;
+}
+
 export function transitReplyImagePngUrl(shareId: string, baseUrl: string) {
   return `${baseUrl}/api/og/share/transit-reply.png?shareId=${encodeURIComponent(
     shareId,

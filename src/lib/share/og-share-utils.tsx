@@ -181,7 +181,7 @@ export function ShareFooter({ format }: { format: ShareFormat }) {
           display: 'flex',
         }}
       >
-        Get yours free → lunary.app
+        Get yours free - lunary.app
       </span>
     </div>
   );

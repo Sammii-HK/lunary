@@ -15,6 +15,7 @@ import {
   createTransitReplyShareId,
   transitReplyImagePngUrl,
   transitReplyImageUrl,
+  transitReplyPublicUrl,
 } from '@/lib/share/transit-reply';
 import { generateBirthChartWithHouses } from '@utils/astrology/birthChart';
 import type { BirthChartData } from '@utils/astrology/birthChart';
@@ -290,7 +291,7 @@ export async function POST(request: Request) {
     }
 
     const shareId = createTransitReplyShareId();
-    const shareUrl = `${APP_URL}/share/transit-reply/${shareId}`;
+    const shareUrl = transitReplyPublicUrl(shareId, APP_URL);
     const imageUrl = transitReplyImageUrl(shareId, APP_URL);
     const imagePngUrl = transitReplyImagePngUrl(shareId, APP_URL);
     const linkAllowed = canIncludeLink(subreddit, input.includeLink);

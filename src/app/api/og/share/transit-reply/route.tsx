@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import type React from 'react';
 import {
   bodiesSymbols,
   zodiacSymbol,
@@ -108,6 +109,59 @@ function polar(longitude: number, ascendantLongitude: number, radius: number) {
   };
 }
 
+function cssPoint(
+  point: { x: number; y: number },
+  size: number,
+): { left: number; top: number } {
+  const scale = size / 280;
+  return {
+    left: size / 2 + point.x * scale,
+    top: size / 2 + point.y * scale,
+  };
+}
+
+function WheelGlyph({
+  point,
+  size,
+  children,
+  color,
+  fontSize,
+  background,
+}: {
+  point: { x: number; y: number };
+  size: number;
+  children: React.ReactNode;
+  color: string;
+  fontSize: number;
+  background?: string;
+}) {
+  const position = cssPoint(point, size);
+  const boxSize = fontSize + 8;
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: position.left - boxSize / 2,
+        top: position.top - boxSize / 2,
+        width: boxSize,
+        height: boxSize,
+        borderRadius: boxSize,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color,
+        fontFamily: 'Astronomicon',
+        fontSize,
+        lineHeight: 1,
+        background: background || 'transparent',
+        textShadow: '0 0 3px #060810, 0 0 6px #060810',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function TransitBiWheelOg({
   birthChart,
   currentSky,
@@ -140,104 +194,108 @@ function TransitBiWheelOg({
   ];
 
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox='-140 -140 280 280'
-      style={{ display: 'flex' }}
+    <div
+      style={{
+        position: 'relative',
+        display: 'flex',
+        width: size,
+        height: size,
+        flexShrink: 0,
+      }}
     >
-      <circle cx='0' cy='0' r='132' fill='rgba(6,8,16,0.92)' />
-      <circle
-        cx='0'
-        cy='0'
-        r='130'
-        fill='none'
-        stroke='rgba(255,255,255,0.34)'
-        strokeWidth='0.8'
-      />
-      <circle
-        cx='0'
-        cy='0'
-        r='94'
-        fill='none'
-        stroke='rgba(255,255,255,0.22)'
-        strokeWidth='0.65'
-      />
-      <circle
-        cx='0'
-        cy='0'
-        r='60'
-        fill='none'
-        stroke='rgba(255,255,255,0.16)'
-        strokeWidth='0.65'
-      />
+      <svg
+        width={size}
+        height={size}
+        viewBox='-140 -140 280 280'
+        style={{ position: 'absolute', inset: 0, display: 'flex' }}
+      >
+        <circle cx='0' cy='0' r='132' fill='rgba(6,8,16,0.92)' />
+        <circle
+          cx='0'
+          cy='0'
+          r='130'
+          fill='none'
+          stroke='rgba(255,255,255,0.34)'
+          strokeWidth='0.8'
+        />
+        <circle
+          cx='0'
+          cy='0'
+          r='94'
+          fill='none'
+          stroke='rgba(255,255,255,0.22)'
+          strokeWidth='0.65'
+        />
+        <circle
+          cx='0'
+          cy='0'
+          r='60'
+          fill='none'
+          stroke='rgba(255,255,255,0.16)'
+          strokeWidth='0.65'
+        />
 
-      {Array.from({ length: 12 }, (_, index) => {
-        const start = index * 30;
-        const p1 = polar(start, ascendantLongitude, 58);
-        const p2 = polar(start, ascendantLongitude, 130);
-        return (
-          <line
-            key={`divider-${index}`}
-            x1={p1.x}
-            y1={p1.y}
-            x2={p2.x}
-            y2={p2.y}
-            stroke='rgba(255,255,255,0.2)'
-            strokeWidth='0.45'
-          />
-        );
-      })}
+        {Array.from({ length: 12 }, (_, index) => {
+          const start = index * 30;
+          const p1 = polar(start, ascendantLongitude, 58);
+          const p2 = polar(start, ascendantLongitude, 130);
+          return (
+            <line
+              key={`divider-${index}`}
+              x1={p1.x}
+              y1={p1.y}
+              x2={p2.x}
+              y2={p2.y}
+              stroke='rgba(255,255,255,0.2)'
+              strokeWidth='0.45'
+            />
+          );
+        })}
+
+        {transits.slice(0, 6).map((transit) => {
+          const skyPlacement = transitLookup.get(transit.transitPlanet);
+          const natalPlacement = natalLookup.get(transit.natalPlanet);
+          if (!skyPlacement || !natalPlacement) return null;
+          const outer = polar(
+            skyPlacement.eclipticLongitude,
+            ascendantLongitude,
+            105,
+          );
+          const inner = polar(
+            natalPlacement.eclipticLongitude,
+            ascendantLongitude,
+            76,
+          );
+          const color = ASPECT_COLORS[transit.aspect] || '#C77DFF';
+          return (
+            <line
+              key={`${transit.transitPlanet}-${transit.natalPlanet}-${transit.aspect}`}
+              x1={inner.x}
+              y1={inner.y}
+              x2={outer.x}
+              y2={outer.y}
+              stroke={color}
+              strokeWidth={transit.orb <= 1 ? 1.4 : 0.9}
+              opacity={transit.orb <= 1 ? 0.76 : 0.48}
+              strokeLinecap='round'
+            />
+          );
+        })}
+      </svg>
 
       {zodiacSigns.map((sign, index) => {
         const position = polar(index * 30 + 15, ascendantLongitude, 116);
         const color = ELEMENT_COLORS[SIGN_ELEMENTS[sign]];
         return (
-          <text
+          <WheelGlyph
             key={sign}
-            x={position.x}
-            y={position.y}
-            textAnchor='middle'
-            dominantBaseline='central'
-            fontFamily='Astronomicon'
-            fontSize='11'
-            fill={color}
-            stroke='#060810'
-            strokeWidth='0.5'
-            paintOrder='stroke fill'
+            point={position}
+            size={size}
+            color={color}
+            fontSize={11}
           >
             {signGlyph(sign)}
-          </text>
-        );
-      })}
-
-      {transits.slice(0, 6).map((transit) => {
-        const skyPlacement = transitLookup.get(transit.transitPlanet);
-        const natalPlacement = natalLookup.get(transit.natalPlanet);
-        if (!skyPlacement || !natalPlacement) return null;
-        const outer = polar(
-          skyPlacement.eclipticLongitude,
-          ascendantLongitude,
-          105,
-        );
-        const inner = polar(
-          natalPlacement.eclipticLongitude,
-          ascendantLongitude,
-          76,
-        );
-        const color = ASPECT_COLORS[transit.aspect] || '#C77DFF';
-        return (
-          <line
-            key={`${transit.transitPlanet}-${transit.natalPlanet}-${transit.aspect}`}
-            x1={inner.x}
-            y1={inner.y}
-            x2={outer.x}
-            y2={outer.y}
-            stroke={color}
-            strokeWidth={transit.orb <= 1 ? 1.4 : 0.9}
-            opacity={transit.orb <= 1 ? 0.76 : 0.48}
-            strokeLinecap='round'
-          />
+          </WheelGlyph>
         );
       })}
 
@@ -248,21 +306,15 @@ function TransitBiWheelOg({
           76,
         );
         return (
-          <text
+          <WheelGlyph
             key={`natal-${placement.body}`}
-            x={position.x}
-            y={position.y}
-            textAnchor='middle'
-            dominantBaseline='central'
-            fontFamily='Astronomicon'
-            fontSize={placement.body === 'Ascendant' ? '9' : '10'}
-            fill='rgba(255,255,255,0.72)'
-            stroke='#060810'
-            strokeWidth='0.65'
-            paintOrder='stroke fill'
+            point={position}
+            size={size}
+            color='rgba(255,255,255,0.72)'
+            fontSize={placement.body === 'Ascendant' ? 9 : 10}
           >
             {symbolFor(placement.body)}
-          </text>
+          </WheelGlyph>
         );
       })}
 
@@ -276,53 +328,52 @@ function TransitBiWheelOg({
           );
           const color = ELEMENT_COLORS[SIGN_ELEMENTS[placement.sign]] || '#fff';
           return (
-            <g key={`transit-${placement.body}`}>
-              <circle
-                cx={position.x}
-                cy={position.y}
-                r='5.8'
-                fill={color}
-                opacity='0.18'
-              />
-              <text
-                x={position.x}
-                y={position.y}
-                textAnchor='middle'
-                dominantBaseline='central'
-                fontFamily='Astronomicon'
-                fontSize='12'
-                fill='#fff'
-                stroke='#060810'
-                strokeWidth='0.72'
-                paintOrder='stroke fill'
-              >
-                {symbolFor(placement.body)}
-              </text>
-            </g>
+            <WheelGlyph
+              key={`transit-${placement.body}`}
+              point={position}
+              size={size}
+              color='#fff'
+              fontSize={12}
+              background={`${color}2e`}
+            >
+              {symbolFor(placement.body)}
+            </WheelGlyph>
           );
         })}
 
-      <text
-        x='0'
-        y='-6'
-        textAnchor='middle'
-        fontSize='8'
-        fill='rgba(255,255,255,0.48)'
-        letterSpacing='0.18em'
+      <div
+        style={{
+          position: 'absolute',
+          left: size / 2 - 48,
+          top: size / 2 - 16,
+          width: 96,
+          display: 'flex',
+          justifyContent: 'center',
+          color: 'rgba(255,255,255,0.48)',
+          fontSize: 8,
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+        }}
       >
-        NATAL
-      </text>
-      <text
-        x='0'
-        y='8'
-        textAnchor='middle'
-        fontSize='8'
-        fill='rgba(255,255,255,0.68)'
-        letterSpacing='0.18em'
+        Natal
+      </div>
+      <div
+        style={{
+          position: 'absolute',
+          left: size / 2 - 58,
+          top: size / 2 + 2,
+          width: 116,
+          display: 'flex',
+          justifyContent: 'center',
+          color: 'rgba(255,255,255,0.68)',
+          fontSize: 8,
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+        }}
       >
-        LIVE TRANSITS
-      </text>
-    </svg>
+        Live transits
+      </div>
+    </div>
   );
 }
 
@@ -339,6 +390,7 @@ function FactPill({ transit }: { transit: TransitReplyAspect }) {
         border: `1px solid ${color}66`,
         background: `${color}16`,
         minWidth: 0,
+        flex: 1,
       }}
     >
       <span
@@ -353,7 +405,8 @@ function FactPill({ transit }: { transit: TransitReplyAspect }) {
         {transit.aspect} · {transit.orb.toFixed(1)}°
       </span>
       <span style={{ display: 'flex', fontSize: 19, color: '#fff' }}>
-        {transit.transitPlanet} {transit.aspectGlyph} {transit.natalPlanet}
+        {transit.transitPlanet} {transit.aspect.toLowerCase()}{' '}
+        {transit.natalPlanet}
       </span>
       <span
         style={{
@@ -387,6 +440,7 @@ function PlacementFactPill({
         border: '1px solid rgba(199,125,255,0.42)',
         background: 'rgba(199,125,255,0.12)',
         minWidth: 0,
+        flex: 1,
       }}
     >
       <span
