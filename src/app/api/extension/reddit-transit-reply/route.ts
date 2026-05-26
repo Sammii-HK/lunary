@@ -6,7 +6,6 @@ import {
   buildRedditBirthChartReply,
   buildRedditTransitReply,
   completeChartAngles,
-  inferHouseNumberingDirection,
   parsePlacementsText,
   type TransitReplyHouseCusp,
 } from '@/lib/transit-reply/analysis';
@@ -138,7 +137,7 @@ async function resolveBirthChart(
         houseConfidence: birthChart.some((placement) => placement.house)
           ? 'medium'
           : 'low',
-        houseNumberingDirection: inferHouseNumberingDirection(birthChart),
+        houseNumberingDirection: 'unknown',
       },
       warnings: [],
     };
@@ -156,7 +155,7 @@ async function resolveBirthChart(
           houseConfidence: parsed.some((placement) => placement.house)
             ? 'medium'
             : 'low',
-          houseNumberingDirection: inferHouseNumberingDirection(parsed),
+          houseNumberingDirection: 'unknown',
         },
         warnings: [],
       };
@@ -177,13 +176,7 @@ async function resolveBirthChart(
           confidence: extracted.confidence,
           houseConfidence: extracted.houseConfidence,
           houseSystem: extracted.houseSystem,
-          houseNumberingDirection:
-            extracted.houseNumberingDirection === 'unknown'
-              ? inferHouseNumberingDirection(
-                  extracted.birthChart,
-                  extracted.houseCusps,
-                )
-              : extracted.houseNumberingDirection,
+          houseNumberingDirection: extracted.houseNumberingDirection,
           birthDate: extracted.birthDate,
           birthTime: extracted.birthTime,
           birthLocation: extracted.birthLocation,
@@ -215,10 +208,7 @@ async function resolveBirthChart(
         confidence: 'high',
         houseConfidence: input.birthTime ? 'high' : 'low',
         houseSystem: 'whole-sign',
-        houseNumberingDirection: inferHouseNumberingDirection(
-          completeChartAngles(chart.planets),
-          chart.houses,
-        ),
+        houseNumberingDirection: 'unknown',
         birthDate: input.birthDate,
         birthTime: input.birthTime,
         birthLocation: input.birthLocation,
