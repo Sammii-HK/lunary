@@ -5,6 +5,7 @@ import { ArrowRight, Sparkles, BookOpen, Mail } from 'lucide-react';
 import { conversionTracking } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
 import { useAuthStatus } from './AuthStatus';
+import { buildSignupChartUrl } from '@/lib/urls';
 
 interface CrossPlatformCTAProps {
   variant?: 'app' | 'substack' | 'newsletter' | 'blog';
@@ -20,6 +21,14 @@ export function CrossPlatformCTA({
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
   const substackUrl = 'https://lunary.substack.com';
   const authState = useAuthStatus();
+  const signupHref = buildSignupChartUrl({
+    source: variant === 'app' ? 'blog' : source || 'blog',
+    medium: 'cta',
+    campaign: 'chart_signup',
+    content: source || `cross_platform_${variant}`,
+    hub: 'blog',
+    location: source || `cross_platform_${variant}`,
+  });
 
   const handleClick = (platform: string) => {
     conversionTracking.upgradeClicked(
@@ -46,11 +55,7 @@ export function CrossPlatformCTA({
             </p>
             <Button variant='lunary' asChild>
               <Link
-                href={
-                  authState.isAuthenticated
-                    ? '/app'
-                    : `${baseUrl}/pricing?utm_source=${source || 'blog'}&utm_medium=cta&utm_campaign=cross_platform`
-                }
+                href={authState.isAuthenticated ? '/app' : signupHref}
                 onClick={() => handleClick('app')}
               >
                 {authState.isAuthenticated

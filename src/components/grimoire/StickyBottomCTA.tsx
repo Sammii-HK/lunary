@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Sparkles, ChevronRight, X } from 'lucide-react';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { ContextualNudge } from '@/lib/grimoire/getContextualNudge';
 import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
+import { buildSignupChartUrl, seoSignupSourceForPath } from '@/lib/urls';
 
 interface StickyBottomCTAProps {
   nudge: ContextualNudge;
@@ -16,7 +18,6 @@ const DISMISS_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes — not forever
 
 export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
   const authState = useAuthStatus();
-  const router = useRouter();
   const pathname = usePathname() || '';
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -87,6 +88,20 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
   // A/B test is scoped per hub so we can compare copy variants within each hub
   const abTestName = `seo_sticky_cta_${nudge.hub}`;
   const abVariantIndex = nudge.ctaVariant?.split('_').pop() || '0';
+  const signupHref = buildSignupChartUrl({
+    source: seoSignupSourceForPath(pathname),
+    medium: 'cta',
+    campaign: 'chart_signup',
+    content: 'seo_sticky_bottom',
+    hub: nudge.hub,
+    headline: nudge.headline || nudge.ctaHeadline || '',
+    subline: nudge.subline || nudge.ctaSubline || '',
+    location: 'seo_sticky_bottom',
+    pagePath: pathname,
+  });
+  const targetHref =
+    (nudge.action === 'link' || isAuthenticated ? nudge.href : signupHref) ||
+    signupHref;
 
   // Track impression when it becomes visible
   useEffect(() => {
@@ -97,7 +112,7 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
         ctaId: 'sticky_bottom_cta',
         location: 'seo_sticky_bottom',
         label: nudge.inlineCopy || nudge.buttonLabel,
-        href: nudge.href,
+        href: targetHref,
         pagePath: pathname,
         ctaVariant: nudge.ctaVariant,
         ctaHeadline: nudge.ctaHeadline,
@@ -106,7 +121,7 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
         abVariant: abVariantIndex,
       });
     }
-  }, [visible, nudge, pathname, abTestName, abVariantIndex]);
+  }, [visible, nudge, pathname, abTestName, abVariantIndex, targetHref]);
 
   const handleDismiss = () => {
     setDismissed(true);
@@ -116,19 +131,13 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
     }
   };
 
-  const navigateToHref = () => {
-    if (nudge.href) {
-      router.push(nudge.href);
-    }
-  };
-
   const handleClick = () => {
     trackCtaClick({
       hub: nudge.hub,
       ctaId: 'sticky_bottom_cta',
       location: 'seo_sticky_bottom',
       label: nudge.inlineCopy || nudge.buttonLabel,
-      href: nudge.href,
+      href: targetHref,
       pagePath: pathname,
       ctaVariant: nudge.ctaVariant,
       ctaHeadline: nudge.ctaHeadline,
@@ -136,25 +145,6 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
       abTest: abTestName,
       abVariant: abVariantIndex,
     });
-
-    if (nudge.action === 'link') {
-      navigateToHref();
-      return;
-    }
-
-    if (!isAuthenticated) {
-      const params = new URLSearchParams({
-        hub: nudge.hub,
-        headline: nudge.headline || nudge.ctaHeadline || '',
-        subline: nudge.subline || nudge.ctaSubline || '',
-        location: 'seo_sticky_bottom',
-        pagePath: pathname,
-      });
-      router.push(`/signup/chart?${params.toString()}`);
-      return;
-    }
-
-    navigateToHref();
   };
 
   if (!visible || dismissed || isAuthenticated) return null;
@@ -170,14 +160,15 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
       >
         <div className='bg-surface-base/95 backdrop-blur-sm border-t border-lunary-primary-700/50'>
           <div className='max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3'>
-            <button
+            <Link
+              href={targetHref}
               onClick={handleClick}
               className='flex-1 flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-content-brand-accent transition-colors group min-w-0'
             >
               <Sparkles className='w-4 h-4 flex-shrink-0' />
               <span className='truncate'>{displayText}</span>
               <ChevronRight className='w-4 h-4 flex-shrink-0 transition-transform group-hover:translate-x-0.5' />
-            </button>
+            </Link>
             <button
               onClick={handleDismiss}
               className='flex-shrink-0 p-1 text-content-muted hover:text-content-secondary transition-colors'

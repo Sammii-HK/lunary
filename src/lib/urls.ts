@@ -6,6 +6,17 @@ export type UtmParams = {
   term?: string;
 };
 
+type SignupChartUrlOptions = Partial<UtmParams> & {
+  hub?: string;
+  location?: string;
+  pagePath?: string;
+  headline?: string;
+  subline?: string;
+  funnel?: string;
+  birthDate?: string;
+  redirect?: string;
+};
+
 type LinksUtmOptions = Partial<
   Omit<UtmParams, 'source' | 'medium' | 'content'>
 > & {
@@ -26,6 +37,47 @@ export function buildUtmUrl(
   if (campaign) url.searchParams.set('utm_campaign', campaign);
   if (content) url.searchParams.set('utm_content', content);
   return url.toString();
+}
+
+export function buildSignupChartUrl({
+  source = 'grimoire',
+  medium = 'cta',
+  campaign = 'chart_signup',
+  content,
+  term,
+  hub,
+  location,
+  pagePath,
+  headline,
+  subline,
+  funnel,
+  birthDate,
+  redirect,
+}: SignupChartUrlOptions = {}): string {
+  const url = new URL('/signup/chart', 'https://lunary.app');
+  const params = url.searchParams;
+
+  params.set('utm_source', source);
+  params.set('utm_medium', medium);
+  if (campaign) params.set('utm_campaign', campaign);
+  if (content || location || hub) {
+    params.set('utm_content', content || location || hub || 'chart_signup');
+  }
+  if (term) params.set('utm_term', term);
+  if (hub) params.set('hub', hub);
+  if (headline) params.set('headline', headline);
+  if (subline) params.set('subline', subline);
+  if (location) params.set('location', location);
+  if (pagePath) params.set('pagePath', pagePath);
+  if (funnel) params.set('funnel', funnel);
+  if (birthDate) params.set('birthDate', birthDate);
+  if (redirect) params.set('redirect', redirect);
+
+  return `${url.pathname}${url.search}`;
+}
+
+export function seoSignupSourceForPath(pathname: string): 'blog' | 'grimoire' {
+  return pathname.startsWith('/blog') ? 'blog' : 'grimoire';
 }
 
 export function buildLinksUtmUrl(

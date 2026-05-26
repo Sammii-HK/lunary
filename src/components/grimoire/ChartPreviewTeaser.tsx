@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/Heading';
 import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
 import { getABTestVariantClient } from '@/lib/ab-tests-client';
+import { buildSignupChartUrl, seoSignupSourceForPath } from '@/lib/urls';
 import { zodiacUnicode, planetUnicode } from '../../../utils/zodiac/zodiac';
 
 type Placement = {
@@ -75,6 +76,20 @@ export function ChartPreviewTeaser({
 
   const impressionTracked = useRef(false);
   const resultImpressionTracked = useRef(false);
+  const signupHref = buildSignupChartUrl({
+    source: seoSignupSourceForPath(pathname),
+    medium: 'cta',
+    campaign: 'chart_preview',
+    content: 'seo_chart_preview',
+    hub,
+    headline: 'See how this shows up in your chart',
+    subline:
+      'Open Lunary to map this page against your placements, houses, and active transits.',
+    location: 'seo_chart_preview',
+    pagePath: pathname,
+    funnel: 'cited_page_chart_cta',
+    ...(birthDate ? { birthDate } : {}),
+  });
 
   useModal({
     isOpen: showAuthModal,
@@ -139,22 +154,13 @@ export function ChartPreviewTeaser({
       ctaId: 'chart_preview_unlock',
       location: 'seo_chart_preview',
       label: 'Open Lunary',
+      href: signupHref,
       pagePath: pathname,
     });
 
     if (!authState.isAuthenticated) {
       if (signupPageVariant === 'value-prop') {
-        const params = new URLSearchParams({
-          hub,
-          headline: 'See how this shows up in your chart',
-          subline:
-            'Open Lunary to map this page against your placements, houses, and active transits.',
-          location: 'seo_chart_preview',
-          pagePath: pathname,
-          funnel: 'cited_page_chart_cta',
-          ...(birthDate ? { birthDate } : {}),
-        });
-        router.push(`/signup/chart?${params.toString()}`);
+        router.push(signupHref);
       } else {
         setShowAuthModal(true);
       }

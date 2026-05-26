@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { ContextualNudgeSection } from '@/components/ui/ContextualNudgeSection';
 
 import {
   PLANETS,
@@ -13,6 +14,7 @@ import {
   Aspect,
 } from '@/constants/seo/aspects';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
+import { getContextualNudge } from '@/lib/grimoire/getContextualNudge';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
@@ -110,6 +112,8 @@ export default async function PlanetAspectTypePage({
   const aspectSymbol = aspectData.symbol;
   const aspectMethod = aspectReadMethods[aspect as Aspect];
   const otherPlanets = PLANETS.filter((p) => p !== planet1);
+  const pagePath = `/grimoire/aspects/${planet1}/${aspect}`;
+  const contextualNudge = getContextualNudge(pagePath);
 
   const breadcrumbItems = [
     { name: 'Grimoire', url: '/grimoire' },
@@ -232,6 +236,10 @@ export default async function PlanetAspectTypePage({
             </Link>
           </div>
         </div>
+        <ContextualNudgeSection
+          nudge={contextualNudge}
+          location='seo_aspect_type_page'
+        />
         <ExploreGrimoire />
       </div>
     </div>

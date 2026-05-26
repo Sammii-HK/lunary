@@ -150,39 +150,40 @@ const nextConfig = {
         buffer: require.resolve('buffer'),
       };
 
-      // Optimize chunk splitting for client-side bundles
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Vendor chunk for common dependencies
-            vendor: {
-              name: 'vendor',
-              chunks: 'all',
-              test: /[\\/]node_modules[\\/]/,
-              priority: 20,
-              minChunks: 2, // Only create vendor chunk if used in 2+ chunks
-            },
-            // Separate chunk for astrochart (large library)
-            astrochart: {
-              name: 'astrochart',
-              test: /[\\/]node_modules[\\/]@astrodraw[\\/]/,
-              chunks: 'all',
-              priority: 30,
-            },
-            // Separate chunk for Radix UI
-            radix: {
-              name: 'radix',
-              test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
-              chunks: 'all',
-              priority: 25,
+      // Next's App Router owns client chunk ordering in development.
+      // Custom splitChunks can make hydrated page modules execute before shared
+      // browser chunks are callable, so leave Next's defaults intact locally.
+      if (!dev) {
+        config.optimization = {
+          ...config.optimization,
+          splitChunks: {
+            chunks: 'all',
+            cacheGroups: {
+              default: false,
+              vendors: false,
+              vendor: {
+                name: 'vendor',
+                chunks: 'all',
+                test: /[\\/]node_modules[\\/]/,
+                priority: 20,
+                minChunks: 2,
+              },
+              astrochart: {
+                name: 'astrochart',
+                test: /[\\/]node_modules[\\/]@astrodraw[\\/]/,
+                chunks: 'all',
+                priority: 30,
+              },
+              radix: {
+                name: 'radix',
+                test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+                chunks: 'all',
+                priority: 25,
+              },
             },
           },
-        },
-      };
+        };
+      }
     }
 
     // Edge runtime: Allow buffer but exclude Node.js-only modules

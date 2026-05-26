@@ -422,6 +422,22 @@ function aspectVerb(aspect: TransitReplyAspect['aspect']) {
   return ASPECTS.find((a) => a.aspect === aspect)?.verb ?? 'aspects';
 }
 
+function aspectMeaning(aspect: TransitReplyAspect['aspect']) {
+  if (aspect === 'Square') {
+    return 'a pressure point: something is asking to be acted on rather than simply understood';
+  }
+  if (aspect === 'Opposition') {
+    return 'a mirror point: the tension often shows up through other people, contrast, or projection';
+  }
+  if (aspect === 'Conjunction') {
+    return 'an intensifier: the planet being touched gets louder and harder to ignore';
+  }
+  if (aspect === 'Trine') {
+    return 'a flow point: the energy is easier to use if you choose to work with it consciously';
+  }
+  return 'an opening: subtle support is available, but it still needs a practical response';
+}
+
 function ordinalSuffix(value: number) {
   if (value >= 11 && value <= 13) return 'th';
   switch (value % 10) {
@@ -586,21 +602,22 @@ export function buildRedditTransitReply(args: {
     first.house && first.houseTheme
       ? ` Because it is moving through the ${first.house}${ordinalSuffix(first.house)} house, the feeling may be coming through ${first.houseTheme}.`
       : '';
+  const aspectPhrase = `A ${first.aspect.toLowerCase()} is ${aspectMeaning(first.aspect)}, so I would read this as a timing signal rather than a fixed personality trait.`;
   const secondPhrase = second
-    ? ` I would also watch ${second.transitPlanet} in ${second.transitSign} ${second.aspect.toLowerCase()} natal ${second.natalPlanet}, which ${second.aspect === 'Square' || second.aspect === 'Opposition' ? 'adds pressure/contrast' : 'gives the chart a support channel'} around ${second.houseTheme ?? 'that same theme'}.`
+    ? ` The next layer I would watch is ${second.transitPlanet} in ${second.transitSign} ${second.aspect.toLowerCase()} natal ${second.natalPlanet}; that adds ${second.aspect === 'Square' || second.aspect === 'Opposition' ? 'another pressure point' : 'a support channel'}${second.houseTheme ? ` through ${second.houseTheme}` : ''}.`
     : '';
   const natalHousePhrase =
     first.natalHouse && first.natalHouseTheme
       ? ` Since the natal ${first.natalPlanet} is shown in the ${first.natalHouse}${ordinalSuffix(first.natalHouse)} house, I would read that natal house as part of why this is landing around ${first.natalHouseTheme}.`
       : '';
   const thirdPhrase = third
-    ? ` The third layer is ${third.transitPlanet} ${third.aspect.toLowerCase()} natal ${third.natalPlanet}, so this is not just one random mood spike.`
+    ? ` I would keep ${third.transitPlanet} ${third.aspect.toLowerCase()} natal ${third.natalPlanet} in the background too, because it shows the chart is carrying more than one live theme at once.`
     : '';
   const linkPhrase = shareUrl
-    ? `\n\nI mapped the overlay here so you can see the natal placements inside and the current transits outside: ${shareUrl}`
+    ? `\n\nI made a visual teaser here with the natal chart inside and the current transits outside: ${shareUrl}`
     : '';
 
-  return `${feelingFrame} The loudest contact I see is ${first.transitPlanet} in ${first.transitSign} ${first.aspect.toLowerCase()} your natal ${first.natalPlanet} in ${first.natalSign}, with about ${first.orb.toFixed(1)}° of orb.${housePhrase}${natalHousePhrase}${secondPhrase}${thirdPhrase}${linkPhrase}`;
+  return `${feelingFrame} The loudest contact I see is ${first.transitPlanet} in ${first.transitSign} ${first.aspect.toLowerCase()} your natal ${first.natalPlanet} in ${first.natalSign}, with about ${first.orb.toFixed(1)}° of orb. ${aspectPhrase}${housePhrase}${natalHousePhrase}${secondPhrase}${thirdPhrase}\n\nThe image is just the quick map; the important part is reading which natal placement is being touched, what house the transit is moving through, and whether the aspect is applying pressure, contrast, intensity, or support.${linkPhrase}`;
 }
 
 const CHART_PLACEMENT_WEIGHTS: Record<string, number> = {
@@ -689,16 +706,16 @@ export function buildRedditBirthChartReply(args: {
     ? 'For the chart read, I would start with the core placements rather than one isolated planet.'
     : 'I would start with the core placements rather than one isolated planet.';
   const secondPhrase = second
-    ? ` ${second.sentence} is the second thing I would read, because it colours how the chart processes needs, communication, or attachment.`
+    ? ` The second layer is ${second.sentence}; I would use that to understand how the chart processes needs, attachment, decision-making, or social expression.`
     : '';
   const thirdPhrase = third
-    ? ` ${third.sentence} gives another concrete house/sign emphasis, so I would not reduce this chart to the Sun sign.`
+    ? ` The third visible emphasis is ${third.sentence}, which is why I would not reduce this chart to the Sun sign alone.`
     : '';
   const linkPhrase = shareUrl
-    ? `\n\nI mapped the chart snapshot here so you can see the placements cleanly: ${shareUrl}`
+    ? `\n\nI made a visual teaser here so you can see the clean placement map and the short breakdown: ${shareUrl}`
     : '';
 
-  return `${intro} The loudest signature I see is ${first.sentence}, which makes that area a major lens for identity and lived experience.${secondPhrase}${thirdPhrase}${linkPhrase}`;
+  return `${intro} The loudest signature I see is ${first.sentence}. That does not mean the whole chart is only about that placement; it means I would use it as the first doorway into the chart because it combines planet, sign, and life area.${secondPhrase}${thirdPhrase}\n\nA good read should move from placement to house to pattern, rather than just listing signs. That is the difference between a quick screenshot reaction and an interpretation that actually explains why the chart feels the way it does.${linkPhrase}`;
 }
 
 export function parsePlacementsText(input: string): BirthChartData[] {

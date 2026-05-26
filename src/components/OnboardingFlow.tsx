@@ -23,7 +23,7 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { DailyCache } from '@/lib/cache/dailyCache';
-import { ClientCache } from '@/lib/patterns/snapshot/cache';
+import { ClientCache } from '@/lib/patterns/snapshot/client-cache';
 import { conversionTracking } from '@/lib/analytics';
 import { BirthdayInput } from './ui/birthday-input';
 import {

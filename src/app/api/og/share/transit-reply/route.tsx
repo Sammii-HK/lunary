@@ -391,6 +391,7 @@ function FactPill({ transit }: { transit: TransitReplyAspect }) {
         background: `${color}16`,
         minWidth: 0,
         flex: 1,
+        overflow: 'hidden',
       }}
     >
       <span
@@ -402,11 +403,13 @@ function FactPill({ transit }: { transit: TransitReplyAspect }) {
           textTransform: 'uppercase',
         }}
       >
-        {transit.aspect} · {transit.orb.toFixed(1)}°
+        {transit.aspect} - {transit.orb.toFixed(1)}°
       </span>
       <span style={{ display: 'flex', fontSize: 19, color: '#fff' }}>
-        {transit.transitPlanet} {transit.aspect.toLowerCase()}{' '}
-        {transit.natalPlanet}
+        {truncateText(
+          `${transit.transitPlanet} ${transit.aspect.toLowerCase()} ${transit.natalPlanet}`,
+          30,
+        )}
       </span>
       <span
         style={{
@@ -417,7 +420,7 @@ function FactPill({ transit }: { transit: TransitReplyAspect }) {
         }}
       >
         {transit.house
-          ? `${transit.house}H · ${truncateText(transit.houseTheme || '', 54)}`
+          ? `${transit.house}H - ${truncateText(transit.houseTheme || '', 54)}`
           : `${transit.transitSign} to ${transit.natalSign}`}
       </span>
     </div>
@@ -441,6 +444,7 @@ function PlacementFactPill({
         background: 'rgba(199,125,255,0.12)',
         minWidth: 0,
         flex: 1,
+        overflow: 'hidden',
       }}
     >
       <span
@@ -452,10 +456,10 @@ function PlacementFactPill({
           textTransform: 'uppercase',
         }}
       >
-        {placement.body} · {placement.sign}
+        {placement.body} - {placement.sign}
       </span>
       <span style={{ display: 'flex', fontSize: 19, color: '#fff' }}>
-        {placement.body} in {placement.sign}
+        {truncateText(`${placement.body} in ${placement.sign}`, 32)}
       </span>
       <span
         style={{
@@ -466,9 +470,110 @@ function PlacementFactPill({
         }}
       >
         {placement.house
-          ? `${placement.house}H · ${truncateText(placement.houseTheme || '', 54)}`
+          ? `${placement.house}H - ${truncateText(placement.houseTheme || '', 54)}`
           : `${placement.degree}° ${placement.sign}`}
       </span>
+    </div>
+  );
+}
+
+function transitMarkerPosition(transit: TransitReplyAspect) {
+  const maxOrb =
+    transit.aspect === 'Sextile' ? 4 : transit.aspect === 'Trine' ? 5 : 7;
+  const exactness = Math.max(0, Math.min(1, 1 - transit.orb / maxOrb));
+  return 12 + exactness * 76;
+}
+
+function TransitTimelineOg({
+  transits,
+  isStory,
+}: {
+  transits: TransitReplyAspect[];
+  isStory: boolean;
+}) {
+  const markers = transits.slice(0, 3);
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+        padding: '12px 16px 14px',
+        borderRadius: 999,
+        border: '1px solid rgba(255,255,255,0.13)',
+        background: 'rgba(255,255,255,0.045)',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+        }}
+      >
+        <span
+          style={{
+            display: 'flex',
+            fontSize: isStory ? 20 : 12,
+            color: 'rgba(255,255,255,0.55)',
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Active contacts
+        </span>
+        <span
+          style={{
+            display: 'flex',
+            fontSize: isStory ? 20 : 12,
+            color: 'rgba(255,255,255,0.72)',
+          }}
+        >
+          wider orb - exact hit
+        </span>
+      </div>
+      <div
+        style={{
+          position: 'relative',
+          display: 'flex',
+          height: 18,
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 8,
+            display: 'flex',
+            height: 3,
+            borderRadius: 999,
+            background:
+              'linear-gradient(90deg, rgba(199,125,255,0.55) 0%, rgba(148,209,255,0.75) 52%, rgba(123,255,184,0.92) 100%)',
+          }}
+        />
+        {markers.map((transit) => {
+          const color = ASPECT_COLORS[transit.aspect] || '#C77DFF';
+          return (
+            <div
+              key={`${transit.transitPlanet}-${transit.natalPlanet}-${transit.aspect}-marker`}
+              style={{
+                position: 'absolute',
+                left: `${transitMarkerPosition(transit)}%`,
+                top: 2,
+                width: 13,
+                height: 13,
+                borderRadius: 999,
+                border: '2px solid #05060d',
+                background: color,
+                boxShadow: `0 0 14px ${color}88`,
+              }}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -495,14 +600,22 @@ export async function GET(request: NextRequest) {
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
     const padding = isStory ? 74 : isLandscape ? 48 : 56;
-    const wheelSize = isStory ? 600 : isLandscape ? 390 : 500;
+    const wheelSize = isBirthChart
+      ? isStory
+        ? 500
+        : isLandscape
+          ? 330
+          : 420
+      : isStory
+        ? 600
+        : isLandscape
+          ? 390
+          : 500;
     const stars = generateStarfield(record.shareId, getStarCount(format));
     const firstTransit = transits[0];
     const firstPlacement = placements[0];
     const title = isBirthChart
-      ? firstPlacement
-        ? `${firstPlacement.body} in ${firstPlacement.sign}`
-        : 'Birth chart read'
+      ? 'Chart highlights'
       : firstTransit
         ? `${firstTransit.transitPlanet} ${firstTransit.aspect.toLowerCase()} natal ${firstTransit.natalPlanet}`
         : 'Live transit overlay';
@@ -618,7 +731,7 @@ export async function GET(request: NextRequest) {
                 }}
               >
                 {isBirthChart
-                  ? 'Birth chart read from supplied chart'
+                  ? 'Supplied chart snapshot'
                   : 'Current transits over natal chart'}
               </span>
               <span
@@ -638,7 +751,9 @@ export async function GET(request: NextRequest) {
                   color: 'rgba(255,255,255,0.7)',
                 }}
               >
-                {dateText}
+                {isBirthChart
+                  ? 'A preview of the full interpretation'
+                  : dateText}
               </span>
             </div>
 
@@ -661,7 +776,10 @@ export async function GET(request: NextRequest) {
                   color: 'rgba(255,255,255,0.9)',
                 }}
               >
-                {truncateText(record.analysis.summary, isStory ? 260 : 180)}
+                {truncateText(
+                  record.analysis.summary,
+                  isStory ? 260 : isBirthChart ? 150 : 180,
+                )}
               </span>
             </div>
 
@@ -703,50 +821,9 @@ export async function GET(request: NextRequest) {
             paddingTop: isStory ? 26 : 10,
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: '12px 16px',
-              borderRadius: 999,
-              border: '1px solid rgba(255,255,255,0.13)',
-              background: 'rgba(255,255,255,0.045)',
-            }}
-          >
-            <span
-              style={{
-                display: 'flex',
-                fontSize: isStory ? 20 : 12,
-                color: 'rgba(255,255,255,0.55)',
-                letterSpacing: '0.18em',
-                textTransform: 'uppercase',
-              }}
-            >
-              Timeline
-            </span>
-            <div
-              style={{
-                display: 'flex',
-                height: 3,
-                flex: 1,
-                borderRadius: 999,
-                background:
-                  'linear-gradient(90deg, #C77DFF 0%, #94d1ff 52%, #7BFFB8 100%)',
-              }}
-            />
-            <span
-              style={{
-                display: 'flex',
-                fontSize: isStory ? 20 : 12,
-                color: 'rgba(255,255,255,0.72)',
-              }}
-            >
-              {isBirthChart
-                ? 'free report · save chart · track transits'
-                : 'now · exact-hit window · next layer'}
-            </span>
-          </div>
+          {!isBirthChart && (
+            <TransitTimelineOg transits={transits} isStory={isStory} />
+          )}
           <ShareFooter format={format} />
         </div>
       </div>,
