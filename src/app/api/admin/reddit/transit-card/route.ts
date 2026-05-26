@@ -4,6 +4,7 @@ import { requireAdminAuth } from '@/lib/admin-auth';
 import {
   analyseTransitReply,
   buildRedditTransitReply,
+  completeChartAngles,
   parsePlacementsText,
 } from '@/lib/transit-reply/analysis';
 import { extractChartFromImage } from '@/lib/transit-reply/chart-image-extraction';
@@ -68,7 +69,7 @@ async function resolveBirthChart(
   input: z.infer<typeof requestSchema>,
 ): Promise<{ birthChart: BirthChartData[]; warnings: string[] }> {
   if (input.placements?.length) {
-    return { birthChart: input.placements, warnings: [] };
+    return { birthChart: completeChartAngles(input.placements), warnings: [] };
   }
 
   if (input.placementsText?.trim()) {
@@ -103,7 +104,7 @@ async function resolveBirthChart(
       undefined,
       'whole-sign',
     );
-    return { birthChart: chart.planets, warnings: [] };
+    return { birthChart: completeChartAngles(chart.planets), warnings: [] };
   }
 
   return { birthChart: [], warnings: [] };

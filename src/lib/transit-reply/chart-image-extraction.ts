@@ -1,7 +1,11 @@
 import OpenAI from 'openai';
 import { z } from 'zod';
 import type { BirthChartData } from '../../../utils/astrology/birthChart';
-import type { TransitReplyHouseCusp } from './analysis';
+import {
+  completeChartAngles,
+  inferHouseNumberingDirection,
+  type TransitReplyHouseCusp,
+} from './analysis';
 
 const SIGNS = [
   'Aries',
@@ -30,7 +34,9 @@ const BODIES = [
   'Neptune',
   'Pluto',
   'Ascendant',
+  'Descendant',
   'Midheaven',
+  'Imum Coeli',
   'North Node',
   'Chiron',
 ] as const;
@@ -162,14 +168,14 @@ export async function extractChartFromImage(input: {
       {
         role: 'system',
         content:
-          'You extract Western astrology birth-chart data from screenshots, especially Astro-Seek, Astrodienst/Astro.com, and Reddit chart screenshots. Return only JSON. Prefer the planet table when visible because it contains planet, sign, degree, minute, and sometimes house. For Astrodienst tables with black natal columns and green transit columns, extract the black natal positions for the chart read; ignore green transit columns unless they are explicitly labelled as natal. If the table is not visible, read the wheel glyphs and sign/degree labels. Do not calculate placements from a visible birth date/time because screenshots often omit timezone; use birth date/time only as optional metadata. Preserve the house structure supplied by the screenshot: identify whether house numbers run clockwise/counterclockwise, extract visible house cusps when possible, and keep placement house numbers from the table. Do not infer missing placements or cusps. If ASC/MC or houses are not readable, omit houses and lower confidence.',
+          'You extract Western astrology birth-chart data from screenshots, especially Astro-Seek, Astrodienst/Astro.com, and Reddit chart screenshots. Return only JSON. Prefer the planet table when visible because it contains planet, sign, degree, minute, and sometimes house. For Astrodienst tables with black natal columns and green transit columns, extract the black natal positions for the chart read; ignore green transit columns unless they are explicitly labelled as natal. If the table is not visible, read the wheel glyphs and sign/degree labels. Do not calculate placements from a visible birth date/time because screenshots often omit timezone; use birth date/time only as optional metadata. Preserve the house structure supplied by the screenshot: identify whether house numbers run clockwise/counterclockwise, extract visible house cusps when possible, and keep placement house numbers from the table. Treat the chart axes as important: extract ASC/Ascendant, DSC/Descendant, MC/Midheaven, and IC/Imum Coeli whenever they are visible. For Astro-Seek wheels, ASC is usually on the left, DSC on the right, MC at the top, and IC at the bottom; use those anchors to determine house direction when house numbers are visible. Do not infer missing planets or cusps. If ASC/DSC/MC/IC or houses are not readable, omit houses and lower confidence.',
       },
       {
         role: 'user',
         content: [
           {
             type: 'text',
-            text: 'Extract visible natal placements from this chart image. Return JSON with provider, confidence, houseConfidence, houseSystem if shown, houseNumberingDirection, optional birthDate/birthTime/birthLocation, placements, houseCusps, and warnings. Placements must use body, sign, degree, minute, optional retrograde, optional house. House cusps must use house, sign, degree, minute. Astro-Seek tables usually show rows like Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Node, Chiron, ASC, MC with sign glyph/degree/house: read those rows first. Astrodienst/Astro.com tables often show natal positions in black on the left and transit positions in green on the right; extract the black natal positions only, including AC/MC and house cusps when visible. Wheel-only screenshots are still usable: extract every clearly readable planet glyph with zodiac sign and degree, plus Ascendant/Midheaven if visible. If the wheel shows all 12 house cusps, extract them in the supplied house-number order rather than recalculating. Only include placements and cusps you can read clearly.',
+            text: 'Extract visible natal placements from this chart image. Return JSON with provider, confidence, houseConfidence, houseSystem if shown, houseNumberingDirection, optional birthDate/birthTime/birthLocation, placements, houseCusps, and warnings. Placements must use body, sign, degree, minute, optional retrograde, optional house. House cusps must use house, sign, degree, minute. Astro-Seek tables usually show rows like Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Node, Chiron, ASC, MC with sign glyph/degree/house: read those rows first. Also read the Astro-Seek wheel axis labels when visible: ASC/AC = Ascendant, DSC/DC = Descendant, MC = Midheaven, IC = Imum Coeli. Astrodienst/Astro.com tables often show natal positions in black on the left and transit positions in green on the right; extract the black natal positions only, including AC/DC/MC/IC and house cusps when visible. Wheel-only screenshots are still usable: extract every clearly readable planet glyph with zodiac sign and degree, plus Ascendant/Descendant/Midheaven/Imum Coeli if visible. If the wheel shows all 12 house cusps, extract them in the supplied house-number order rather than recalculating. Use ASC/DSC/MC/IC and house numbers to set houseNumberingDirection. Only include placements and cusps you can read clearly.',
           },
           {
             type: 'image_url',
@@ -187,13 +193,15 @@ export async function extractChartFromImage(input: {
 
   const parsed = extractionSchema.parse(JSON.parse(content));
   const seen = new Set<string>();
-  const birthChart = parsed.placements
-    .filter((placement) => {
-      if (seen.has(placement.body)) return false;
-      seen.add(placement.body);
-      return true;
-    })
-    .map(placementToBirthChartData);
+  const birthChart = completeChartAngles(
+    parsed.placements
+      .filter((placement) => {
+        if (seen.has(placement.body)) return false;
+        seen.add(placement.body);
+        return true;
+      })
+      .map(placementToBirthChartData),
+  );
   const seenHouses = new Set<number>();
   const houseCusps = parsed.houseCusps
     .filter((cusp) => {
@@ -206,6 +214,10 @@ export async function extractChartFromImage(input: {
 
   return {
     ...parsed,
+    houseNumberingDirection:
+      parsed.houseNumberingDirection === 'unknown'
+        ? inferHouseNumberingDirection(birthChart, houseCusps)
+        : parsed.houseNumberingDirection,
     birthChart,
     houseCusps,
   };

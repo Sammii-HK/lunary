@@ -5,6 +5,8 @@ import {
   analyseTransitReply,
   buildRedditBirthChartReply,
   buildRedditTransitReply,
+  completeChartAngles,
+  inferHouseNumberingDirection,
   parsePlacementsText,
   type TransitReplyHouseCusp,
 } from '@/lib/transit-reply/analysis';
@@ -126,13 +128,38 @@ async function resolveBirthChart(
   chartMeta?: ShareTransitReplyPayload['chartMeta'];
 }> {
   if (input.placements?.length) {
-    return { birthChart: input.placements, houseCusps: [], warnings: [] };
+    const birthChart = completeChartAngles(input.placements);
+    return {
+      birthChart,
+      houseCusps: [],
+      chartMeta: {
+        provider: 'extension',
+        confidence: 'high',
+        houseConfidence: birthChart.some((placement) => placement.house)
+          ? 'medium'
+          : 'low',
+        houseNumberingDirection: inferHouseNumberingDirection(birthChart),
+      },
+      warnings: [],
+    };
   }
 
   if (input.placementsText?.trim()) {
     const parsed = parsePlacementsText(input.placementsText);
     if (parsed.length >= 3)
-      return { birthChart: parsed, houseCusps: [], warnings: [] };
+      return {
+        birthChart: parsed,
+        houseCusps: [],
+        chartMeta: {
+          provider: 'pasted-table',
+          confidence: 'medium',
+          houseConfidence: parsed.some((placement) => placement.house)
+            ? 'medium'
+            : 'low',
+          houseNumberingDirection: inferHouseNumberingDirection(parsed),
+        },
+        warnings: [],
+      };
   }
 
   if (input.chartImageDataUrl || input.chartImageUrl) {
@@ -150,7 +177,13 @@ async function resolveBirthChart(
           confidence: extracted.confidence,
           houseConfidence: extracted.houseConfidence,
           houseSystem: extracted.houseSystem,
-          houseNumberingDirection: extracted.houseNumberingDirection,
+          houseNumberingDirection:
+            extracted.houseNumberingDirection === 'unknown'
+              ? inferHouseNumberingDirection(
+                  extracted.birthChart,
+                  extracted.houseCusps,
+                )
+              : extracted.houseNumberingDirection,
           birthDate: extracted.birthDate,
           birthTime: extracted.birthTime,
           birthLocation: extracted.birthLocation,
@@ -175,13 +208,17 @@ async function resolveBirthChart(
       'whole-sign',
     );
     return {
-      birthChart: chart.planets,
+      birthChart: completeChartAngles(chart.planets),
       houseCusps: chart.houses,
       chartMeta: {
         provider: 'lunary',
         confidence: 'high',
         houseConfidence: input.birthTime ? 'high' : 'low',
         houseSystem: 'whole-sign',
+        houseNumberingDirection: inferHouseNumberingDirection(
+          completeChartAngles(chart.planets),
+          chart.houses,
+        ),
         birthDate: input.birthDate,
         birthTime: input.birthTime,
         birthLocation: input.birthLocation,

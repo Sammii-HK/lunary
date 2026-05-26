@@ -119,8 +119,14 @@ const BODY_ALIASES: Record<string, string> = {
   ac: 'Ascendant',
   ascendant: 'Ascendant',
   rising: 'Ascendant',
+  dsc: 'Descendant',
+  dc: 'Descendant',
+  desc: 'Descendant',
+  descendant: 'Descendant',
   mc: 'Midheaven',
   midheaven: 'Midheaven',
+  ic: 'Imum Coeli',
+  'imum coeli': 'Imum Coeli',
   chiron: 'Chiron',
   node: 'North Node',
   'north node': 'North Node',
@@ -138,6 +144,8 @@ const NATAL_FOCUS = new Set([
   'Saturn',
   'North Node',
   'Chiron',
+  'Descendant',
+  'Imum Coeli',
 ]);
 
 const TRANSIT_WEIGHTS: Record<string, number> = {
@@ -155,7 +163,9 @@ const TRANSIT_WEIGHTS: Record<string, number> = {
 
 const NATAL_WEIGHTS: Record<string, number> = {
   Ascendant: 24,
+  Descendant: 22,
   Midheaven: 22,
+  'Imum Coeli': 20,
   Sun: 22,
   Moon: 22,
   Venus: 16,
@@ -235,6 +245,118 @@ function signFromLongitude(longitude: number) {
 
 function degreeInSign(longitude: number) {
   return Math.floor(normaliseDegrees(longitude) % 30);
+}
+
+function placementFromLongitude(
+  source: BirthChartData,
+  body: string,
+  longitude: number,
+  house: number,
+): BirthChartData {
+  const normalized = normaliseDegrees(longitude);
+  const sign = signFromLongitude(normalized);
+  const degreeFloat = normalized % 30;
+  let degree = Math.floor(degreeFloat);
+  let minute = Math.round((degreeFloat - degree) * 60);
+
+  if (minute === 60) {
+    degree += 1;
+    minute = 0;
+  }
+  if (degree === 30) {
+    degree = 0;
+  }
+
+  return {
+    body,
+    sign,
+    degree,
+    minute,
+    eclipticLongitude: normalized,
+    retrograde: source.retrograde,
+    house,
+  };
+}
+
+function withDefaultAxisHouse(placement: BirthChartData): BirthChartData {
+  if (placement.house) return placement;
+  if (placement.body === 'Ascendant') return { ...placement, house: 1 };
+  if (placement.body === 'Descendant') return { ...placement, house: 7 };
+  if (placement.body === 'Midheaven') return { ...placement, house: 10 };
+  if (placement.body === 'Imum Coeli') return { ...placement, house: 4 };
+  return placement;
+}
+
+export function completeChartAngles(
+  birthChart: BirthChartData[],
+): BirthChartData[] {
+  const chart = birthChart.map(withDefaultAxisHouse);
+  const bodies = new Set(chart.map((placement) => placement.body));
+  const ascendant = chart.find((placement) => placement.body === 'Ascendant');
+  const midheaven = chart.find((placement) => placement.body === 'Midheaven');
+
+  if (ascendant && !bodies.has('Descendant')) {
+    chart.push(
+      placementFromLongitude(
+        ascendant,
+        'Descendant',
+        ascendant.eclipticLongitude + 180,
+        7,
+      ),
+    );
+  }
+  if (midheaven && !bodies.has('Imum Coeli')) {
+    chart.push(
+      placementFromLongitude(
+        midheaven,
+        'Imum Coeli',
+        midheaven.eclipticLongitude + 180,
+        4,
+      ),
+    );
+  }
+
+  return chart;
+}
+
+function isForwardBetween(start: number, end: number, target: number) {
+  const span = normaliseDegrees(end - start);
+  const offset = normaliseDegrees(target - start);
+  return offset > 0 && offset < span;
+}
+
+export function inferHouseNumberingDirection(
+  birthChart: BirthChartData[],
+  houseCusps: TransitReplyHouseCusp[] = [],
+): 'clockwise' | 'counterclockwise' | 'unknown' {
+  const house = (houseNumber: number) =>
+    houseCusps.find((cusp) => cusp.house === houseNumber)?.eclipticLongitude;
+  const point = (body: string) =>
+    birthChart.find((placement) => placement.body === body)?.eclipticLongitude;
+
+  const ascendant = house(1) ?? point('Ascendant');
+  const descendant = house(7) ?? point('Descendant');
+  const midheaven = house(10) ?? point('Midheaven');
+  const imumCoeli = house(4) ?? point('Imum Coeli');
+
+  if (!Number.isFinite(ascendant) || !Number.isFinite(descendant)) {
+    return 'unknown';
+  }
+
+  if (
+    Number.isFinite(imumCoeli) &&
+    isForwardBetween(ascendant!, descendant!, imumCoeli!)
+  ) {
+    return 'clockwise';
+  }
+  if (
+    Number.isFinite(midheaven) &&
+    isForwardBetween(ascendant!, descendant!, midheaven!)
+  ) {
+    return 'counterclockwise';
+  }
+
+  return 'unknown';
 }
 
 function angularDistance(a: number, b: number) {
@@ -629,7 +751,7 @@ export function parsePlacementsText(input: string): BirthChartData[] {
     usedBodies.add(body);
   }
 
-  return placements;
+  return completeChartAngles(placements);
 }
 
 function findSignInLine(line: string) {

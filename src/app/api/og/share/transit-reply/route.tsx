@@ -73,7 +73,9 @@ const MAIN_BODIES = new Set([
   'Neptune',
   'Pluto',
   'Ascendant',
+  'Descendant',
   'Midheaven',
+  'Imum Coeli',
 ]);
 
 function normaliseDegrees(value: number) {
