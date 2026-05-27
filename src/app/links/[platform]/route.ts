@@ -38,10 +38,12 @@ const PLATFORM_DESTINATIONS: Record<string, Destination> = {
   pin: { path: '/birth-chart', campaign: 'pin_bio_birth_chart' },
   reddit: { path: '/grimoire', campaign: 'reddit_bio_grimoire' },
   mastodon: { path: '/grimoire', campaign: 'mastodon_bio_grimoire' },
-  discord: { path: '/community', campaign: 'discord_bio_community' },
   podcast: { path: '/podcast', campaign: 'podcast_bio' },
   substack: { path: '/grimoire', campaign: 'substack_bio_grimoire' },
 };
+// Notes on destinations intentionally NOT in this map:
+//   - discord: dead channel, audience mismatch — falls back to /links menu
+//   - community: in-app destination, requires auth, not a cold landing
 
 function normaliseSlug(raw: string): string {
   return raw.toLowerCase().replace(/[^a-z0-9_-]/g, '');
