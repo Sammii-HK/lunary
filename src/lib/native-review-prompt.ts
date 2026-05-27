@@ -88,8 +88,8 @@ const getStoredValue = (storage: StorageLike | null, key: string) => {
 
 export function recordNativeReviewSession(
   now = Date.now(),
-  localStorage = getBrowserLocalStorage(),
-  sessionStorage = getBrowserSessionStorage(),
+  localStorage: StorageLike | null = getBrowserLocalStorage(),
+  sessionStorage: StorageLike | null = getBrowserSessionStorage(),
 ) {
   if (!localStorage || !sessionStorage) return;
 
@@ -149,7 +149,7 @@ export function shouldRequestNativeReviewPrompt({
 
 export function markNativeReviewRequested(
   now = Date.now(),
-  localStorage = getBrowserLocalStorage(),
+  localStorage: StorageLike | null = getBrowserLocalStorage(),
 ) {
   if (!localStorage) return;
 

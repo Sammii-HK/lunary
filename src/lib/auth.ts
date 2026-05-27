@@ -345,7 +345,7 @@ async function initializeAuth() {
                     trialEndsAt.toISOString(),
                   ],
                 );
-                autoTrialCreated = trialResult.rowCount > 0;
+                autoTrialCreated = (trialResult.rowCount ?? 0) > 0;
               } catch (subError) {
                 console.error(
                   'Failed to create auto-trial subscription:',
