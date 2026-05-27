@@ -86,12 +86,10 @@ describe('InlineContextualNudge Component', () => {
         <InlineContextualNudge nudge={mockNudge} serverVariant='minimal' />,
       );
 
-      const button = screen.getByRole('button');
-      expect(button).toBeInTheDocument();
-      expect(button).toHaveTextContent(
-        'See where Aries shows up in your chart',
-      );
-      expect(button).toHaveClass('underline');
+      const link = screen.getByRole('link');
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveTextContent('See where Aries shows up in your chart');
+      expect(link).toHaveClass('underline');
     });
 
     it('renders sparkles variant with icon and chevron', () => {
@@ -99,36 +97,32 @@ describe('InlineContextualNudge Component', () => {
         <InlineContextualNudge nudge={mockNudge} serverVariant='sparkles' />,
       );
 
-      const button = screen.getByRole('button');
-      expect(button).toBeInTheDocument();
-      expect(button).toHaveTextContent(
-        'See where Aries shows up in your chart',
-      );
+      const link = screen.getByRole('link');
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveTextContent('See where Aries shows up in your chart');
 
       // Check for flex layout with icons
-      expect(button).toHaveClass('inline-flex');
-      expect(button).toHaveClass('items-center');
+      expect(link).toHaveClass('inline-flex');
+      expect(link).toHaveClass('items-center');
     });
 
     it('renders card variant with background styling', () => {
       render(<InlineContextualNudge nudge={mockNudge} serverVariant='card' />);
 
-      const button = screen.getByRole('button');
-      expect(button).toBeInTheDocument();
-      expect(button).toHaveTextContent(
-        'See where Aries shows up in your chart',
-      );
+      const link = screen.getByRole('link');
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveTextContent('See where Aries shows up in your chart');
 
       // Card variant has background and border
-      expect(button).toHaveClass('rounded-lg');
-      expect(button).toHaveClass('border');
+      expect(link).toHaveClass('rounded-lg');
+      expect(link).toHaveClass('border');
     });
 
     it('defaults to sparkles when no serverVariant provided', () => {
       render(<InlineContextualNudge nudge={mockNudge} />);
 
-      const button = screen.getByRole('button');
-      expect(button).toHaveClass('inline-flex');
+      const link = screen.getByRole('link');
+      expect(link).toHaveClass('inline-flex');
     });
   });
 
@@ -145,7 +139,6 @@ describe('InlineContextualNudge Component', () => {
           ctaId: 'inline_contextual_nudge',
           location: 'seo_inline_post_tldr',
           label: 'See where Aries shows up in your chart',
-          href: '/app/chart',
           abTest: 'inline_cta',
           abVariant: 'sparkles',
           inlineStyle: 'sparkles',
@@ -178,8 +171,8 @@ describe('InlineContextualNudge Component', () => {
         <InlineContextualNudge nudge={mockNudge} serverVariant='minimal' />,
       );
 
-      const button = screen.getByRole('button');
-      fireEvent.click(button);
+      const link = screen.getByRole('link');
+      fireEvent.click(link);
 
       expect(mockTrackCtaClick).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -221,10 +214,9 @@ describe('InlineContextualNudge Component', () => {
         <InlineContextualNudge nudge={mockNudge} serverVariant='sparkles' />,
       );
 
-      const button = screen.getByRole('button');
-      fireEvent.click(button);
-
-      expect(mockPush).toHaveBeenCalledWith('/app/chart');
+      // Component uses <Link href> for navigation, not router.push
+      const link = screen.getByRole('link');
+      expect(link).toHaveAttribute('href', '/app/chart');
     });
 
     it('navigates to signup page when not authenticated', async () => {
@@ -238,13 +230,9 @@ describe('InlineContextualNudge Component', () => {
         <InlineContextualNudge nudge={mockNudge} serverVariant='sparkles' />,
       );
 
-      const button = screen.getByRole('button');
-      fireEvent.click(button);
-
-      // Should navigate to value-prop signup page with context params
-      expect(mockPush).toHaveBeenCalledWith(
-        expect.stringContaining('/signup/chart?'),
-      );
+      // Should point to value-prop signup page with context params
+      const link = screen.getByRole('link');
+      expect(link.getAttribute('href')).toContain('/signup/chart?');
     });
 
     it('navigates directly for link action regardless of auth', () => {
@@ -263,10 +251,8 @@ describe('InlineContextualNudge Component', () => {
         <InlineContextualNudge nudge={linkNudge} serverVariant='sparkles' />,
       );
 
-      const button = screen.getByRole('button');
-      fireEvent.click(button);
-
-      expect(mockPush).toHaveBeenCalledWith('/app/chart');
+      const link = screen.getByRole('link');
+      expect(link).toHaveAttribute('href', '/app/chart');
     });
   });
 
