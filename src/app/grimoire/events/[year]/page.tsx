@@ -440,6 +440,8 @@ export default async function EventsYearPage({
   const { year } = await params;
   const yearNum = parseInt(year, 10);
   const nextYear = yearNum + 1;
+  const datasetUrl = `https://lunary.app/grimoire/datasets/astrology-calendar/${year}.json`;
+  const methodologyUrl = 'https://lunary.app/about/methodology';
 
   if (isNaN(yearNum) || yearNum < START_YEAR || yearNum > END_YEAR) {
     notFound();
@@ -571,12 +573,38 @@ While these events affect everyone, their impact on your personal chart is uniqu
       ]}
       whatIs={{
         question: `What are the astrological events in ${year}?`,
-        answer: `${year} features ${stats.mercuryRetrograde} Mercury retrograde periods, ${stats.venusRetrograde} Venus retrograde, ${stats.eclipses} eclipses, ${stats.outerPlanetRx} outer planet retrograde periods${stats.signChanges > 0 ? `, and ${stats.signChanges} major planet sign changes` : ''}. This calendar provides complete dates and guidance for navigating all major cosmic events.`,
+        answer: `${year} features ${stats.mercuryRetrograde} Mercury retrograde periods, ${stats.venusRetrograde} Venus retrograde period, ${stats.eclipses} eclipses, ${stats.outerPlanetRx} outer planet retrograde periods${stats.signChanges > 0 ? `, and ${stats.signChanges} major planet sign changes` : ''}. The date-level source for these counts is Lunary's ${year} astrology calendar JSON dataset.`,
       }}
       intro={`Major astrological events gathers the eclipses, retrogrades, and major transits that matter so you can scan the dates and the quick meaning they carry. Each date also notes what to expect so you can plan within the timing instead of reacting to it.`}
       tldr={`${year} Astrological Events: ${stats.mercuryRetrograde} Mercury retrogrades, ${stats.venusRetrograde} Venus retrograde, ${stats.eclipses} eclipses, ${stats.outerPlanetRx} outer planet retrogrades. Use this calendar to plan ahead and align with cosmic energies.`}
       meaning={meaningContent}
       faqs={faqs}
+      citableFacts={[
+        {
+          claim: `${year} has ${stats.mercuryRetrograde} Mercury retrograde periods, ${stats.eclipses} eclipses, and ${stats.outerPlanetRx} outer planet retrograde periods in Lunary's generated astrology calendar.`,
+          sourceName: `${year} astrology calendar JSON`,
+          sourceUrl: datasetUrl,
+          date: year,
+        },
+        {
+          claim: `${year} includes ${stats.signChanges} major planet sign changes and ${stats.conjunctions} major conjunction event groupings in this Grimoire calendar view.`,
+          sourceName: `${year} astrology events page`,
+          sourceUrl: `https://lunary.app/grimoire/events/${year}`,
+          date: year,
+        },
+        {
+          claim:
+            'Lunary derives event timing from astronomical calculations, then layers astrology interpretation onto the computed dates.',
+          sourceName: 'Lunary methodology',
+          sourceUrl: methodologyUrl,
+        },
+      ]}
+      citationMetadata={{
+        summary: `Citation sources for ${year} event counts, date windows, and interpretation context.`,
+        methodologyUrl,
+        datasetUrl,
+        citationUrl: `https://lunary.app/grimoire/events/${year}`,
+      }}
       cosmicConnections={
         <CosmicConnections
           entityType='hub-events'
@@ -605,6 +633,18 @@ While these events affect everyone, their impact on your personal chart is uniqu
                 className='px-4 py-3 rounded-lg border border-stroke-subtle bg-surface-base text-sm font-medium text-content-primary hover:border-lunary-primary-500 transition-colors'
               >
                 Astrology events {nextYear}
+              </Link>
+              <Link
+                href={`/grimoire/datasets/astrology-calendar/${year}.json`}
+                className='px-4 py-3 rounded-lg border border-stroke-subtle bg-surface-base text-sm font-medium text-content-primary hover:border-lunary-primary-500 transition-colors'
+              >
+                {year} astrology calendar JSON
+              </Link>
+              <Link
+                href='/about/methodology'
+                className='px-4 py-3 rounded-lg border border-stroke-subtle bg-surface-base text-sm font-medium text-content-primary hover:border-lunary-primary-500 transition-colors'
+              >
+                Lunary calculation methodology
               </Link>
             </div>
           </section>

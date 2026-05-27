@@ -106,6 +106,14 @@
       "schedule": "5 0 * * *"
     },
     {
+      "path": "/api/cron/citation-dataset-snapshots",
+      "schedule": "10 0 * * *"
+    },
+    {
+      "path": "/api/cron/transit-blog-generate",
+      "schedule": "0 10 * * 3"
+    },
+    {
       "path": "/api/cron/trial-nurture",
       "schedule": "0 6 * * *"
     },

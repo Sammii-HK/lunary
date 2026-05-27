@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { Button } from '@/components/ui/button';
 import { ContextualNudge } from '@/lib/grimoire/getContextualNudge';
 import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
+import { buildSignupChartUrl, seoSignupSourceForPath } from '@/lib/urls';
 
 interface ContextualNudgeButtonProps {
   nudge: ContextualNudge;
@@ -17,7 +19,6 @@ export function ContextualNudgeButton({
   location = 'seo_contextual_nudge',
 }: ContextualNudgeButtonProps) {
   const authState = useAuthStatus();
-  const router = useRouter();
   const pathname = usePathname() || '';
   const impressionTracked = useRef(false);
 
@@ -25,6 +26,21 @@ export function ContextualNudgeButton({
   // A/B test is scoped per hub so we can compare copy variants within each hub
   const abTestName = `seo_cta_${nudge.hub}`;
   const abVariantIndex = nudge.ctaVariant?.split('_').pop() || '0';
+  const signupHref = buildSignupChartUrl({
+    source: seoSignupSourceForPath(pathname),
+    medium: 'cta',
+    campaign: 'chart_signup',
+    content: location,
+    hub: nudge.hub,
+    headline: nudge.headline,
+    subline: nudge.subline,
+    location,
+    pagePath: pathname,
+  });
+  const targetHref =
+    (nudge.action === 'link' || authState.isAuthenticated
+      ? nudge.href
+      : signupHref) || signupHref;
 
   useEffect(() => {
     if (!impressionTracked.current) {
@@ -34,7 +50,7 @@ export function ContextualNudgeButton({
         ctaId: 'contextual_nudge',
         location,
         label: nudge.buttonLabel,
-        href: nudge.href,
+        href: targetHref,
         pagePath: pathname,
         exampleType: nudge.exampleType,
         exampleText: nudge.exampleText,
@@ -45,13 +61,7 @@ export function ContextualNudgeButton({
         abVariant: abVariantIndex,
       });
     }
-  }, [nudge, location, pathname, abTestName, abVariantIndex]);
-
-  const navigateToHref = () => {
-    if (nudge.href) {
-      router.push(nudge.href);
-    }
-  };
+  }, [nudge, location, pathname, abTestName, abVariantIndex, targetHref]);
 
   const handleClick = () => {
     trackCtaClick({
@@ -59,7 +69,7 @@ export function ContextualNudgeButton({
       ctaId: 'contextual_nudge',
       location,
       label: nudge.buttonLabel,
-      href: nudge.href,
+      href: targetHref,
       pagePath: pathname,
       exampleType: nudge.exampleType,
       exampleText: nudge.exampleText,
@@ -69,34 +79,17 @@ export function ContextualNudgeButton({
       abTest: abTestName,
       abVariant: abVariantIndex,
     });
-
-    if (nudge.action === 'link') {
-      navigateToHref();
-      return;
-    }
-
-    if (!authState.isAuthenticated) {
-      const params = new URLSearchParams({
-        hub: nudge.hub,
-        headline: nudge.headline,
-        subline: nudge.subline,
-        location,
-        pagePath: pathname,
-      });
-      router.push(`/signup/chart?${params.toString()}`);
-      return;
-    }
-
-    navigateToHref();
   };
 
   return (
     <Button
       variant='lunary-soft'
-      onClick={handleClick}
+      asChild
       className='min-w-[200px] py-6 px-8 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105'
     >
-      {nudge.buttonLabel}
+      <Link href={targetHref} onClick={handleClick}>
+        {nudge.buttonLabel}
+      </Link>
     </Button>
   );
 }

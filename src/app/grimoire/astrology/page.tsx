@@ -200,6 +200,89 @@ export default function AstrologyIndexPage() {
             'Astrology is a symbolic system that maps planetary positions to human experience. A birth chart captures the sky at your birth, and its placements, houses, and aspects describe patterns of personality, timing, and growth.',
         }}
         tldr='Astrology interprets the sky as a map of patterns. Your birth chart shows planetary placements, houses show life areas, and aspects show how energies interact. Transits and retrogrades describe how timing unfolds over time.'
+        structuredSummary={[
+          {
+            label: 'Core model',
+            value:
+              'Planets describe what is active, signs describe how it acts, houses describe where it lands, aspects describe relationship, and transits describe timing.',
+          },
+          {
+            label: 'Best starting point',
+            value:
+              'Begin with the birth chart, then read the Big Three, chart ruler, houses, aspects, and current transits.',
+            href: '/grimoire/birth-chart',
+          },
+          {
+            label: 'Calculation layer',
+            value:
+              'Lunary separates astronomical calculation from symbolic interpretation before applying chart meaning.',
+            href: '/about/methodology',
+          },
+          {
+            label: 'Use case',
+            value:
+              'Astrology is most useful as context for pattern recognition, timing, and self-reflection, not as deterministic instruction.',
+          },
+        ]}
+        conceptComparisons={[
+          {
+            label: 'Signs vs houses',
+            description:
+              'Signs describe style and expression; houses describe the life area where that expression becomes visible.',
+            href: '/grimoire/houses',
+          },
+          {
+            label: 'Natal chart vs transits',
+            description:
+              'The natal chart is the fixed birth map; transits are the moving sky interacting with that map over time.',
+            href: '/grimoire/transits',
+          },
+          {
+            label: 'Astronomy vs astrology',
+            description:
+              'Astronomy calculates celestial positions; astrology interprets those positions as symbolic timing and chart context.',
+            href: '/grimoire/astronomy-vs-astrology',
+          },
+        ]}
+        whyThisWorks={{
+          points: [
+            'Astrology becomes coherent when each symbol has a job: planet, sign, house, aspect, and timing layer.',
+            'A chart reading is stronger when it explains why a symbol means something instead of repeating isolated keywords.',
+            'Lunary treats future and current sky pages as educational forecasting: calculated sky facts first, interpretation second.',
+          ],
+        }}
+        learningPath={[
+          {
+            title: 'Start with birth charts',
+            href: '/grimoire/birth-chart',
+            description:
+              'Learn what a natal chart is and why exact birth data matters.',
+          },
+          {
+            title: 'Learn planets',
+            href: '/grimoire/astronomy/planets',
+            description:
+              'Understand what each planetary function represents in a chart.',
+          },
+          {
+            title: 'Read houses',
+            href: '/grimoire/houses',
+            description:
+              'Map placements into real life areas before judging meaning.',
+          },
+          {
+            title: 'Add aspects',
+            href: '/grimoire/aspects',
+            description:
+              'See how planets cooperate, intensify, or challenge each other.',
+          },
+          {
+            title: 'Track timing',
+            href: '/grimoire/transits',
+            description:
+              'Use transits and retrogrades to understand timing and context.',
+          },
+        ]}
         intro='Want to understand how astrology maps the sky to your life? This guide walks through birth charts, houses, aspects, placements, and timing so you can name the cycles you already feel and then dive deeper into each topic.'
         meaning='Astrology works through three main building blocks: planets, signs, and houses. Planets describe *what* energy is active, signs describe *how* that energy expresses, and houses describe *where* it shows up in life. A placement such as "Venus in Taurus in the 7th House" is a complete sentence: Venus (love, values) in Taurus (steady, sensual) expressed through the 7th House (relationships).\n\nAspects are the relationships between planets. They show how parts of your chart support, challenge, or intensify each other. A trine indicates ease and flow, a square indicates tension that pushes growth, and an opposition shows polarity that seeks balance. Aspects do not cancel each other out; they describe the way your inner world moves.\n\nTiming comes from transits and cycles. Transits show how the current sky interacts with your birth chart, revealing seasons of change, reflection, or momentum. Retrogrades highlight review periods rather than failure. Lunar nodes point to long-term growth themes, while eclipses and major transits mark turning points. Astrology becomes most helpful when you see these timing layers as context for choices, not a script to follow.\n\nThis page gathers the core topics that make astrology practical: understanding the birth chart, learning houses and aspects, exploring placements, and tracking cycles. Use it as a map to navigate the deeper guides below.'
         howToWorkWith={[
@@ -234,6 +317,28 @@ export default function AstrologyIndexPage() {
           { text: 'Astrological Houses', href: '/grimoire/houses' },
           { text: 'Aspects', href: '/grimoire/aspects' },
           { text: 'Transits', href: '/grimoire/transits' },
+        ]}
+        citationMetadata={{
+          summary:
+            'Use this page as Lunary’s canonical overview of the astrology reading model: planets, signs, houses, aspects, and timing.',
+          methodologyUrl: 'https://lunary.app/about/methodology',
+          datasetUrl:
+            'https://lunary.app/grimoire/datasets/core-astrology.json',
+          citationUrl: 'https://lunary.app/about/citations',
+        }}
+        citableFacts={[
+          {
+            claim:
+              'Lunary’s core astrology model reads planets as functions, signs as style, houses as life areas, aspects as relationships, and transits as timing context.',
+            sourceName: 'Lunary astrology guide',
+            sourceUrl: 'https://lunary.app/grimoire/astrology',
+          },
+          {
+            claim:
+              'Lunary separates astronomical calculation from symbolic interpretation before presenting chart meaning.',
+            sourceName: 'Lunary methodology',
+            sourceUrl: 'https://lunary.app/about/methodology',
+          },
         ]}
       >
         <div className='space-y-12'>

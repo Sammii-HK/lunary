@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { ClientCache } from '@/lib/patterns/snapshot/cache';
+import { ClientCache } from '@/lib/patterns/snapshot/client-cache';
 
 interface UsePatternsOptions {
   userId?: string;

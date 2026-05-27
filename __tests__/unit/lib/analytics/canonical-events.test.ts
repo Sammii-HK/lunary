@@ -24,6 +24,55 @@ describe('canonicaliseEvent', () => {
     expect((result.row.metadata as any).message).toBeUndefined();
   });
 
+  it('maps legacy tarot and personalised horoscope events to activation events', () => {
+    const tarot = canonicaliseEvent({
+      eventType: 'tarot_viewed',
+      userId: 'user_1',
+    });
+    const paidTarot = canonicaliseEvent({
+      eventType: 'personalized_tarot_viewed',
+      userId: 'user_1',
+    });
+    const horoscope = canonicaliseEvent({
+      eventType: 'personalized_horoscope_viewed',
+      userId: 'user_1',
+    });
+
+    expect(tarot.ok).toBe(true);
+    expect(paidTarot.ok).toBe(true);
+    expect(horoscope.ok).toBe(true);
+    if (!tarot.ok || !paidTarot.ok || !horoscope.ok) return;
+
+    expect(tarot.row.eventType).toBe('tarot_drawn');
+    expect(paidTarot.row.eventType).toBe('tarot_drawn');
+    expect(horoscope.row.eventType).toBe('horoscope_viewed');
+  });
+
+  it('accepts checkout funnel proof events', () => {
+    const started = canonicaliseEvent({
+      eventType: 'checkout_started',
+      userId: 'user_1',
+      metadata: { utm_source: 'threads', cta_id: 'pricing_monthly' },
+    });
+    const completed = canonicaliseEvent({
+      eventType: 'checkout_completed',
+      userId: 'user_1',
+      metadata: { first_touch_source: 'threads' },
+    });
+
+    expect(started.ok).toBe(true);
+    expect(completed.ok).toBe(true);
+    if (!started.ok || !completed.ok) return;
+
+    expect(started.row.eventType).toBe('checkout_started');
+    expect(started.row.metadata).toMatchObject({
+      canonical_event_type: 'checkout_started',
+      utm_source: 'threads',
+      cta_id: 'pricing_monthly',
+    });
+    expect(completed.row.eventType).toBe('checkout_completed');
+  });
+
   it('supports anonymous users (userId derived from anonymousId)', () => {
     const result = canonicaliseEvent({
       eventType: 'signup',

@@ -11,6 +11,7 @@ import {
   getTransitById,
 } from '../src/lib/blog/transit-deep-dive/index';
 import { checkArticleQuality } from '../src/lib/blog/transit-deep-dive/quality-check';
+import { formatTextArray } from '../src/lib/postgres/formatTextArray';
 import { sql } from '@vercel/postgres';
 import { randomBytes } from 'crypto';
 
@@ -55,7 +56,7 @@ async function generate(transitId: string) {
     ) VALUES (
       ${id}, ${transitId}, ${transitId}, ${content.title}, ${content.subtitle},
       ${content.metaDescription},
-      ${`{${content.keywords.map((k: string) => `"${k.replace(/"/g, '\\"')}"`).join(',')}}`},
+      ${formatTextArray(content.keywords)},
       ${content.introduction}, ${content.historicalDeepDive},
       ${content.astronomicalContext}, ${content.practicalGuidance},
       ${JSON.stringify(content.signBreakdowns)}, ${content.closingSection},

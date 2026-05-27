@@ -103,6 +103,32 @@ const PUBLIC_SEO_PREFIXES = [
   '/shop',
 ];
 
+const LEGACY_SEASON_SLUGS = new Set([
+  'aries-season',
+  'taurus-season',
+  'gemini-season',
+  'cancer-season',
+  'leo-season',
+  'virgo-season',
+  'libra-season',
+  'scorpio-season',
+  'sagittarius-season',
+  'capricorn-season',
+  'aquarius-season',
+  'pisces-season',
+]);
+
+function getLegacySeasonSign(pathname: string): string | null {
+  const match = pathname.match(/^\/grimoire\/seasons\/([^/]+)$/);
+  const slug = match?.[1];
+
+  if (!slug || !LEGACY_SEASON_SLUGS.has(slug)) {
+    return null;
+  }
+
+  return slug.replace(/-season$/, '');
+}
+
 const shouldSkipTracking = (request: NextRequest, hostname: string) => {
   if (request.method !== 'GET') return true;
 
@@ -232,7 +258,7 @@ function queueServerPageview(
         anonymousId: anonId,
         pagePath,
         metadata: {
-          source: 'server_middleware_pageview',
+          event_source: 'server_middleware_pageview',
           server_side: true,
           analytics_channel: 'middleware',
           referrer,
@@ -499,6 +525,16 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
   }
   if (normalisedPath === '/grimoire/numerology/planetary-days') {
     return buildRedirect(request, '/grimoire/correspondences/days', 301);
+  }
+
+  const legacySeasonSign = getLegacySeasonSign(normalisedPath);
+  if (legacySeasonSign) {
+    const currentYear = new Date().getUTCFullYear();
+    return buildRedirect(
+      request,
+      `/grimoire/seasons/${currentYear}/${legacySeasonSign}`,
+      308,
+    );
   }
 
   // Apply legacy mappings after normalisation, so it catches %20, casing, etc.

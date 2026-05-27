@@ -15,12 +15,13 @@ import { getPersonalTransitImpacts } from '../../../../../utils/astrology/person
 import { getUpcomingTransits } from '../../../../../utils/astrology/transitCalendar';
 import { HoroscopeSection } from './HoroscopeSection';
 import { FeaturePreview } from './FeaturePreview';
-import { TodaysAspects, MoonPhaseCard } from './TodaysAspects';
+import { TodaysAspects, AspectsTeaser, MoonPhaseCard } from './TodaysAspects';
 import { TransitWisdom } from './TransitWisdom';
 import { UnifiedTransitList } from './UnifiedTransitList';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { ShareRetrogradeBadge } from '@/components/share/ShareRetrogradeBadge';
 import { ShareHoroscope } from '@/components/share/ShareHoroscope';
+import { ShareTransitReply } from '@/components/share/ShareTransitReply';
 import { HoroscopeReflectionPrompts } from '@/components/horoscope/HoroscopeReflectionPrompts';
 import { HoroscopeSeasonReading } from '@/components/horoscope/HoroscopeSeasonReading';
 import { HoroscopeRitualForDay } from '@/components/horoscope/HoroscopeRitualForDay';
@@ -38,6 +39,19 @@ const GuideNudge = dynamic(
     })),
   {
     loading: () => null,
+    ssr: false,
+  },
+);
+
+const SkyNowCard = dynamic(
+  () =>
+    import('@/components/compact/SkyNowCard').then((m) => ({
+      default: m.SkyNowCard,
+    })),
+  {
+    loading: () => (
+      <div className='h-16 bg-surface-elevated/50 rounded-lg animate-pulse' />
+    ),
     ssr: false,
   },
 );
@@ -133,6 +147,7 @@ export function HoroscopeView({
   const [currentTransits, setCurrentTransits] = useState<any[]>([]);
   const [horoscope, setHoroscope] = useState<CachedHoroscope | null>(null);
   const [isLoading, setIsLoading] = useState(hasPaidAccess);
+  const [skyNowExpanded, setSkyNowExpanded] = useState(false);
   const [numerologyModal, setNumerologyModal] =
     useState<NumerologyModalPayload | null>(null);
   const {
@@ -185,14 +200,15 @@ export function HoroscopeView({
     fetchHoroscope();
   }, [hasPaidAccess, userBirthday, userName, profile]);
 
-  // Load astronomy-engine for Transit Wisdom + Aspects (paid only)
+  // Load astronomy-engine: always for paid users; for free users only when they
+  // have a birth chart so we can compute real data for the teaser sections.
   useEffect(() => {
-    if (!hasPaidAccess) return;
+    if (!hasPaidAccess && !birthChart) return;
     import('astronomy-engine').then((module) => {
       const { Observer } = module;
       setObserver(new Observer(51.4769, 0.0005, 0));
     });
-  }, [hasPaidAccess]);
+  }, [hasPaidAccess, birthChart]);
 
   useEffect(() => {
     if (!observer || !birthChart) return;
@@ -367,6 +383,9 @@ export function HoroscopeView({
             </p>
           </div>
           <div className='flex items-center gap-2'>
+            {birthChart && birthChart.length > 0 && (
+              <ShareTransitReply birthChart={birthChart} compact />
+            )}
             <ShareRetrogradeBadge compact />
             {horoscope ? (
               <ShareHoroscope
@@ -397,6 +416,13 @@ export function HoroscopeView({
         </div>
       )}
 
+      {/* Sky Now — current planetary positions, expandable */}
+      <SkyNowCard
+        isExpanded={skyNowExpanded}
+        onToggle={(expanded) => setSkyNowExpanded(expanded)}
+        showNatalHouses={hasPaidAccess}
+      />
+
       {/* Cosmic Highlight Card */}
       <div className='rounded-xl border border-stroke-subtle/70 bg-gradient-to-br from-surface-elevated/70 via-surface-base/70 to-layer-deep p-3 space-y-3'>
         {/* <p className='text-[11px] font-semibold tracking-[0.3em] uppercase text-content-muted'>
@@ -413,12 +439,17 @@ export function HoroscopeView({
             compactVariant='inline'
           /> */}
         </div>
-        <AutoLinkText
-          as='p'
-          className='text-xs md:text-sm text-content-secondary leading-relaxed'
-        >
-          {dailyGuidance}
-        </AutoLinkText>
+        {/* Paid users get the full personalised reading; free users get only
+            the teaser — generic guidance is deliberately withheld so the
+            personalised preview creates clear FOMO rather than giving away free content */}
+        {hasPaidAccess && (
+          <AutoLinkText
+            as='p'
+            className='text-xs md:text-sm text-content-secondary leading-relaxed'
+          >
+            {dailyGuidance}
+          </AutoLinkText>
+        )}
 
         {personalizedTeaser && (
           <Link href='/pricing?nav=app' className='block space-y-2 group'>
@@ -665,7 +696,8 @@ export function HoroscopeView({
         moonPhase={horoscope?.moonPhase || generalHoroscope?.moonPhase}
       />
 
-      {/* Transit Wisdom, paid: full component; free: locked preview */}
+      {/* Transit Wisdom: paid = full list; free + real transits = top-1 teaser;
+          free + no transits = static blurred mock */}
       {hasPaidAccess && birthChart && currentTransits.length > 0 ? (
         <HoroscopeSection
           title='Transit Wisdom'
@@ -683,66 +715,84 @@ export function HoroscopeView({
         </HoroscopeSection>
       ) : (
         !hasPaidAccess && (
-          <FeaturePreview
+          <HoroscopeSection
             title='Transit Wisdom'
-            description="See how today's planetary shifts are touching your life, intensity, themes, and what to watch for"
-            feature='personalized_horoscope'
-            ctaKey='horoscope'
-            trackingFeature='transit_wisdom'
-            page='horoscope'
-            blurredContent={
-              <div className='space-y-3'>
-                <div className='rounded-lg border border-lunary-error-700/50 bg-surface-elevated/40 p-4 space-y-3'>
-                  <div className='flex items-start gap-3'>
-                    <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-layer-deep/60 text-lunary-error-300'>
-                      Highly Prominent
-                    </span>
-                    <div className='flex-1'>
-                      <h4 className='text-sm font-medium text-content-primary'>
-                        Saturn meets your Sun
-                      </h4>
-                      <p className='text-xs text-content-muted mt-0.5'>
-                        Saturn in Aquarius · Sun in Aquarius
-                      </p>
-                    </div>
+            color='indigo'
+            id='transit-wisdom'
+          >
+            <p className='text-sm text-content-muted mb-2'>
+              What the sky is stirring up for you today
+            </p>
+            {birthChart && currentTransits.length > 0 ? (
+              <>
+                {/* Real top-1 transit — the user can see exactly what they had on trial */}
+                <TransitWisdom
+                  birthChart={birthChart}
+                  currentTransits={currentTransits}
+                  maxItems={1}
+                />
+                {/* Ghost cards to hint at the remaining transits */}
+                <div className='relative mt-2'>
+                  <div className='filter blur-sm opacity-40 pointer-events-none space-y-2'>
+                    <div className='rounded-lg border border-stroke-default bg-surface-elevated/40 p-4 h-24' />
+                    <div className='rounded-lg border border-stroke-default bg-surface-elevated/40 p-4 h-16' />
                   </div>
-                  <div className='flex flex-wrap gap-1.5'>
-                    <span className='inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border bg-amber-900/40 text-amber-300 border-amber-700/40'>
-                      Identity
+                  <div className='absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-b from-transparent to-surface-base rounded-lg'>
+                    <span className='inline-flex items-center gap-1 text-[10px] bg-layer-base/50 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-content-brand'>
+                      <Sparkles className='w-2.5 h-2.5' />
+                      Lunary+
                     </span>
-                    <span className='inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border bg-blue-900/40 text-blue-300 border-blue-700/40'>
-                      Work
-                    </span>
+                    <Link
+                      href='/pricing?nav=app'
+                      className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-surface-elevated/80 px-4 py-2 text-xs font-medium text-content-brand hover:bg-surface-elevated transition-colors'
+                    >
+                      <Sparkles className='w-3 h-3' />
+                      See all transit insights
+                    </Link>
                   </div>
-                  <p className='text-sm text-content-secondary leading-relaxed'>
-                    A period of deep restructuring around your sense of self and
-                    long-term commitments. Discipline and patience will unlock
-                    lasting transformation.
-                  </p>
                 </div>
-                <div className='rounded-lg border border-lunary-accent-700/50 bg-surface-elevated/40 p-4 space-y-3'>
-                  <div className='flex items-start gap-3'>
-                    <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-layer-deep/60 text-content-brand-accent'>
-                      Noticeable
-                    </span>
-                    <div className='flex-1'>
-                      <h4 className='text-sm font-medium text-content-primary'>
-                        Venus flows with your Moon
-                      </h4>
-                      <p className='text-xs text-content-muted mt-0.5'>
-                        Venus in Pisces · Moon in Scorpio
-                      </p>
+              </>
+            ) : (
+              /* No real data yet — static blurred preview */
+              <div className='relative'>
+                <div className='filter blur-sm opacity-60 pointer-events-none rounded-lg overflow-hidden space-y-3'>
+                  <div className='rounded-lg border border-lunary-error-700/50 bg-surface-elevated/40 p-4 space-y-3'>
+                    <div className='flex items-start gap-3'>
+                      <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-layer-deep/60 text-lunary-error-300'>
+                        Highly Prominent
+                      </span>
+                      <div className='flex-1'>
+                        <h4 className='text-sm font-medium text-content-primary'>
+                          Saturn meets your Sun
+                        </h4>
+                        <p className='text-xs text-content-muted mt-0.5'>
+                          Saturn in Aquarius · Sun in Aquarius
+                        </p>
+                      </div>
                     </div>
+                    <p className='text-sm text-content-secondary leading-relaxed'>
+                      A period of deep restructuring. Discipline and patience
+                      will unlock lasting transformation.
+                    </p>
                   </div>
-                  <p className='text-sm text-content-secondary leading-relaxed'>
-                    Emotional harmony and creative flow. Your intuition is
-                    especially sharp, lean into connections that feel
-                    nourishing.
-                  </p>
+                  <div className='rounded-lg border border-lunary-accent-700/50 bg-surface-elevated/40 p-4 h-20' />
+                </div>
+                <div className='absolute inset-0 rounded-lg bg-gradient-to-b from-surface-base/0 via-surface-base/60 to-surface-base flex flex-col items-center justify-center gap-3'>
+                  <span className='inline-flex items-center gap-1 text-[10px] bg-layer-base/50 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-content-brand'>
+                    <Sparkles className='w-2.5 h-2.5' />
+                    Lunary+
+                  </span>
+                  <Link
+                    href='/pricing?nav=app'
+                    className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-surface-elevated/80 px-4 py-2 text-xs font-medium text-content-brand hover:bg-surface-elevated transition-colors'
+                  >
+                    <Sparkles className='w-3 h-3' />
+                    Unlock Transit Wisdom
+                  </Link>
                 </div>
               </div>
-            }
-          />
+            )}
+          </HoroscopeSection>
         )
       )}
 
@@ -761,10 +811,29 @@ export function HoroscopeView({
             currentTransits={currentTransits}
             showHousePlacement={false}
           />
+          {/* Tease the natal house placement */}
+          <div className='mt-2 flex items-center justify-between rounded-lg border border-stroke-subtle/40 bg-surface-elevated/30 px-3 py-2.5 gap-3'>
+            <div>
+              <p className='text-xs font-medium text-content-secondary'>
+                Moon house placement hidden
+              </p>
+              <p className='text-[11px] text-content-muted'>
+                See which natal house the Moon is activating for you — Pro only.
+              </p>
+            </div>
+            <Link
+              href='/pricing?nav=app'
+              className='shrink-0 inline-flex items-center gap-1 rounded-full border border-lunary-primary-700/50 bg-lunary-primary/10 px-3 py-1 text-[11px] font-medium text-content-brand transition hover:border-lunary-primary-500'
+            >
+              <Sparkles className='w-2.5 h-2.5' />
+              Unlock
+            </Link>
+          </div>
         </HoroscopeSection>
       )}
 
-      {/* Today's Aspects, paid: full component; free: locked preview */}
+      {/* Today's Aspects: paid = full list; free + real transits = top-1 real teaser;
+          free + no transits = static blurred mock */}
       {hasPaidAccess && birthChart && currentTransits.length > 0 ? (
         <HoroscopeSection
           title="Today's Aspects to Your Chart"
@@ -780,7 +849,23 @@ export function HoroscopeView({
           />
         </HoroscopeSection>
       ) : (
-        !hasPaidAccess && (
+        !hasPaidAccess &&
+        (birthChart && currentTransits.length > 0 ? (
+          <HoroscopeSection
+            title="Today's Aspects to Your Chart"
+            color='zinc'
+            id='today-aspects'
+          >
+            <p className='text-sm text-content-muted mb-2'>
+              How today&apos;s sky connects to your story
+            </p>
+            {/* Real top-1 aspect + house grid — the user sees their actual chart data */}
+            <AspectsTeaser
+              birthChart={birthChart}
+              currentTransits={currentTransits}
+            />
+          </HoroscopeSection>
+        ) : (
           <FeaturePreview
             title="Today's Aspects"
             description='See how the planets are speaking to you right now'
@@ -790,6 +875,43 @@ export function HoroscopeView({
             page='horoscope'
             blurredContent={
               <div className='space-y-2'>
+                {/* Mock active houses grid */}
+                <div className='mb-1'>
+                  <p className='text-xs text-content-muted mb-2'>
+                    Houses being activated
+                  </p>
+                  <div className='grid grid-cols-6 gap-1.5'>
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((h) => {
+                      const isTransit = [3, 7, 10].includes(h);
+                      const isNatal = h === 5;
+                      const labels: Record<number, string> = {
+                        3: 'communication',
+                        5: 'creativity',
+                        7: 'partnerships',
+                        10: 'career',
+                      };
+                      return (
+                        <div
+                          key={h}
+                          className={`flex flex-col items-center gap-0.5 rounded-lg border p-1.5 text-center ${
+                            isTransit
+                              ? 'border-lunary-primary-700/50 bg-lunary-primary/10 text-content-brand'
+                              : isNatal
+                                ? 'border-stroke-subtle bg-surface-elevated/60 text-content-secondary'
+                                : 'border-stroke-subtle bg-surface-base text-content-muted opacity-25'
+                          }`}
+                        >
+                          <span className='text-xs font-semibold'>{h}</span>
+                          {(isTransit || isNatal) && labels[h] && (
+                            <span className='text-[8px] leading-tight text-content-muted line-clamp-1'>
+                              {labels[h]}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
                 <div className='rounded-lg border border-lunary-primary-400/40 bg-layer-deep/40 p-3'>
                   <div className='flex items-start gap-3'>
                     <div className='flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-layer-deep/40 border border-lunary-primary-400/40'>
@@ -809,16 +931,19 @@ export function HoroscopeView({
                           1.2°
                         </span>
                       </div>
-                      <div className='flex items-center gap-2 text-xs mb-2'>
+                      <div className='flex items-center gap-2 text-xs mb-2 flex-wrap'>
                         <span className='text-content-secondary'>Saturn</span>
                         <span className='text-content-muted'>3°12</span>
                         <span className='text-content-brand'>☌</span>
                         <span className='text-content-secondary'>Sun</span>
                         <span className='text-content-muted'>4°45</span>
+                        <span className='inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border border-lunary-primary-700/40 bg-lunary-primary/10 text-content-brand'>
+                          7th house
+                        </span>
                       </div>
                       <p className='text-xs text-content-muted leading-relaxed'>
-                        Saturn's energy is blending with yours, a time for
-                        grounding and stepping into your own authority.
+                        Saturn in Aquarius conjoins natal Sun in Aquarius,
+                        activating your 7th house of partnerships.
                       </p>
                     </div>
                   </div>
@@ -842,16 +967,19 @@ export function HoroscopeView({
                           3.8°
                         </span>
                       </div>
-                      <div className='flex items-center gap-2 text-xs mb-2'>
+                      <div className='flex items-center gap-2 text-xs mb-2 flex-wrap'>
                         <span className='text-content-secondary'>Venus</span>
                         <span className='text-content-muted'>18°30</span>
                         <span className='text-lunary-success-300'>△</span>
                         <span className='text-content-secondary'>Moon</span>
                         <span className='text-content-muted'>14°52</span>
+                        <span className='inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border border-lunary-success-700/40 bg-lunary-success-900/20 text-lunary-success-300'>
+                          3rd house
+                        </span>
                       </div>
                       <p className='text-xs text-content-muted leading-relaxed'>
-                        Venus is gently lifting your emotional world —
-                        connections feel easy and nourishing right now.
+                        Venus in Pisces trines natal Moon in Scorpio, activating
+                        your 3rd house of communication.
                       </p>
                     </div>
                   </div>
@@ -859,7 +987,7 @@ export function HoroscopeView({
               </div>
             }
           />
-        )
+        ))
       )}
 
       {/* Upcoming Transits, unified, gated internally */}

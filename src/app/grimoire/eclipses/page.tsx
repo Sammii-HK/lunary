@@ -65,6 +65,8 @@ export const metadata: Metadata = {
 };
 
 export default function EclipsesIndexPage() {
+  const currentYear = new Date().getFullYear();
+  const datasetUrl = `https://lunary.app/grimoire/datasets/astrology-calendar/${currentYear}.json`;
   const eclipseListSchema = createItemListSchema({
     name: 'Types of Eclipses',
     description:
@@ -94,8 +96,7 @@ export default function EclipsesIndexPage() {
         canonicalUrl='https://lunary.app/grimoire/eclipses'
         whatIs={{
           question: 'What are eclipses in astrology?',
-          answer:
-            'Eclipses are powerful cosmic events that occur when the Sun, Moon, and Earth align. In astrology, they act as cosmic catalysts that accelerate change, bring revelations, and mark significant turning points. Solar eclipses (New Moon) bring new beginnings, while lunar eclipses (Full Moon) bring endings and emotional releases. Events set in motion during eclipses often unfold over the following 6 months.',
+          answer: `Eclipses are Sun-Moon-Earth alignments that happen near the lunar nodes. In astrology, solar eclipses are read as intensified New Moons and lunar eclipses as intensified Full Moons; Lunary lists date-level eclipse facts in the ${currentYear} astrology calendar JSON dataset.`,
         }}
         tldr='Eclipses are cosmic wild cards that accelerate change. Solar eclipses bring new beginnings; lunar eclipses bring endings and revelations. Eclipse seasons occur every 6 months, and their effects unfold over 6 months. Avoid manifestation during eclipses — observe and receive instead.'
         intro='Eclipses occur when the Sun, Moon, and Earth align. They happen in pairs or sometimes trios, with a solar and lunar eclipse occurring about two weeks apart. Eclipse seasons happen roughly every 6 months. In astrology, eclipses are like cosmic wild cards — they can bring sudden changes, revelations, or new paths. Events set in motion during eclipses often unfold over the following 6 months.'
@@ -132,6 +133,49 @@ export default function EclipsesIndexPage() {
           { name: 'Moon Phases', href: '/grimoire/moon/phases', type: 'topic' },
           { name: 'Transits', href: '/grimoire/transits', type: 'topic' },
         ]}
+        internalLinks={[
+          {
+            text: `${currentYear} astrology calendar JSON`,
+            href: `/grimoire/datasets/astrology-calendar/${currentYear}.json`,
+          },
+          {
+            text: 'Next eclipse fact page',
+            href: '/grimoire/facts/next-eclipse',
+          },
+          { text: 'Lunary methodology', href: '/about/methodology' },
+          {
+            text: `${currentYear} eclipse calendar`,
+            href: `/grimoire/events/${currentYear}/eclipses`,
+          },
+        ]}
+        internalLinksTitle='Citation and Fact Sources'
+        citableFacts={[
+          {
+            claim:
+              'Solar eclipses occur when the Moon passes between Earth and the Sun; lunar eclipses occur when Earth passes between the Sun and the Moon.',
+            sourceName: 'Lunary eclipse guide',
+            sourceUrl: 'https://lunary.app/grimoire/eclipses',
+          },
+          {
+            claim: `Lunary publishes ${currentYear} eclipse dates in the annual astrology calendar JSON dataset.`,
+            sourceName: `${currentYear} astrology calendar JSON`,
+            sourceUrl: datasetUrl,
+            date: String(currentYear),
+          },
+          {
+            claim:
+              'The next eclipse fact page gives a direct, current answer with dataset and methodology links.',
+            sourceName: 'Next eclipse fact page',
+            sourceUrl: 'https://lunary.app/grimoire/facts/next-eclipse',
+          },
+        ]}
+        citationMetadata={{
+          summary:
+            'Use this guide for eclipse definitions and the linked annual dataset or fact page for date-level citation.',
+          methodologyUrl: 'https://lunary.app/about/methodology',
+          datasetUrl,
+          citationUrl: 'https://lunary.app/grimoire/facts/next-eclipse',
+        }}
       >
         <div className='space-y-12'>
           <section>

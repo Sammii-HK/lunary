@@ -15,10 +15,11 @@ export function sanitizeImageUrl(url: string): string {
   try {
     // Parse as URL to check structure
     const parsed = new URL(url, 'https://example.com');
+    const safePath = `${parsed.pathname}${parsed.search}`;
 
     // Only allow relative URLs starting with /api/
     if (parsed.origin === 'https://example.com' && url.startsWith('/api/')) {
-      return url;
+      return safePath;
     }
 
     // If it's an absolute URL to our own domain, allow it
@@ -27,7 +28,7 @@ export function sanitizeImageUrl(url: string): string {
       parsed.origin === process.env.NEXT_PUBLIC_BASE_URL &&
       parsed.pathname.startsWith('/api/')
     ) {
-      return url;
+      return safePath;
     }
 
     console.warn('Unsafe image URL blocked:', url);

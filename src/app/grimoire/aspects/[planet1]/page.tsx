@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { ContextualNudgeSection } from '@/components/ui/ContextualNudgeSection';
 
 import {
   PLANETS,
@@ -13,10 +14,15 @@ import {
   Aspect,
 } from '@/constants/seo/aspects';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
+import { getContextualNudge } from '@/lib/grimoire/getContextualNudge';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-export const dynamicParams = true;
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return PLANETS.map((planet1) => ({ planet1 }));
+}
 
 const PLANET_METHOD: Record<Planet, string> = {
   sun: 'identity, vitality, visibility, and the conscious direction of the chart',
@@ -88,6 +94,8 @@ export default async function PlanetAspectsPage({
   const planetName = PLANET_DISPLAY[planet1 as Planet];
   const symbol = PLANET_SYMBOLS[planet1 as Planet];
   const planetMethod = PLANET_METHOD[planet1 as Planet];
+  const pagePath = `/grimoire/aspects/${planet1}`;
+  const contextualNudge = getContextualNudge(pagePath);
 
   const breadcrumbItems = [
     { name: 'Grimoire', url: '/grimoire' },
@@ -228,6 +236,10 @@ export default async function PlanetAspectsPage({
             </Link>
           </div>
         </div>
+        <ContextualNudgeSection
+          nudge={contextualNudge}
+          location='seo_aspect_planet_page'
+        />
         <ExploreGrimoire />
       </div>
     </div>

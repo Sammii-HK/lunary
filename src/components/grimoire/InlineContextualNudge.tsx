@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Sparkles, ChevronRight, ArrowRight, Star } from 'lucide-react';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { ContextualNudge } from '@/lib/grimoire/getContextualNudge';
 import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
+import { buildSignupChartUrl, seoSignupSourceForPath } from '@/lib/urls';
 
 /**
  * Inline CTA Style Variants:
@@ -32,13 +34,27 @@ export function InlineContextualNudge({
   scrollTriggered = false,
 }: InlineContextualNudgeProps) {
   const authState = useAuthStatus();
-  const router = useRouter();
   const pathname = usePathname() || '';
   const [scrollVisible, setScrollVisible] = useState(!scrollTriggered);
   const impressionTracked = useRef(false);
 
   // Use server-assigned variant (works for all users, no PostHog needed)
   const variant: InlineCtaVariant = serverVariant || 'sparkles';
+  const signupHref = buildSignupChartUrl({
+    source: seoSignupSourceForPath(pathname),
+    medium: 'cta',
+    campaign: 'chart_signup',
+    content: location,
+    hub: nudge.hub,
+    headline: nudge.headline || nudge.ctaHeadline || '',
+    subline: nudge.subline || nudge.ctaSubline || '',
+    location,
+    pagePath: pathname,
+  });
+  const targetHref =
+    (nudge.action === 'link' || authState.isAuthenticated
+      ? nudge.href
+      : signupHref) || signupHref;
 
   // 50% scroll trigger
   useEffect(() => {
@@ -69,7 +85,7 @@ export function InlineContextualNudge({
         ctaId: 'inline_contextual_nudge',
         location,
         label: nudge.inlineCopy || nudge.buttonLabel,
-        href: nudge.href,
+        href: targetHref,
         pagePath: pathname,
         exampleType: nudge.exampleType,
         exampleText: nudge.exampleText,
@@ -81,13 +97,7 @@ export function InlineContextualNudge({
         inlineStyle: variant,
       });
     }
-  }, [nudge, location, pathname, variant]);
-
-  const navigateToHref = () => {
-    if (nudge.href) {
-      router.push(nudge.href);
-    }
-  };
+  }, [scrollVisible, nudge, location, pathname, variant, targetHref]);
 
   const handleClick = () => {
     trackCtaClick({
@@ -95,7 +105,7 @@ export function InlineContextualNudge({
       ctaId: 'inline_contextual_nudge',
       location,
       label: nudge.inlineCopy || nudge.buttonLabel,
-      href: nudge.href,
+      href: targetHref,
       pagePath: pathname,
       exampleType: nudge.exampleType,
       exampleText: nudge.exampleText,
@@ -106,25 +116,6 @@ export function InlineContextualNudge({
       abVariant: variant,
       inlineStyle: variant,
     });
-
-    if (nudge.action === 'link') {
-      navigateToHref();
-      return;
-    }
-
-    if (!authState.isAuthenticated) {
-      const params = new URLSearchParams({
-        hub: nudge.hub,
-        headline: nudge.headline || nudge.ctaHeadline || '',
-        subline: nudge.subline || nudge.ctaSubline || '',
-        location,
-        pagePath: pathname,
-      });
-      router.push(`/signup/chart?${params.toString()}`);
-      return;
-    }
-
-    navigateToHref();
   };
 
   // Use inlineCopy if available, otherwise fall back to headline
@@ -146,27 +137,30 @@ export function InlineContextualNudge({
         className={`my-6 ${scrollTriggered ? 'transition-all duration-500 opacity-100 translate-y-0' : ''}`}
       >
         {variant === 'minimal' && (
-          <button
+          <Link
+            href={targetHref}
             onClick={handleClick}
             className='text-sm text-lunary-accent-400 hover:text-content-brand-accent underline underline-offset-2 decoration-lunary-accent-400/50 hover:decoration-lunary-accent-300 transition-colors'
           >
             {displayText}
-          </button>
+          </Link>
         )}
 
         {variant === 'sparkles' && (
-          <button
+          <Link
+            href={targetHref}
             onClick={handleClick}
             className='inline-flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-content-brand-accent transition-colors group'
           >
             <Sparkles className='w-4 h-4 flex-shrink-0' />
             <span>{displayText}</span>
             <ChevronRight className='w-4 h-4 flex-shrink-0 transition-transform group-hover:translate-x-0.5' />
-          </button>
+          </Link>
         )}
 
         {variant === 'card' && (
-          <button
+          <Link
+            href={targetHref}
             onClick={handleClick}
             className='flex items-center gap-3 px-4 py-3 rounded-lg bg-layer-base/30 border border-lunary-primary-700/50 hover:bg-layer-base/50 hover:border-lunary-primary-600 transition-all group'
           >
@@ -175,7 +169,7 @@ export function InlineContextualNudge({
               {displayText}
             </span>
             <ArrowRight className='w-4 h-4 text-lunary-accent-400 flex-shrink-0 transition-transform group-hover:translate-x-0.5 ml-auto' />
-          </button>
+          </Link>
         )}
       </div>
     </>

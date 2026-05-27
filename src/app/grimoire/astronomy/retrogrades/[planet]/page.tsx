@@ -163,6 +163,8 @@ export default async function RetrogradePage({
   const currentYear = new Date().getFullYear();
   const nextYear = currentYear + 1;
   const planetName = retrogradeData.name.replace(' Retrograde', '');
+  const datasetUrl = `https://lunary.app/grimoire/datasets/astrology-calendar/${currentYear}.json`;
+  const methodologyUrl = 'https://lunary.app/about/methodology';
 
   // Fetch actual computed retrograde dates for current + next year
   const { periods } = await getRetrogradeDates(planet);
@@ -366,6 +368,23 @@ ${retrogradeData.whatToAvoid.map((a) => `- ${a}`).join('\n')}`}
         ]}
         internalLinks={[
           {
+            text: `${currentYear} astrology calendar JSON`,
+            href: `/grimoire/datasets/astrology-calendar/${currentYear}.json`,
+          },
+          { text: 'Lunary methodology', href: '/about/methodology' },
+          ...(planet === 'mercury'
+            ? [
+                {
+                  text: 'Next Mercury retrograde fact page',
+                  href: '/grimoire/facts/next-mercury-retrograde',
+                },
+                {
+                  text: 'Mercury retrograde status today',
+                  href: '/grimoire/facts/mercury-retrograde-status',
+                },
+              ]
+            : []),
+          {
             text: `${currentYear} Astrological Events`,
             href: `/grimoire/events/${currentYear}`,
           },
@@ -385,7 +404,11 @@ ${retrogradeData.whatToAvoid.map((a) => `- ${a}`).join('\n')}`}
         sources={[
           {
             name: 'Lunary yearly transit calculation methodology',
-            url: 'https://lunary.app/about/methodology',
+            url: methodologyUrl,
+          },
+          {
+            name: `${currentYear} astrology calendar JSON`,
+            url: datasetUrl,
           },
           {
             name: 'Apparent geocentric retrograde motion',
@@ -394,6 +417,34 @@ ${retrogradeData.whatToAvoid.map((a) => `- ${a}`).join('\n')}`}
             name: 'Traditional planetary retrograde interpretation',
           },
         ]}
+        citableFacts={[
+          {
+            claim: `${retrogradeData.name} occurs ${currentYearPeriods.length} time${currentYearPeriods.length !== 1 ? 's' : ''} in ${currentYear}${currentYearPeriods.length > 0 ? `: ${currentYearPeriods.map((p) => p.formatted).join('; ')}` : '.'}`,
+            sourceName: `${currentYear} astrology calendar JSON`,
+            sourceUrl: datasetUrl,
+            date: String(currentYear),
+          },
+          {
+            claim: `${retrogradeData.name} occurs ${retrogradeData.frequency.toLowerCase()} and lasts ${retrogradeData.duration.toLowerCase()}.`,
+            sourceName: `${retrogradeData.name} guide`,
+            sourceUrl: `https://lunary.app/grimoire/astronomy/retrogrades/${planet}`,
+          },
+          {
+            claim:
+              'Lunary identifies retrograde periods from apparent geocentric planetary motion and station points.',
+            sourceName: 'Lunary methodology',
+            sourceUrl: methodologyUrl,
+          },
+        ]}
+        citationMetadata={{
+          summary: `Citation sources for ${retrogradeData.name.toLowerCase()} dates, status, and interpretation.`,
+          methodologyUrl,
+          datasetUrl,
+          citationUrl:
+            planet === 'mercury'
+              ? 'https://lunary.app/grimoire/facts/next-mercury-retrograde'
+              : `https://lunary.app/grimoire/astronomy/retrogrades/${planet}`,
+        }}
         cosmicConnections={
           <CosmicConnections
             entityType='planet'

@@ -329,6 +329,38 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
           ],
         },
       ]}
+      followUpIntent={[
+        {
+          title: 'Monthly timing',
+          description:
+            'Open the month-by-month forecast when you need dates, turning points, and practical guidance.',
+          href: `/grimoire/horoscopes/${sign}/${year}/${currentMonthSlug}`,
+        },
+        {
+          title: 'Natal vs yearly forecast',
+          description:
+            'Compare this sign-based forecast with the full birth chart so the year becomes personal.',
+          href: '/grimoire/birth-chart',
+        },
+        {
+          title: 'Transit context',
+          description:
+            'Use major transits to understand why a year carries a particular pressure or opportunity.',
+          href: `/grimoire/transits/year/${year}`,
+        },
+        {
+          title: 'Moon phase timing',
+          description:
+            'Layer monthly forecasts with moon phases for rituals, decisions, and emotional rhythm.',
+          href: `/grimoire/moon/${year}`,
+        },
+        {
+          title: 'Explore your placements',
+          description:
+            'Read Sun, Moon, and Rising sign paths for a fuller version of the horoscope.',
+          href: `/grimoire/zodiac/${sign}`,
+        },
+      ]}
       ctaText='See your full birth-chart horoscope in the app'
       ctaHref='/horoscope'
       sources={[

@@ -49,6 +49,11 @@ const TRUSTED_FETCH_DOMAINS = new Set([
 export function validateFetchUrl(url: string): string {
   const parsed = new URL(url);
   const host = parsed.hostname;
+
+  if (parsed.protocol !== 'https:') {
+    throw new Error(`Untrusted fetch URL protocol: ${parsed.protocol}`);
+  }
+
   // Allow exact match or subdomain match (e.g. xyz.blob.vercel-storage.com)
   const isTrusted = Array.from(TRUSTED_FETCH_DOMAINS).some(
     (domain) => host === domain || host.endsWith(`.${domain}`),
@@ -57,7 +62,7 @@ export function validateFetchUrl(url: string): string {
     throw new Error(`Untrusted fetch URL domain: ${host}`);
   }
   // Reconstruct URL from parsed components to break CodeQL taint chain
-  return `${parsed.protocol}//${parsed.host}${parsed.pathname}${parsed.search}`;
+  return `https://${parsed.host}${parsed.pathname}${parsed.search}`;
 }
 
 /**

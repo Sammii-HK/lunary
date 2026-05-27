@@ -8,6 +8,7 @@ import {
   getTransitById,
 } from '@/lib/blog/transit-deep-dive';
 import { sendDiscordNotification } from '@/lib/discord';
+import { formatTextArray } from '@/lib/postgres/formatTextArray';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
       published_at, created_at, updated_at
     ) VALUES (
       ${id}, ${slug}, ${transitId}, ${content.title}, ${content.subtitle},
-      ${content.metaDescription}, ${`{${content.keywords.map((k) => `"${k.replace(/"/g, '\\"')}"`).join(',')}}`},
+      ${content.metaDescription}, ${formatTextArray(content.keywords)},
       ${content.introduction}, ${content.historicalDeepDive},
       ${content.astronomicalContext}, ${content.practicalGuidance},
       ${JSON.stringify(content.signBreakdowns)}, ${content.closingSection},

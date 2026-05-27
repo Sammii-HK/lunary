@@ -85,6 +85,10 @@ export type CanonicalEventType =
   | 'birth_data_completed'
   | 'birth_time_confirmed'
   | 'birth_location_updated'
+  // Quiz funnels
+  | 'quiz_started'
+  | 'quiz_result_viewed'
+  | 'quiz_signup_clicked'
   // Subscription & Lifecycle
   | 'signup_completed'
   | 'subscription_started'
@@ -234,10 +238,15 @@ function canonicaliseEventType(raw: unknown): {
     value === 'tarot_drawn' ||
     value === 'ritual_started' ||
     value === 'ritual_completed' ||
+    value === 'quiz_started' ||
+    value === 'quiz_result_viewed' ||
+    value === 'quiz_signup_clicked' ||
     value === 'signup_completed' ||
     value === 'subscription_started' ||
     value === 'subscription_cancelled' ||
-    value === 'trial_started'
+    value === 'trial_started' ||
+    value === 'checkout_started' ||
+    value === 'checkout_completed'
   ) {
     return { eventType: value };
   }
@@ -252,8 +261,11 @@ function canonicaliseEventType(raw: unknown): {
   if (value === 'ai_chat') {
     return { eventType: 'astral_chat_used', legacyEventType: value };
   }
-  if (value === 'tarot_viewed') {
-    return { eventType: 'page_viewed', legacyEventType: value };
+  if (value === 'tarot_viewed' || value === 'personalized_tarot_viewed') {
+    return { eventType: 'tarot_drawn', legacyEventType: value };
+  }
+  if (value === 'personalized_horoscope_viewed') {
+    return { eventType: 'horoscope_viewed', legacyEventType: value };
   }
   if (value === 'ritual_view') {
     return { eventType: 'ritual_started', legacyEventType: value };

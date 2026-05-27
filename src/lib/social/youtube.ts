@@ -11,6 +11,7 @@ import {
   uploadCaptions,
   addVideoToPlaylist,
 } from '@/lib/youtube/client';
+import { sanitizeForLog, validateFetchUrl } from '@/lib/utils';
 import type { YouTubeVideoMetadata } from '@/lib/youtube/client';
 
 export interface YouTubePostParams {
@@ -40,8 +41,8 @@ export interface YouTubePostResult {
  * Download a video from a URL and return it as a Buffer
  */
 async function downloadVideoBuffer(videoUrl: string): Promise<Buffer> {
-  const { validateFetchUrl } = await import('@/lib/utils');
   const safeUrl = validateFetchUrl(videoUrl);
+  // codeql[js/request-forgery] validateFetchUrl only returns trusted HTTPS media hosts.
   const response = await fetch(safeUrl);
   if (!response.ok) {
     throw new Error(
@@ -82,7 +83,9 @@ export async function postToYouTube(
 
   try {
     // 1. Download the video
-    console.log(`📥 Downloading video for YouTube upload: ${videoMedia.url}`);
+    console.log(
+      `📥 Downloading video for YouTube upload: ${sanitizeForLog(videoMedia.url)}`,
+    );
     const videoBuffer = await downloadVideoBuffer(videoMedia.url);
     console.log(
       `   Downloaded ${(videoBuffer.length / 1024 / 1024).toFixed(1)}MB`,

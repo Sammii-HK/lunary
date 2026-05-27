@@ -286,6 +286,10 @@ export function analyzeSourceReadiness(
       content.includes('whatIs={{') ||
       content.includes('tldr=') ||
       content.includes('tldr:') ||
+      content.includes('answer=') ||
+      content.includes('data-citation-answer') ||
+      content.includes('TL;DR') ||
+      content.includes('Quick answer') ||
       content.includes('description=') ||
       content.includes('Citable Facts') ||
       content.includes('Citation rule'),
@@ -305,6 +309,7 @@ export function analyzeSourceReadiness(
       isJsonRoute ||
       content.includes('citableFacts') ||
       content.includes('citationMetadata') ||
+      content.includes('data-citation-answer') ||
       content.includes('Citable Facts') ||
       content.includes('citationWorkSchema') ||
       content.includes('methodologyUrl') ||
@@ -314,7 +319,11 @@ export function analyzeSourceReadiness(
       content.includes('isBasedOn') ||
       content.includes('citation:') ||
       content.includes('citationUrls') ||
-      content.includes('createItemListSchema'),
+      content.includes('createItemListSchema') ||
+      content.includes('createArticleSchema') ||
+      content.includes('createArticleWithSpeakableSchema') ||
+      content.includes('createDefinedTermSchema') ||
+      content.includes('createFAQPageSchema'),
     hasFaqSignal:
       content.includes('faqs=') ||
       content.includes('faqs:') ||

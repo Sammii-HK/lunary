@@ -11,6 +11,37 @@ const API_TIER_PLAN_IDS: Record<string, keyof typeof STRIPE_PRICE_MAPPING> = {
   business: 'api_business',
 };
 
+function getInternalCheckoutUrl(): URL {
+  const candidates = [
+    process.env.NEXT_PUBLIC_BASE_URL,
+    process.env.NEXT_PUBLIC_SITE_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : undefined,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+    'https://lunary.app',
+  ];
+
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+
+    try {
+      const url = new URL(candidate.trim());
+      const isLocalHttp =
+        url.protocol === 'http:' &&
+        (url.hostname === 'localhost' || url.hostname === '127.0.0.1');
+
+      if (url.protocol === 'https:' || isLocalHttp) {
+        return new URL('/api/stripe/create-checkout-session', url.origin);
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return new URL('/api/stripe/create-checkout-session', 'https://lunary.app');
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -38,20 +69,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Redirect to the existing checkout flow
-    const origin = new URL(request.url).origin;
-    const checkoutResponse = await fetch(
-      `${origin}/api/stripe/create-checkout-session`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          priceId,
-          userId: session.user.id,
-          userEmail: session.user.email,
-        }),
-      },
-    );
+    // Redirect to the existing checkout flow.
+    const checkoutResponse = await fetch(getInternalCheckoutUrl(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        priceId,
+        userId: session.user.id,
+        userEmail: session.user.email,
+      }),
+    });
 
     const checkoutData = await checkoutResponse.json();
 

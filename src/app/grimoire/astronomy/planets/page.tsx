@@ -162,6 +162,82 @@ export default function PlanetsIndexPage() {
             "In astrology, planets represent different aspects of your personality, drives, and life experiences. Personal planets (Sun, Moon, Mercury, Venus, Mars) shape your core traits and daily life. Social planets (Jupiter, Saturn) influence growth and structure. Transpersonal planets (Uranus, Neptune, Pluto) represent generational and transformative forces. Each planet's sign and house placement reveals how and where its energy expresses in your life.",
         }}
         tldr='10 planets shape your chart: Personal planets (Sun = identity, Moon = emotions, Mercury = mind, Venus = love, Mars = action) move fast and shape personality. Social planets (Jupiter = expansion, Saturn = structure) influence society role. Outer planets (Uranus, Neptune, Pluto) = generational transformation.'
+        structuredSummary={[
+          {
+            label: 'Personal planets',
+            value:
+              'Sun, Moon, Mercury, Venus, and Mars move quickly and describe identity, emotion, mind, desire, and action.',
+          },
+          {
+            label: 'Social planets',
+            value:
+              'Jupiter and Saturn describe growth, responsibility, maturity, boundaries, and the bridge between personal life and society.',
+          },
+          {
+            label: 'Outer planets',
+            value:
+              'Uranus, Neptune, and Pluto move slowly, describing generational themes and deep transformation when they contact natal points.',
+          },
+          {
+            label: 'How to read one',
+            value:
+              'Read the planet first, then its sign, house, dignity, retrograde state, and aspects.',
+            href: '/grimoire/birth-chart',
+          },
+        ]}
+        conceptComparisons={[
+          {
+            label: 'Planet vs sign',
+            description:
+              'The planet is the function; the sign is the style that function uses.',
+            href: '/grimoire/zodiac',
+          },
+          {
+            label: 'Personal vs outer planets',
+            description:
+              'Personal planets shape daily personality, while outer planets describe slower collective cycles that become personal through aspects and houses.',
+          },
+          {
+            label: 'Natal planet vs transiting planet',
+            description:
+              'A natal planet is fixed in the birth chart; a transiting planet is the current sky activating that chart.',
+            href: '/grimoire/transits',
+          },
+        ]}
+        whyThisWorks={{
+          title: 'Why astrology starts with planets',
+          points: [
+            'Planets give the chart verbs: they show what psychological or life function is active.',
+            'Signs, houses, and aspects refine the planet rather than replacing it.',
+            'Planetary speed matters because faster planets describe more personal rhythms while slower planets describe long arcs and collective pressure.',
+          ],
+        }}
+        learningPath={[
+          {
+            title: 'Read the birth chart',
+            href: '/grimoire/birth-chart',
+            description:
+              'See how planets become part of the full natal chart structure.',
+          },
+          {
+            title: 'Add zodiac signs',
+            href: '/grimoire/zodiac',
+            description:
+              'Learn the style each planet uses when placed in a sign.',
+          },
+          {
+            title: 'Place planets in houses',
+            href: '/grimoire/houses',
+            description:
+              'Understand where each planet acts in lived experience.',
+          },
+          {
+            title: 'Track transits',
+            href: '/grimoire/transits',
+            description:
+              'Follow moving planets and how they activate natal placements.',
+          },
+        ]}
         intro='In astrology, planets are divided into three categories: Personal planets (Sun through Mars) move quickly and shape your personality. Social planets (Jupiter and Saturn) influence your role in society. Transpersonal planets (Uranus, Neptune, Pluto) represent generational and transformative forces.'
         tables={[
           {
@@ -223,6 +299,28 @@ export default function PlanetsIndexPage() {
           { text: 'Astrological Houses', href: '/grimoire/houses' },
           { text: 'Birth Chart Calculator', href: '/birth-chart' },
           { text: 'Retrogrades', href: '/grimoire/astronomy/retrogrades' },
+        ]}
+        citationMetadata={{
+          summary:
+            'Use this page as Lunary’s canonical reference for what planets mean in astrology and how planet categories work in chart interpretation.',
+          methodologyUrl: 'https://lunary.app/about/methodology',
+          datasetUrl:
+            'https://lunary.app/grimoire/datasets/core-astrology.json',
+          citationUrl: 'https://lunary.app/about/citations',
+        }}
+        citableFacts={[
+          {
+            claim:
+              'Lunary groups planets into personal planets, social planets, and transpersonal planets to separate daily personality factors from longer collective cycles.',
+            sourceName: 'Lunary planets guide',
+            sourceUrl: 'https://lunary.app/grimoire/astronomy/planets',
+          },
+          {
+            claim:
+              'In Lunary’s chart-reading order, the planet describes what function is active before sign, house, dignity, retrograde state, and aspects refine that function.',
+            sourceName: 'Lunary methodology',
+            sourceUrl: 'https://lunary.app/about/methodology',
+          },
         ]}
       >
         <div className='space-y-12'>

@@ -1,3 +1,15 @@
+// Mock next/cache so unstable_cache works outside the Next.js runtime
+jest.mock('next/cache', () => ({
+  revalidateTag: jest.fn(),
+  unstable_cache: (fn: (...args: unknown[]) => unknown) => fn,
+}));
+
+// Mock the DB-backed snapshot store — no DB available in unit tests
+jest.mock('@/lib/seo/citation-snapshot-store', () => ({
+  ...jest.requireActual('@/lib/seo/citation-snapshot-store'),
+  getCurrentSkySnapshot: jest.fn().mockResolvedValue(null),
+}));
+
 import {
   buildCoreAstrologyDataset,
   buildCurrentSkyFacts,

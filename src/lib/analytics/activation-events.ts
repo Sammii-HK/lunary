@@ -11,18 +11,12 @@
  */
 export const ACTIVATION_EVENTS = [
   'horoscope_viewed',
-  'personalized_horoscope_viewed',
-  'tarot_viewed',
-  'personalized_tarot_viewed',
-  'birth_chart_viewed',
+  'tarot_drawn',
   'chart_viewed',
   'grimoire_viewed',
-  'grimoire_save',
   'daily_dashboard_viewed',
-  'tarot_pull',
-  'moon_phase_view',
-  'cosmic_pulse_opened',
   'astral_chat_used',
+  'ritual_started',
   'ritual_completed',
 ] as const;
 

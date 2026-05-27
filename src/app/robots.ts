@@ -29,6 +29,7 @@ export default function robots(): MetadataRoute.Robots {
     ],
     sitemap: [
       'https://lunary.app/sitemap-index.xml',
+      'https://lunary.app/sitemap-datasets.xml',
       'https://lunary.app/sitemap.xml',
     ],
     host: 'https://lunary.app',

@@ -212,26 +212,43 @@ function TransitCard({
   onUpgradeClick: () => void;
 }) {
   const isPersonalizable = transit.type !== 'lunar_phase';
+  const hasHouse = Boolean(impact?.house);
+  const hasAspect = Boolean(impact?.aspectToNatal);
 
   return (
-    <div className='rounded-lg bg-surface-card/50 p-4'>
-      <div className='flex justify-between items-start mb-2'>
-        <div>
-          <h4 className='font-medium text-content-primary text-sm mb-1'>
+    <div className='rounded-lg bg-surface-card/50 p-4 space-y-2.5'>
+      <div className='flex justify-between items-start gap-3'>
+        <div className='min-w-0'>
+          <h4 className='font-medium text-content-primary text-sm'>
             {transit.planet} {transit.event}
           </h4>
-          <p className='text-xs text-content-muted'>
-            {transit.date.format('MMM DD')} • {transit.type.replace('_', ' ')}
-            {impact?.house && (
-              <span className='ml-2'>
-                • {impact.house}
-                {getOrdinalSuffix(impact.house)} house
+          <div className='flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5'>
+            <p className='text-xs text-content-muted'>
+              {transit.date.format('MMM DD')}
+            </p>
+            {hasHouse && (
+              <span className='text-xs font-medium text-content-secondary'>
+                · {impact!.house}
+                {getOrdinalSuffix(impact!.house!)} house
+                {impact!.aspectToNatal?.aspectType && (
+                  <span className='text-content-muted font-normal ml-1'>
+                    ({impact!.aspectToNatal.aspectType.toLowerCase()})
+                  </span>
+                )}
               </span>
             )}
-          </p>
+            {hasAspect && impact?.aspectToNatal?.natalPlanet && (
+              <span className='text-xs text-content-muted'>
+                · natal {impact!.aspectToNatal!.natalPlanet}
+                {impact!.aspectToNatal!.natalSign
+                  ? ` in ${impact!.aspectToNatal!.natalSign}`
+                  : ''}
+              </span>
+            )}
+          </div>
         </div>
         <span
-          className={`px-2 py-1 rounded text-xs font-medium ${
+          className={`shrink-0 px-2 py-1 rounded text-xs font-medium ${
             transit.significance === 'high'
               ? 'bg-layer-base text-lunary-error-300/90 border border-lunary-error-700'
               : transit.significance === 'medium'
@@ -248,10 +265,10 @@ function TransitCard({
       </p>
 
       {hasPaidAccess && impact ? (
-        <div className='mt-3 pt-3 border-t border-stroke-default/50 space-y-2'>
+        <div className='pt-2.5 border-t border-stroke-default/50 space-y-2'>
           <p className='text-xs text-content-muted leading-relaxed'>
             <span className='font-medium text-content-secondary'>
-              Personal Impact:
+              Personal impact:
             </span>{' '}
             {impact.personalImpact}
           </p>
@@ -265,20 +282,33 @@ function TransitCard({
               </p>
             </div>
           )}
-          {impact.aspectToNatal && (
-            <p className='text-xs text-content-muted'>
-              <span className='font-medium text-content-secondary'>
-                Aspect:
-              </span>{' '}
-              Transit at{' '}
-              {impact.aspectToNatal.transitDegree ||
-                impact.aspectToNatal.transitSign}{' '}
-              {impact.aspectToNatal.aspectType} your natal{' '}
-              {impact.aspectToNatal.natalPlanet} at{' '}
-              {impact.aspectToNatal.natalDegree ||
-                impact.aspectToNatal.natalSign}
-            </p>
-          )}
+          {impact.aspectToNatal &&
+            (impact.aspectToNatal.transitSign ||
+              impact.aspectToNatal.natalSign) && (
+              <p className='text-xs text-content-muted'>
+                <span className='font-medium text-content-secondary'>
+                  Chart contact:
+                </span>{' '}
+                {impact.aspectToNatal.transitSign && (
+                  <>
+                    {transit.planet} in {impact.aspectToNatal.transitSign}{' '}
+                    ·{' '}
+                  </>
+                )}
+                {impact.aspectToNatal.aspectType?.toLowerCase()} natal{' '}
+                {impact.aspectToNatal.natalPlanet}
+                {impact.aspectToNatal.natalSign
+                  ? ` in ${impact.aspectToNatal.natalSign}`
+                  : ''}
+                {impact.house && (
+                  <>
+                    {' '}
+                    · {impact.house}
+                    {getOrdinalSuffix(impact.house)} house
+                  </>
+                )}
+              </p>
+            )}
         </div>
       ) : !hasPaidAccess && isPersonalizable ? (
         <div className='mt-3 pt-3 border-t border-stroke-default/50'>

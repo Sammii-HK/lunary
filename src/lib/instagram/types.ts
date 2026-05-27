@@ -47,6 +47,10 @@ export interface IGCarouselSlide {
   content: string;
   subtitle?: string;
   symbol?: string;
+  visualStyle?: string;
+  slideStyle?: string;
+  slideRole?: string;
+  styleVariant?: string;
   category: ThemeCategory;
   variant: CarouselSlideVariant;
 }
@@ -121,11 +125,6 @@ export interface IGStoryData {
 
 // --- Post Batch ---
 
-export interface IGPostBatch {
-  date: string;
-  posts: IGScheduledPost[];
-}
-
 export interface IGScheduledPost {
   type: IGPostType;
   format: IGFormat;
@@ -148,4 +147,9 @@ export interface IGScheduledPost {
     transitSign?: string;
     mythTopic?: string;
   };
+}
+
+export interface IGPostBatch {
+  date: string;
+  posts: IGScheduledPost[];
 }

@@ -132,6 +132,10 @@ Start with the concrete theme, not the fantasy. ${data.number} is most useful wh
         description={data.description}
         keywords={data.keywords}
         canonicalUrl={`https://lunary.app/grimoire/angel-numbers/${number}`}
+        whatIs={{
+          question: `What does angel number ${data.number} mean?`,
+          answer: `${data.name} means ${data.coreMeaning.toLowerCase()}. In Lunary's numerology framework, ${data.number} is read through its repeated sequence, root number ${data.numerologyBreakdown.rootNumber}, and the context in which it appears rather than as a fixed prediction.`,
+        }}
         intro={data.quickMeaning}
         tldr={`${data.name} means ${data.coreMeaning.toLowerCase()}. ${data.message}`}
         meaning={meaningContent}
@@ -160,6 +164,38 @@ Keywords: ${data.keywords.join(', ')}`}
           {
             text: `${currentYear} Major Transits`,
             href: `/grimoire/transits/year/${currentYear}`,
+          },
+        ]}
+        followUpIntent={[
+          {
+            title: 'Root number context',
+            description:
+              'Compare the repeated sequence with its reduced root number before acting on the meaning.',
+            href: '/grimoire/numerology',
+          },
+          {
+            title: 'Examples',
+            description:
+              'Use the full angel number archive when you need to compare similar repeated sequences.',
+            href: '/grimoire/angel-numbers',
+          },
+          {
+            title: 'Dates and timing',
+            description:
+              'Layer number meanings with the current Universal Year for broader timing context.',
+            href: `/grimoire/numerology/year/${currentYear}`,
+          },
+          {
+            title: 'Mirror hours',
+            description:
+              'Read clock-based number signs when the number appeared as a time pattern.',
+            href: '/grimoire/mirror-hours',
+          },
+          {
+            title: 'What to do with it',
+            description:
+              'Turn the meaning into reflection, journaling, and one grounded next step.',
+            href: '/grimoire/numerology',
           },
         ]}
         ctaText='Want personalized numerology insights for your life?'

@@ -38,7 +38,9 @@ export function detectBot(headers: Headers): string | null {
     const isModernFirefox = /Firefox\/(?:9\d|1\d\d)/.test(ua);
     // Safari 16.4+ sends sec-fetch-dest. Anything claiming to be Safari 17+
     // without it is suspicious.
-    const isModernSafari = /Version\/(?:1[7-9]|[2-9]\d)\.\d.*Safari/.test(ua);
+    const safariVersion = ua.match(/Version\/(\d{2,})\.\d/);
+    const isModernSafari =
+      ua.includes('Safari') && Number(safariVersion?.[1] ?? 0) >= 17;
     if (isModernChrome || isModernFirefox || isModernSafari) {
       return 'no_sec_fetch';
     }

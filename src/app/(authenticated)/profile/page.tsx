@@ -22,7 +22,7 @@ import { Heading } from '@/components/ui/Heading';
 import { Button } from '@/components/ui/button';
 import { formatIsoDateOnly } from '@/lib/date-only';
 import { DailyCache } from '@/lib/cache/dailyCache';
-import { ClientCache } from '@/lib/patterns/snapshot/cache';
+import { ClientCache } from '@/lib/patterns/snapshot/client-cache';
 
 // Profile components
 import { ProfileTabs, type ProfileTab } from '@/components/profile/ProfileTabs';

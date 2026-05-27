@@ -40,6 +40,18 @@ const DEFAULT_PROMPTS = 'docs/reports/ai-citation-prompts.json';
 const DEFAULT_REPORT = 'docs/reports/ai-citation-radar.json';
 const DEFAULT_FINDINGS = 'data/ai-citation-radar/findings.json';
 const DEFAULT_SCREENSHOT_DIR = 'data/ai-citation-radar/screenshots';
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]', '::1']);
+const MAX_CDP_MESSAGE_BYTES = 64_000;
+const ALLOWED_CDP_METHODS = new Set([
+  'Page.captureScreenshot',
+  'Page.enable',
+  'Page.navigate',
+  'Runtime.enable',
+  'Runtime.evaluate',
+  'Target.attachToTarget',
+  'Target.closeTarget',
+  'Target.createTarget',
+]);
 
 function parseArgs(argv: string[]) {
   const args: Args = new Map();
@@ -116,6 +128,65 @@ function readJson<T>(path: string, fallback: T): T {
   return JSON.parse(readFileSync(path, 'utf8')) as T;
 }
 
+function normalizeLoopbackManager(input: string) {
+  const url = new URL(input);
+  if (
+    !['http:', 'https:'].includes(url.protocol) ||
+    !LOOPBACK_HOSTS.has(url.hostname) ||
+    (url.pathname !== '/' && url.pathname !== '')
+  ) {
+    throw new Error(
+      '--manager must be a loopback Cloak manager origin, for example http://127.0.0.1:18080',
+    );
+  }
+  url.hash = '';
+  url.search = '';
+  url.pathname = '';
+  return url.toString().replace(/\/$/, '');
+}
+
+function assertLoopbackUrl(input: string, label: string) {
+  const url = new URL(input);
+  if (!['ws:', 'wss:'].includes(url.protocol)) {
+    throw new Error(`${label} must use ws or wss.`);
+  }
+
+  if (!LOOPBACK_HOSTS.has(url.hostname)) {
+    throw new Error(`${label} must point at the local Cloak manager.`);
+  }
+
+  return url;
+}
+
+function assertSafeCdpMethod(method: string) {
+  if (!ALLOWED_CDP_METHODS.has(method)) {
+    throw new Error(`CDP method is not allowed: ${method}`);
+  }
+}
+
+function assertSafeCdpParams(method: string, params: Record<string, unknown>) {
+  if (method === 'Target.createTarget' && params.url !== 'about:blank') {
+    throw new Error('Target.createTarget is only allowed for about:blank.');
+  }
+
+  if (method === 'Page.navigate') {
+    const rawUrl = String(params.url || '');
+    const url = new URL(rawUrl);
+    if (
+      url.protocol !== 'https:' ||
+      url.hostname !== 'www.perplexity.ai' ||
+      url.pathname !== '/search' ||
+      url.username ||
+      url.password ||
+      url.searchParams.size !== 1 ||
+      !url.searchParams.get('q') ||
+      url.searchParams.get('q')!.length > 500
+    ) {
+      throw new Error('Page.navigate is only allowed for Perplexity search.');
+    }
+  }
+}
+
 function readCloakToken() {
   if (process.env.CLOAK_AUTH_TOKEN) return process.env.CLOAK_AUTH_TOKEN.trim();
 
@@ -167,7 +238,7 @@ async function resolveProfileId(
   if (current.status === 'running') return current.id;
 
   const launched = await fetchJson<{ profile_id?: string }>(
-    `${manager}/api/profiles/${current.id}/launch`,
+    `${manager}/api/profiles/${encodeURIComponent(current.id)}/launch`,
     token,
     { method: 'POST' },
   );
@@ -198,6 +269,8 @@ class CdpClient {
   }
 
   static async connect(url: string, token: string) {
+    assertLoopbackUrl(url, 'CDP WebSocket URL');
+
     const BrowserWebSocket = WebSocket as unknown as new (
       targetUrl: string,
       options?: { headers?: Record<string, string> },
@@ -232,12 +305,19 @@ class CdpClient {
     const id = this.nextId;
     this.nextId += 1;
 
+    assertSafeCdpMethod(method);
+    assertSafeCdpParams(method, params);
+
     const message = {
       id,
       method,
       params,
       ...(sessionId ? { sessionId } : {}),
     };
+    const payload = JSON.stringify(message);
+    if (Buffer.byteLength(payload, 'utf8') > MAX_CDP_MESSAGE_BYTES) {
+      throw new Error(`CDP message is too large: ${method}`);
+    }
 
     const result = new Promise<T>((resolveCommand, rejectCommand) => {
       const timeout = setTimeout(() => {
@@ -257,7 +337,8 @@ class CdpClient {
       });
     });
 
-    this.ws.send(JSON.stringify(message));
+    // codeql[js/file-access-to-http] CDP is restricted to the local Cloak manager, with allow-listed methods and validated navigation targets.
+    this.ws.send(payload);
     return result;
   }
 
@@ -267,7 +348,9 @@ class CdpClient {
 }
 
 function managerWsUrl(manager: string, profileId: string) {
-  return `${manager.replace(/^http/, 'ws')}/api/profiles/${profileId}/cdp`;
+  return `${manager.replace(/^http/, 'ws')}/api/profiles/${encodeURIComponent(
+    profileId,
+  )}/cdp`;
 }
 
 async function createPage(cdp: CdpClient) {
@@ -426,7 +509,9 @@ async function capturePerplexity(params: {
     mkdirSync(params.screenshotDir, { recursive: true });
     const screenshotPath = resolve(
       params.screenshotDir,
-      `${new Date().toISOString().replace(/[:.]/g, '-')}-perplexity-${params.prompt.id}.png`,
+      `${new Date().toISOString().replace(/[:.]/g, '-')}-perplexity-${
+        slugify(params.prompt.id) || 'prompt'
+      }.png`,
     );
     const screenshot = await params.cdp.send<{ data: string }>(
       'Page.captureScreenshot',
@@ -522,9 +607,8 @@ function writeMergedFindings(path: string, findings: CitationFinding[]) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const manager = stringArg(args, 'manager', DEFAULT_MANAGER).replace(
-    /\/$/,
-    '',
+  const manager = normalizeLoopbackManager(
+    stringArg(args, 'manager', DEFAULT_MANAGER),
   );
   const profile = stringArg(args, 'profile', DEFAULT_PROFILE);
   const engine = stringArg(args, 'engine', 'perplexity');

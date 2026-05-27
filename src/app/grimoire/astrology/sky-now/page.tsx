@@ -18,6 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const description =
     'Read the current chart with live planetary positions, active aspects, and grounded chart-reading guidance. Learn how today’s sky fits into real astrology, not vague transit wallpaper.';
   const canonical = `${APP_URL}${CANONICAL_PATH}`;
+  const ogImage = `${APP_URL}/api/og/grimoire/astrology/sky-now`;
 
   return {
     title,
@@ -30,12 +31,21 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       url: canonical,
       siteName: 'Lunary',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: 'Lunary Sky Now current astrology transit chart',
+        },
+      ],
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [ogImage],
     },
     robots: {
       index: true,

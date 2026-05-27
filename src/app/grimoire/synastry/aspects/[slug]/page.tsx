@@ -5,6 +5,7 @@ import {
   getSynastryAspect,
   aspectTypes,
   synastryAspects,
+  getAllSynastryAspectSlugs,
 } from '@/constants/seo/synastry-aspects';
 import {
   Heart,
@@ -17,7 +18,11 @@ import { Heading } from '@/components/ui/Heading';
 import { NavParamLink } from '@/components/NavParamLink';
 
 export const revalidate = 86400;
-export const dynamicParams = true;
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return getAllSynastryAspectSlugs().map((slug) => ({ slug }));
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>;

@@ -19,7 +19,12 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { useCurrency, formatPrice } from '../../hooks/useCurrency';
 import { getPriceForCurrency } from '../../../utils/stripe-prices';
 import { FAQStructuredData } from '@/components/FAQStructuredData';
-import { conversionTracking } from '@/lib/analytics';
+import {
+  conversionTracking,
+  getAnalyticsSessionId,
+  getAnonymousId,
+} from '@/lib/analytics';
+import { getAttributionForTracking } from '@/lib/attribution';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import { createProductSchema, renderJsonLd } from '@/lib/schema';
 import { AuthComponent } from '@/components/Auth';
@@ -215,6 +220,28 @@ export default function PricingPage() {
 
       const triggerFeature =
         new URLSearchParams(window.location.search).get('trigger') ?? undefined;
+      const checkoutSourceContext = {
+        ...getAttributionForTracking(),
+        cta_id: `pricing_${planId}_${planLabel}`,
+        cta_location: 'pricing_page',
+        cta_label: planId,
+        page_path: window.location.pathname,
+        analytics_session_id: getAnalyticsSessionId(),
+        anonymous_id: getAnonymousId(),
+      };
+
+      await conversionTracking.checkoutStarted(
+        currentUserId,
+        planInterval === 'year' ? 'yearly' : 'monthly',
+        undefined,
+        {
+          ...checkoutSourceContext,
+          plan_id: planId,
+          price_id: priceId,
+          plan_interval: planInterval,
+          trigger_feature: triggerFeature,
+        },
+      );
 
       const checkout = await createCheckoutSession(
         priceId,
@@ -225,6 +252,7 @@ export default function PricingPage() {
         currentUserEmail,
         urlPromoCode,
         triggerFeature,
+        checkoutSourceContext,
       );
 
       if (checkout.portalUrl) {

@@ -20,6 +20,11 @@ import {
 import { TestimonialForm } from '@/components/TestimonialForm';
 import { RateApp } from 'capacitor-rate-app';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import {
+  markNativeReviewRequested,
+  recordNativeReviewSession,
+  shouldRequestNativeReviewPrompt,
+} from '@/lib/native-review-prompt';
 import { useAuthStatus } from './AuthStatus';
 import { TrialCountdownBanner } from './TrialCountdownBanner';
 import { PastDueBanner } from './PastDueBanner';
@@ -240,27 +245,31 @@ export function AppChrome() {
   const testimonialCheckedRef = useRef(false);
   const ratingCheckedRef = useRef(false);
 
-  // Native app rating prompt (iOS + Android) — replaces testimonial modal
+  // Native app rating prompt (iOS + Android) — replaces testimonial modal.
   useEffect(() => {
+    if (ratingCheckedRef.current) return;
     if (!Capacitor.isNativePlatform()) return;
     if (isPublicSeoSurface) return;
     if (!authState.isAuthenticated || isAdminSurface) return;
-    if (ratingCheckedRef.current) return;
-    if (sessionStorage.getItem('rating-prompted')) return;
+
+    recordNativeReviewSession();
+
+    if (
+      !shouldRequestNativeReviewPrompt({
+        pathname,
+        isNativeApp: true,
+        isAuthenticated: authState.isAuthenticated,
+        isAdminSurface,
+        isPublicSeoSurface,
+      })
+    ) {
+      return;
+    }
 
     ratingCheckedRef.current = true;
-
-    // Reuse the same server-side timing logic as the testimonial prompt
-    fetch('/api/testimonials/prompt-tracking')
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.shouldPrompt) {
-          sessionStorage.setItem('rating-prompted', '1');
-          RateApp.requestReview();
-        }
-      })
-      .catch(() => {});
-  }, [authState.isAuthenticated, isAdminSurface, isPublicSeoSurface]);
+    markNativeReviewRequested();
+    RateApp.requestReview().catch(() => {});
+  }, [pathname, authState.isAuthenticated, isAdminSurface, isPublicSeoSurface]);
 
   // Fetch testimonial prompt status from server
   useEffect(() => {

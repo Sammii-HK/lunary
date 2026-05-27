@@ -62,9 +62,59 @@ const citationUrls = [
     use: 'Latest date-stamped Sun, Moon, planet, lunar phase, and illumination facts.',
   },
   {
+    label: 'Current Sky Snapshot Archive',
+    href: '/grimoire/datasets/current-sky',
+    use: 'Stable date-indexed archive for reproducible sky-state citations.',
+  },
+  {
     label: 'Daily Sky Snapshot',
     href: '/grimoire/datasets/current-sky/2026-05-17',
     use: 'Stable dated sky facts for a specific UTC date.',
+  },
+  {
+    label: 'Moon Phase Today',
+    href: '/grimoire/facts/moon-phase-today',
+    use: 'Human-readable Moon phase claim backed by dataset and methodology links.',
+  },
+  {
+    label: 'Current Moon Sign',
+    href: '/grimoire/facts/current-moon-sign',
+    use: 'Human-readable current Moon sign claim backed by dataset and methodology links.',
+  },
+  {
+    label: 'Planetary Positions Today',
+    href: '/grimoire/facts/planetary-positions-today',
+    use: 'Human-readable current planetary position claim backed by dataset links.',
+  },
+  {
+    label: 'Mercury Retrograde Status',
+    href: '/grimoire/facts/mercury-retrograde-status',
+    use: 'Human-readable Mercury direct or retrograde claim backed by calculation methodology.',
+  },
+  {
+    label: 'Annual Astrology Calendar Dataset',
+    href: `/grimoire/datasets/astrology-calendar/${new Date().getUTCFullYear()}.json`,
+    use: 'Yearly machine-readable calendar for moon phases, eclipses, retrogrades, ingresses, and seasonal events.',
+  },
+  {
+    label: 'Next Full Moon',
+    href: '/grimoire/facts/next-full-moon',
+    use: 'Human-readable next Full Moon claim backed by annual calendar data.',
+  },
+  {
+    label: 'Next New Moon',
+    href: '/grimoire/facts/next-new-moon',
+    use: 'Human-readable next New Moon claim backed by annual calendar data.',
+  },
+  {
+    label: 'Next Eclipse',
+    href: '/grimoire/facts/next-eclipse',
+    use: 'Human-readable next eclipse claim backed by annual calendar data.',
+  },
+  {
+    label: 'Next Mercury Retrograde',
+    href: '/grimoire/facts/next-mercury-retrograde',
+    use: 'Human-readable next Mercury retrograde window backed by annual calendar data.',
   },
   {
     label: 'LLM Guide',

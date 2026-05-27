@@ -12,7 +12,7 @@ import {
   primeAuthenticatedAuthCache,
 } from './AuthStatus';
 import { SignOutButton } from './SignOutButton';
-import { conversionTracking } from '@/lib/analytics';
+import { conversionTracking, getAnonymousId } from '@/lib/analytics';
 import {
   getStoredAttribution,
   getAttributionForTracking,
@@ -215,8 +215,10 @@ export function AuthComponent({
             fetch('/api/attribution', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
               body: JSON.stringify({
                 userId: user.id,
+                anonymous_id: getAnonymousId(),
                 ...attributionData,
               }),
             }).catch(() => {});

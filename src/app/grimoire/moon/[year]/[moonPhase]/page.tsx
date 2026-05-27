@@ -38,7 +38,17 @@ function getMoonEventBySlug(
   return list.find((event) => event.slug === moonPhase);
 }
 
-export const dynamicParams = true;
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return SUPPORTED_YEARS.flatMap((year) => {
+    const { fullMoons, newMoons } = getMoonEventsForYear(year);
+    return [...fullMoons, ...newMoons].map((event) => ({
+      year: String(year),
+      moonPhase: event.slug,
+    }));
+  });
+}
 
 export async function generateMetadata({
   params,
@@ -99,7 +109,7 @@ export async function generateMetadata({
       canonical: `https://lunary.app/grimoire/moon/${year}/${moonPhase}`,
     },
     robots: {
-      index: false,
+      index: true,
       follow: true,
     },
   };
@@ -258,6 +268,32 @@ export default async function MoonPhaseYearPage({
             ? 'releasing, celebrating, and closing loops'
             : 'new beginnings, intention setting, and building momentum'
         }.`}
+        citationMetadata={{
+          summary: `Use this page for the direct answer for the ${fullDate} ${typeLabel.toLowerCase()}, and use the ${year} astrology calendar JSON for machine-readable event data.`,
+          methodologyUrl: 'https://lunary.app/about/methodology',
+          datasetUrl: `https://lunary.app/grimoire/datasets/astrology-calendar/${year}.json`,
+          citationUrl: 'https://lunary.app/about/citations',
+        }}
+        citableFacts={[
+          {
+            claim: `The ${typeLabel.toLowerCase()} in ${moonEvent.sign} occurs on ${fullDate}.`,
+            sourceName: `${monthName} ${year} ${typeLabel}`,
+            sourceUrl: `https://lunary.app/grimoire/moon/${year}/${moonPhase}`,
+          },
+          {
+            claim:
+              parsed.type === 'full'
+                ? `The traditional name for this ${monthName} ${year} full moon is ${moonEvent.name}.`
+                : `This ${monthName} ${year} new moon starts a lunar cycle in ${moonEvent.sign}.`,
+            sourceName: `${year} Moon Calendar`,
+            sourceUrl: `https://lunary.app/grimoire/moon/${year}`,
+          },
+          {
+            claim: `Lunary’s ${year} astrology calendar JSON is the machine-readable source for annual Moon event dates and signs.`,
+            sourceName: 'Lunary astrology calendar dataset',
+            sourceUrl: `https://lunary.app/grimoire/datasets/astrology-calendar/${year}.json`,
+          },
+        ]}
         meaning={meaning}
         rituals={rituals}
         emotionalThemes={signKeywords}
@@ -302,6 +338,21 @@ export default async function MoonPhaseYearPage({
         internalLinks={[
           { text: 'Moon Calendar Hub', href: '/grimoire/moon' },
           { text: 'All Moon Phases', href: '/grimoire/moon/phases' },
+          {
+            text: `${year} Astrology Calendar JSON`,
+            href: `/grimoire/datasets/astrology-calendar/${year}.json`,
+          },
+          {
+            text:
+              parsed.type === 'full'
+                ? 'Next Full Moon Fact'
+                : 'Next New Moon Fact',
+            href:
+              parsed.type === 'full'
+                ? '/grimoire/facts/next-full-moon'
+                : '/grimoire/facts/next-new-moon',
+          },
+          { text: 'Methodology', href: '/about/methodology' },
           { text: 'Moon Rituals', href: '/grimoire/moon/rituals' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}

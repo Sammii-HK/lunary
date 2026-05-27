@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { v1Handler, apiResponse, apiError } from '@/lib/api/v1-handler';
 import { generateBirthChartWithHouses } from '@utils/astrology/birthChart';
+import type { HouseSystem } from '@utils/astrology/birthChart';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -40,10 +41,13 @@ export const POST = v1Handler('starter', async (request: NextRequest) => {
     birthDate,
     birthTime || undefined,
     latitude && longitude ? `${latitude},${longitude}` : undefined,
+    undefined,
+    undefined,
+    system as HouseSystem,
   );
 
   return apiResponse({
     houseSystem: system,
-    houses: (chart as any).houses || [],
+    houses: chart.houses || [],
   });
 });

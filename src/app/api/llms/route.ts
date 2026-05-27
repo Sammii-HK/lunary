@@ -103,6 +103,17 @@ Moon in ${moonSign}
 - Rulerships and Dignities: https://lunary.app/grimoire/astrology/rulerships-and-dignities
 - Transits - Current Sky and Natal Impact: https://lunary.app/grimoire/transits
 - Retrogrades - Timing and Meaning: https://lunary.app/grimoire/astronomy/retrogrades
+- Moon Phase Today - Quotable Current Moon Fact: https://lunary.app/grimoire/facts/moon-phase-today
+- Current Moon Sign - Quotable Moon Sign Fact: https://lunary.app/grimoire/facts/current-moon-sign
+- Planetary Positions Today - Quotable Current Sky Facts: https://lunary.app/grimoire/facts/planetary-positions-today
+- Mercury Retrograde Status - Quotable Mercury Motion Fact: https://lunary.app/grimoire/facts/mercury-retrograde-status
+- Next Full Moon - Quotable Upcoming Lunar Event: https://lunary.app/grimoire/facts/next-full-moon
+- Next New Moon - Quotable Upcoming Lunar Event: https://lunary.app/grimoire/facts/next-new-moon
+- Next Eclipse - Quotable Upcoming Eclipse Event: https://lunary.app/grimoire/facts/next-eclipse
+- Next Mercury Retrograde - Quotable Upcoming Retrograde Window: https://lunary.app/grimoire/facts/next-mercury-retrograde
+- Annual Astrology Calendar Dataset: https://lunary.app/grimoire/datasets/astrology-calendar/${today.getUTCFullYear()}.json
+- Current Sky Dataset Archive: https://lunary.app/grimoire/datasets/current-sky
+- Dataset Sitemap: https://lunary.app/sitemap-datasets.xml
 - Tarot Cards - Meanings and Spreads: https://lunary.app/grimoire/tarot
 - Crystals - Properties and Healing Guides: https://lunary.app/grimoire/crystals
 - Numerology - Angel Numbers, Life Path, Mirror Hours: https://lunary.app/grimoire/numerology

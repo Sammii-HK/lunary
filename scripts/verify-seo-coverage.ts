@@ -18,6 +18,7 @@ import {
   CURATED_DISCOVERY_SITEMAPS,
   DEPRIORITIZED_DISCOVERY_SITEMAPS,
 } from '@/lib/seo/discovery';
+import { ASPECTS, PLANETS } from '@/constants/seo/aspects';
 
 type AiCitationMap = {
   crawlEntryPoints?: string[];
@@ -191,6 +192,15 @@ function verifyAISearchDiscovery() {
 
   const issues: string[] = [];
   const publicDir = path.join(process.cwd(), 'public');
+  const currentYear = new Date().getUTCFullYear();
+  const annualCalendarDataset = `https://lunary.app/grimoire/datasets/astrology-calendar/${currentYear}.json`;
+  const nextAnnualCalendarDataset = `https://lunary.app/grimoire/datasets/astrology-calendar/${currentYear + 1}.json`;
+  const nextFactUrls = [
+    'https://lunary.app/grimoire/facts/next-full-moon',
+    'https://lunary.app/grimoire/facts/next-new-moon',
+    'https://lunary.app/grimoire/facts/next-eclipse',
+    'https://lunary.app/grimoire/facts/next-mercury-retrograde',
+  ];
 
   const requiredPublicFiles = [
     'llms.txt',
@@ -233,6 +243,14 @@ function verifyAISearchDiscovery() {
     if (!llms.includes('https://lunary.app/ai-citation-map.json')) {
       issues.push('llms.txt does not reference ai-citation-map.json');
     }
+    if (!llms.includes(annualCalendarDataset)) {
+      issues.push('llms.txt does not reference annual astrology calendar data');
+    }
+    nextFactUrls.forEach((url) => {
+      if (!llms.includes(url)) {
+        issues.push(`llms.txt does not reference ${url}`);
+      }
+    });
     if (!llms.includes('Authorization: Bearer <LUNARY_GPT_SECRET>')) {
       issues.push('llms.txt does not explain authenticated GPT action access');
     }
@@ -246,6 +264,16 @@ function verifyAISearchDiscovery() {
     if (!llmsFull.includes('https://lunary.app/ai-citation-map.json')) {
       issues.push('llms-full.txt does not reference ai-citation-map.json');
     }
+    if (!llmsFull.includes(annualCalendarDataset)) {
+      issues.push(
+        'llms-full.txt does not reference annual astrology calendar data',
+      );
+    }
+    nextFactUrls.forEach((url) => {
+      if (!llmsFull.includes(url)) {
+        issues.push(`llms-full.txt does not reference ${url}`);
+      }
+    });
     if (!llmsFull.includes('Authorization: Bearer <LUNARY_GPT_SECRET>')) {
       issues.push(
         'llms-full.txt does not explain authenticated GPT action access',
@@ -314,6 +342,22 @@ function verifyAISearchDiscovery() {
     ) {
       issues.push('ai-citation-map.json does not reference sitemap-index.xml');
     }
+    if (
+      !citationMap.crawlEntryPoints?.includes(
+        'https://lunary.app/sitemap-datasets.xml',
+      )
+    ) {
+      issues.push(
+        'ai-citation-map.json does not reference sitemap-datasets.xml',
+      );
+    }
+    [annualCalendarDataset, nextAnnualCalendarDataset, ...nextFactUrls].forEach(
+      (url) => {
+        if (!citationMap.crawlEntryPoints?.includes(url)) {
+          issues.push(`ai-citation-map.json crawlEntryPoints missing ${url}`);
+        }
+      },
+    );
     if ((citationMap.prioritySurfaces?.length || 0) < 8) {
       issues.push('ai-citation-map.json has too few priority surfaces');
     }
@@ -334,6 +378,20 @@ function verifyAISearchDiscovery() {
         }
       });
     });
+
+    const citationMapUrls = new Set(
+      citationMap.prioritySurfaces?.flatMap((surface) => [
+        surface.canonicalUrl,
+        ...(surface.supportingUrls || []),
+      ]),
+    );
+    [annualCalendarDataset, nextAnnualCalendarDataset, ...nextFactUrls].forEach(
+      (url) => {
+        if (!citationMapUrls.has(url)) {
+          issues.push(`ai-citation-map.json priority surfaces missing ${url}`);
+        }
+      },
+    );
   }
 
   const robots = robotsMetadata();
@@ -362,12 +420,18 @@ function verifyAISearchDiscovery() {
     });
   });
 
+  const robotSitemaps = toStringArray(robots.sitemap);
+  if (!robotSitemaps.includes('https://lunary.app/sitemap-datasets.xml')) {
+    issues.push('robots metadata does not advertise sitemap-datasets.xml');
+  }
+
   if (fs.existsSync(sitemapIndexPath)) {
     const sitemapIndex = fs.readFileSync(sitemapIndexPath, 'utf-8');
     const requiredCuratedSitemaps = [
       'sitemap.xml',
       'sitemap-horoscopes.xml',
       'sitemap-transit-blog.xml',
+      'sitemap-datasets.xml',
       'sitemap-tarot.xml',
       'sitemap-chinese-zodiac.xml',
       'sitemap-seasons.xml',
@@ -425,15 +489,28 @@ function verifyAISearchDiscovery() {
         'Speakable schema does not include the direct-answer-summary selector',
       );
     }
-    if (!seoContentTemplate.includes('Direct answer')) {
+    if (!seoContentTemplate.includes('Quick Answer')) {
       issues.push(
         'SEOContentTemplate does not label the extractable answer block',
       );
     }
-    if (!seoContentTemplate.includes('Related concepts')) {
+    if (!seoContentTemplate.includes('directAnswerRelationships.map')) {
       issues.push(
         'SEOContentTemplate does not expose related concepts for entity context',
       );
+    }
+    if (!seoContentTemplate.includes("id='follow-up-intent'")) {
+      issues.push('SEOContentTemplate is missing the follow-up intent section');
+    }
+    const citableFactsPosition =
+      seoContentTemplate.indexOf("id='citable-facts'");
+    const explorePosition = seoContentTemplate.indexOf('<ExploreGrimoire />');
+    if (
+      citableFactsPosition !== -1 &&
+      explorePosition !== -1 &&
+      citableFactsPosition < explorePosition
+    ) {
+      issues.push('SEOContentTemplate renders citable facts too high');
     }
   }
 
@@ -445,6 +522,185 @@ function verifyAISearchDiscovery() {
   }
 
   console.log('✅ AI and Bing discovery surface is coherent\n');
+  return true;
+}
+
+async function verifyAspectSitemapCoverage() {
+  console.log('🔍 Verifying Aspect Sitemap Coverage...\n');
+
+  const { GET } = await import('@/app/sitemap-aspects.xml/route');
+  const response = await GET();
+  const xml = await response.text();
+  const locs = Array.from(
+    xml.matchAll(/<loc>([^<]+)<\/loc>/g),
+    (match) => match[1],
+  );
+  const locSet = new Set(locs);
+  const issues: string[] = [];
+  const canonicalPairCount = (PLANETS.length * (PLANETS.length - 1)) / 2;
+  const expectedCount =
+    1 +
+    PLANETS.length +
+    PLANETS.length * ASPECTS.length +
+    canonicalPairCount * ASPECTS.length;
+
+  [
+    'https://lunary.app/grimoire/aspects/moon/conjunct',
+    'https://lunary.app/grimoire/aspects/jupiter/conjunct',
+    'https://lunary.app/grimoire/aspects/moon/conjunct/mercury',
+  ].forEach((url) => {
+    if (!locSet.has(url)) {
+      issues.push(`sitemap-aspects.xml is missing ${url}`);
+    }
+  });
+
+  if (locSet.size !== locs.length) {
+    issues.push('sitemap-aspects.xml contains duplicate URLs');
+  }
+
+  if (locs.length !== expectedCount) {
+    issues.push(
+      `sitemap-aspects.xml has ${locs.length} URLs; expected ${expectedCount}`,
+    );
+  }
+
+  if (issues.length > 0) {
+    console.log('Aspect sitemap issues found:');
+    issues.forEach((issue) => console.log(`  ❌ ${issue}`));
+    console.log();
+    return false;
+  }
+
+  console.log(
+    '✅ Aspect sitemap covers planet, planet-aspect, and pair pages\n',
+  );
+  return true;
+}
+
+function verifyCanonicalSourceTruthScaffold() {
+  console.log('🔍 Verifying Canonical Source-of-Truth Scaffolding...\n');
+
+  const issues: string[] = [];
+  const templatePath = path.join(
+    process.cwd(),
+    'src/components/grimoire/SEOContentTemplate.tsx',
+  );
+  const requiredTemplateMarkers = [
+    'structuredSummary',
+    'conceptComparisons',
+    'whyThisWorks',
+    'learningPath',
+    'followUpIntent',
+    "id='reference-map'",
+  ];
+
+  if (!fs.existsSync(templatePath)) {
+    issues.push('SEOContentTemplate is missing');
+  } else {
+    const template = fs.readFileSync(templatePath, 'utf-8');
+    requiredTemplateMarkers.forEach((marker) => {
+      if (!template.includes(marker)) {
+        issues.push(`SEOContentTemplate is missing ${marker}`);
+      }
+    });
+  }
+
+  const canonicalPages = [
+    'src/app/grimoire/astrology/page.tsx',
+    'src/app/grimoire/birth-chart/page.tsx',
+    'src/app/grimoire/astronomy/planets/page.tsx',
+    'src/app/grimoire/aspects/page.tsx',
+    'src/app/grimoire/houses/page.tsx',
+    'src/app/grimoire/moon/phases/page.tsx',
+    'src/app/grimoire/transits/page.tsx',
+  ];
+
+  canonicalPages.forEach((relativePath) => {
+    const fullPath = path.join(process.cwd(), relativePath);
+
+    if (!fs.existsSync(fullPath)) {
+      issues.push(`Canonical source page missing: ${relativePath}`);
+      return;
+    }
+
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    [
+      'structuredSummary',
+      'conceptComparisons',
+      'whyThisWorks',
+      'learningPath',
+    ].forEach((marker) => {
+      if (!content.includes(marker)) {
+        issues.push(`${relativePath} is missing ${marker}`);
+      }
+    });
+  });
+
+  if (issues.length > 0) {
+    console.log('Canonical source-of-truth issues found:');
+    issues.forEach((issue) => console.log(`  ❌ ${issue}`));
+    console.log();
+    return false;
+  }
+
+  console.log(
+    '✅ Canonical hubs expose structured summaries, contrasts, rationale, and learning paths\n',
+  );
+  return true;
+}
+
+function verifyLegacyCanonicalRedirects() {
+  console.log('🔍 Verifying Legacy Canonical Redirects...\n');
+
+  const issues: string[] = [];
+  const middlewarePath = path.join(process.cwd(), 'src/middleware.ts');
+  const requiredSeasonSlugs = [
+    'aries-season',
+    'taurus-season',
+    'gemini-season',
+    'cancer-season',
+    'leo-season',
+    'virgo-season',
+    'libra-season',
+    'scorpio-season',
+    'sagittarius-season',
+    'capricorn-season',
+    'aquarius-season',
+    'pisces-season',
+  ];
+
+  if (!fs.existsSync(middlewarePath)) {
+    issues.push('src/middleware.ts is missing');
+  } else {
+    const middleware = fs.readFileSync(middlewarePath, 'utf-8');
+
+    requiredSeasonSlugs.forEach((slug) => {
+      if (!middleware.includes(`'${slug}'`)) {
+        issues.push(`middleware legacy season redirects are missing ${slug}`);
+      }
+    });
+
+    if (!middleware.includes('getLegacySeasonSign')) {
+      issues.push('middleware is missing legacy season redirect detection');
+    }
+    if (!middleware.includes('/grimoire/seasons/${currentYear}/')) {
+      issues.push('middleware does not redirect legacy seasons to year pages');
+    }
+    if (!middleware.includes('308')) {
+      issues.push(
+        'middleware legacy season redirects should be permanent 308s',
+      );
+    }
+  }
+
+  if (issues.length > 0) {
+    console.log('Legacy redirect issues found:');
+    issues.forEach((issue) => console.log(`  ❌ ${issue}`));
+    console.log();
+    return false;
+  }
+
+  console.log('✅ Legacy season URLs redirect to canonical year pages\n');
   return true;
 }
 
@@ -467,6 +723,9 @@ async function verifySEOCoverage() {
 
   const results = {
     retrogradeSitemap: await verifyRetrogradeSitemapCoverage(),
+    aspectSitemap: await verifyAspectSitemapCoverage(),
+    sourceTruthScaffold: verifyCanonicalSourceTruthScaffold(),
+    legacyCanonicalRedirects: verifyLegacyCanonicalRedirects(),
     generateStaticParams: verifyGenerateStaticParams(),
     canonicalURLs: verifyCanonicalURLs(),
     aiSearchDiscovery: verifyAISearchDiscovery(),

@@ -7,12 +7,18 @@ import {
   SIGN_SYMBOLS,
   getDecanData,
   ZodiacSign,
+  generateAllDecanParams,
 } from '@/constants/seo/decans';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-export const dynamicParams = true;
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return generateAllDecanParams();
+}
+
 interface PageParams {
   sign: string;
   decan: string;
@@ -24,7 +30,7 @@ export async function generateMetadata({
   params: Promise<PageParams>;
 }): Promise<Metadata> {
   const { sign, decan: decanStr } = await params;
-  const decan = parseInt(decanStr) as 1 | 2 | 3;
+  const decan = parseInt(decanStr, 10) as 1 | 2 | 3;
 
   if (
     !ZODIAC_SIGNS.includes(sign as ZodiacSign) ||
@@ -71,7 +77,7 @@ export default async function DecanPage({
   params: Promise<PageParams>;
 }) {
   const { sign, decan: decanStr } = await params;
-  const decan = parseInt(decanStr) as 1 | 2 | 3;
+  const decan = parseInt(decanStr, 10) as 1 | 2 | 3;
 
   if (
     !ZODIAC_SIGNS.includes(sign as ZodiacSign) ||

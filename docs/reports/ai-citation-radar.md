@@ -1,7 +1,7 @@
 # AI Citation Radar
 
-Generated: 2026-05-18T14:38:10.013Z
-Window: 2026-04-19 to 2026-05-17
+Generated: 2026-05-20T09:20:33.301Z
+Window: 2026-04-21 to 2026-05-19
 
 ## Summary
 
@@ -13,7 +13,7 @@ Window: 2026-04-19 to 2026-05-17
 | Competitor domains found   |   257 |
 | Bing AI citations          |   333 |
 | Bing average cited pages   |    62 |
-| AI referral visits via API |   294 |
+| AI referral visits via API |   314 |
 
 ## Source Health
 

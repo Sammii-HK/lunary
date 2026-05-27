@@ -12,7 +12,7 @@ import {
 import { useAuthStatus } from '@/components/AuthStatus';
 import { CURRENT_BIRTH_CHART_VERSION } from 'utils/astrology/chart-version';
 import { DailyCache } from '@/lib/cache/dailyCache';
-import { ClientCache } from '@/lib/patterns/snapshot/cache';
+import { ClientCache } from '@/lib/patterns/snapshot/client-cache';
 
 export interface BirthChartPlacement {
   body: string;

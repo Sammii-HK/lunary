@@ -267,6 +267,38 @@ ${forecast.keyEvents.map((event) => `- **${event.dateLabel}: ${event.title}** â€
           ],
         },
       ]}
+      followUpIntent={[
+        {
+          title: 'Dates and timing',
+          description:
+            'Use the monthâ€™s key sky events to choose when to act, wait, reset, or review.',
+          href: `/grimoire/events/${year}`,
+        },
+        {
+          title: 'Natal vs transit',
+          description:
+            'Compare this sign forecast with your birth chart to see where the month lands personally.',
+          href: '/grimoire/birth-chart',
+        },
+        {
+          title: 'Year context',
+          description:
+            'Zoom out from this month into the complete yearly forecast and quarterly checkpoints.',
+          href: `/grimoire/horoscopes/${sign}/${year}`,
+        },
+        {
+          title: 'Moon phase timing',
+          description:
+            'Layer the forecast with lunar phases for rituals, decisions, and emotional pacing.',
+          href: `/grimoire/moon/${year}`,
+        },
+        {
+          title: 'Placement examples',
+          description:
+            'Explore Sun, Moon, and Rising paths to make the forecast more specific.',
+          href: `/grimoire/zodiac/${sign}`,
+        },
+      ]}
       components={null}
       cosmicConnections={
         <HoroscopeCosmicConnections

@@ -47,7 +47,7 @@ function parseFormat(value: string | null): QuizShareFormat {
 
 function parseChips(subtitle: string): string[] {
   return subtitle
-    .split(/\s*[·•]\s*/)
+    .split(/[·•]/)
     .map((part) => part.trim())
     .filter((part) => part.length > 0)
     .slice(0, 6); // cap to keep the card clean at small formats

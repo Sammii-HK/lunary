@@ -1,8 +1,15 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { usePathname } from 'next/navigation';
-import { initializeAttribution } from '@/lib/attribution';
+import { useAuthStatus } from '@/components/AuthStatus';
+import { getAnonymousId } from '@/lib/analytics';
+import {
+  getAttributionForTracking,
+  getStoredAttribution,
+  initializeAttribution,
+} from '@/lib/attribution';
+
+const ATTRIBUTION_SYNC_PREFIX = 'lunary_attribution_synced';
 
 /**
  * Captures attribution data (referrer, UTM params, landing page) on first page load.
@@ -16,28 +23,62 @@ import { initializeAttribution } from '@/lib/attribution';
  */
 export function AttributionCapture() {
   const initialized = useRef(false);
-  const pathname = usePathname() || '';
-  const publicSeoPrefixes = [
-    '/grimoire',
-    '/blog',
-    '/comparison',
-    '/features',
-    '/pricing',
-    '/shop',
-  ];
-  const isPublicSeoSurface = publicSeoPrefixes.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
 
   useEffect(() => {
     if (initialized.current) return;
-    if (isPublicSeoSurface) return;
     initialized.current = true;
 
     // Capture attribution immediately on first page load
     // This ensures attribution is available for signup tracking
     initializeAttribution();
-  }, [isPublicSeoSurface]);
+  }, []);
+
+  return null;
+}
+
+export function AttributionSync() {
+  const { isAuthenticated, loading, user } = useAuthStatus();
+  const syncInFlight = useRef(false);
+
+  useEffect(() => {
+    if (loading || !isAuthenticated || !user?.id || syncInFlight.current) {
+      return;
+    }
+
+    const attribution = getStoredAttribution();
+    if (!attribution) return;
+
+    const syncKey = `${ATTRIBUTION_SYNC_PREFIX}:${user.id}`;
+    try {
+      if (window.localStorage.getItem(syncKey)) return;
+    } catch {
+      // localStorage can be blocked; still attempt the authenticated sync.
+    }
+
+    syncInFlight.current = true;
+    fetch('/api/attribution', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        userId: user.id,
+        anonymous_id: getAnonymousId(),
+        ...getAttributionForTracking(),
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) return;
+        try {
+          window.localStorage.setItem(syncKey, '1');
+        } catch {
+          // Non-critical; a future mount may retry the same idempotent upsert.
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        syncInFlight.current = false;
+      });
+  }, [isAuthenticated, loading, user?.id]);
 
   return null;
 }

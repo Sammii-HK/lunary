@@ -37,6 +37,7 @@ import {
   NextLunarApsis,
   ApsisKind,
 } from 'astronomy-engine';
+import tzLookup from 'tz-lookup';
 
 export type BirthChartData = {
   body: string;
@@ -359,6 +360,17 @@ const LOCATIONIQ_API_KEY = process.env.LOCATIONIQ_API_KEY || '';
 const LOCATIONIQ_BASE_URL =
   process.env.LOCATIONIQ_BASE_URL || 'https://us1.locationiq.com/v1';
 
+function timezoneForCoordinates(
+  latitude: number,
+  longitude: number,
+): string | undefined {
+  try {
+    return tzLookup(latitude, longitude);
+  } catch {
+    return undefined;
+  }
+}
+
 async function parseLocationToCoordinates(
   location: string,
 ): Promise<{ latitude: number; longitude: number } | null> {
@@ -506,25 +518,30 @@ export const generateBirthChart = async (
     }
   }
 
-  const birthDateTime = resolveBirthDateTime(
-    birthDate,
-    birthTime,
-    birthTimezone,
-  );
-
   let finalObserver: Observer;
+  let resolvedBirthTimezone = birthTimezone;
   if (observer) {
     finalObserver = observer;
   } else if (birthLocation) {
     const coords = await parseLocationToCoordinates(birthLocation);
     if (coords) {
       finalObserver = new Observer(coords.latitude, coords.longitude, 0);
+      resolvedBirthTimezone ??= timezoneForCoordinates(
+        coords.latitude,
+        coords.longitude,
+      );
     } else {
       finalObserver = new Observer(51.4769, 0.0005, 0);
     }
   } else {
     finalObserver = new Observer(51.4769, 0.0005, 0);
   }
+
+  const birthDateTime = resolveBirthDateTime(
+    birthDate,
+    birthTime,
+    resolvedBirthTimezone,
+  );
 
   const astroChart = getAstrologicalChart(birthDateTime, finalObserver);
 
@@ -832,33 +849,40 @@ export const generateBirthChartWithHouses = async (
   observer?: Observer,
   houseSystem: HouseSystem = 'whole-sign',
 ): Promise<BirthChartResult> => {
-  const birthDateTime = resolveBirthDateTime(
-    birthDate,
-    birthTime,
-    birthTimezone,
-  );
-
   // Resolve observer from birth location — needed for house calculations.
   // Previously this was only done inside generateBirthChart and never
   // passed to calculateHouses, causing Placidus/Koch/Alcabitius to use
   // Observer(0,0,0) (the equator) and produce completely wrong cusps.
   let resolvedObserver = observer;
+  let resolvedBirthTimezone = birthTimezone;
   if (!resolvedObserver) {
     if (birthLocation) {
       const coords = await parseLocationToCoordinates(birthLocation);
-      resolvedObserver = coords
-        ? new Observer(coords.latitude, coords.longitude, 0)
-        : new Observer(51.4769, 0.0005, 0);
+      if (coords) {
+        resolvedObserver = new Observer(coords.latitude, coords.longitude, 0);
+        resolvedBirthTimezone ??= timezoneForCoordinates(
+          coords.latitude,
+          coords.longitude,
+        );
+      } else {
+        resolvedObserver = new Observer(51.4769, 0.0005, 0);
+      }
     } else {
       resolvedObserver = new Observer(51.4769, 0.0005, 0);
     }
   }
 
+  const birthDateTime = resolveBirthDateTime(
+    birthDate,
+    birthTime,
+    resolvedBirthTimezone,
+  );
+
   const planets = await generateBirthChart(
     birthDate,
     birthTime,
     birthLocation,
-    birthTimezone,
+    resolvedBirthTimezone,
     resolvedObserver,
   );
 
@@ -886,6 +910,7 @@ export const generateBirthChartWithHouses = async (
 
 export const __test__ = {
   toUtcFromTimeZone,
+  timezoneForCoordinates,
 };
 
 function resolveBirthDateTime(

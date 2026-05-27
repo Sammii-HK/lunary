@@ -120,7 +120,10 @@ export default async function TransitBlogIndexPage() {
           sign. Drawn from our grimoire, grounded in real astronomical data.
         </p>
 
-        <section className='mt-8 rounded-xl border border-lunary-primary-800/40 bg-layer-deep/30 p-5'>
+        <section
+          data-citation-answer='true'
+          className='mt-8 rounded-xl border border-lunary-primary-800/40 bg-layer-deep/30 p-5'
+        >
           <Heading as='h2' variant='h3'>
             What are astrology transits?
           </Heading>

@@ -77,6 +77,11 @@ export async function POST(request: NextRequest) {
           typeof payload?.ctaVariant === 'string'
             ? payload.ctaVariant
             : undefined,
+        funnel_version:
+          typeof payload?.funnelVersion === 'string'
+            ? payload.funnelVersion
+            : undefined,
+        step: typeof payload?.step === 'string' ? payload.step : undefined,
         cta_headline:
           typeof payload?.ctaHeadline === 'string'
             ? payload.ctaHeadline

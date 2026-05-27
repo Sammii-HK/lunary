@@ -15,10 +15,14 @@ import {
   Link2,
   Share2,
 } from 'lucide-react';
+import { trackCtaClick, trackEvent } from '@/lib/analytics';
 import { captureEvent } from '@/lib/posthog-client';
 import type { QuizResult } from '@/lib/quiz/types';
 
 const QUIZ_SLUG = 'chart-ruler';
+const QUIZ_PAGE_PATH = '/quiz/beyond-your-sun-sign/chart-ruler';
+const QUIZ_FEATURE_NAME = 'chart-ruler-quiz';
+const QUIZ_FUNNEL_VERSION = 'chart-ruler-v1';
 
 type Phase = 'form' | 'loading' | 'result' | 'error';
 
@@ -36,6 +40,36 @@ const initialForm: FormState = {
   skipTime: false,
 };
 
+type QuizProofEvent =
+  | 'quiz_started'
+  | 'quiz_result_viewed'
+  | 'quiz_signup_clicked';
+
+type QuizProofMetadata = Record<
+  string,
+  string | number | boolean | null | undefined
+>;
+
+function trackQuizProofEvent(
+  event: QuizProofEvent,
+  metadata: QuizProofMetadata = {},
+) {
+  void trackEvent(event, {
+    featureName: QUIZ_FEATURE_NAME,
+    pagePath: QUIZ_PAGE_PATH,
+    entityType: 'quiz',
+    entityId: QUIZ_SLUG,
+    funnelVersion: QUIZ_FUNNEL_VERSION,
+    step: typeof metadata.step === 'string' ? metadata.step : undefined,
+    metadata: {
+      quizSlug: QUIZ_SLUG,
+      quiz_slug: QUIZ_SLUG,
+      funnel_version: QUIZ_FUNNEL_VERSION,
+      ...metadata,
+    },
+  });
+}
+
 export function ChartRulerQuizClient() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [phase, setPhase] = useState<Phase>('form');
@@ -43,7 +77,7 @@ export function ChartRulerQuizClient() {
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
-    captureEvent('quiz_started', { quizSlug: QUIZ_SLUG });
+    trackQuizProofEvent('quiz_started', { step: 'started' });
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -80,18 +114,25 @@ export function ChartRulerQuizClient() {
         return;
       }
       const data = (await res.json()) as QuizResult;
-      captureEvent('quiz_result_viewed', {
+      const resultProofMetadata = {
         quizSlug: data.quizSlug,
+        quiz_slug: data.quizSlug,
+        chartKey: data.meta.chartKey,
+        chart_key: data.meta.chartKey,
+        join_key: `${data.quizSlug}:${data.meta.chartKey}`,
         archetype: data.archetype?.label,
+        step: 'result_viewed',
         dignity: data.meta?.signals?.dignity ?? null,
-        houseNature: data.meta?.signals?.houseNature,
-        houseNumber: data.meta?.signals?.houseNumber,
-        rulerInRising: data.meta?.signals?.rulerInRising,
-        retrograde: data.meta?.signals?.retrograde,
-      });
+        houseNature: data.meta?.signals?.houseNature ?? null,
+        houseNumber: data.meta?.signals?.houseNumber ?? null,
+        rulerInRising: data.meta?.signals?.rulerInRising ?? null,
+        retrograde: data.meta?.signals?.retrograde ?? null,
+      };
+      trackQuizProofEvent('quiz_result_viewed', resultProofMetadata);
       try {
         const payload = JSON.stringify({
           quizSlug: data.quizSlug,
+          chartKey: data.meta.chartKey,
           birthDate: form.birthDate,
           birthTime:
             form.skipTime || !form.birthTime ? undefined : form.birthTime,
@@ -269,10 +310,29 @@ function ChartRulerResultView({ result }: { result: QuizResult }) {
   const share = buildShareAssets(result);
 
   function handleSignupClick() {
-    captureEvent('quiz_signup_clicked', {
+    const quizMetadata = {
       quizSlug: result.quizSlug,
-      archetype: result.archetype?.label,
+      quiz_slug: result.quizSlug,
       chartKey: result.meta.chartKey,
+      chart_key: result.meta.chartKey,
+      join_key: `${result.quizSlug}:${result.meta.chartKey}`,
+      archetype: result.archetype?.label,
+      step: 'signup_clicked',
+    };
+    trackQuizProofEvent('quiz_signup_clicked', quizMetadata);
+    void trackCtaClick({
+      hub: 'quiz',
+      ctaId: 'chart_ruler_quiz_signup',
+      location: 'chart_ruler_result',
+      label: 'Unlock my full profile (free 7-day trial)',
+      href: signupHref,
+      pagePath: QUIZ_PAGE_PATH,
+      funnelVersion: QUIZ_FUNNEL_VERSION,
+      step: 'signup_clicked',
+      ctaVariant: result.archetype?.label,
+    });
+    captureEvent('quiz_signup_clicked', {
+      ...quizMetadata,
     });
   }
 

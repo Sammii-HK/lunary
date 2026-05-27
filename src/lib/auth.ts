@@ -1,5 +1,6 @@
 import { betterAuth } from 'better-auth';
 import { Pool } from 'pg';
+import { buildAuthLifecycleConversionEvents } from './analytics/auth-lifecycle-events';
 import { getAllowedOrigins } from './origin-validation';
 
 // Postgres pool (PRIMARY)
@@ -35,47 +36,58 @@ function getPostgresPool() {
   return pgPool;
 }
 
-async function recordSignupConversionEvent(
+async function recordAuthLifecycleConversionEvents(
   pool: Pool,
   user: { id: string; email?: string | null; createdAt?: Date | string | null },
+  options: { trialEndsAt?: Date | null; includeTrialStarted?: boolean } = {},
 ): Promise<void> {
   try {
-    const normalizedEmail =
-      typeof user.email === 'string' && user.email.trim().length > 0
-        ? user.email.trim().toLowerCase()
-        : null;
-    const createdAt =
-      user.createdAt instanceof Date
-        ? user.createdAt
-        : user.createdAt
-          ? new Date(user.createdAt)
-          : new Date();
+    const events = buildAuthLifecycleConversionEvents({
+      user,
+      trialEndsAt: options.trialEndsAt,
+      includeTrialStarted: options.includeTrialStarted,
+    });
 
-    await pool.query(
-      `INSERT INTO conversion_events (
-        event_type,
-        user_id,
-        user_email,
-        metadata,
-        created_at
-      )
-      SELECT $1, $2, $3, $4, $5
-      WHERE NOT EXISTS (
-        SELECT 1
-        FROM conversion_events
-        WHERE event_type = $1
-          AND user_id = $2
-      )`,
-      [
-        'signup',
-        user.id,
-        normalizedEmail,
-        JSON.stringify({ source: 'auth' }),
-        createdAt,
-      ],
-    );
+    for (const event of events) {
+      await pool.query(
+        `INSERT INTO conversion_events (
+          event_type,
+          event_id,
+          user_id,
+          user_email,
+          plan_type,
+          trial_days_remaining,
+          feature_name,
+          page_path,
+          metadata,
+          created_at
+        )
+        SELECT $1, $2::uuid, $3, $4, $5, $6, $7, $8, $9::jsonb, $10
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM conversion_events
+          WHERE event_type = $1
+            AND user_id = $3
+        )`,
+        [
+          event.eventType,
+          event.eventId,
+          event.userId,
+          event.userEmail,
+          event.planType,
+          event.trialDaysRemaining,
+          event.featureName,
+          event.pagePath,
+          JSON.stringify(event.metadata),
+          event.createdAt,
+        ],
+      );
+    }
   } catch (error) {
-    console.warn('[auth] Failed to record signup conversion event:', error);
+    console.warn(
+      '[auth] Failed to record auth lifecycle conversion events:',
+      error,
+    );
   }
 }
 
@@ -308,17 +320,17 @@ async function initializeAuth() {
             console.log('✨ New user created in Postgres:', user.id);
 
             if (pool) {
-              await recordSignupConversionEvent(pool, user);
-
               // Auto-enroll every new user in a 7-day Lunary+ trial so they
               // experience the full product immediately. All existing trial
               // nurture, reminder, and win-back email crons key off
               // status='trial' + trial_ends_at, so they fire automatically.
+              let trialEndsAt: Date | null = null;
+              let autoTrialCreated = false;
               try {
-                const trialEndsAt = new Date();
+                trialEndsAt = new Date();
                 trialEndsAt.setDate(trialEndsAt.getDate() + 7);
 
-                await pool.query(
+                const trialResult = await pool.query(
                   `INSERT INTO subscriptions (
                      user_id, user_email, user_name,
                      status, plan_type, trial_ends_at, trial_used,
@@ -333,12 +345,18 @@ async function initializeAuth() {
                     trialEndsAt.toISOString(),
                   ],
                 );
+                autoTrialCreated = (trialResult.rowCount ?? 0) > 0;
               } catch (subError) {
                 console.error(
                   'Failed to create auto-trial subscription:',
                   subError,
                 );
               }
+
+              await recordAuthLifecycleConversionEvents(pool, user, {
+                trialEndsAt,
+                includeTrialStarted: autoTrialCreated,
+              });
             }
             // Welcome email is sent after email verification to avoid emailing unverified/bot addresses
           },

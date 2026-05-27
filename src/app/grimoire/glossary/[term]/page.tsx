@@ -208,7 +208,11 @@ export default async function GlossaryTermPage({
           </p>
         </header>
 
-        <section className='mb-8 border-l-2 border-lunary-primary-600 pl-4'>
+        <section
+          aria-label='Direct answer'
+          data-citation-answer='true'
+          className='mb-8 border-l-2 border-lunary-primary-600 pl-4'
+        >
           <h2 className='text-lg font-medium text-content-primary'>
             Quick answer
           </h2>

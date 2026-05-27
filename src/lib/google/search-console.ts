@@ -625,10 +625,11 @@ export async function auditUrlsIndexing(
         await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
     } catch (error) {
-      console.error(
-        `[Indexing Audit] Error checking URL ${i + 1}/${urls.length}:`,
+      console.error('[Indexing Audit] Error checking URL', {
         error,
-      );
+        position: i + 1,
+        total: urls.length,
+      });
       results.push({
         url,
         verdict: 'ERROR',

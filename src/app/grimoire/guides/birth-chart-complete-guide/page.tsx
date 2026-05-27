@@ -90,6 +90,9 @@ const faqs = [
   },
 ];
 
+const birthChartDirectAnswer =
+  'A birth chart is a map of the sky at your exact birth time and location. Lunary reads it by identifying the planets, signs, houses, rulers, aspects, decans, and timing layers in that order.';
+
 export default function BirthChartCompleteGuidePage() {
   const articleSchema = createArticleWithSpeakableSchema({
     headline: `Birth Chart: The Complete Guide (${currentYear} Edition)`,
@@ -166,6 +169,16 @@ export default function BirthChartCompleteGuidePage() {
           timing. Once you learn that order, birth charts stop feeling mystical
           and start feeling readable.
         </p>
+        <section
+          aria-label='Direct answer'
+          data-citation-answer='true'
+          className='mb-6 rounded-xl border border-stroke-subtle bg-surface-elevated/40 p-5'
+        >
+          <h2 className='sr-only'>Direct answer</h2>
+          <p className='text-sm leading-relaxed text-content-muted'>
+            TL;DR: {birthChartDirectAnswer}
+          </p>
+        </section>
         <div className='flex flex-wrap gap-4'>
           <Button asChild variant='lunary-solid' size='lg'>
             <Link href='/birth-chart'>Get Your Birth Chart</Link>

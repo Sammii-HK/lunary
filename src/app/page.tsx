@@ -5,9 +5,9 @@ import { Metadata } from 'next';
 import WelcomePage from '@/components/pages/WelcomePage';
 
 export const metadata: Metadata = {
-  title: 'Personalized Astrology App for Your Birth Chart | Lunary',
+  title: 'Astrology That Understands Your Life | Lunary',
   description:
-    'Get daily horoscopes, tarot readings, and cosmic insights from your exact birth chart. Real astronomical data, not generic zodiac signs. Free 7-day trial.',
+    "Understand why today feels the way it does. Lunary connects today's sky to your full birth chart with real astronomy, transits, tarot, moon phases and free astrology education.",
   keywords: [
     'personalized astrology',
     'birth chart astrology',
@@ -29,9 +29,9 @@ export const metadata: Metadata = {
     canonical: 'https://lunary.app',
   },
   openGraph: {
-    title: 'Personalized Astrology App for Your Birth Chart | Lunary',
+    title: 'Astrology That Understands Your Life | Lunary',
     description:
-      'Get daily horoscopes, tarot readings, and cosmic insights from your exact birth chart. Real astronomical data, not generic zodiac signs.',
+      "Understand why today feels the way it does. Lunary connects today's sky to your full birth chart with real astronomy, transits, tarot and moon phases.",
     url: 'https://lunary.app',
     siteName: 'Lunary',
     images: [
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
         url: '/api/og/homepage',
         width: 1200,
         height: 630,
-        alt: 'Lunary - Personalized Astrology App for Your Birth Chart',
+        alt: 'Lunary - Astrology that understands your life',
       },
     ],
     locale: 'en_US',
@@ -47,9 +47,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Personalized Astrology App for Your Birth Chart | Lunary',
+    title: 'Astrology That Understands Your Life | Lunary',
     description:
-      'Get daily horoscopes, tarot readings, and cosmic insights from your exact birth chart. Real astronomical data, not generic zodiac signs.',
+      "Understand why today feels the way it does. Lunary connects today's sky to your full birth chart with real astronomy, transits, tarot and moon phases.",
     images: ['/api/og/homepage'],
   },
   robots: {
@@ -67,6 +67,7 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const cookieStore = await cookies();
+  let isAuthenticated = false;
 
   // Build cookie header string for Better Auth
   const cookieHeader = cookieStore
@@ -74,8 +75,9 @@ export default async function HomePage() {
     .map((cookie) => `${cookie.name}=${cookie.value}`)
     .join('; ');
 
+  // Check if user is authenticated. Redirect outside the try block so Next's
+  // redirect exception is not swallowed by the unauthenticated fallback.
   try {
-    // Check if user is authenticated
     const sessionResponse = await auth.api.getSession({
       headers: new Headers({
         cookie: cookieHeader,
@@ -84,14 +86,15 @@ export default async function HomePage() {
 
     // Check if session exists and has user
     const user = sessionResponse?.user;
-
-    if (user?.id) {
-      // User is authenticated, redirect to app dashboard
-      redirect('/app');
-    }
+    isAuthenticated = Boolean(user?.id);
   } catch (error) {
     // Not authenticated or error checking session, continue to show welcome page
     // This is expected for unauthenticated users and Google crawlers
+  }
+
+  if (isAuthenticated) {
+    // User is authenticated, redirect to app dashboard
+    redirect('/app');
   }
 
   // Show welcome page for unauthenticated users (and Google crawlers)

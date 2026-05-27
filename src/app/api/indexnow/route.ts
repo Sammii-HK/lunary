@@ -20,8 +20,10 @@ export async function POST(request: Request) {
     const providedSecret =
       request.headers.get('x-indexnow-secret') ||
       request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
+    const normalizedProvidedSecret =
+      providedSecret?.replace(/\s+/g, '') || undefined;
 
-    if (!publishSecret || publishSecret !== providedSecret) {
+    if (!publishSecret || publishSecret !== normalizedProvidedSecret) {
       return NextResponse.json(
         { error: 'Unauthorized IndexNow submission.' },
         { status: 401 },

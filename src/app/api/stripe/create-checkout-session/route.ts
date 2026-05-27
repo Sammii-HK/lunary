@@ -318,6 +318,48 @@ async function getTrialPeriodForPrice(
   }
 }
 
+const CHECKOUT_SOURCE_CONTEXT_KEYS = [
+  'cta_id',
+  'cta_location',
+  'cta_label',
+  'cta_href',
+  'cta_funnel_version',
+  'cta_step',
+  'funnel_version',
+  'step',
+  'page_path',
+  'analytics_session_id',
+  'anonymous_id',
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_content',
+  'utm_term',
+  'first_touch_source',
+  'first_touch_medium',
+  'first_touch_campaign',
+  'first_touch_keyword',
+  'first_touch_page',
+  'first_touch_referrer',
+  'first_touch_at',
+] as const;
+
+function normalizeCheckoutSourceContext(
+  value: unknown,
+): Record<string, string> {
+  if (!value || typeof value !== 'object') return {};
+  const input = value as Record<string, unknown>;
+  const metadata: Record<string, string> = {};
+  for (const key of CHECKOUT_SOURCE_CONTEXT_KEYS) {
+    const raw = input[key];
+    if (typeof raw !== 'string') continue;
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+    metadata[key] = trimmed.slice(0, 480);
+  }
+  return metadata;
+}
+
 export async function POST(request: NextRequest) {
   let priceId: string | undefined;
   try {
@@ -333,7 +375,9 @@ export async function POST(request: NextRequest) {
       promoCode,
       referralCode,
       triggerFeature,
+      sourceContext,
     } = requestBody;
+    const checkoutSourceContext = normalizeCheckoutSourceContext(sourceContext);
 
     let resolvedCustomerId =
       typeof requestedCustomerId === 'string' &&
@@ -571,6 +615,7 @@ export async function POST(request: NextRequest) {
     const metadata: Record<string, string> = {
       plan_id: planId,
       planType: isMonthly ? 'monthly' : 'yearly',
+      ...checkoutSourceContext,
     };
 
     if (

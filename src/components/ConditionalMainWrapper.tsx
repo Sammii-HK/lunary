@@ -6,6 +6,39 @@ import { cn } from '@/lib/utils';
 
 const NAV_CONTEXT_KEY = 'lunary_nav_context';
 
+function isLikelyMarketingRoute(pathname: string | null) {
+  if (!pathname) return false;
+  return (
+    pathname === '/' ||
+    pathname === '/welcome' ||
+    pathname === '/help' ||
+    pathname === '/auth' ||
+    pathname === '/pricing' ||
+    pathname === '/features' ||
+    pathname === '/faq' ||
+    pathname === '/about' ||
+    pathname.startsWith('/blog') ||
+    pathname.startsWith('/grimoire') ||
+    pathname.startsWith('/comparison') ||
+    pathname.startsWith('/product') ||
+    pathname.startsWith('/resources') ||
+    pathname.startsWith('/legal') ||
+    pathname.startsWith('/privacy') ||
+    pathname.startsWith('/terms') ||
+    pathname.startsWith('/cookies') ||
+    pathname.startsWith('/refund') ||
+    pathname.startsWith('/accessibility') ||
+    pathname.startsWith('/acceptable-use') ||
+    pathname.startsWith('/referral-terms') ||
+    pathname.startsWith('/api-terms') ||
+    pathname.startsWith('/dmca') ||
+    pathname.startsWith('/trademark') ||
+    pathname.startsWith('/press-kit') ||
+    pathname.startsWith('/developers') ||
+    pathname.startsWith('/circle')
+  );
+}
+
 export function ConditionalMainWrapper({
   children,
 }: {
@@ -13,9 +46,12 @@ export function ConditionalMainWrapper({
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [showMarketingNav, setShowMarketingNav] = useState(false);
-  const [showAppNav, setShowAppNav] = useState(false);
   const navOverride = searchParams?.get('nav');
+  const [showMarketingNav, setShowMarketingNav] = useState(
+    navOverride === 'marketing' ||
+      (navOverride !== 'app' && isLikelyMarketingRoute(pathname)),
+  );
+  const [showAppNav, setShowAppNav] = useState(false);
   const mainRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -194,13 +230,17 @@ export function ConditionalMainWrapper({
       style={{
         paddingTop: showAppNav
           ? 'calc(var(--global-nav-offset, 0px) + max(env(safe-area-inset-top, 0px), 1rem))'
-          : 'var(--global-nav-offset, 0px)',
+          : showMarketingNav
+            ? 'var(--global-nav-offset, 40px)'
+            : '0px',
         paddingBottom: showAppNav
           ? 'calc(56px + env(safe-area-inset-bottom, 0px))'
           : undefined,
         scrollPaddingTop: showAppNav
           ? 'calc(var(--global-nav-offset, 0px) + max(env(safe-area-inset-top, 0px), 1rem))'
-          : 'var(--global-nav-offset, 0px)',
+          : showMarketingNav
+            ? 'var(--global-nav-offset, 40px)'
+            : '0px',
         minHeight: '100dvh',
       }}
       className={cn('flex h-dvh w-full flex-col overflow-y-auto')}

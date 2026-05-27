@@ -14,7 +14,14 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-export const dynamicParams = true;
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return PLANETS_FOR_HOUSES.flatMap((slug) =>
+    HOUSES.map((house) => ({ slug, house: String(house) })),
+  );
+}
+
 interface PageParams {
   slug: string;
   house: string;
@@ -26,7 +33,7 @@ export async function generateMetadata({
   params: Promise<PageParams>;
 }): Promise<Metadata> {
   const { slug: planet, house: houseStr } = await params;
-  const house = parseInt(houseStr) as House;
+  const house = parseInt(houseStr, 10) as House;
 
   if (
     !PLANETS_FOR_HOUSES.includes(planet as HousePlanet) ||
@@ -73,7 +80,7 @@ export default async function HousePlacementPage({
   params: Promise<PageParams>;
 }) {
   const { slug: planet, house: houseStr } = await params;
-  const house = parseInt(houseStr) as House;
+  const house = parseInt(houseStr, 10) as House;
 
   if (
     !PLANETS_FOR_HOUSES.includes(planet as HousePlanet) ||

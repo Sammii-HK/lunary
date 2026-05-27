@@ -132,6 +132,25 @@ export default async function FullMoonPage({
         canonicalUrl={`https://lunary.app/grimoire/moon/full-moons/${month}`}
         intro={`The ${monthKey} full moon is traditionally known as the ${moonData.name}. ${moonData.description}`}
         tldr={`The ${monthKey} ${moonData.name} is perfect for ${moonData.description.split('.')[0].toLowerCase()}.`}
+        citationMetadata={{
+          summary: `Use this page for the direct meaning of the ${monthKey} ${moonData.name}. Use the annual astrology calendar dataset for exact dates in a specific year.`,
+          methodologyUrl: 'https://lunary.app/about/methodology',
+          datasetUrl: `https://lunary.app/grimoire/datasets/astrology-calendar/${new Date().getUTCFullYear()}.json`,
+          citationUrl: 'https://lunary.app/about/citations',
+        }}
+        citableFacts={[
+          {
+            claim: `The ${monthKey} full moon is traditionally known as the ${moonData.name}.`,
+            sourceName: `${monthKey} ${moonData.name}`,
+            sourceUrl: `https://lunary.app/grimoire/moon/full-moons/${month}`,
+          },
+          {
+            claim:
+              'Exact full moon dates vary each year, so Lunary links yearly Moon events to the annual astrology calendar dataset.',
+            sourceName: 'Lunary astrology calendar dataset',
+            sourceUrl: `https://lunary.app/grimoire/datasets/astrology-calendar/${new Date().getUTCFullYear()}.json`,
+          },
+        ]}
         meaning={`Each month's full moon carries a unique name and energy, passed down through generations of agricultural and spiritual traditions. The ${monthKey} full moon, known as the ${moonData.name}, holds special significance in the wheel of the year.
 
 ${moonData.description}
@@ -182,7 +201,19 @@ Understanding the ${moonData.name}'s energy helps you plan meaningful rituals an
           },
         ]}
         internalLinks={[
-          { text: "View Today's Moon Phase", href: '/horoscope' },
+          {
+            text: 'Next Full Moon Fact',
+            href: '/grimoire/facts/next-full-moon',
+          },
+          {
+            text: "View Today's Moon Phase",
+            href: '/grimoire/facts/moon-phase-today',
+          },
+          {
+            text: 'Annual Astrology Dataset',
+            href: `/grimoire/datasets/astrology-calendar/${new Date().getUTCFullYear()}.json`,
+          },
+          { text: 'Methodology', href: '/about/methodology' },
           { text: 'All Moon Phases', href: '/grimoire/moon' },
           { text: 'Moon Rituals', href: '/grimoire/moon/rituals' },
           { text: 'Grimoire Home', href: '/grimoire' },

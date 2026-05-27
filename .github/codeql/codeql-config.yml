@@ -1,5 +1,9 @@
 name: 'Lunary CodeQL Config'
 
+queries:
+  - uses: security-extended
+  - uses: security-and-quality
+
 query-filters:
   # Code quality issues handled by ESLint, not security concerns
   - exclude:
@@ -35,9 +39,29 @@ query-filters:
       id: js/clear-text-storage-of-sensitive-data
 
 paths-ignore:
+  # Generated dependency/build/test output; these can contain copied source,
+  # HTML coverage reports, or packaged artifacts that create noisy alerts.
+  - 'node_modules/**'
+  - '.next/**'
+  - 'coverage/**'
+  - 'data/**'
+  - 'logs/**'
+  - 'playwright-report/**'
+  - 'test-results/**'
+  - 'public/app-demos/**'
+  - 'scripts/output/**'
+  - 'play-store-assets/**'
+  - 'app-store-assets/**'
+  - 'videos/**'
+  - 'images/backgrounds/**'
+  - '.temp-sitemaps/**'
+  - 'android/app/build/**'
+  - 'android/build/**'
+  - 'ios/App/build/**'
+
   # Ignore test files - they often have intentional test patterns
-  - __tests__
-  - e2e
+  - '__tests__/**'
+  - 'e2e/**'
   - '**/*.test.ts'
   - '**/*.test.tsx'
   - '**/*.spec.ts'

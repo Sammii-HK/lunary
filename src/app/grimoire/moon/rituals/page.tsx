@@ -35,10 +35,10 @@ export const metadata: Metadata = {
     url: 'https://lunary.app/grimoire/moon/rituals',
   },
   alternates: {
-    canonical: 'https://lunary.app/grimoire/moon',
+    canonical: 'https://lunary.app/grimoire/moon/rituals',
   },
   robots: {
-    index: false,
+    index: true,
     follow: true,
   },
 };
@@ -178,6 +178,38 @@ export default function MoonRitualsPage() {
           cycle.
         </p>
       </header>
+
+      <section className='mb-12 rounded-xl border border-stroke-subtle bg-surface-elevated/40 p-6'>
+        <p className='text-xs uppercase tracking-[0.22em] text-content-muted'>
+          Quotable answer
+        </p>
+        <p className='mt-3 text-lg leading-relaxed text-content-primary'>
+          A moon ritual is an intentional practice timed to the lunar cycle: New
+          Moon rituals set intentions, waxing Moon rituals build momentum, Full
+          Moon rituals celebrate and release, and waning Moon rituals clear what
+          is complete.
+        </p>
+        <div className='mt-5 flex flex-wrap gap-3 text-sm'>
+          <Link
+            href='/about/methodology'
+            className='rounded-lg border border-lunary-primary-700 px-3 py-2 text-content-brand hover:border-lunary-primary-500'
+          >
+            Methodology
+          </Link>
+          <Link
+            href='/grimoire/facts/moon-phase-today'
+            className='rounded-lg border border-lunary-primary-700 px-3 py-2 text-content-brand hover:border-lunary-primary-500'
+          >
+            Moon phase today
+          </Link>
+          <Link
+            href='/grimoire/datasets/current-sky-facts.json'
+            className='rounded-lg border border-lunary-primary-700 px-3 py-2 text-content-brand hover:border-lunary-primary-500'
+          >
+            Current-sky dataset
+          </Link>
+        </div>
+      </section>
 
       <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-12'>
         <h2 className='text-lg font-medium text-content-primary mb-4'>

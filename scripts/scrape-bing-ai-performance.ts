@@ -26,9 +26,10 @@ function getOption(name: string) {
 }
 
 const siteUrl = getOption('site-url') || 'https://lunary.app';
-const targetUrl =
+const targetUrl = normalizeBingAiPerformanceUrl(
   getOption('url') ||
-  `https://www.bing.com/webmasters/aiperformance?siteUrl=${encodeURIComponent(siteUrl)}`;
+    `https://www.bing.com/webmasters/aiperformance?siteUrl=${encodeURIComponent(siteUrl)}`,
+);
 const profileDir = resolve(
   process.cwd(),
   getOption('profile') || '.playwright-bing-webmaster',
@@ -37,8 +38,23 @@ const headed =
   hasFlag('--headed') || process.env.BING_AI_SCRAPER_HEADED === '1';
 const dryRun = hasFlag('--dry-run');
 
+function normalizeBingAiPerformanceUrl(input: string) {
+  const url = new URL(input);
+  const isBingHost = /^(?:[^/?#]+\.)?bing\.com$/i.test(url.hostname);
+  if (
+    url.protocol !== 'https:' ||
+    !isBingHost ||
+    url.pathname !== '/webmasters/aiperformance'
+  ) {
+    throw new Error(
+      '--url must be an HTTPS Bing Webmaster AI Performance URL.',
+    );
+  }
+  return url.toString();
+}
+
 function isLoginUrl(url: string) {
-  return /login\.live\.com|login\.microsoftonline\.com|account\.microsoft\.com/i.test(
+  return /^https:\/\/(?:[^/?#]+\.)?(?:login\.live\.com|login\.microsoftonline\.com|account\.microsoft\.com)(?::\d+)?(?:[/?#]|$)/i.test(
     url,
   );
 }
@@ -58,9 +74,12 @@ async function waitForAuthenticatedPage(page: Page) {
   }
 
   console.log('Microsoft login required. Complete it in the opened browser.');
-  await page.waitForURL(/bing\.com\/webmasters\/aiperformance/i, {
-    timeout: 10 * 60_000,
-  });
+  await page.waitForURL(
+    /^https:\/\/(?:[^/?#]+\.)?bing\.com(?::\d+)?\/webmasters\/aiperformance(?:[/?#]|$)/i,
+    {
+      timeout: 10 * 60_000,
+    },
+  );
 }
 
 async function extractCitedPages(page: Page): Promise<BingAiCitedPage[]> {

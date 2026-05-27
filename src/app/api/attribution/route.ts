@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { requireAuth } from '@/lib/get-user-session';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +9,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       userId,
+      anonymous_id,
+      anonymousId,
       first_touch_source,
       first_touch_medium,
       first_touch_campaign,
@@ -29,6 +32,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const authResult = await requireAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
+    if (authResult.id !== userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const resolvedAnonymousId =
+      typeof anonymous_id === 'string'
+        ? anonymous_id
+        : typeof anonymousId === 'string'
+          ? anonymousId
+          : null;
+
     const firstTouchAt = first_touch_at
       ? new Date(first_touch_at).toISOString()
       : new Date().toISOString();
@@ -36,6 +53,7 @@ export async function POST(request: NextRequest) {
     await sql`
       INSERT INTO user_attribution (
         user_id,
+        anonymous_id,
         first_touch_source,
         first_touch_medium,
         first_touch_campaign,
@@ -50,6 +68,7 @@ export async function POST(request: NextRequest) {
         utm_content
       ) VALUES (
         ${userId},
+        ${resolvedAnonymousId},
         ${first_touch_source || null},
         ${first_touch_medium || null},
         ${first_touch_campaign || null},
@@ -63,7 +82,22 @@ export async function POST(request: NextRequest) {
         ${utm_term || null},
         ${utm_content || null}
       )
-      ON CONFLICT (user_id) DO NOTHING
+      ON CONFLICT (user_id) DO UPDATE
+      SET
+        anonymous_id = COALESCE(user_attribution.anonymous_id, EXCLUDED.anonymous_id),
+        first_touch_source = COALESCE(user_attribution.first_touch_source, EXCLUDED.first_touch_source),
+        first_touch_medium = COALESCE(user_attribution.first_touch_medium, EXCLUDED.first_touch_medium),
+        first_touch_campaign = COALESCE(user_attribution.first_touch_campaign, EXCLUDED.first_touch_campaign),
+        first_touch_keyword = COALESCE(user_attribution.first_touch_keyword, EXCLUDED.first_touch_keyword),
+        first_touch_page = COALESCE(user_attribution.first_touch_page, EXCLUDED.first_touch_page),
+        first_touch_referrer = COALESCE(user_attribution.first_touch_referrer, EXCLUDED.first_touch_referrer),
+        first_touch_at = COALESCE(user_attribution.first_touch_at, EXCLUDED.first_touch_at),
+        utm_source = COALESCE(user_attribution.utm_source, EXCLUDED.utm_source),
+        utm_medium = COALESCE(user_attribution.utm_medium, EXCLUDED.utm_medium),
+        utm_campaign = COALESCE(user_attribution.utm_campaign, EXCLUDED.utm_campaign),
+        utm_term = COALESCE(user_attribution.utm_term, EXCLUDED.utm_term),
+        utm_content = COALESCE(user_attribution.utm_content, EXCLUDED.utm_content),
+        updated_at = NOW()
     `;
 
     return NextResponse.json({ success: true });
@@ -86,6 +120,13 @@ export async function GET(request: NextRequest) {
         { error: 'userId is required' },
         { status: 400 },
       );
+    }
+
+    const authResult = await requireAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
+    if (authResult.id !== userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const result = await sql`

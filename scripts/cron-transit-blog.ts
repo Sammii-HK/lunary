@@ -22,6 +22,7 @@ import {
   getTransitsNeedingBlogPosts,
 } from '../src/lib/blog/transit-deep-dive/index';
 import { checkArticleQuality } from '../src/lib/blog/transit-deep-dive/quality-check';
+import { formatTextArray } from '../src/lib/postgres/formatTextArray';
 import type { YearlyTransit } from '../src/constants/seo/yearly-transits';
 
 // --- Config ---
@@ -61,7 +62,7 @@ async function save(
     ) VALUES (
       ${id}, ${transit.id}, ${transit.id},
       ${content.title}, ${content.subtitle}, ${content.metaDescription},
-      ${`{${content.keywords.map((k: string) => `"${k.replace(/"/g, '\\"')}"`).join(',')}}`},
+      ${formatTextArray(content.keywords)},
       ${content.introduction}, ${content.historicalDeepDive},
       ${content.astronomicalContext}, ${content.practicalGuidance},
       ${JSON.stringify(content.signBreakdowns)}, ${content.closingSection},

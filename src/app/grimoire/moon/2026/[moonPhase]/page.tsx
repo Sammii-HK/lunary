@@ -713,6 +713,28 @@ export default async function MoonPhase2026Page({
         answer: `The ${data.type === 'full' ? (data.name ? `${data.name}${data.altNames ? ` (also known as ${data.altNames.join(', ')})` : ''} (` : '') + `Full Moon in ${data.sign}` + (data.name ? ')' : '') : `New Moon in ${data.sign}`} occurs on ${data.date}. This ${data.element} energy ${data.type === 'full' ? 'illuminates and brings to completion' : 'initiates and plants seeds for'} themes related to ${data.sign}.`,
       }}
       tldr={`${data.date} brings a ${data.type === 'full' ? 'Full Moon' : 'New Moon'} in ${data.sign}. This ${data.element} moon is ideal for ${data.type === 'full' ? 'releasing, completing, and celebrating' : 'new beginnings, intention setting, and planting seeds'} around ${data.sign.toLowerCase()} themes.`}
+      citationMetadata={{
+        summary:
+          'Use this page for a direct answer about this 2026 Moon event, and cite the 2026 astrology calendar JSON for machine-readable annual event data.',
+        methodologyUrl: 'https://lunary.app/about/methodology',
+        datasetUrl:
+          'https://lunary.app/grimoire/datasets/astrology-calendar/2026.json',
+        citationUrl: 'https://lunary.app/about/citations',
+      }}
+      citableFacts={[
+        {
+          claim: `The ${data.type === 'full' ? data.name || 'Full Moon' : 'New Moon'} in ${data.sign} occurs on ${data.date}.`,
+          sourceName: `${data.month} 2026 ${data.type === 'full' ? 'Full Moon' : 'New Moon'}`,
+          sourceUrl: `https://lunary.app/grimoire/moon/2026/${moonPhase}`,
+        },
+        {
+          claim:
+            'Lunary publishes 2026 Moon event data in the annual astrology calendar JSON dataset.',
+          sourceName: '2026 astrology calendar dataset',
+          sourceUrl:
+            'https://lunary.app/grimoire/datasets/astrology-calendar/2026.json',
+        },
+      ]}
       meaning={data.meaning}
       rituals={data.rituals}
       emotionalThemes={data.intentions}
@@ -757,10 +779,33 @@ export default async function MoonPhase2026Page({
           type: 'Ritual',
         },
       ]}
+      internalLinks={[
+        {
+          text: '2026 Astrology Calendar JSON',
+          href: '/grimoire/datasets/astrology-calendar/2026.json',
+        },
+        {
+          text:
+            data.type === 'full' ? 'Next Full Moon Fact' : 'Next New Moon Fact',
+          href:
+            data.type === 'full'
+              ? '/grimoire/facts/next-full-moon'
+              : '/grimoire/facts/next-new-moon',
+        },
+        { text: 'Methodology', href: '/about/methodology' },
+        { text: 'Moon Phase Today', href: '/grimoire/facts/moon-phase-today' },
+      ]}
       ctaText={`Get personalized ${data.type === 'full' ? 'Full Moon' : 'New Moon'} insights for your chart`}
       ctaHref='/horoscope'
       sources={[
-        { name: 'NASA Moon Phase Data' },
+        {
+          name: 'Lunary 2026 astrology calendar dataset',
+          url: 'https://lunary.app/grimoire/datasets/astrology-calendar/2026.json',
+        },
+        {
+          name: 'Lunary lunar calendar methodology',
+          url: 'https://lunary.app/about/methodology',
+        },
         { name: 'Traditional lunar correspondences' },
       ]}
     />

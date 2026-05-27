@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/Heading';
 import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
 import { getABTestVariantClient } from '@/lib/ab-tests-client';
+import { buildSignupChartUrl, seoSignupSourceForPath } from '@/lib/urls';
 import { zodiacUnicode, planetUnicode } from '../../../utils/zodiac/zodiac';
 
 type Placement = {
@@ -75,6 +76,20 @@ export function ChartPreviewTeaser({
 
   const impressionTracked = useRef(false);
   const resultImpressionTracked = useRef(false);
+  const signupHref = buildSignupChartUrl({
+    source: seoSignupSourceForPath(pathname),
+    medium: 'cta',
+    campaign: 'chart_preview',
+    content: 'seo_chart_preview',
+    hub,
+    headline: 'See how this shows up in your chart',
+    subline:
+      'Open Lunary to map this page against your placements, houses, and active transits.',
+    location: 'seo_chart_preview',
+    pagePath: pathname,
+    funnel: 'cited_page_chart_cta',
+    ...(birthDate ? { birthDate } : {}),
+  });
 
   useModal({
     isOpen: showAuthModal,
@@ -90,7 +105,7 @@ export function ChartPreviewTeaser({
         hub,
         ctaId: 'chart_preview_teaser',
         location: 'seo_chart_preview',
-        label: 'Chart preview teaser',
+        label: 'Explore your chart CTA',
         pagePath: pathname,
       });
     }
@@ -138,22 +153,14 @@ export function ChartPreviewTeaser({
       hub,
       ctaId: 'chart_preview_unlock',
       location: 'seo_chart_preview',
-      label: 'See your full chart',
+      label: 'Open Lunary',
+      href: signupHref,
       pagePath: pathname,
     });
 
     if (!authState.isAuthenticated) {
       if (signupPageVariant === 'value-prop') {
-        const params = new URLSearchParams({
-          hub,
-          headline: 'See your full birth chart',
-          subline:
-            'All your placements, houses, and aspects with detailed readings',
-          location: 'seo_chart_preview',
-          pagePath: pathname,
-          ...(birthDate ? { birthDate } : {}),
-        });
-        router.push(`/signup/chart?${params.toString()}`);
+        router.push(signupHref);
       } else {
         setShowAuthModal(true);
       }
@@ -171,11 +178,11 @@ export function ChartPreviewTeaser({
       <div className='my-8 rounded-xl border border-lunary-primary-700/40 bg-layer-base/20 overflow-hidden'>
         <div className='px-5 py-4 border-b border-lunary-primary-700/30'>
           <Heading as='h3' variant='h4' className='text-content-secondary'>
-            What is happening in your chart right now?
+            Want to see how this shows up in your chart?
           </Heading>
           <p className='text-sm text-content-muted mt-1'>
-            Enter your birthday to see which transits are activating your natal
-            placements today
+            Enter your birthday for a quick preview, or open Lunary for the full
+            chart.
           </p>
         </div>
 
@@ -206,7 +213,7 @@ export function ChartPreviewTeaser({
                   ) : (
                     <span className='flex items-center gap-2'>
                       <Sparkles className='w-4 h-4' />
-                      Show my transits
+                      Preview my chart
                     </span>
                   )}
                 </Button>
@@ -215,7 +222,7 @@ export function ChartPreviewTeaser({
                 onClick={handleUnlock}
                 className='text-xs text-lunary-primary-400 hover:text-content-brand transition-colors'
               >
-                Skip — just show me my full chart
+                Open Lunary
               </button>
             </div>
           ) : (

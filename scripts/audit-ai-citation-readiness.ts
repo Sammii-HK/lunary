@@ -4,6 +4,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import generateSitemap from '@/app/sitemap';
+import { GET as generateDatasetSitemap } from '@/app/sitemap-datasets.xml/route';
 import {
   createCitationReadinessReport,
   loadAiCitationMap,
@@ -41,11 +42,29 @@ async function loadSitemapUrls(skipSitemap: boolean) {
 
   try {
     const sitemapEntries = await generateSitemap();
-    return new Set(
+    const urls = new Set(
       sitemapEntries
         .map((entry) => entry.url)
         .filter((url): url is string => Boolean(url)),
     );
+
+    try {
+      const datasetSitemapResponse = await generateDatasetSitemap();
+      const datasetSitemapXml = await datasetSitemapResponse.text();
+      const datasetUrls = datasetSitemapXml.matchAll(/<loc>(.*?)<\/loc>/g);
+
+      for (const match of datasetUrls) {
+        if (match[1]) urls.add(match[1]);
+      }
+    } catch (error) {
+      console.warn(
+        `[ai-citation-readiness] Dataset sitemap generation skipped: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+
+    return urls;
   } catch (error) {
     console.warn(
       `[ai-citation-readiness] Sitemap generation skipped: ${

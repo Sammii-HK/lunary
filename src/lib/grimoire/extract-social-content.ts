@@ -117,13 +117,18 @@ function toPlainText(content: string): string {
   text = stripHtml(text);
 
   // Decode common HTML entities
-  text = text
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ');
+  const entities: Record<string, string> = {
+    '#39': "'",
+    amp: '&',
+    gt: '>',
+    lt: '<',
+    nbsp: ' ',
+    quot: '"',
+  };
+  text = text.replace(
+    /&(amp|lt|gt|quot|#39|nbsp);/g,
+    (_match, entity: string) => entities[entity] ?? '',
+  );
 
   return normaliseWhitespace(text);
 }

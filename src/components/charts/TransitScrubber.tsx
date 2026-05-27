@@ -110,6 +110,10 @@ type Props = {
   birthChart: BirthChartData[];
   /** Optional ISO birth date — enables the progressed-chart third ring. */
   birthDate?: string;
+  /** Optional ISO date for pinned share/snapshot views. */
+  initialDate?: string;
+  /** Force teaser mode even when the viewer is signed in. */
+  forceLocked?: boolean;
   compact?: boolean;
   onOpenFull?: () => void;
 };
@@ -117,17 +121,22 @@ type Props = {
 export function TransitScrubber({
   birthChart,
   birthDate,
+  initialDate,
+  forceLocked = false,
   compact = false,
   onOpenFull,
 }: Props) {
   const sub = useSubscription();
-  const canScrub = sub.hasAccess('personalized_transit_readings');
+  const canScrub =
+    !forceLocked && sub.hasAccess('personalized_transit_readings');
 
   const today = useMemo(() => {
-    const d = new Date();
+    const candidate = initialDate ? new Date(`${initialDate}T12:00:00`) : null;
+    const d =
+      candidate && !Number.isNaN(candidate.getTime()) ? candidate : new Date();
     d.setHours(12, 0, 0, 0);
     return d;
-  }, []);
+  }, [initialDate]);
   const [now, setNow] = useState(today.getTime());
   const [playing, setPlaying] = useState(false);
   const [speedIdx, setSpeedIdx] = useState(1);

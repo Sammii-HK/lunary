@@ -1,22 +1,25 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
+import { buildLinksUtmUrl } from '@/lib/urls';
+import { LinksClickTracker } from './LinksClickTracker';
 import {
   Smartphone,
   Globe,
   Headphones,
   BookOpen,
   ExternalLink,
+  Sparkles,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Links | Lunary',
   description:
-    'All Lunary links in one place. Download the app, listen to The Grimoire podcast, and follow us on social media.',
+    'All Lunary links in one place. Take the chart ruler quiz, download the app, listen to The Grimoire podcast, and follow us on social media.',
   openGraph: {
     title: 'Lunary — Links',
     description:
-      'All Lunary links in one place. Download the app, listen to The Grimoire podcast, and follow us.',
+      'All Lunary links in one place. Take the chart ruler quiz, download the app, listen to The Grimoire podcast, and follow us.',
     url: 'https://lunary.app/links',
     siteName: 'Lunary',
     type: 'website',
@@ -26,22 +29,43 @@ export const metadata: Metadata = {
   },
 };
 
+const FEATURED_LINKS = [
+  {
+    id: 'chart-ruler-quiz',
+    label: 'Find your chart ruler',
+    description: 'A 90-second quiz using your real birth chart',
+    href: buildLinksUtmUrl(
+      '/quiz/beyond-your-sun-sign/chart-ruler',
+      'chart_ruler_quiz',
+      { campaign: 'quiz_warm_click' },
+    ),
+    icon: Sparkles,
+    step: 'featured_quiz_click',
+  },
+];
+
 const MAIN_LINKS = [
   {
+    id: 'open-lunary',
     label: 'Open Lunary',
     description: 'Web app — horoscopes, birth charts & more',
-    href: 'https://lunary.app/app',
+    href: buildLinksUtmUrl('https://lunary.app/app', 'open_lunary_app'),
     icon: Globe,
     external: true,
   },
   {
+    id: 'google-play',
     label: 'Get on Google Play',
     description: 'Download the Android app',
-    href: 'https://play.google.com/store/apps/details?id=app.lunary',
+    href: buildLinksUtmUrl(
+      'https://play.google.com/store/apps/details?id=app.lunary',
+      'google_play',
+    ),
     icon: Smartphone,
     external: true,
   },
   {
+    id: 'app-store',
     label: 'App Store',
     description: 'Coming soon',
     href: null,
@@ -50,16 +74,18 @@ const MAIN_LINKS = [
     disabled: true,
   },
   {
+    id: 'podcast',
     label: 'Listen to The Grimoire',
     description: 'Our astrology & cosmic wisdom podcast',
-    href: '/podcast',
+    href: buildLinksUtmUrl('/podcast', 'podcast'),
     icon: Headphones,
     external: false,
   },
   {
+    id: 'grimoire',
     label: 'Read the Grimoire',
     description: 'Articles, guides & deep dives',
-    href: '/grimoire',
+    href: buildLinksUtmUrl('/grimoire', 'grimoire'),
     icon: BookOpen,
     external: false,
   },
@@ -67,6 +93,7 @@ const MAIN_LINKS = [
 
 const SOCIAL_LINKS = [
   {
+    id: 'threads',
     label: 'Threads',
     href: 'https://www.threads.net/@lunary.app',
     icon: (
@@ -76,6 +103,7 @@ const SOCIAL_LINKS = [
     ),
   },
   {
+    id: 'tiktok',
     label: 'TikTok',
     href: 'https://www.tiktok.com/@lunary.app',
     icon: (
@@ -85,6 +113,7 @@ const SOCIAL_LINKS = [
     ),
   },
   {
+    id: 'instagram',
     label: 'Instagram',
     href: 'https://www.instagram.com/lunary.app',
     icon: (
@@ -94,6 +123,7 @@ const SOCIAL_LINKS = [
     ),
   },
   {
+    id: 'x-twitter',
     label: 'X / Twitter',
     href: 'https://twitter.com/lunaryApp',
     icon: (
@@ -103,6 +133,7 @@ const SOCIAL_LINKS = [
     ),
   },
   {
+    id: 'pinterest',
     label: 'Pinterest',
     href: 'https://www.pinterest.com/lunaryapp',
     icon: (
@@ -112,6 +143,7 @@ const SOCIAL_LINKS = [
     ),
   },
   {
+    id: 'bluesky',
     label: 'Bluesky',
     href: 'https://bsky.app/profile/lunaryapp.bsky.social',
     icon: (
@@ -121,6 +153,7 @@ const SOCIAL_LINKS = [
     ),
   },
   {
+    id: 'discord',
     label: 'Discord',
     href: 'https://discord.gg/SUvdhDXFSk',
     icon: (
@@ -133,111 +166,160 @@ const SOCIAL_LINKS = [
 
 export default function LinksPage() {
   return (
-    <div className='min-h-screen bg-surface-elevated flex items-start justify-center px-4 py-12'>
-      <div className='w-full max-w-md space-y-8'>
-        {/* Profile header */}
-        <div className='flex flex-col items-center gap-3'>
-          <Logo size={56} />
-          <h1 className='text-xl font-bold text-content-primary font-mono tracking-tight'>
-            Lunary
-          </h1>
-          <p className='text-sm text-content-muted text-center max-w-xs'>
-            Astrology, tarot & cosmic wisdom — in your pocket.
-          </p>
-        </div>
+    <LinksClickTracker>
+      <div className='min-h-screen bg-surface-elevated flex items-start justify-center px-4 py-12'>
+        <div className='w-full max-w-md space-y-8'>
+          {/* Profile header */}
+          <div className='flex flex-col items-center gap-3'>
+            <Logo size={56} />
+            <h1 className='text-xl font-bold text-content-primary font-mono tracking-tight'>
+              Lunary
+            </h1>
+            <p className='text-sm text-content-muted text-center max-w-xs'>
+              Astrology, tarot & cosmic wisdom — in your pocket.
+            </p>
+          </div>
 
-        {/* Main links */}
-        <div className='space-y-3'>
-          {MAIN_LINKS.map((link) => {
-            const Icon = link.icon;
-            const inner = (
-              <span className='flex items-center gap-3 w-full'>
-                <span className='flex-shrink-0 w-10 h-10 rounded-lg bg-surface-card/80 flex items-center justify-center text-lunary-primary-400'>
-                  <Icon className='w-5 h-5' />
-                </span>
-                <span className='flex-1 min-w-0'>
-                  <span className='block text-sm font-medium text-content-primary'>
-                    {link.label}
-                  </span>
-                  <span className='block text-xs text-content-muted'>
-                    {link.description}
-                  </span>
-                </span>
-                {link.external && (
-                  <ExternalLink className='w-4 h-4 text-content-muted flex-shrink-0' />
-                )}
-              </span>
-            );
+          {/* Featured links */}
+          <div className='space-y-3'>
+            {FEATURED_LINKS.map((link) => {
+              const Icon = link.icon;
 
-            if (link.disabled) {
               return (
-                <div
+                <Link
                   key={link.label}
-                  className='block w-full rounded-xl border border-stroke-subtle/40 bg-surface-elevated/30 p-3 opacity-50 cursor-not-allowed'
+                  href={link.href}
+                  data-links-id={link.id}
+                  data-links-label={link.label}
+                  data-links-step={link.step}
+                  className='block w-full rounded-xl border border-lunary-primary-500/50 bg-lunary-primary-950/40 p-4 shadow-[0_0_30px_rgba(168,85,247,0.12)] hover:bg-lunary-primary-900/40 hover:border-lunary-primary-400/70 transition-colors'
                 >
-                  {inner}
-                </div>
+                  <span className='flex items-center gap-3 w-full'>
+                    <span className='flex-shrink-0 w-11 h-11 rounded-lg bg-lunary-primary-500/15 flex items-center justify-center text-lunary-primary-300'>
+                      <Icon className='w-5 h-5' />
+                    </span>
+                    <span className='flex-1 min-w-0'>
+                      <span className='mb-1 block text-xs font-medium uppercase tracking-wider text-lunary-primary-200'>
+                        Start here
+                      </span>
+                      <span className='block text-sm font-semibold text-content-primary'>
+                        {link.label}
+                      </span>
+                      <span className='block text-xs text-content-muted'>
+                        {link.description}
+                      </span>
+                    </span>
+                  </span>
+                </Link>
               );
-            }
+            })}
+          </div>
 
-            if (link.external) {
+          {/* Main links */}
+          <div className='space-y-3'>
+            {MAIN_LINKS.map((link) => {
+              const Icon = link.icon;
+              const inner = (
+                <span className='flex items-center gap-3 w-full'>
+                  <span className='flex-shrink-0 w-10 h-10 rounded-lg bg-surface-card/80 flex items-center justify-center text-lunary-primary-400'>
+                    <Icon className='w-5 h-5' />
+                  </span>
+                  <span className='flex-1 min-w-0'>
+                    <span className='block text-sm font-medium text-content-primary'>
+                      {link.label}
+                    </span>
+                    <span className='block text-xs text-content-muted'>
+                      {link.description}
+                    </span>
+                  </span>
+                  {link.external && (
+                    <ExternalLink className='w-4 h-4 text-content-muted flex-shrink-0' />
+                  )}
+                </span>
+              );
+
+              if (link.disabled) {
+                return (
+                  <div
+                    key={link.label}
+                    className='block w-full rounded-xl border border-stroke-subtle/40 bg-surface-elevated/30 p-3 opacity-50 cursor-not-allowed'
+                  >
+                    {inner}
+                  </div>
+                );
+              }
+
+              if (link.external) {
+                return (
+                  <a
+                    key={link.label}
+                    href={link.href!}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    data-links-id={link.id}
+                    data-links-label={link.label}
+                    data-links-step='main_link_click'
+                    className='block w-full rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-3 hover:bg-surface-card/60 hover:border-lunary-primary-700/50 transition-colors'
+                  >
+                    {inner}
+                  </a>
+                );
+              }
+
               return (
-                <a
+                <Link
                   key={link.label}
                   href={link.href!}
-                  target='_blank'
-                  rel='noopener noreferrer'
+                  data-links-id={link.id}
+                  data-links-label={link.label}
+                  data-links-step='main_link_click'
                   className='block w-full rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-3 hover:bg-surface-card/60 hover:border-lunary-primary-700/50 transition-colors'
                 >
                   {inner}
-                </a>
+                </Link>
               );
-            }
+            })}
+          </div>
 
-            return (
-              <Link
-                key={link.label}
-                href={link.href!}
-                className='block w-full rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-3 hover:bg-surface-card/60 hover:border-lunary-primary-700/50 transition-colors'
-              >
-                {inner}
-              </Link>
-            );
-          })}
-        </div>
+          {/* Social links */}
+          <div className='space-y-3'>
+            <p className='text-xs text-content-muted uppercase tracking-wider text-center'>
+              Follow us
+            </p>
+            <div className='flex items-center justify-center gap-2 flex-wrap'>
+              {SOCIAL_LINKS.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  data-links-id={social.id}
+                  data-links-label={social.label}
+                  data-links-step='social_link_click'
+                  className='inline-flex items-center justify-center w-10 h-10 rounded-xl bg-surface-elevated/60 border border-stroke-subtle/60 text-content-muted hover:text-lunary-primary-400 hover:bg-surface-card/60 hover:border-lunary-primary-700/50 transition-colors'
+                  aria-label={social.label}
+                  title={social.label}
+                >
+                  {social.icon}
+                </a>
+              ))}
+            </div>
+          </div>
 
-        {/* Social links */}
-        <div className='space-y-3'>
-          <p className='text-xs text-content-muted uppercase tracking-wider text-center'>
-            Follow us
-          </p>
-          <div className='flex items-center justify-center gap-2 flex-wrap'>
-            {SOCIAL_LINKS.map((social) => (
-              <a
-                key={social.label}
-                href={social.href}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='inline-flex items-center justify-center w-10 h-10 rounded-xl bg-surface-elevated/60 border border-stroke-subtle/60 text-content-muted hover:text-lunary-primary-400 hover:bg-surface-card/60 hover:border-lunary-primary-700/50 transition-colors'
-                aria-label={social.label}
-                title={social.label}
-              >
-                {social.icon}
-              </a>
-            ))}
+          {/* Footer */}
+          <div className='text-center pt-4'>
+            <Link
+              href={buildLinksUtmUrl('/', 'homepage_footer')}
+              data-links-id='homepage-footer'
+              data-links-label='lunary.app'
+              data-links-step='footer_link_click'
+              className='text-xs text-content-muted hover:text-content-muted transition-colors'
+            >
+              lunary.app
+            </Link>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className='text-center pt-4'>
-          <Link
-            href='/'
-            className='text-xs text-content-muted hover:text-content-muted transition-colors'
-          >
-            lunary.app
-          </Link>
-        </div>
       </div>
-    </div>
+    </LinksClickTracker>
   );
 }

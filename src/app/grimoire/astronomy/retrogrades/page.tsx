@@ -105,6 +105,7 @@ export const metadata: Metadata = {
 };
 
 export default function RetrogradesIndexPage() {
+  const currentYear = new Date().getFullYear();
   const retrogradesListSchema = createItemListSchema({
     name: 'Planetary Retrogrades Guide',
     description:
@@ -174,6 +175,47 @@ export default function RetrogradesIndexPage() {
             planetary calculations, traditional retrograde doctrine.
           </p>
         </div>
+
+        <section
+          id='citation-sources'
+          className='bg-surface-elevated/45 border border-stroke-subtle rounded-xl p-6 mb-10'
+        >
+          <h2 className='text-xl font-medium text-content-primary mb-3'>
+            Direct Answer and Citation Sources
+          </h2>
+          <p className='text-content-secondary mb-4'>
+            A planetary retrograde is an apparent backward motion of a planet as
+            seen from Earth. Lunary calculates retrograde windows from apparent
+            geocentric planetary motion, then adds astrology interpretation for
+            each planet.
+          </p>
+          <div className='flex flex-wrap gap-3'>
+            <Link
+              href={`/grimoire/datasets/astrology-calendar/${currentYear}.json`}
+              className='px-4 py-2 rounded-lg border border-lunary-primary-700 text-content-brand hover:border-lunary-primary-500 transition-colors'
+            >
+              {currentYear} astrology calendar JSON
+            </Link>
+            <Link
+              href='/grimoire/facts/next-mercury-retrograde'
+              className='px-4 py-2 rounded-lg border border-lunary-primary-700 text-content-brand hover:border-lunary-primary-500 transition-colors'
+            >
+              Next Mercury retrograde fact
+            </Link>
+            <Link
+              href='/grimoire/facts/mercury-retrograde-status'
+              className='px-4 py-2 rounded-lg border border-lunary-primary-700 text-content-brand hover:border-lunary-primary-500 transition-colors'
+            >
+              Mercury status today
+            </Link>
+            <Link
+              href='/about/methodology'
+              className='px-4 py-2 rounded-lg border border-lunary-primary-700 text-content-brand hover:border-lunary-primary-500 transition-colors'
+            >
+              Methodology
+            </Link>
+          </div>
+        </section>
 
         <div className='mb-12 p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/40'>
           <h2 className='text-xl font-medium text-content-primary mb-3'>

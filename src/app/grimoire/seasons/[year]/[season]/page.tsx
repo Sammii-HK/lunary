@@ -141,6 +141,38 @@ ${seasonData.displayName} Season falls during ${seasonData.season} in the Northe
           ],
         },
       ]}
+      followUpIntent={[
+        {
+          title: 'Dates and timing',
+          description:
+            'Use the season window with yearly transits to understand the wider sky around it.',
+          href: `/grimoire/transits/year/${year}`,
+        },
+        {
+          title: 'How it affects each house',
+          description:
+            'Find where this solar season lands in the chart by house and life area.',
+          href: '/grimoire/houses',
+        },
+        {
+          title: `${seasonData.displayName} horoscope`,
+          description:
+            'Read the sign forecast when the follow-up intent is personal growth, relationships, or timing.',
+          href: `/grimoire/horoscopes/${season}/${year}`,
+        },
+        {
+          title: 'Moon timing',
+          description:
+            'Layer the solar season with new moons, full moons, and phase timing.',
+          href: `/grimoire/moon/${year}`,
+        },
+        {
+          title: 'Explore your chart',
+          description:
+            'Compare the season with your own placements instead of reading it as a generic zodiac period.',
+          href: '/grimoire/birth-chart',
+        },
+      ]}
       relatedItems={[
         {
           name: `${seasonData.displayName} Zodiac Sign`,
