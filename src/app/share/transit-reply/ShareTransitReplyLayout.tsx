@@ -1,16 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import {
-  BookOpen,
-  Copy,
-  ExternalLink,
-  Lock,
-  Share2,
-  Sparkles,
-} from 'lucide-react';
+import { BookOpen, ExternalLink, Lock, Share2, Sparkles } from 'lucide-react';
+import { PLANET_DAILY_MOTION } from '../../../../utils/astrology/transit-duration-constants';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { BirthChart } from '@/components/BirthChart';
 import { TransitScrubber } from '@/components/charts/TransitScrubber';
 import { Button } from '@/components/ui/button';
@@ -23,6 +17,23 @@ import type {
   TransitReplyAspect,
   TransitReplyHouseCusp,
 } from '@/lib/transit-reply/analysis';
+import {
+  AspectCard,
+  ActiveHousesGrid,
+  type AspectCardData,
+  buildAspectSentence,
+  buildContextCopy,
+  getAspectGlyph,
+  ordinal,
+  PLANET_MEANINGS,
+  SIGN_MEANINGS,
+  HOUSE_THEMES,
+} from '@/components/aspects/AspectCard';
+import {
+  buildTransitDetails,
+  type TransitAspect,
+  type TransitDetail,
+} from '@/features/horoscope';
 
 export type ShareTransitReplyDisplayData = {
   shareId: string;
@@ -52,36 +63,18 @@ export type ShareTransitReplyDisplayData = {
 };
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('en-GB', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
   }).format(new Date(`${value}T12:00:00Z`));
 }
 
-function ordinal(value: number) {
-  if (value >= 11 && value <= 13) return `${value}th`;
-  switch (value % 10) {
-    case 1:
-      return `${value}st`;
-    case 2:
-      return `${value}nd`;
-    case 3:
-      return `${value}rd`;
-    default:
-      return `${value}th`;
-  }
-}
-
-function aspectTone(aspect: TransitReplyAspect['aspect']) {
-  if (aspect === 'Square') return 'pressure, friction, and a need to act';
-  if (aspect === 'Opposition')
-    return 'contrast, projection, and relationship mirrors';
-  if (aspect === 'Conjunction')
-    return 'concentration, immediacy, and a louder inner signal';
-  if (aspect === 'Trine')
-    return 'ease, flow, and something that can be used constructively';
-  return 'openings, support, and a subtle invitation to respond';
+function slug(s: string) {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
 const ROUTED_PLANETS = new Set([
@@ -97,56 +90,7 @@ const ROUTED_PLANETS = new Set([
   'Pluto',
 ]);
 
-const PLANET_MEANINGS: Record<string, string> = {
-  Sun: 'identity, vitality, confidence, and the conscious self',
-  Moon: 'emotional needs, instinct, memory, and inner security',
-  Mercury: 'language, thinking, learning, and interpretation',
-  Venus: 'love, desire, values, attraction, and pleasure',
-  Mars: 'drive, anger, desire, assertion, and physical action',
-  Jupiter: 'growth, belief, opportunity, hope, and expansion',
-  Saturn: 'limits, pressure, responsibility, maturity, and structure',
-  Uranus: 'change, freedom, disruption, originality, and breakthrough',
-  Neptune: 'dreams, longing, imagination, spirituality, and porous boundaries',
-  Pluto: 'power, fear, transformation, obsession, and deep renewal',
-  Ascendant: 'identity, appearance, first impressions, and how life is met',
-  Descendant: 'partnerships, projection, mirroring, and committed others',
-  Midheaven: 'visibility, vocation, reputation, and public direction',
-  'Imum Coeli': 'home, roots, privacy, family patterns, and emotional ground',
-  'North Node':
-    'growth direction, appetite for experience, and unfamiliar lessons',
-  Chiron: 'sensitivity, old pain, healing work, and practiced wisdom',
-};
-
-const SIGN_MEANINGS: Record<string, string> = {
-  Aries: 'direct, initiating, hot, urgent, and instinctive',
-  Taurus: 'steady, embodied, sensual, loyal, and concerned with security',
-  Gemini: 'curious, verbal, changeable, connective, and mentally quick',
-  Cancer: 'protective, emotional, memory-led, private, and attachment-focused',
-  Leo: 'expressive, proud, creative, warm, and visibility-oriented',
-  Virgo:
-    'analytical, precise, practical, service-minded, and improvement-focused',
-  Libra: 'relational, aesthetic, diplomatic, comparative, and balance-seeking',
-  Scorpio:
-    'intense, private, investigative, loyal, and transformation-oriented',
-  Sagittarius:
-    'expansive, honest, exploratory, philosophical, and freedom-seeking',
-  Capricorn:
-    'disciplined, strategic, mature, responsible, and achievement-focused',
-  Aquarius:
-    'systemic, future-minded, independent, experimental, and collective',
-  Pisces:
-    'porous, imaginative, compassionate, symbolic, and spiritually sensitive',
-};
-
-const ASPECT_TYPE_SLUG: Record<TransitReplyAspect['aspect'], string> = {
-  Conjunction: 'conjunction',
-  Opposition: 'opposition',
-  Square: 'square',
-  Trine: 'trine',
-  Sextile: 'sextile',
-};
-
-const ASPECT_PAIR_SLUG: Record<TransitReplyAspect['aspect'], string> = {
+const ASPECT_PAIR_SLUG: Record<string, string> = {
   Conjunction: 'conjunct',
   Opposition: 'opposite',
   Square: 'square',
@@ -154,44 +98,186 @@ const ASPECT_PAIR_SLUG: Record<TransitReplyAspect['aspect'], string> = {
   Sextile: 'sextile',
 };
 
-function slug(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+const ASPECT_ANGLE: Record<string, number> = {
+  conjunction: 0,
+  opposition: 180,
+  trine: 120,
+  square: 90,
+  sextile: 60,
+};
+
+/** Compute applying/separating + frozen exact-date label relative to a snapshot date. */
+function computeAspectTiming(
+  transit: TransitReplyAspect,
+  snapshotDate: Date,
+): { isApplying: boolean; exactDateLabel: string } {
+  const aspectAngle = ASPECT_ANGLE[transit.aspect.toLowerCase()] ?? 0;
+  const dailyMotion =
+    PLANET_DAILY_MOTION[
+      transit.transitPlanet as keyof typeof PLANET_DAILY_MOTION
+    ] ?? 1;
+
+  // Simulate yesterday's position to detect direction
+  const yesterdayLong = transit.transitDegree - dailyMotion;
+  let yesterdayDiff = Math.abs(yesterdayLong - transit.natalDegree);
+  if (yesterdayDiff > 180) yesterdayDiff = 360 - yesterdayDiff;
+  const yesterdayOrb = Math.abs(yesterdayDiff - aspectAngle);
+
+  let currentDiff = Math.abs(transit.transitDegree - transit.natalDegree);
+  if (currentDiff > 180) currentDiff = 360 - currentDiff;
+  const currentOrb = Math.abs(currentDiff - aspectAngle);
+
+  const isApplying = yesterdayOrb > currentOrb;
+
+  // Exact date is relative to snapshot date, not today
+  const daysToExact = currentOrb / dailyMotion;
+  const exactDate = new Date(
+    snapshotDate.getTime() +
+      (isApplying ? daysToExact : -daysToExact) * 24 * 60 * 60 * 1000,
+  );
+
+  const label = exactDate.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+  });
+  const exactDateLabel = isApplying ? `peaks ${label}` : `peaked ${label}`;
+
+  return { isApplying, exactDateLabel };
 }
 
-function planetHref(planet: string) {
-  return ROUTED_PLANETS.has(planet)
-    ? `/grimoire/astronomy/planets/${slug(planet)}`
+function planetHref(p: string) {
+  return ROUTED_PLANETS.has(p)
+    ? `/grimoire/astronomy/planets/${slug(p)}`
     : null;
 }
-
 function placementHref(body: string, sign: string) {
   return ROUTED_PLANETS.has(body)
     ? `/grimoire/placements/${slug(body)}-in-${slug(sign)}`
     : null;
 }
-
-function aspectPairHref(transit: TransitReplyAspect) {
-  if (
-    !ROUTED_PLANETS.has(transit.transitPlanet) ||
-    !ROUTED_PLANETS.has(transit.natalPlanet)
-  ) {
-    return null;
-  }
-  return `/grimoire/aspects/${slug(transit.transitPlanet)}/${ASPECT_PAIR_SLUG[transit.aspect]}/${slug(transit.natalPlanet)}`;
+function houseRefHref(h?: number | null) {
+  return h ? `/grimoire/houses/${ordinal(h)}-house` : null;
 }
-
-function houseHref(house?: number | null) {
-  return house ? `/grimoire/houses/${ordinal(house)}-house` : null;
-}
-
 function signHref(sign: string) {
   return `/grimoire/zodiac/${slug(sign)}`;
 }
 
-function ReferenceButton({
+/** Map a TransitReplyAspect to the shared AspectCardData interface. */
+function toAspectCardData(
+  transit: TransitReplyAspect,
+  snapshotDate: Date,
+): AspectCardData {
+  const aspectType = transit.aspect.toLowerCase();
+  const sentence =
+    transit.sentence?.trim() ||
+    buildAspectSentence(
+      transit.transitPlanet,
+      transit.transitSign,
+      transit.natalPlanet,
+      transit.natalSign,
+      aspectType,
+      transit.house ?? null,
+      transit.natalHouse ?? null,
+    );
+
+  const { isApplying, exactDateLabel } = computeAspectTiming(
+    transit,
+    snapshotDate,
+  );
+
+  return {
+    aspectType,
+    aspectGlyph: getAspectGlyph(aspectType),
+    orb: transit.orb,
+    transitPlanet: transit.transitPlanet,
+    transitSign: transit.transitSign,
+    natalPlanet: transit.natalPlanet,
+    natalSign: transit.natalSign,
+    transitHouse: transit.house ?? null,
+    natalHouse: transit.natalHouse ?? null,
+    sentence,
+    contextCopy: buildContextCopy(transit.transitPlanet, transit.transitSign),
+    duration: {
+      displayText: '', // not shown when exactDateLabel is present
+      isApplying,
+    },
+    exactDateLabel,
+  };
+}
+
+// ── Section wrapper (matches HoroscopeSection in app) ──────────────────────
+function Section({
+  title,
+  children,
+  color = 'zinc',
+}: {
+  title: string;
+  children: React.ReactNode;
+  color?: 'purple' | 'zinc' | 'emerald' | 'amber' | 'indigo';
+}) {
+  const borders: Record<string, string> = {
+    purple: 'border-lunary-primary-800',
+    zinc: 'border-stroke-subtle',
+    emerald: 'border-lunary-success-800',
+    amber: 'border-lunary-accent-800',
+    indigo: 'border-lunary-highlight-800',
+  };
+  return (
+    <div
+      className={`rounded-lg border ${borders[color]} bg-surface-elevated p-4`}
+    >
+      <h2 className='text-sm font-medium text-content-primary mb-2'>{title}</h2>
+      {children}
+    </div>
+  );
+}
+
+// ── Placement card for birth-chart mode ───────────────────────────────────
+function PlacementCard({
+  placement,
+}: {
+  placement: ChartReplyAnalysis['placements'][number];
+}) {
+  const houseTheme = placement.house ? HOUSE_THEMES[placement.house] : null;
+  const planetMeaning = PLANET_MEANINGS[placement.body];
+  const signMeaning = SIGN_MEANINGS[placement.sign];
+
+  return (
+    <div className='rounded-lg border border-stroke-subtle bg-layer-deep/40 p-3'>
+      <div className='flex items-center justify-between mb-1'>
+        <span className='text-sm font-medium text-content-secondary'>
+          {placement.body} in {placement.sign}
+        </span>
+        {placement.house && (
+          <Link
+            href={houseRefHref(placement.house) ?? '#'}
+            className='text-[10px] px-2 py-0.5 rounded-full bg-layer-base/50 border border-lunary-primary-700/30 text-content-brand hover:border-lunary-primary-500 transition'
+          >
+            {ordinal(placement.house)} house
+          </Link>
+        )}
+      </div>
+      {planetMeaning && (
+        <p className='text-xs text-content-muted mb-1'>
+          {placement.body} {planetMeaning}.
+        </p>
+      )}
+      {signMeaning && (
+        <p className='text-xs text-content-muted mb-1'>
+          In {placement.sign}, that energy is {signMeaning}.
+        </p>
+      )}
+      {houseTheme && (
+        <p className='text-xs text-content-secondary leading-relaxed'>
+          Falls in the {ordinal(placement.house!)} house — {houseTheme}.
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── Reference link button ─────────────────────────────────────────────────
+function RefLink({
   href,
   children,
 }: {
@@ -202,236 +288,145 @@ function ReferenceButton({
   return (
     <Link
       href={href}
-      className='inline-flex min-w-0 items-center gap-1 rounded-full border border-stroke-subtle bg-surface-elevated/70 px-3 py-1.5 text-xs font-medium text-content-secondary transition hover:border-lunary-primary/60 hover:text-content-primary'
+      className='inline-flex items-center gap-1 rounded-full border border-stroke-subtle bg-surface-elevated/70 px-2.5 py-1 text-[10px] font-medium text-content-secondary hover:border-lunary-primary/60 hover:text-content-primary transition'
     >
-      <BookOpen className='h-3 w-3 shrink-0' />
+      <BookOpen className='h-2.5 w-2.5 shrink-0' />
       <span className='truncate'>{children}</span>
     </Link>
   );
 }
 
-function TransitPill({ transit }: { transit: TransitReplyAspect }) {
-  return (
-    <div className='min-w-0 overflow-hidden rounded-xl border border-stroke-subtle bg-surface-elevated/60 p-3'>
-      <p className='text-[11px] font-semibold uppercase tracking-[0.22em] text-content-muted'>
-        {transit.aspect} - {transit.orb.toFixed(1)}° orb
-      </p>
-      <p className='mt-1 break-words text-sm font-semibold text-content-primary'>
-        {transit.transitPlanet} {transit.aspect.toLowerCase()} natal{' '}
-        {transit.natalPlanet}
-      </p>
-      <p className='mt-1 text-xs leading-relaxed text-content-secondary'>
-        {transit.house
-          ? `${ordinal(transit.house)} house: ${transit.houseTheme}`
-          : `${transit.transitSign} to ${transit.natalSign}`}
-      </p>
-    </div>
-  );
-}
+// ── Intensity styles (mirrors TransitWisdom.tsx) ────────────────────────────
+const INTENSITY_STYLES: Record<
+  string,
+  { bg: string; text: string; border: string }
+> = {
+  'Life-Defining': {
+    bg: 'bg-layer-deep/60',
+    text: 'text-content-error',
+    border: 'border-lunary-error-700/50',
+  },
+  'Highly Prominent': {
+    bg: 'bg-layer-deep/60',
+    text: 'text-content-brand-accent',
+    border: 'border-lunary-accent-700/50',
+  },
+  Noticeable: {
+    bg: 'bg-layer-deep/60',
+    text: 'text-content-success',
+    border: 'border-lunary-success-700/50',
+  },
+  Mild: {
+    bg: 'bg-surface-elevated/60',
+    text: 'text-content-muted',
+    border: 'border-stroke-default/50',
+  },
+};
 
-function ConceptReferenceCard({
-  title,
-  body,
-  links,
-}: {
-  title: string;
-  body: string;
-  links: Array<{ href: string | null; label: string }>;
-}) {
+const THEME_COLORS: Record<string, string> = {
+  Identity: 'tag-identity',
+  Creativity: 'tag-creativity',
+  Boundaries: 'tag-boundaries',
+  Love: 'tag-love',
+  Work: 'tag-work',
+  Healing: 'tag-healing',
+  Transformation: 'tag-transformation',
+  Communication: 'tag-communication',
+  Growth: 'tag-growth',
+  Intuition: 'tag-intuition',
+  Power: 'tag-power',
+  Freedom: 'tag-freedom',
+};
+
+const ORB_BADGE_STYLES: Record<string, { bg: string; text: string }> = {
+  Exact: { bg: 'bg-layer-deep/60', text: 'text-content-brand' },
+  Strong: { bg: 'bg-layer-deep/60', text: 'text-content-brand-secondary' },
+  Subtle: { bg: 'bg-surface-elevated/60', text: 'text-content-muted' },
+};
+
+function ShareTransitCard({ detail }: { detail: TransitDetail }) {
+  const styles =
+    INTENSITY_STYLES[detail.intensityLevel] ?? INTENSITY_STYLES.Mild;
+  const orbStyles =
+    ORB_BADGE_STYLES[detail.intensity] ?? ORB_BADGE_STYLES.Subtle;
+
   return (
-    <article className='rounded-2xl border border-stroke-subtle bg-surface-elevated/45 p-4'>
-      <h3 className='text-sm font-semibold text-content-primary'>{title}</h3>
-      <p className='mt-2 text-sm leading-relaxed text-content-secondary'>
-        {body}
-      </p>
-      <div className='mt-4 flex flex-wrap gap-2'>
-        {links.map((link) => (
-          <ReferenceButton key={`${link.href}-${link.label}`} href={link.href}>
-            {link.label}
-          </ReferenceButton>
-        ))}
+    <div
+      className={`rounded-lg border ${styles.border} bg-surface-elevated/40 p-4 space-y-3`}
+    >
+      <div className='space-y-1'>
+        <div className='flex items-center justify-between gap-2'>
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium whitespace-nowrap ${styles.bg} ${styles.text}`}
+          >
+            {detail.intensityLevel}
+          </span>
+          <p className='text-xs text-content-muted'>{detail.header}</p>
+        </div>
+        <h4 className='text-sm font-medium text-content-primary leading-tight'>
+          {detail.title}
+        </h4>
       </div>
-    </article>
-  );
-}
 
-function PlacementPill({
-  placement,
-}: {
-  placement: ChartReplyAnalysis['placements'][number];
-}) {
-  return (
-    <div className='min-w-0 overflow-hidden rounded-xl border border-stroke-subtle bg-surface-elevated/60 p-3'>
-      <p className='text-[11px] font-semibold uppercase tracking-[0.22em] text-content-muted'>
-        {placement.body} - {placement.sign}
-      </p>
-      <p className='mt-1 break-words text-sm font-semibold text-content-primary'>
-        {placement.body} in {placement.sign}
-      </p>
-      <p className='mt-1 text-xs leading-relaxed text-content-secondary'>
-        {placement.house
-          ? `${ordinal(placement.house)} house: ${placement.houseTheme}`
-          : `${placement.degree}° ${placement.sign}`}
-      </p>
-    </div>
-  );
-}
+      <div className='flex flex-wrap items-center gap-1.5'>
+        {detail.themes.map((theme) => (
+          <span
+            key={theme}
+            className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border ${THEME_COLORS[theme] ?? ''}`}
+          >
+            {theme}
+          </span>
+        ))}
+        <span
+          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border border-stroke-default/50 ${orbStyles.bg} ${orbStyles.text}`}
+        >
+          {detail.intensity} · {detail.orbDegrees}°
+        </span>
+        <span className='inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border bg-surface-elevated border-stroke-subtle text-content-muted'>
+          {detail.transitCycle}
+        </span>
+      </div>
 
-function TransitBreakdown({ transit }: { transit: TransitReplyAspect }) {
-  return (
-    <article className='rounded-2xl border border-stroke-subtle bg-surface-elevated/50 p-4'>
-      <p className='text-[11px] font-semibold uppercase tracking-[0.22em] text-content-muted'>
-        {transit.transitPlanet} {transit.aspect.toLowerCase()} natal{' '}
-        {transit.natalPlanet}
+      <p className='text-xs text-content-muted leading-relaxed'>
+        {detail.degreeInfo}
       </p>
-      <h3 className='mt-2 text-base font-semibold text-content-primary'>
-        Why this one matters
-      </h3>
-      <p className='mt-2 text-sm leading-relaxed text-content-secondary'>
-        {transit.transitPlanet} is currently in {transit.transitSign}, forming a{' '}
-        {transit.aspect.toLowerCase()} to the natal {transit.natalPlanet} in{' '}
-        {transit.natalSign}. With an orb of {transit.orb.toFixed(1)}°, this is
-        one of the tighter live contacts in the chart.
+      <p className='text-sm text-content-secondary leading-relaxed'>
+        {detail.meaning}
       </p>
-      <p className='mt-3 text-sm leading-relaxed text-content-secondary'>
-        This aspect usually describes {aspectTone(transit.aspect)}.{' '}
-        {transit.house && transit.houseTheme
-          ? `Because the moving planet is activating the ${ordinal(transit.house)} house, the visible life area is ${transit.houseTheme}.`
-          : 'Without a fully readable house structure, the sign and planet contact are the cleaner signal.'}
-      </p>
-      {transit.natalHouse && transit.natalHouseTheme && (
-        <p className='mt-3 text-sm leading-relaxed text-content-secondary'>
-          The natal planet sits in the {ordinal(transit.natalHouse)} house, so
-          the deeper chart theme comes back to {transit.natalHouseTheme}.
+
+      {detail.suggestion && (
+        <p className='text-xs text-content-muted italic'>
+          <span className='not-italic'>Try this:</span> {detail.suggestion}
         </p>
       )}
-    </article>
-  );
-}
-
-function TransitReferenceMap({ transit }: { transit: TransitReplyAspect }) {
-  const transitPlanetMeaning =
-    PLANET_MEANINGS[transit.transitPlanet] || 'a moving planetary function';
-  const natalPlanetMeaning =
-    PLANET_MEANINGS[transit.natalPlanet] || 'a natal chart function';
-  const transitSignMeaning =
-    SIGN_MEANINGS[transit.transitSign] || 'the sign style of the transit';
-  const natalSignMeaning =
-    SIGN_MEANINGS[transit.natalSign] || 'the sign style of the natal placement';
-
-  return (
-    <div className='grid gap-4 lg:grid-cols-3'>
-      <ConceptReferenceCard
-        title={`${transit.aspect} aspect`}
-        body={`${transit.aspect} describes the geometry of the contact. In this read, it is ${aspectTone(transit.aspect)}, with a ${transit.orb.toFixed(1)}° orb between the moving ${transit.transitPlanet} and natal ${transit.natalPlanet}.`}
-        links={[
-          {
-            href: `/grimoire/aspects/types/${ASPECT_TYPE_SLUG[transit.aspect]}`,
-            label: `${transit.aspect} meaning`,
-          },
-          {
-            href: aspectPairHref(transit),
-            label: `${transit.transitPlanet} ${transit.aspect} ${transit.natalPlanet}`,
-          },
-          { href: '/grimoire/aspects', label: 'All aspects' },
-        ]}
-      />
-      <ConceptReferenceCard
-        title={`${transit.transitPlanet} in ${transit.transitSign}`}
-        body={`${transit.transitPlanet} brings ${transitPlanetMeaning}. ${transit.transitSign} makes that expression feel ${transitSignMeaning}. This is the moving sky layer, not a permanent natal trait.`}
-        links={[
-          {
-            href: planetHref(transit.transitPlanet),
-            label: `${transit.transitPlanet} planet`,
-          },
-          {
-            href: signHref(transit.transitSign),
-            label: `${transit.transitSign} zodiac`,
-          },
-          { href: '/grimoire/transits', label: 'All transits' },
-        ]}
-      />
-      <ConceptReferenceCard
-        title={`Natal ${transit.natalPlanet} in ${transit.natalSign}`}
-        body={`The natal ${transit.natalPlanet} describes ${natalPlanetMeaning}. In ${transit.natalSign}, it tends to express through a ${natalSignMeaning} style.${transit.natalHouse && transit.natalHouseTheme ? ` The house layer ties it to ${transit.natalHouseTheme}.` : ''}`}
-        links={[
-          {
-            href: placementHref(transit.natalPlanet, transit.natalSign),
-            label: `${transit.natalPlanet} in ${transit.natalSign}`,
-          },
-          {
-            href: houseHref(transit.natalHouse),
-            label: transit.natalHouse
-              ? `${ordinal(transit.natalHouse)} house`
-              : 'House meanings',
-          },
-          { href: '/grimoire/houses', label: 'All houses' },
-        ]}
-      />
     </div>
   );
 }
 
-function PlacementBreakdown({
-  placement,
-}: {
-  placement: ChartReplyAnalysis['placements'][number];
-}) {
-  return (
-    <article className='rounded-2xl border border-stroke-subtle bg-surface-elevated/50 p-4'>
-      <p className='text-[11px] font-semibold uppercase tracking-[0.22em] text-content-muted'>
-        {placement.body} in {placement.sign}
-      </p>
-      <h3 className='mt-2 text-base font-semibold text-content-primary'>
-        How I would read it
-      </h3>
-      <p className='mt-2 text-sm leading-relaxed text-content-secondary'>
-        {placement.body} in {placement.sign} is a core chart signal, but the
-        house placement is what makes it practical.{' '}
-        {placement.house && placement.houseTheme
-          ? `Here it falls in the ${ordinal(placement.house)} house, tying the placement to ${placement.houseTheme}.`
-          : 'The sign is visible, but the house context should be treated more carefully unless the chart table is clear.'}
-      </p>
-    </article>
-  );
+/** Adapter: convert share-page transit aspects to TransitAspect for buildTransitDetails */
+function toTransitAspects(
+  transits: ShareTransitReplyDisplayData['transits'],
+): TransitAspect[] {
+  return transits.map((t) => ({
+    transitPlanet: t.transitPlanet,
+    natalPlanet: t.natalPlanet,
+    aspectType: t.aspect.toLowerCase(),
+    transitSign: t.transitSign,
+    transitDegree: '',
+    natalSign: t.natalSign,
+    natalDegree: '',
+    orbDegrees: t.orb,
+    house: t.house ?? undefined,
+    natalHouse: t.natalHouse ?? undefined,
+  }));
 }
 
-function PlacementReferenceMap({
-  placement,
-}: {
-  placement: ChartReplyAnalysis['placements'][number];
-}) {
-  const planetMeaning =
-    PLANET_MEANINGS[placement.body] || 'a visible chart function';
-  const signMeaning = SIGN_MEANINGS[placement.sign] || 'the sign style';
-
-  return (
-    <ConceptReferenceCard
-      title={`${placement.body} in ${placement.sign}`}
-      body={`${placement.body} describes ${planetMeaning}. ${placement.sign} gives it a ${signMeaning} expression.${placement.house && placement.houseTheme ? ` The ${ordinal(placement.house)} house connects that expression to ${placement.houseTheme}.` : ''}`}
-      links={[
-        {
-          href: placementHref(placement.body, placement.sign),
-          label: `${placement.body} in ${placement.sign}`,
-        },
-        { href: signHref(placement.sign), label: `${placement.sign} zodiac` },
-        {
-          href: houseHref(placement.house),
-          label: placement.house
-            ? `${ordinal(placement.house)} house`
-            : 'All houses',
-        },
-      ]}
-    />
-  );
-}
-
+// ── Main layout ───────────────────────────────────────────────────────────
 export function ShareTransitReplyLayout({
   data,
 }: {
   data: ShareTransitReplyDisplayData;
 }) {
-  const [copied, setCopied] = useState(false);
   const isBirthChart = data.mode === 'birth-chart';
   const {
     shareTarget,
@@ -448,7 +443,7 @@ export function ShareTransitReplyLayout({
 
   const target = useMemo(
     () => ({
-      title: 'Share transit overlay',
+      title: isBirthChart ? 'Birth chart snapshot' : 'Transit overlay',
       description: isBirthChart
         ? 'Birth chart snapshot with the strongest extracted placements.'
         : 'Natal chart inside, current transits outside, with the strongest active contacts.',
@@ -458,30 +453,22 @@ export function ShareTransitReplyLayout({
     [data.imageUrl, data.shareUrl, isBirthChart],
   );
 
-  const copyReply = async () => {
-    await navigator.clipboard.writeText(data.redditReply);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
-  };
-
   const freeChartHref = useMemo(() => {
-    const params = new URLSearchParams({
+    const p = new URLSearchParams({
       source: 'birth_chart_reply_share',
       utm_source: 'reddit',
       utm_medium: 'share_page',
       utm_campaign: 'birth_chart_reply',
       utm_content: 'free_chart_cta',
     });
-    if (data.name) params.set('name', data.name);
-    if (data.chartMeta?.birthDate)
-      params.set('birthDate', data.chartMeta.birthDate);
-    if (data.chartMeta?.birthTime)
-      params.set('birthTime', data.chartMeta.birthTime);
-    if (data.chartMeta?.birthLocation) {
-      params.set('birthLocation', data.chartMeta.birthLocation);
-    }
-    return `/free-chart?${params.toString()}`;
+    if (data.name) p.set('name', data.name);
+    if (data.chartMeta?.birthDate) p.set('birthDate', data.chartMeta.birthDate);
+    if (data.chartMeta?.birthTime) p.set('birthTime', data.chartMeta.birthTime);
+    if (data.chartMeta?.birthLocation)
+      p.set('birthLocation', data.chartMeta.birthLocation);
+    return `/free-chart?${p.toString()}`;
   }, [data.chartMeta, data.name]);
+
   const signupHref = buildSignupChartUrl({
     source: 'reddit',
     medium: 'share_page',
@@ -493,227 +480,291 @@ export function ShareTransitReplyLayout({
     funnel: 'reddit_chart_reply',
   });
 
+  const snapshotDate = useMemo(
+    () => new Date(`${data.date}T12:00:00Z`),
+    [data.date],
+  );
+
+  const primaryTransits = data.transits.slice(0, 6);
+  const primaryPlacements = (data.placements ?? []).slice(0, 6);
+
+  const transitWisdomDetails = useMemo(() => {
+    if (isBirthChart || data.transits.length === 0) return [];
+    return buildTransitDetails(toTransitAspects(data.transits), {
+      maxItems: 3,
+    });
+  }, [isBirthChart, data.transits]);
+
   return (
     <main className='min-h-screen bg-surface-base text-content-primary'>
-      <div className='mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 md:px-8 md:py-10'>
-        <header className='grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end'>
-          <div>
-            <p className='text-[11px] font-semibold uppercase tracking-[0.28em] text-content-muted'>
-              {isBirthChart ? 'Chart insight' : 'Live transit overlay'}
-            </p>
-            <h1 className='mt-2 max-w-3xl text-3xl font-semibold tracking-normal text-content-primary md:text-5xl'>
-              {isBirthChart
-                ? 'What stands out in this chart'
-                : data.name
-                  ? `${data.name}'s current transits`
-                  : 'Current transits over this chart'}
-            </h1>
-            <p className='mt-3 max-w-2xl text-sm leading-relaxed text-content-secondary md:text-base'>
-              {isBirthChart
-                ? 'This is a short read from the chart supplied in the thread. The image is only a preview; the notes below explain why the placements matter.'
-                : 'Natal chart inside. Current sky outside. The notes below focus on the strongest active contacts and the houses they are moving through right now.'}
-            </p>
-          </div>
-          <div className='flex flex-wrap gap-2'>
+      <div className='mx-auto w-full max-w-2xl space-y-4 px-4 py-6 pb-16'>
+        {/* ── Header ── */}
+        <div>
+          <div className='flex flex-wrap items-start justify-between gap-3'>
+            <div className='flex-1'>
+              <p className='text-[11px] font-semibold uppercase tracking-[0.28em] text-content-muted'>
+                {isBirthChart ? 'Chart insight' : 'Live transit overlay'}
+              </p>
+              <h1 className='mt-1 text-xl font-semibold text-content-primary'>
+                {isBirthChart
+                  ? 'What stands out in this chart'
+                  : data.name
+                    ? `${data.name}'s current transits`
+                    : 'Current transits over this chart'}
+              </h1>
+              <p className='text-sm text-content-muted mt-0.5'>
+                {isBirthChart
+                  ? 'Strongest placements from the supplied chart'
+                  : !isBirthChart
+                    ? `How the planets are moving through this chart right now${data.date ? ` · ${formatDate(data.date)}` : ''}`
+                    : ''}
+              </p>
+            </div>
             <Button
               type='button'
               onClick={() => openShareModal(target)}
-              className='gap-2'
+              size='sm'
+              className='gap-2 shrink-0'
             >
-              <Share2 className='h-4 w-4' />
+              <Share2 className='h-3.5 w-3.5' />
               Share image
             </Button>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={copyReply}
-              className='gap-2'
-            >
-              <Copy className='h-4 w-4' />
-              {copied ? 'Copied' : 'Copy reply'}
-            </Button>
           </div>
-        </header>
+        </div>
 
-        <section className='grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]'>
-          <div className='rounded-2xl border border-stroke-subtle bg-gradient-to-br from-surface-elevated/80 via-surface-base/80 to-layer-deep p-4 md:p-5'>
-            {isBirthChart ? (
-              <div className='mx-auto max-w-[460px]'>
-                <BirthChart
-                  birthChart={data.birthChart}
-                  houses={data.houseCusps}
-                  showAspects
-                  aspectFilter='all'
-                  showAsteroids={false}
-                  showPoints
-                  clockwise={
-                    data.chartMeta?.houseNumberingDirection === 'clockwise'
-                  }
-                  houseSystem='placidus'
-                />
-              </div>
-            ) : (
-              <TransitScrubber
+        {/* ── TransitScrubber / Birth chart ── */}
+        <div className='rounded-2xl border border-stroke-subtle/70 bg-gradient-to-br from-surface-elevated/70 via-surface-base/70 to-layer-deep p-4'>
+          {isBirthChart ? (
+            <div className='mx-auto max-w-[400px]'>
+              <BirthChart
                 birthChart={data.birthChart}
-                initialDate={data.date}
-                forceLocked
+                houses={data.houseCusps}
+                showAspects
+                aspectFilter='all'
+                showAsteroids={false}
+                showPoints
+                clockwise={
+                  data.chartMeta?.houseNumberingDirection === 'clockwise'
+                }
+                houseSystem='placidus'
               />
-            )}
+            </div>
+          ) : (
+            <TransitScrubber
+              birthChart={data.birthChart}
+              initialDate={data.date}
+              forceLocked
+            />
+          )}
+        </div>
+
+        {/* ── Cosmic highlight (summary) ── matches in-app style ── */}
+        <div className='rounded-xl border border-stroke-subtle/70 bg-gradient-to-br from-surface-elevated/70 via-surface-base/70 to-layer-deep p-3 space-y-2'>
+          <div className='flex items-start justify-between gap-3'>
+            <h2 className='text-sm font-semibold text-content-primary leading-snug flex-1'>
+              {isBirthChart ? 'What stands out' : 'What is active right now'}
+            </h2>
+            <Sparkles className='h-3.5 w-3.5 text-lunary-primary shrink-0 mt-0.5' />
           </div>
+          <p className='text-xs text-content-secondary leading-relaxed'>
+            {data.summary}
+          </p>
+        </div>
 
-          <aside className='flex flex-col gap-4'>
-            <div className='rounded-2xl border border-stroke-subtle bg-surface-elevated/60 p-5'>
-              <div className='mb-3 flex items-center justify-between gap-3'>
-                <p className='text-[11px] font-semibold uppercase tracking-[0.24em] text-content-muted'>
-                  {isBirthChart
-                    ? 'Birth chart snapshot'
-                    : formatDate(data.date)}
-                </p>
-                <Sparkles className='h-4 w-4 text-lunary-primary' />
-              </div>
-              <h2 className='text-xl font-semibold text-content-primary'>
-                {isBirthChart
-                  ? 'What stands out in the chart'
-                  : 'What is active right now'}
-              </h2>
-              <p className='mt-3 text-sm leading-relaxed text-content-secondary'>
-                {data.summary}
-              </p>
-            </div>
-
-            <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-1'>
-              {isBirthChart
-                ? (data.placements || [])
-                    .slice(0, 4)
-                    .map((placement) => (
-                      <PlacementPill
-                        key={`${placement.body}-${placement.sign}-${placement.house || 'sign'}`}
-                        placement={placement}
-                      />
-                    ))
-                : data.transits
-                    .slice(0, 4)
-                    .map((transit) => (
-                      <TransitPill
-                        key={`${transit.transitPlanet}-${transit.natalPlanet}-${transit.aspect}`}
-                        transit={transit}
-                      />
-                    ))}
-            </div>
-
-            <div className='rounded-2xl border border-lunary-primary/30 bg-lunary-primary/10 p-5'>
-              <div className='flex items-start gap-3'>
-                <Lock className='mt-0.5 h-4 w-4 text-lunary-primary' />
-                <div>
-                  <h2 className='text-sm font-semibold text-content-primary'>
-                    {isBirthChart
-                      ? 'Get your free birth chart report'
-                      : 'Keep this updated in Lunary'}
-                  </h2>
-                  <p className='mt-2 text-sm leading-relaxed text-content-secondary'>
-                    {isBirthChart
-                      ? 'Use Lunary’s free chart page to generate your own clean report, then save the full map when you want personalised daily timing.'
-                      : 'This snapshot shows today. Sign in to save your chart, unlock the scrubber, and keep watching how the transits change over time.'}
-                  </p>
+        {/* ── Active transits / placements ── */}
+        <Section
+          title={
+            isBirthChart
+              ? 'Strongest placements'
+              : 'Active aspects on this chart'
+          }
+          color='indigo'
+        >
+          <p className='text-xs text-content-muted mb-2'>
+            {isBirthChart
+              ? 'Key placements extracted from the chart image'
+              : 'How the sky was connecting to the natal chart on this date'}
+          </p>
+          {!isBirthChart && (
+            <>
+              <ActiveHousesGrid
+                aspects={primaryTransits.map((t) => ({
+                  transitHouse: t.house ?? null,
+                  natalHouse: t.natalHouse ?? null,
+                }))}
+              />
+              {/* Snapshot lock notice */}
+              <div className='flex items-center gap-2 rounded-md border border-stroke-subtle/60 bg-surface-elevated/50 px-3 py-2 mb-2'>
+                <Lock className='h-3 w-3 shrink-0 text-content-muted' />
+                <p className='text-[11px] text-content-muted leading-snug'>
+                  Dates shown are frozen to{' '}
+                  <span className='text-content-secondary font-medium'>
+                    {snapshotDate.toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </span>
+                  .{' '}
                   <Link
-                    href={isBirthChart ? freeChartHref : signupHref}
-                    className='mt-4 inline-flex items-center gap-2 rounded-full bg-lunary-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-lunary-primary-400'
+                    href={signupHref}
+                    className='text-content-brand hover:underline'
                   >
-                    {isBirthChart
-                      ? 'Open free chart page'
-                      : 'Explore your chart'}
-                    <ExternalLink className='h-3.5 w-3.5' />
+                    Sign in for live timings
                   </Link>
-                </div>
+                </p>
               </div>
-            </div>
-          </aside>
-        </section>
-
-        <section className='grid gap-4 lg:grid-cols-2'>
-          {isBirthChart
-            ? (data.placements || [])
-                .slice(0, 4)
-                .map((placement) => (
-                  <PlacementBreakdown
-                    key={`detail-${placement.body}-${placement.sign}-${placement.house || 'sign'}`}
-                    placement={placement}
+            </>
+          )}
+          <div className='space-y-2'>
+            {isBirthChart
+              ? primaryPlacements.map((p) => (
+                  <PlacementCard
+                    key={`${p.body}-${p.sign}-${p.house ?? 'no-house'}`}
+                    placement={p}
                   />
                 ))
-            : data.transits
-                .slice(0, 4)
-                .map((transit) => (
-                  <TransitBreakdown
-                    key={`detail-${transit.transitPlanet}-${transit.natalPlanet}-${transit.aspect}`}
-                    transit={transit}
+              : primaryTransits.map((t) => (
+                  <AspectCard
+                    key={`${t.transitPlanet}-${t.natalPlanet}-${t.aspect}`}
+                    aspect={toAspectCardData(t, snapshotDate)}
                   />
                 ))}
-        </section>
+          </div>
+        </Section>
 
-        <section className='rounded-2xl border border-stroke-subtle bg-surface-elevated/30 p-5 md:p-6'>
-          <div className='max-w-3xl'>
-            <p className='text-[11px] font-semibold uppercase tracking-[0.24em] text-content-muted'>
-              Grimoire references
+        {/* ── Transit wisdom ── */}
+        {transitWisdomDetails.length > 0 && (
+          <Section title='What this means for you' color='purple'>
+            <p className='text-xs text-content-muted mb-3'>
+              The strongest active transits over this chart right now
             </p>
-            <h2 className='mt-2 text-2xl font-semibold text-content-primary'>
-              The concepts behind this read
-            </h2>
-            <p className='mt-3 text-sm leading-relaxed text-content-secondary'>
-              Lunary reads from the same public reference system used across the
-              Grimoire: aspects, planet meanings, zodiac signs, houses,
-              placements, and transit context. Use these links to go deeper than
-              the teaser image.
+            <div className='space-y-3'>
+              {transitWisdomDetails.map((detail) => (
+                <ShareTransitCard key={detail.id} detail={detail} />
+              ))}
+            </div>
+            <p className='text-[11px] text-content-muted mt-3 pt-3 border-t border-stroke-subtle/50'>
+              Personalised daily timing, house activations and transit history
+              are available in{' '}
+              <Link
+                href='/pricing?nav=app'
+                className='text-content-brand hover:underline'
+              >
+                Lunary+
+              </Link>
             </p>
-          </div>
+          </Section>
+        )}
 
-          <div className='mt-5 space-y-5'>
-            {isBirthChart
-              ? (data.placements || [])
-                  .slice(0, 3)
-                  .map((placement) => (
-                    <PlacementReferenceMap
-                      key={`reference-${placement.body}-${placement.sign}-${placement.house || 'sign'}`}
-                      placement={placement}
-                    />
-                  ))
-              : data.transits
-                  .slice(0, 2)
-                  .map((transit) => (
-                    <TransitReferenceMap
-                      key={`reference-${transit.transitPlanet}-${transit.natalPlanet}-${transit.aspect}`}
-                      transit={transit}
-                    />
-                  ))}
+        {/* ── CTA ── */}
+        <div className='rounded-lg border border-lunary-primary/30 bg-lunary-primary/10 p-4'>
+          <div className='flex items-start gap-3'>
+            <Lock className='mt-0.5 h-4 w-4 text-lunary-primary shrink-0' />
+            <div>
+              <h2 className='text-sm font-semibold text-content-primary'>
+                {isBirthChart
+                  ? 'Get your free birth chart report'
+                  : 'Keep this updated in Lunary'}
+              </h2>
+              <p className='mt-1 text-xs leading-relaxed text-content-secondary'>
+                {isBirthChart
+                  ? "Use Lunary's free chart page to generate your own clean report, then save it when you want personalised daily timing."
+                  : 'This snapshot shows today. Sign in to save your chart, unlock the scrubber, and watch how your transits change over time.'}
+              </p>
+              <Link
+                href={isBirthChart ? freeChartHref : signupHref}
+                className='mt-3 inline-flex items-center gap-2 rounded-full bg-lunary-primary px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-lunary-primary-400'
+              >
+                {isBirthChart ? 'Open free chart page' : 'Explore your chart'}
+                <ExternalLink className='h-3 w-3' />
+              </Link>
+            </div>
           </div>
+        </div>
 
-          <div className='mt-5 flex flex-wrap gap-2 border-t border-stroke-subtle pt-5'>
-            <ReferenceButton href='/grimoire/birth-chart'>
-              Birth chart guide
-            </ReferenceButton>
-            <ReferenceButton href='/grimoire/aspects'>
-              All aspects
-            </ReferenceButton>
-            <ReferenceButton href='/grimoire/transits'>
-              All transits
-            </ReferenceButton>
-            <ReferenceButton href='/grimoire/houses'>
-              All houses
-            </ReferenceButton>
-            <ReferenceButton href='/grimoire/zodiac'>
-              Zodiac signs
-            </ReferenceButton>
+        {/* ── Grimoire references ── */}
+        <Section title='Learn more' color='zinc'>
+          <p className='text-xs text-content-muted mb-3'>
+            Go deeper into the concepts behind this read
+          </p>
+
+          {/* Per-transit concept pills */}
+          {!isBirthChart &&
+            primaryTransits.slice(0, 3).map((t) => (
+              <div
+                key={`ref-${t.transitPlanet}-${t.natalPlanet}-${t.aspect}`}
+                className='mb-3 last:mb-0'
+              >
+                <p className='text-[10px] font-semibold uppercase tracking-[0.2em] text-content-muted mb-1.5'>
+                  {t.transitPlanet} {t.aspect.toLowerCase()} natal{' '}
+                  {t.natalPlanet}
+                </p>
+                <div className='flex flex-wrap gap-1.5'>
+                  <RefLink href={planetHref(t.transitPlanet)}>
+                    {t.transitPlanet}
+                  </RefLink>
+                  <RefLink href={signHref(t.transitSign)}>
+                    {t.transitSign}
+                  </RefLink>
+                  {ROUTED_PLANETS.has(t.natalPlanet) &&
+                    ROUTED_PLANETS.has(t.transitPlanet) && (
+                      <RefLink
+                        href={`/grimoire/aspects/${slug(t.transitPlanet)}/${ASPECT_PAIR_SLUG[t.aspect]}/${slug(t.natalPlanet)}`}
+                      >
+                        {t.transitPlanet} {ASPECT_PAIR_SLUG[t.aspect]}{' '}
+                        {t.natalPlanet}
+                      </RefLink>
+                    )}
+                  <RefLink href={placementHref(t.natalPlanet, t.natalSign)}>
+                    natal {t.natalPlanet} in {t.natalSign}
+                  </RefLink>
+                  <RefLink href={houseRefHref(t.natalHouse)}>
+                    {t.natalHouse ? `${ordinal(t.natalHouse)} house` : null}
+                  </RefLink>
+                </div>
+              </div>
+            ))}
+
+          {/* Per-placement concept pills */}
+          {isBirthChart &&
+            primaryPlacements.slice(0, 3).map((p) => (
+              <div
+                key={`ref-${p.body}-${p.sign}-${p.house ?? 'no-house'}`}
+                className='mb-3 last:mb-0'
+              >
+                <p className='text-[10px] font-semibold uppercase tracking-[0.2em] text-content-muted mb-1.5'>
+                  {p.body} in {p.sign}
+                </p>
+                <div className='flex flex-wrap gap-1.5'>
+                  <RefLink href={placementHref(p.body, p.sign)}>
+                    {p.body} in {p.sign}
+                  </RefLink>
+                  <RefLink href={signHref(p.sign)}>{p.sign}</RefLink>
+                  <RefLink href={houseRefHref(p.house)}>
+                    {p.house ? `${ordinal(p.house)} house` : null}
+                  </RefLink>
+                </div>
+              </div>
+            ))}
+
+          {/* General grimoire links */}
+          <div className='mt-3 pt-3 border-t border-stroke-subtle flex flex-wrap gap-1.5'>
+            <RefLink href='/grimoire/aspects'>All aspects</RefLink>
+            <RefLink href='/grimoire/transits'>All transits</RefLink>
+            <RefLink href='/grimoire/houses'>All houses</RefLink>
+            <RefLink href='/grimoire/zodiac'>Zodiac signs</RefLink>
+            <RefLink href='/grimoire/birth-chart'>Birth chart guide</RefLink>
           </div>
-        </section>
+        </Section>
 
+        {/* ── Original question ── */}
         {data.question && (
-          <section className='rounded-2xl border border-stroke-subtle bg-surface-elevated/40 p-5'>
-            <p className='text-[11px] font-semibold uppercase tracking-[0.24em] text-content-muted'>
-              Original context
-            </p>
-            <p className='mt-2 max-w-3xl text-sm leading-relaxed text-content-secondary'>
+          <Section title='Original context' color='zinc'>
+            <p className='text-xs leading-relaxed text-content-secondary'>
               {data.question}
             </p>
-          </section>
+          </Section>
         )}
       </div>
 

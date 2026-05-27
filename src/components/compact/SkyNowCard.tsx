@@ -1,7 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useRef, useState } from 'react';
-import { Check, Telescope } from 'lucide-react';
+import { Check, Sparkles, Telescope } from 'lucide-react';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { BirthChartPlacement, useUser } from '@/context/UserContext';
 import {
@@ -386,9 +387,15 @@ const buildNatalHouseInfo = (
 interface SkyNowCardProps {
   isExpanded?: boolean;
   onToggle?: (isExpanded: boolean) => void;
+  /** Show which natal house each transit planet occupies. Paid feature only. */
+  showNatalHouses?: boolean;
 }
 
-export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
+export const SkyNowCard = ({
+  isExpanded,
+  onToggle,
+  showNatalHouses = false,
+}: SkyNowCardProps = {}) => {
   const { user } = useUser();
   const { currentAstrologicalChart } = usePlanetaryChart();
   const {
@@ -518,6 +525,21 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
             );
           })}
         </div>
+        {!showNatalHouses && (
+          <div className='mt-2 flex items-center justify-between px-0.5'>
+            <p className='text-[10px] text-content-muted'>
+              House activations hidden
+            </p>
+            <Link
+              href='/pricing'
+              onClick={(e) => e.stopPropagation()}
+              className='inline-flex items-center gap-0.5 text-[10px] text-content-brand hover:text-content-secondary transition-colors'
+            >
+              <Sparkles className='w-2.5 h-2.5' />
+              Unlock
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -612,11 +634,12 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
                     {planet.formattedDegree?.minute !== undefined &&
                       `${planet.formattedDegree.minute}'`}
                   </span>
-                  {natalSignHouseLookup[normalizedSign] != null && (
-                    <span className='text-xs uppercase text-content-muted'>
-                      {natalSignHouseLookup[normalizedSign]}H
-                    </span>
-                  )}
+                  {showNatalHouses &&
+                    natalSignHouseLookup[normalizedSign] != null && (
+                      <span className='text-xs uppercase text-content-muted'>
+                        {natalSignHouseLookup[normalizedSign]}H
+                      </span>
+                    )}
                   {planet.retrograde && (
                     <span className='text-xs text-lunary-error-300'>℞</span>
                   )}
@@ -640,7 +663,9 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
                 {composePlacementNarrative({
                   planet: planet.body,
                   sign: normalizedSign,
-                  house: natalSignHouseLookup[normalizedSign] ?? null,
+                  house: showNatalHouses
+                    ? (natalSignHouseLookup[normalizedSign] ?? null)
+                    : null,
                   dignity,
                   retrograde: planet.retrograde,
                 })}
@@ -657,6 +682,27 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
           );
         })}
       </div>
+
+      {/* FOMO teaser: house placements only shown to paid users */}
+      {!showNatalHouses && (
+        <div className='mt-3 rounded-lg border border-stroke-subtle/40 bg-surface-elevated/40 px-3 py-2.5 flex items-center justify-between gap-3'>
+          <div>
+            <p className='text-xs font-medium text-content-secondary'>
+              House activations hidden
+            </p>
+            <p className='text-[11px] text-content-muted'>
+              See which natal house each planet is moving through — Pro only.
+            </p>
+          </div>
+          <Link
+            href='/pricing'
+            className='shrink-0 inline-flex items-center gap-1 rounded-full border border-lunary-primary-700/50 bg-lunary-primary/10 px-3 py-1 text-[11px] font-medium text-content-brand transition hover:border-lunary-primary-500'
+          >
+            <Sparkles className='w-2.5 h-2.5' />
+            Unlock
+          </Link>
+        </div>
+      )}
     </div>
   );
 

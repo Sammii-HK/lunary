@@ -94,18 +94,22 @@ export async function getTransitReplyShare(
   }
 }
 
+function normaliseBase(baseUrl: string) {
+  return baseUrl.replace(/\/+$/, '');
+}
+
 export function transitReplyImageUrl(shareId: string, baseUrl: string) {
-  return `${baseUrl}/api/og/share/transit-reply?shareId=${encodeURIComponent(
+  return `${normaliseBase(baseUrl)}/api/og/share/transit-reply?shareId=${encodeURIComponent(
     shareId,
   )}`;
 }
 
 export function transitReplyPublicUrl(shareId: string, baseUrl: string) {
-  return `${baseUrl}/insights/chart/${encodeURIComponent(shareId)}`;
+  return `${normaliseBase(baseUrl)}/insights/chart/${encodeURIComponent(shareId)}`;
 }
 
 export function transitReplyImagePngUrl(shareId: string, baseUrl: string) {
-  return `${baseUrl}/api/og/share/transit-reply.png?shareId=${encodeURIComponent(
+  return `${normaliseBase(baseUrl)}/api/og/share/transit-reply.png?shareId=${encodeURIComponent(
     shareId,
   )}`;
 }

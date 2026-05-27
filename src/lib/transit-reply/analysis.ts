@@ -227,7 +227,7 @@ const ASPECTS = [
   },
   {
     aspect: 'Sextile',
-    glyph: '✶',
+    glyph: '⚹',
     angle: 60,
     orb: 4,
     verb: 'is sextiling',
