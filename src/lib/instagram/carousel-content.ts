@@ -8,6 +8,36 @@ const SHARE_BASE_URL = (
   process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app'
 ).replace(/\/+$/, '');
 
+// Astronomicon zodiac sign characters (A=Aries … L=Pisces)
+const ZODIAC_SIGN_SYMBOLS: Record<string, string> = {
+  aries: 'A',
+  taurus: 'B',
+  gemini: 'C',
+  cancer: 'D',
+  leo: 'E',
+  virgo: 'F',
+  libra: 'G',
+  scorpio: 'H',
+  sagittarius: 'I',
+  capricorn: 'J',
+  aquarius: 'K',
+  pisces: 'L',
+};
+
+// Astronomicon planet characters
+const PLANET_SYMBOLS: Record<string, string> = {
+  Sun: 'Q',
+  Moon: 'R',
+  Mercury: 'S',
+  Venus: 'T',
+  Mars: 'U',
+  Jupiter: 'V',
+  Saturn: 'W',
+  Uranus: 'X',
+  Neptune: 'Y',
+  Pluto: 'Z',
+};
+
 function inferSlideStyle(
   variant: IGCarouselSlide['variant'],
   subtitle = '',
@@ -910,36 +940,6 @@ const CATEGORY_SYMBOL: Partial<Record<ThemeCategory, string>> = {
   lunar: 'R', // Moon
   planetary: 'Q', // Sun
   // zodiac: sign-specific glyph passed explicitly per slide (see ZODIAC_SIGN_SYMBOLS)
-};
-
-// Astronomicon zodiac sign characters (A=Aries … L=Pisces)
-const ZODIAC_SIGN_SYMBOLS: Record<string, string> = {
-  aries: 'A',
-  taurus: 'B',
-  gemini: 'C',
-  cancer: 'D',
-  leo: 'E',
-  virgo: 'F',
-  libra: 'G',
-  scorpio: 'H',
-  sagittarius: 'I',
-  capricorn: 'J',
-  aquarius: 'K',
-  pisces: 'L',
-};
-
-// Astronomicon planet characters
-const PLANET_SYMBOLS: Record<string, string> = {
-  Sun: 'Q',
-  Moon: 'R',
-  Mercury: 'S',
-  Venus: 'T',
-  Mars: 'U',
-  Jupiter: 'V',
-  Saturn: 'W',
-  Uranus: 'X',
-  Neptune: 'Y',
-  Pluto: 'Z',
 };
 
 function makeSlide(
