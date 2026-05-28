@@ -619,11 +619,12 @@ export function OnboardingFlow({
 
   // Once the birthday is set, the user is in personalisation. Clear any
   // pending skip re-prompt schedule permanently so we never nag them again.
+  const hasBirthdaySet = Boolean(user?.birthday);
   useEffect(() => {
-    if (user?.birthday) {
+    if (hasBirthdaySet) {
       clearSkipReprompt();
     }
-  }, [user?.birthday]);
+  }, [hasBirthdaySet]);
 
   useEffect(() => {
     if (previewMode && previewStep) {

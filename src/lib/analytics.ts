@@ -1037,10 +1037,7 @@ export const conversionTracking = {
       userId,
       metadata: { code },
     }),
-  referralCodeRedeemed: (
-    userId?: string,
-    metadata?: Record<string, any>,
-  ) =>
+  referralCodeRedeemed: (userId?: string, metadata?: Record<string, any>) =>
     trackConversion('referral_code_redeemed', {
       userId,
       metadata,

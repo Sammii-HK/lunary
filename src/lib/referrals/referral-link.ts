@@ -61,9 +61,7 @@ export function storeReferralCode(code: string | null | undefined): void {
  * Read a `ref` param from a URL search string and stash it. Returns the stored
  * code, or null if none was present.
  */
-export function storeReferralCodeFromUrl(
-  search?: string,
-): string | null {
+export function storeReferralCodeFromUrl(search?: string): string | null {
   if (typeof window === 'undefined') return null;
   const source = search ?? window.location.search;
   try {
@@ -131,7 +129,9 @@ export async function redeemStoredReferralCode(
     if (res.ok && data?.success) {
       // Successfully attributed — never redeem this code again.
       clearStoredReferralCode();
-      conversionTracking.referralCodeRedeemed(userId, { outcome: 'attributed' });
+      conversionTracking.referralCodeRedeemed(userId, {
+        outcome: 'attributed',
+      });
       return { success: true };
     }
 
