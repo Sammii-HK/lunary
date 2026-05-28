@@ -83,6 +83,7 @@ export type CanonicalEventType =
   | 'settings_changed'
   | 'notification_preference_changed'
   | 'birth_data_completed'
+  | 'birth_data_submitted'
   | 'birth_time_confirmed'
   | 'birth_location_updated'
   // Quiz funnels
@@ -91,6 +92,7 @@ export type CanonicalEventType =
   | 'quiz_signup_clicked'
   // Subscription & Lifecycle
   | 'signup_completed'
+  | 'onboarding_completed'
   | 'subscription_started'
   | 'subscription_cancelled'
   | 'subscription_cancellation_reason'
@@ -246,7 +248,10 @@ function canonicaliseEventType(raw: unknown): {
     value === 'subscription_cancelled' ||
     value === 'trial_started' ||
     value === 'checkout_started' ||
-    value === 'checkout_completed'
+    value === 'checkout_completed' ||
+    value === 'pricing_page_viewed' ||
+    value === 'onboarding_completed' ||
+    value === 'birth_data_submitted'
   ) {
     return { eventType: value };
   }
