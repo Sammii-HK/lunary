@@ -288,7 +288,7 @@ export default async function BirthChartLandingPage() {
               experience.
             </p>
           </div>
-          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg overflow-hidden'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg overflow-x-auto'>
             <table className='w-full text-sm'>
               <thead>
                 <tr className='border-b border-stroke-subtle'>
