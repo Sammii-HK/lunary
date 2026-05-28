@@ -54,13 +54,15 @@ const ACTIVITY_EVENTS = [
   'grimoire_viewed',
 ];
 
+// Canonical stored event_types. Ingest remaps legacy names since 2026-01-16
+// (birth_chart_viewed -> chart_viewed; tarot_viewed/personalized_tarot_viewed -> tarot_drawn;
+// personalized_horoscope_viewed -> horoscope_viewed), so filtering the legacy names returned 0.
+// Filter on the canonical names the rows are actually stored under.
 const PRODUCT_EVENTS = [
-  'birth_chart_viewed',
-  'tarot_viewed',
+  'chart_viewed',
+  'tarot_drawn',
   'horoscope_viewed',
   'crystal_recommendations_viewed',
-  'personalized_tarot_viewed',
-  'personalized_horoscope_viewed',
 ];
 
 export async function GET(request: NextRequest) {

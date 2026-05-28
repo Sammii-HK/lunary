@@ -216,7 +216,7 @@ export default async function SkyNowPage() {
   const shareDateParam = now.toISOString();
   const heroContent = (
     <div className='mx-auto flex max-w-4xl flex-col items-center gap-4'>
-      <div className='rounded-[40px] border border-white/10 bg-gradient-to-b from-surface-base/60 to-surface-elevated/60 p-6 shadow-[0_30px_80px_rgba(0,0,0,0.6)]'>
+      <div className='flex w-full max-w-[420px] justify-center rounded-[40px] border border-white/10 bg-gradient-to-b from-surface-base/60 to-surface-elevated/60 p-3 shadow-[0_30px_80px_rgba(0,0,0,0.6)] sm:p-6'>
         <ChartWheelSvg birthChart={chartData} size={380} />
       </div>
       <SkyNowSharePanel dateParam={shareDateParam} />

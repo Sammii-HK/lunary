@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
         const journey = await sql`
           SELECT
-            COUNT(DISTINCT CASE WHEN event_type = 'signup' THEN user_id END) as signups,
+            COUNT(DISTINCT CASE WHEN event_type = 'signup_completed' THEN user_id END) as signups,
             COUNT(DISTINCT CASE WHEN event_type = 'trial_started' THEN user_id END) as trials,
             COUNT(DISTINCT CASE WHEN event_type IN ('trial_converted', 'subscription_started') THEN user_id END) as conversions
           FROM conversion_events

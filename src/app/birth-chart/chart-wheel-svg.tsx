@@ -282,6 +282,8 @@ export function ChartWheelSvg({
       style={{
         borderRadius: 9999,
         background: colours.bg,
+        maxWidth: '100%',
+        height: 'auto',
       }}
     >
       <style>{`
