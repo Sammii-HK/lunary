@@ -166,7 +166,7 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
               className='flex-1 flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-content-brand-accent transition-colors group min-w-0'
             >
               <Sparkles className='w-4 h-4 flex-shrink-0' />
-              <span className='truncate'>{displayText}</span>
+              <span className='line-clamp-2 text-left'>{displayText}</span>
               <ChevronRight className='w-4 h-4 flex-shrink-0 transition-transform group-hover:translate-x-0.5' />
             </Link>
             <button
