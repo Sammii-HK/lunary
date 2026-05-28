@@ -39,7 +39,9 @@ const SCOPES = [
 ].join(',');
 
 function redirectUri(): string {
-  return process.env.TIKTOK_REDIRECT_URI || 'https://lunary.app/api/tiktok/callback';
+  return (
+    process.env.TIKTOK_REDIRECT_URI || 'https://lunary.app/api/tiktok/callback'
+  );
 }
 
 function html(body: string, status = 200): Response {
@@ -113,7 +115,10 @@ export async function GET(request: Request) {
     });
     token = await res.json();
   } catch (e) {
-    return html(`<h1 class="err">Token exchange threw</h1><pre>${esc((e as Error).message)}</pre>`, 502);
+    return html(
+      `<h1 class="err">Token exchange threw</h1><pre>${esc((e as Error).message)}</pre>`,
+      502,
+    );
   }
 
   const accessToken = token.access_token as string | undefined;
