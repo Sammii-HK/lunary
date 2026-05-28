@@ -191,12 +191,10 @@ export default function PricingPage() {
     planId: string,
     planInterval: 'month' | 'year',
   ) => {
-    if (!priceId) return;
-
-    setLoading(planId);
     const planLabel = planInterval === 'year' ? 'yearly_plan' : 'monthly_plan';
 
-    // Track upgrade click with A/B test metadata
+    // Track upgrade click BEFORE the priceId guard so click intent is always
+    // visible in analytics, even if plans haven't finished loading yet.
     const ctaMetadata = getABTestMetadataFromVariant(
       'pricing_cta_test',
       pricingCtaVariant,
@@ -212,6 +210,13 @@ export default function PricingPage() {
     } else {
       conversionTracking.upgradeClicked(`${planId}-${planLabel}`, '/pricing');
     }
+
+    if (!priceId) {
+      console.error('[pricing] click without priceId — plans not loaded yet');
+      return;
+    }
+
+    setLoading(planId);
 
     try {
       const storedReferralCode = localStorage.getItem('lunary_referral_code');
@@ -664,7 +669,15 @@ export default function PricingPage() {
                               }
                               handleSubscribe(priceId, plan.id, plan.interval);
                             }}
-                            disabled={loading === plan.id}
+                            disabled={
+                              loading === plan.id ||
+                              (!isFree &&
+                                (loadingPlans ||
+                                  !(
+                                    (plan as any).currencyPriceId ||
+                                    plan.stripePriceId
+                                  )))
+                            }
                             className={`w-full py-3 rounded-xl text-sm font-medium transition-all ${
                               isPopular
                                 ? 'bg-layer-base hover:bg-layer-raised text-content-brand-accent border border-lunary-primary-700'
