@@ -30,8 +30,8 @@ export async function generateMetadata({
   }
 
   const dates = getSeasonDates(season, yearNum);
-  const title = `${seasonData.displayName} Season ${year}: Dates, Meaning & Rituals | Lunary`;
-  const description = `${seasonData.displayName} Season ${year} runs from ${dates.start} to ${dates.end}. Discover the cosmic energy, themes, and rituals for ${seasonData.displayName} season.`;
+  const title = `${seasonData.displayName} Season ${year}: Dates, Meaning & Rituals`;
+  const description = `${seasonData.displayName} Season ${year} runs ${dates.start} to ${dates.end}, bringing ${seasonData.theme}. See the cosmic energy, key themes and rituals to work with it.`;
 
   return {
     title,

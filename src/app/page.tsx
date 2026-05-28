@@ -5,9 +5,9 @@ import { Metadata } from 'next';
 import WelcomePage from '@/components/pages/WelcomePage';
 
 export const metadata: Metadata = {
-  title: 'Astrology That Understands Your Life | Lunary',
+  title: 'Lunary: Personalised Astrology From Your Birth Chart',
   description:
-    "Understand why today feels the way it does. Lunary connects today's sky to your full birth chart with real astronomy, transits, tarot, moon phases and free astrology education.",
+    "Finally understand why today feels the way it does. Lunary reads your full birth chart against today's real sky with transits, tarot and moon phases. Free to start.",
   keywords: [
     'personalized astrology',
     'birth chart astrology',
@@ -29,9 +29,9 @@ export const metadata: Metadata = {
     canonical: 'https://lunary.app',
   },
   openGraph: {
-    title: 'Astrology That Understands Your Life | Lunary',
+    title: 'Lunary: Personalised Astrology From Your Birth Chart',
     description:
-      "Understand why today feels the way it does. Lunary connects today's sky to your full birth chart with real astronomy, transits, tarot and moon phases.",
+      "Finally understand why today feels the way it does. Lunary reads your full birth chart against today's real sky with transits, tarot and moon phases.",
     url: 'https://lunary.app',
     siteName: 'Lunary',
     images: [
@@ -47,9 +47,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Astrology That Understands Your Life | Lunary',
+    title: 'Lunary: Personalised Astrology From Your Birth Chart',
     description:
-      "Understand why today feels the way it does. Lunary connects today's sky to your full birth chart with real astronomy, transits, tarot and moon phases.",
+      "Finally understand why today feels the way it does. Lunary reads your full birth chart against today's real sky with transits, tarot and moon phases.",
     images: ['/api/og/homepage'],
   },
   robots: {

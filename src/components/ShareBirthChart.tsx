@@ -373,8 +373,9 @@ export function ShareBirthChart({
             />
 
             <p className='mt-4 text-xs text-content-muted text-center'>
-              People who click your link can see your Big Three and chart
-              highlights without needing an account
+              Friends who open your link see your Big Three and chart highlights
+              without an account. When they create their own free chart, you
+              both unlock bonus Pro time.
             </p>
           </>
         )}

@@ -53,10 +53,23 @@ interface CachedHoroscope {
   moonPhase: string;
   headline: string;
   overview: string;
+  cosmicHighlight?: string;
   focusAreas?: FocusArea[];
   tinyAction: string;
   dailyGuidance: string;
 }
+
+// Truncate a personalised reading to its first sentence (or ~90 chars),
+// cutting cleanly on a word boundary so the soft teaser never ends mid-word.
+const buildPersonalTeaser = (text: string | null | undefined) => {
+  const clean = (text || '').replace(/\s+/g, ' ').trim();
+  if (!clean) return '';
+  const firstSentence = clean.split(/(?<=[.!?])\s/)[0] || clean;
+  if (firstSentence.length <= 90) return firstSentence;
+  const truncated = firstSentence.slice(0, 90);
+  const lastSpace = truncated.lastIndexOf(' ');
+  return `${(lastSpace > 40 ? truncated.slice(0, lastSpace) : truncated).trim()}...`;
+};
 
 const FOCUS_COMPLETE_KEY = 'lunary_focus_complete';
 
@@ -417,6 +430,16 @@ export const PersonalizedHoroscopePreview = () => {
     // Use general horoscope for free users instead of personalized
     const generalHoroscope = getGeneralHoroscope(new Date());
 
+    // Real personalised teaser: the daily horoscope is already fetched for
+    // every authenticated user with a birthday. Show the first sentence of
+    // their actual reading, then a soft cap + upgrade prompt. Soft teaser
+    // only, never a hard wall.
+    const personalTeaser = buildPersonalTeaser(
+      horoscope?.cosmicHighlight ||
+        horoscope?.overview ||
+        horoscope?.dailyGuidance,
+    );
+
     return (
       <Link
         href='/pricing?nav=app'
@@ -462,9 +485,18 @@ export const PersonalizedHoroscopePreview = () => {
             </div>
           ) : !mobileExpanded ? (
             <>
-              <p className='text-xs text-content-muted leading-snug'>
-                {ctaCopy.horoscope}
-              </p>
+              {personalTeaser ? (
+                <p className='text-xs text-content-secondary leading-snug'>
+                  {personalTeaser}{' '}
+                  <span className='text-content-muted'>
+                    Read your full personalised reading with Lunary+.
+                  </span>
+                </p>
+              ) : (
+                <p className='text-xs text-content-muted leading-snug'>
+                  {ctaCopy.horoscope}
+                </p>
+              )}
               <span className='flex items-center gap-1.5 text-xs text-content-secondary'>
                 <span>Tap to reveal today's reading</span>
                 <ArrowRight className='w-4 h-4' />
@@ -522,6 +554,12 @@ export const PersonalizedHoroscopePreview = () => {
                 </p>
               )}
 
+              {personalTeaser && (
+                <p className='text-sm text-content-primary leading-snug'>
+                  {personalTeaser}
+                </p>
+              )}
+
               <div className='relative mt-1'>
                 {renderPreview()}
                 <div className='absolute top-0 right-0'>
@@ -530,7 +568,11 @@ export const PersonalizedHoroscopePreview = () => {
               </div>
 
               <span className='flex items-center gap-1.5 text-xs text-content-secondary hover:text-content-secondary transition-colors'>
-                <span>{ctaCopy.horoscope}</span>
+                <span>
+                  {personalTeaser
+                    ? 'Unlock your full personalised reading with Lunary+'
+                    : ctaCopy.horoscope}
+                </span>
                 <ArrowRight className='w-4 h-4' />
               </span>
             </>

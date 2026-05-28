@@ -126,6 +126,10 @@
       "schedule": "0 9 * * 1,3,5"
     },
     {
+      "path": "/api/cron/transit-reengagement",
+      "schedule": "0 11 * * *"
+    },
+    {
       "path": "/api/cron/welcome-drip",
       "schedule": "0 10 * * *"
     },

@@ -61,6 +61,7 @@ export type ConversionEvent =
   | 'referral_link_copied'
   | 'referral_link_shared'
   | 'referral_code_generated'
+  | 'referral_code_redeemed'
   | 'session_started'
   | 'session_ended'
   | 'feature_first_use'
@@ -1035,6 +1036,14 @@ export const conversionTracking = {
     trackConversion('referral_code_generated', {
       userId,
       metadata: { code },
+    }),
+  referralCodeRedeemed: (
+    userId?: string,
+    metadata?: Record<string, any>,
+  ) =>
+    trackConversion('referral_code_redeemed', {
+      userId,
+      metadata,
     }),
 
   // Session & Engagement

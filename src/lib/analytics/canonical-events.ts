@@ -71,6 +71,7 @@ export type CanonicalEventType =
   | 'referral_link_copied'
   | 'referral_link_shared'
   | 'referral_code_generated'
+  | 'referral_code_redeemed'
   | 'invite_sent'
   // Session & Engagement
   | 'session_started'

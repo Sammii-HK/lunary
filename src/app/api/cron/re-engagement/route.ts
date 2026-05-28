@@ -4,6 +4,7 @@ import { sendEmail } from '@/lib/email';
 import {
   getUsersWithMissedStreaks,
   getMilestoneUsers,
+  getDormantFreeUsers,
   hasReceivedCampaign,
   recordCampaignSent,
 } from '@/lib/re-engagement/campaign-manager';
@@ -21,10 +22,9 @@ import {
   generateReEngagementInsightsEmailText,
 } from '@/lib/email/templates/re-engagement-insights';
 import {
-  renderFreeDay3Email,
+  renderFreeDay2Email,
   renderFreeDay7Email,
   renderFreeDay14Email,
-  renderWinBackEmail,
 } from '@/lib/email-components/FreeReengagementEmails';
 
 export const dynamic = 'force-dynamic';
@@ -143,44 +143,25 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ─── 2. Free users: 3 days inactive ────────────────────────────────────
-    // Gentle check-in. Only activated users (have at least one session).
+    // ─── 2. Dormant free users: day 2 ──────────────────────────────────────
+    // Gentle check-in. Targets the dormant free-user pool directly via
+    // getDormantFreeUsers (real session recency), NOT a subscriptions
+    // created_at drip, so cold users who set up and vanished are caught.
+    // Inner cutoff 2 days, outer bound 7 days so day-2 only fires on the
+    // freshly-dormant before the day-7 email takes over.
 
-    const threeDaysAgo = new Date();
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    const freeInactive2d = await getDormantFreeUsers(2, 7, 50);
 
-    const freeInactive3d = await sql`
-      SELECT DISTINCT
-        s.user_id,
-        s.user_email as email,
-        s.user_name as name,
-        up.birth_chart
-      FROM subscriptions s
-      LEFT JOIN user_profiles up ON s.user_id = up.user_id
-      WHERE s.user_email IS NOT NULL
-        AND s.status = 'free'
-        AND EXISTS (
-          SELECT 1 FROM user_sessions us2
-          WHERE us2.user_id = s.user_id
-        )
-        AND NOT EXISTS (
-          SELECT 1 FROM user_sessions us
-          WHERE us.user_id = s.user_id
-          AND us.session_timestamp >= ${threeDaysAgo.toISOString()}
-        )
-      LIMIT 50
-    `;
-
-    counts['free_3d'] = 0;
-    for (const user of freeInactive3d.rows) {
+    counts['free_2d'] = 0;
+    for (const user of freeInactive2d) {
       try {
-        if (await hasReceivedCampaign(user.user_id, 'free_3days_inactive', 7))
+        if (await hasReceivedCampaign(user.userId, 'free_2days_inactive', 7))
           continue;
 
-        const { sunSign } = parsePlacements(user.birth_chart);
+        const { sunSign } = parsePlacements(user.birthChart);
 
-        const html = await renderFreeDay3Email({
-          userId: user.user_id,
+        const html = await renderFreeDay2Email({
+          userId: user.userId,
           userName: user.name || 'there',
           sunSign,
           userEmail: user.email,
@@ -193,63 +174,44 @@ export async function GET(request: NextRequest) {
           subject: 'Came to check in on your chart',
           html,
           tracking: {
-            userId: user.user_id,
+            userId: user.userId,
             notificationType: 'free_reengagement',
-            notificationId: `free-3d-${user.user_id}`,
+            notificationId: `free-2d-${user.userId}`,
             utm: {
               source: 'email',
               medium: 'reengagement',
-              campaign: 'free_3d',
+              campaign: 'free_2d',
             },
           },
         });
 
-        await recordCampaignSent(user.user_id, 'free_3days_inactive');
+        await recordCampaignSent(user.userId, 'free_2days_inactive');
         emailsSent++;
-        counts['free_3d']++;
+        counts['free_2d']++;
       } catch (error) {
         console.error(
-          `[Re-Engagement] free_3d failed for ${sanitizeForLogging(user.email)}:`,
+          `[Re-Engagement] free_2d failed for ${sanitizeForLogging(user.email)}:`,
           error,
         );
         emailsFailed++;
       }
     }
 
-    // ─── 3. Free users: 7 days inactive ────────────────────────────────────
+    // ─── 3. Dormant free users: day 7 ──────────────────────────────────────
+    // Inner cutoff 7 days, outer bound 14 days.
 
-    const freeInactive7d = await sql`
-      SELECT DISTINCT
-        s.user_id,
-        s.user_email as email,
-        s.user_name as name,
-        up.birth_chart
-      FROM subscriptions s
-      LEFT JOIN user_profiles up ON s.user_id = up.user_id
-      WHERE s.user_email IS NOT NULL
-        AND s.status = 'free'
-        AND EXISTS (
-          SELECT 1 FROM user_sessions us2
-          WHERE us2.user_id = s.user_id
-        )
-        AND NOT EXISTS (
-          SELECT 1 FROM user_sessions us
-          WHERE us.user_id = s.user_id
-          AND us.session_timestamp >= ${sevenDaysAgo.toISOString()}
-        )
-      LIMIT 50
-    `;
+    const freeInactive7d = await getDormantFreeUsers(7, 14, 50);
 
     counts['free_7d'] = 0;
-    for (const user of freeInactive7d.rows) {
+    for (const user of freeInactive7d) {
       try {
-        if (await hasReceivedCampaign(user.user_id, 'free_7days_inactive', 14))
+        if (await hasReceivedCampaign(user.userId, 'free_7days_inactive', 14))
           continue;
 
-        const { sunSign, moonSign } = parsePlacements(user.birth_chart);
+        const { sunSign, moonSign } = parsePlacements(user.birthChart);
 
         const html = await renderFreeDay7Email({
-          userId: user.user_id,
+          userId: user.userId,
           userName: user.name || 'there',
           sunSign,
           moonSign,
@@ -265,9 +227,9 @@ export async function GET(request: NextRequest) {
             : 'Here is what moved in your chart this week',
           html,
           tracking: {
-            userId: user.user_id,
+            userId: user.userId,
             notificationType: 'free_reengagement',
-            notificationId: `free-7d-${user.user_id}`,
+            notificationId: `free-7d-${user.userId}`,
             utm: {
               source: 'email',
               medium: 'reengagement',
@@ -276,7 +238,7 @@ export async function GET(request: NextRequest) {
           },
         });
 
-        await recordCampaignSent(user.user_id, 'free_7days_inactive');
+        await recordCampaignSent(user.userId, 'free_7days_inactive');
         emailsSent++;
         counts['free_7d']++;
       } catch (error) {
@@ -288,43 +250,24 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ─── 4. Free users: 14 days inactive ───────────────────────────────────
+    // ─── 4. Dormant free users: 14 days ────────────────────────────────────
+    // The thing they probably missed (the Grimoire). Last in-sequence email,
+    // so no outer bound: any free user dormant 14+ days who has not had it.
+    // Content hook only, no discount. The major-transit email (separate cron)
+    // takes over from here as the event-triggered re-entry point.
 
-    const fourteenDaysAgo = new Date();
-    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
-
-    const freeInactive14d = await sql`
-      SELECT DISTINCT
-        s.user_id,
-        s.user_email as email,
-        s.user_name as name,
-        up.birth_chart
-      FROM subscriptions s
-      LEFT JOIN user_profiles up ON s.user_id = up.user_id
-      WHERE s.user_email IS NOT NULL
-        AND s.status = 'free'
-        AND EXISTS (
-          SELECT 1 FROM user_sessions us2
-          WHERE us2.user_id = s.user_id
-        )
-        AND NOT EXISTS (
-          SELECT 1 FROM user_sessions us
-          WHERE us.user_id = s.user_id
-          AND us.session_timestamp >= ${fourteenDaysAgo.toISOString()}
-        )
-      LIMIT 50
-    `;
+    const freeInactive14d = await getDormantFreeUsers(14, null, 50);
 
     counts['free_14d'] = 0;
-    for (const user of freeInactive14d.rows) {
+    for (const user of freeInactive14d) {
       try {
-        if (await hasReceivedCampaign(user.user_id, 'free_14days_inactive', 30))
+        if (await hasReceivedCampaign(user.userId, 'free_14days_inactive', 30))
           continue;
 
-        const { sunSign } = parsePlacements(user.birth_chart);
+        const { sunSign } = parsePlacements(user.birthChart);
 
         const html = await renderFreeDay14Email({
-          userId: user.user_id,
+          userId: user.userId,
           userName: user.name || 'there',
           sunSign,
           userEmail: user.email,
@@ -337,9 +280,9 @@ export async function GET(request: NextRequest) {
           subject: 'Something I want to make sure you saw',
           html,
           tracking: {
-            userId: user.user_id,
+            userId: user.userId,
             notificationType: 'free_reengagement',
-            notificationId: `free-14d-${user.user_id}`,
+            notificationId: `free-14d-${user.userId}`,
             utm: {
               source: 'email',
               medium: 'reengagement',
@@ -348,7 +291,7 @@ export async function GET(request: NextRequest) {
           },
         });
 
-        await recordCampaignSent(user.user_id, 'free_14days_inactive');
+        await recordCampaignSent(user.userId, 'free_14days_inactive');
         emailsSent++;
         counts['free_14d']++;
       } catch (error) {
@@ -360,79 +303,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ─── 5. Win-back: 30 days inactive, all users ──────────────────────────
-
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const inactive30d = await sql`
-      SELECT DISTINCT
-        s.user_id,
-        s.user_email as email,
-        s.user_name as name,
-        up.birth_chart
-      FROM subscriptions s
-      LEFT JOIN user_profiles up ON s.user_id = up.user_id
-      WHERE s.user_email IS NOT NULL
-        AND EXISTS (
-          SELECT 1 FROM user_sessions us2
-          WHERE us2.user_id = s.user_id
-        )
-        AND NOT EXISTS (
-          SELECT 1 FROM user_sessions us
-          WHERE us.user_id = s.user_id
-          AND us.session_timestamp >= ${thirtyDaysAgo.toISOString()}
-        )
-      LIMIT 50
-    `;
-
-    counts['winback_30d'] = 0;
-    for (const user of inactive30d.rows) {
-      try {
-        if (await hasReceivedCampaign(user.user_id, 'winback_30d', 60))
-          continue;
-
-        const { sunSign } = parsePlacements(user.birth_chart);
-
-        const html = await renderWinBackEmail({
-          userName: user.name || 'there',
-          userEmail: user.email,
-          sunSign,
-        });
-
-        await sendEmail({
-          to: user.email,
-          from: 'Sammii <hello@lunary.app>',
-          replyTo: 'sammii@lunary.app',
-          subject: sunSign
-            ? `Still here, and your ${sunSign} chart has been busy`
-            : 'Still here, and I have something for you',
-          html,
-          tracking: {
-            userId: user.user_id,
-            notificationType: 'win_back',
-            notificationId: `winback-${user.user_id}`,
-            utm: {
-              source: 'email',
-              medium: 'reengagement',
-              campaign: 'winback_30d',
-            },
-          },
-        });
-
-        await recordCampaignSent(user.user_id, 'winback_30d');
-        emailsSent++;
-        counts['winback_30d']++;
-      } catch (error) {
-        console.error(
-          `[Re-Engagement] winback_30d failed for ${sanitizeForLogging(user.email)}:`,
-          error,
-        );
-        emailsFailed++;
-      }
-    }
-
-    // ─── 6. Missed streak ──────────────────────────────────────────────────
+    // ─── 5. Missed streak ──────────────────────────────────────────────────
 
     const missedStreaks = await getUsersWithMissedStreaks();
     counts['missed_streak'] = 0;
@@ -473,7 +344,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ─── 7. Milestones ─────────────────────────────────────────────────────
+    // ─── 6. Milestones ─────────────────────────────────────────────────────
 
     const milestones = await getMilestoneUsers();
     counts['milestone'] = 0;
@@ -513,7 +384,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ─── 8. Monthly insights ready ─────────────────────────────────────────
+    // ─── 7. Monthly insights ready ─────────────────────────────────────────
 
     const now = new Date();
     const insightsReady = await sql`

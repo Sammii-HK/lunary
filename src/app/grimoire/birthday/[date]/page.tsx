@@ -108,8 +108,8 @@ export async function generateMetadata({
 
   const zodiac = getZodiacForDate(birthday.month, birthday.day);
 
-  const title = `${birthday.dateString} Zodiac Sign: ${zodiac.sign} Birthday Personality | Lunary`;
-  const description = `Born on ${birthday.dateString}? Your zodiac sign is ${zodiac.sign}. Discover your ${birthday.dateString} birthday personality traits, compatibility, lucky numbers, and what the stars say about people born on this day.`;
+  const title = `${birthday.dateString} Zodiac Sign: ${zodiac.sign} Personality & Traits`;
+  const description = `Born on ${birthday.dateString}? You are a ${zodiac.sign}. See your personality traits, strengths, best matches, lucky numbers and what your decan adds to your sign.`;
 
   return {
     title,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createBirthChartShare } from '@/lib/share/birth-chart';
+import { getShareReferralCode } from '@/lib/share/referral-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,7 +50,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const record = await createBirthChartShare(parsed.data);
+    // Capture the sharer's referral code (if signed in) so the public share
+    // page can carry attribution through to the recipient's signup. Falls back
+    // to undefined for anonymous shares.
+    const referralCode =
+      (await getShareReferralCode(request.headers)) ?? undefined;
+
+    const record = await createBirthChartShare({
+      ...parsed.data,
+      referralCode,
+    });
     const shareUrl = `${APP_URL}/share/birth-chart/${record.shareId}`;
 
     return NextResponse.json({

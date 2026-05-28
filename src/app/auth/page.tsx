@@ -11,6 +11,10 @@ import { Logo } from '@/components/Logo';
 import { BrandedPageLoader } from '@/components/states/BrandedPageLoader';
 import { getSafeAuthRedirectPath } from '@/lib/auth-redirect';
 import { replaceBrowserLocation } from '@/lib/browser-redirect';
+import {
+  redeemStoredReferralCode,
+  storeReferralCodeFromUrl,
+} from '@/lib/referrals/referral-link';
 
 // Skip auth redirects ONLY in Playwright e2e tests (NOT Jest unit tests)
 function isTestMode(): boolean {
@@ -34,6 +38,23 @@ export default function AuthPage() {
   useEffect(() => {
     setIsNative(Capacitor.isNativePlatform());
   }, []);
+
+  // Capture any ?ref code (e.g. arriving from a shared birth chart) into
+  // localStorage so it survives the signup round-trip and can be redeemed
+  // once the account exists.
+  useEffect(() => {
+    storeReferralCodeFromUrl();
+  }, []);
+
+  // Attribute FREE signups. When the user becomes authenticated, redeem any
+  // referral code stashed in localStorage against their new account. Paid
+  // signups are already attributed by the Stripe webhook, but free signups
+  // never hit checkout, so this is the only place they get attributed.
+  // NOTE: the id lives at authState.user?.id — there is no authState.userId.
+  useEffect(() => {
+    if (authState.loading || !authState.isAuthenticated) return;
+    redeemStoredReferralCode(authState.user?.id);
+  }, [authState.isAuthenticated, authState.loading, authState.user?.id]);
 
   useEffect(() => {
     // Keep unauthenticated Playwright smoke tests on /auth, but still exercise
