@@ -163,6 +163,24 @@ export default async function SignHoroscopePage({
       components={<PlacementSelector signName={signName} />}
       ctaText={birthChartCta.text}
       ctaHref={birthChartCta.href}
+      faqs={[
+        {
+          question: `What element is ${signName}?`,
+          answer: `${signName} is a ${element} sign ruled by ${rulership}. The ${element.toLowerCase()} element shapes how ${signName} processes energy, motivation, and emotional expression.`,
+        },
+        {
+          question: `Are these ${signName} horoscopes personalised?`,
+          answer: `These horoscopes are written for the ${signName} Sun sign using real planetary context, lunations, and transits for each month. For a reading tied to your exact birth chart, Lunary generates a personalised horoscope from your full natal placements.`,
+        },
+        {
+          question: `What is the difference between my ${signName} Sun sign and my rising sign for horoscopes?`,
+          answer: `Reading your horoscope for your Sun sign reflects your core identity and seasonal theme, while reading for your rising sign often feels more accurate day to day because it sets the houses your transits move through. Many readers check both.`,
+        },
+        {
+          question: `How often are ${signName} horoscopes updated?`,
+          answer: `Each month has its own ${signName} forecast, and you can browse by year. The guidance reflects the actual lunations and transits for that period rather than generic sun-sign filler.`,
+        },
+      ]}
       childrenPosition='after-description'
     >
       <section className='mb-12'>

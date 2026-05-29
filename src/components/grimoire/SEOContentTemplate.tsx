@@ -262,6 +262,8 @@ export function SEOContentTemplate({
   tableOfContents,
   additionalSchemas,
   cosmicConnections,
+  internalLinks,
+  internalLinksTitle,
   breadcrumbs,
   ctaText,
   ctaHref,
@@ -323,10 +325,13 @@ export function SEOContentTemplate({
       }),
   });
 
-  // Add speakable specification for Google AI Overviews and voice assistants
+  // Add speakable specification for Google AI Overviews and voice assistants.
+  // Share the Article's mainEntityOfPage @id so this merges into one WebPage
+  // node instead of orphaning a duplicate WebPage per page.
   const speakableSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
+    '@id': canonicalUrl,
     name: h1,
     speakable: {
       '@type': 'SpeakableSpecification',
@@ -1172,6 +1177,26 @@ export function SEOContentTemplate({
                 </NavParamLink>
               ))}
             </div>
+          </section>
+        )}
+
+        {/* Curated internal links - topical-authority + related-answer signal */}
+        {internalLinks && internalLinks.length > 0 && (
+          <section className='overflow-x-hidden'>
+            <Heading as='h2' variant='h2'>
+              {internalLinksTitle || 'Related Pages'}
+            </Heading>
+            <nav className='flex flex-wrap gap-3'>
+              {internalLinks.map((link, index) => (
+                <NavParamLink
+                  key={`${link.href}-${index}`}
+                  href={link.href}
+                  className='px-3 sm:px-4 py-2 bg-surface-card/80 border border-lunary-primary-400 rounded-lg text-content-secondary hover:bg-surface-overlay hover:text-content-brand-accent transition-colors break-words'
+                >
+                  {link.text}
+                </NavParamLink>
+              ))}
+            </nav>
           </section>
         )}
 

@@ -67,6 +67,7 @@ export const AI_DISCOVERY_PATHS = [
   `/grimoire/datasets/astrology-calendar/${currentDiscoveryYear + 1}.json`,
   '/grimoire/facts/moon-phase-today',
   '/grimoire/facts/current-moon-sign',
+  '/grimoire/facts/current-sun-sign',
   '/grimoire/facts/planetary-positions-today',
   '/grimoire/facts/mercury-retrograde-status',
   '/grimoire/facts/next-full-moon',

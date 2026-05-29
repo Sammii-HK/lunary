@@ -82,6 +82,11 @@ const citationUrls = [
     use: 'Human-readable current Moon sign claim backed by dataset and methodology links.',
   },
   {
+    label: 'Current Sun Sign & Zodiac Season',
+    href: '/grimoire/facts/current-sun-sign',
+    use: 'Human-readable current Sun sign and active zodiac season claim backed by dataset and methodology links.',
+  },
+  {
     label: 'Planetary Positions Today',
     href: '/grimoire/facts/planetary-positions-today',
     use: 'Human-readable current planetary position claim backed by dataset links.',

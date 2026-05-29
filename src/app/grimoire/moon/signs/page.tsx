@@ -112,6 +112,29 @@ Intuitive, emotional, and deeply feeling. Best for emotional work, healing, and 
         { text: 'Methodology', href: '/about/methodology' },
         { text: 'Astronomy & Zodiac', href: '/grimoire/astronomy' },
       ]}
+      faqs={[
+        {
+          question: 'How often does the Moon change signs?',
+          answer:
+            'The Moon changes zodiac signs roughly every 2 to 3 days, moving through all twelve signs in about 27 to 28 days. That is why the current Moon sign reads as short-lived emotional weather rather than a fixed trait.',
+        },
+        {
+          question:
+            'What is the difference between a Moon sign and a Sun sign?',
+          answer:
+            'Your Sun sign reflects your core identity and the season you were born in, while your Moon sign describes your inner emotional world, instincts, and what makes you feel secure. The Moon sign is often what you feel privately rather than show outwardly.',
+        },
+        {
+          question: 'How do I find my Moon sign?',
+          answer:
+            'Your Moon sign is calculated from your exact date, time, and place of birth, because the Moon moves quickly. Lunary works it out from your birth chart so you do not need to read an ephemeris by hand.',
+        },
+        {
+          question: 'What does the current Moon sign affect?',
+          answer:
+            'The current Moon sign colours the collective emotional tone for those few days: which activities flow easily, how people connect emotionally, and which kinds of decisions feel supported. Fire moons favour action, earth moons favour building, air moons favour talking, and water moons favour reflection.',
+        },
+      ]}
     />
   );
 }
