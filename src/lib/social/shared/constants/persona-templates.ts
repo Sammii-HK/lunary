@@ -4,6 +4,16 @@
  * Format: "dear [varied audience terms]" + Lunary intro content
  */
 
+import { EMAIL_PROMO } from '@/lib/promo/email-promo';
+
+/**
+ * Discount clause for social CTAs, built from the centralised promo source of
+ * truth so it can never drift to a dead code. The previous hardcoded
+ * "3 months free with code COSMICSEASON" advertised a promo that no longer
+ * exists. `EMAIL_PROMO` (BLUEMOON) is the live web offer.
+ */
+const PROMO_OFFER_LINE = `${EMAIL_PROMO.percent}% off ${EMAIL_PROMO.label} with code ${EMAIL_PROMO.code}.`;
+
 /**
  * Audience term facets - each facet has variations
  * Pick ONE term from each facet to avoid duplication (e.g., no "moon lovers, moon watchers")
@@ -96,7 +106,7 @@ export const PERSONA_BODY_TEMPLATES = [
   'Lunary tracks how transits are actually affecting you, using your full birth chart.\nNot generic content. Now on Google Play.',
   'I made Lunary for people who want more than a sun sign horoscope.\nYour full natal chart drives everything. Now on Google Play.',
   'Lunary is live on Google Play.\nDaily horoscopes, real time transit tracking, tarot, crystals. All based on your complete natal chart.',
-  'Lunary reads your transits in real time and tells you what they mean for you personally.\nNow on Google Play. 3 months free with code COSMICSEASON.',
+  `Lunary reads your transits in real time and tells you what they mean for you personally.\nNow on Google Play. ${PROMO_OFFER_LINE}`,
 ];
 
 /**
@@ -145,14 +155,14 @@ export const THREADS_QUESTION_TEMPLATES = [
  */
 
 const CTA_BODIES = [
-  `Lunary uses your full birth chart for everything. Horoscopes, transits, tarot, crystals. Not just your sun sign. Code COSMICSEASON for 3 months free.`,
-  `Your birth chart has 10 planets, 12 houses, and dozens of aspects. Lunary tracks all of it in real time. 3 months free with code COSMICSEASON.`,
-  `Most astrology apps give you the same horoscope as everyone born in your month. Lunary uses your actual chart. Try it free: code COSMICSEASON.`,
-  `Transits hit different when they are mapped to your natal placements. That is what Lunary does. COSMICSEASON = 3 months free.`,
-  `Lunary tells you which transits are affecting YOUR chart today. Not generic forecasts. Yours. Code COSMICSEASON for 3 months free.`,
-  `Your rising sign matters. Your moon sign matters. Lunary reads them all, together, in real time. 3 months free with COSMICSEASON.`,
-  `One app for your birth chart, daily transits, tarot, and crystals. All personalised to your exact chart. COSMICSEASON gets you 3 months free.`,
-  `Astrology that knows your chart. Horoscopes that reflect your placements. No ads. No fluff. Try free: code COSMICSEASON.`,
+  `Lunary uses your full birth chart for everything. Horoscopes, transits, tarot, crystals. Not just your sun sign. ${PROMO_OFFER_LINE}`,
+  `Your birth chart has 10 planets, 12 houses, and dozens of aspects. Lunary tracks all of it in real time. ${PROMO_OFFER_LINE}`,
+  `Most astrology apps give you the same horoscope as everyone born in your month. Lunary uses your actual chart. ${PROMO_OFFER_LINE}`,
+  `Transits hit different when they are mapped to your natal placements. That is what Lunary does. ${PROMO_OFFER_LINE}`,
+  `Lunary tells you which transits are affecting YOUR chart today. Not generic forecasts. Yours. ${PROMO_OFFER_LINE}`,
+  `Your rising sign matters. Your moon sign matters. Lunary reads them all, together, in real time. ${PROMO_OFFER_LINE}`,
+  `One app for your birth chart, daily transits, tarot, and crystals. All personalised to your exact chart. ${PROMO_OFFER_LINE}`,
+  `Astrology that knows your chart. Horoscopes that reflect your placements. No ads. No fluff. ${PROMO_OFFER_LINE}`,
 ];
 
 /** Conversation-ending questions — every dear-style post ends with one */

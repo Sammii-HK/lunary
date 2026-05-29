@@ -21,6 +21,7 @@ import { ShareZodiacSeason } from '@/components/share/ShareZodiacSeason';
 import { TourTrigger } from '@/components/feature-tour/tour-trigger';
 import { useMilestones } from '@/hooks/useMilestones';
 import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
+import { YearInStarsShareCard } from '@/components/year-in-stars/YearInStarsShareCard';
 import { StreakBanner } from '@/components/StreakBanner';
 import { ReferralOnboardingModal } from '@/components/referrals/ReferralOnboardingModal';
 import { MoonPhaseIcon } from '@/components/MoonPhaseIcon';
@@ -613,28 +614,7 @@ export default function AppDashboardClient() {
               const month = new Date().getMonth(); // 0-indexed
               const showYearInStars = month >= 10 || month === 0;
               if (!showYearInStars) return null;
-              return (
-                <Link
-                  href='/year-in-stars'
-                  className='block w-full rounded-xl border border-lunary-accent-700/50 bg-gradient-to-r from-lunary-accent-950/40 to-lunary-primary-950/40 p-4 hover:border-lunary-accent-500 transition-colors'
-                >
-                  <div className='flex items-center gap-3'>
-                    <span className='text-2xl' aria-hidden>
-                      ✨
-                    </span>
-                    <div className='flex-1'>
-                      <p className='text-sm font-medium text-content-primary'>
-                        Your Year in Stars is ready
-                      </p>
-                      <p className='text-xs text-content-muted'>
-                        A swipeable retrospective of your transits, moods, and
-                        reflections.
-                      </p>
-                    </div>
-                    <span className='text-content-brand-accent text-sm'>→</span>
-                  </div>
-                </Link>
-              );
+              return <YearInStarsShareCard />;
             })()}
 
           {authState.isAuthenticated && <ReferralShareCTA compact />}

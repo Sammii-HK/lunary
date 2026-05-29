@@ -54,6 +54,7 @@ interface CosmicVibeStored {
 async function loadByHandle(handle: string): Promise<{
   user: UserRow;
   profile: ProfileRow | null;
+  referralCode: string | null;
 } | null> {
   const userRes = await sql<UserRow>`
     SELECT id, name FROM "user"
@@ -68,7 +69,23 @@ async function loadByHandle(handle: string): Promise<{
     WHERE user_id = ${user.id}
     LIMIT 1
   `;
-  return { user, profile: profileRes.rows[0] ?? null };
+
+  // The profile owner's referral code, so the free-chart CTA below can
+  // attribute any signup back to the person whose page is being viewed.
+  let referralCode: string | null = null;
+  try {
+    const refRes = await sql<{ code: string }>`
+      SELECT code FROM referral_codes
+      WHERE user_id = ${user.id}
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    referralCode = refRes.rows[0]?.code ?? null;
+  } catch {
+    referralCode = null;
+  }
+
+  return { user, profile: profileRes.rows[0] ?? null, referralCode };
 }
 
 async function fetchYearTransitsForYear(
@@ -188,7 +205,13 @@ export default async function CosmicIdentityPublicPage({ params }: PageParams) {
   const data = await loadByHandle(handle);
   if (!data) notFound();
 
-  const { user, profile } = data;
+  const { user, profile, referralCode } = data;
+
+  // Free-chart CTA carrying the owner's referral code so a visitor who lands
+  // on a friend's profile is one click from their own free chart, attributed.
+  const freeChartHref = referralCode
+    ? `/birth-chart?ref=${encodeURIComponent(referralCode)}`
+    : '/birth-chart';
 
   // ---- Big Three -------------------------------------------------------
   const chart: BirthChartData[] = Array.isArray(profile?.birth_chart)
@@ -260,10 +283,21 @@ export default async function CosmicIdentityPublicPage({ params }: PageParams) {
           }
           topTransits={topTransits}
         />
+        <div className='mt-8 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-layer-base/30 to-lunary-highlight-900/30 p-5 text-center'>
+          <p className='text-sm text-content-secondary'>
+            Want your own cosmic identity? Read your real birth chart free.
+          </p>
+          <Link
+            href={freeChartHref}
+            className='mt-3 inline-block rounded-lg bg-lunary-primary px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400'
+          >
+            Get your free birth chart
+          </Link>
+        </div>
         <p className='mt-6 text-center text-xs text-content-muted'>
           Powered by{' '}
           <Link
-            href='/'
+            href={freeChartHref}
             className='text-content-brand underline-offset-2 hover:underline'
           >
             Lunary

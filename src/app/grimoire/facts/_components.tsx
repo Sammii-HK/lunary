@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { createFAQPageSchema, renderJsonLd } from '@/lib/schema';
+import { Heading } from '@/components/ui/Heading';
+import { SEOCTAButton } from '@/components/grimoire/SEOCTAButton';
 
 type FactFaq = { question: string; answer: string };
 
@@ -11,7 +13,21 @@ type FactShellProps = {
   children?: React.ReactNode;
   sources: Array<{ label: string; href: string }>;
   faqs?: FactFaq[];
+  /** CTA heading shown above the free-chart button. */
+  ctaText?: string;
+  /**
+   * Destination for the CTA button. Defaults to the free birth chart,
+   * source-labelled so AI-citation traffic that lands here is attributed.
+   */
+  ctaHref?: string;
 };
+
+// Source-labelled free-chart funnel for the citation-moat fact pages. These
+// pages are the best AI-citation surface Lunary has; without a CTA the moat
+// dead-ends. UTM tags mark the traffic as arriving from a cited fact page.
+const DEFAULT_FACTS_CTA_TEXT = 'See it in your own birth chart';
+const DEFAULT_FACTS_CTA_HREF =
+  '/birth-chart?utm_source=grimoire&utm_medium=facts&utm_campaign=fact-cta';
 
 export function FactShell({
   title,
@@ -21,6 +37,8 @@ export function FactShell({
   children,
   sources,
   faqs,
+  ctaText = DEFAULT_FACTS_CTA_TEXT,
+  ctaHref = DEFAULT_FACTS_CTA_HREF,
 }: FactShellProps) {
   const hasFaqs = Array.isArray(faqs) && faqs.length > 0;
 
@@ -92,6 +110,24 @@ export function FactShell({
             </dl>
           </section>
         )}
+
+        <section className='mt-10 overflow-x-hidden rounded-lg border border-lunary-primary-700 bg-gradient-to-r from-layer-base/30 to-lunary-highlight-900/30 p-6 text-center sm:p-8'>
+          <Heading as='h2' variant='h3'>
+            {ctaText}
+          </Heading>
+          <p className='mx-auto mt-2 max-w-md text-sm text-content-secondary'>
+            This is what the sky is doing right now. Read your full birth chart
+            free to see how it lands for you personally.
+          </p>
+          <div className='mt-4'>
+            <SEOCTAButton
+              href={ctaHref}
+              label='Get your free birth chart'
+              hub='grimoire'
+              location='facts_cta'
+            />
+          </div>
+        </section>
 
         <section className='mt-10 border-t border-stroke-subtle pt-6'>
           <h2 className='text-sm font-medium uppercase tracking-[0.2em] text-content-muted'>
