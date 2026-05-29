@@ -7,6 +7,7 @@ import { SmartTrialButton } from './SmartTrialButton';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
 import Link from 'next/link';
+import { EMAIL_PROMO } from '@/lib/promo/email-promo';
 
 export function PostTrialMessaging() {
   const subscription = useSubscription();
@@ -53,12 +54,15 @@ export function PostTrialMessaging() {
             insights have been waiting. Pick up where you left off.
           </p>
           <p className='text-content-brand text-sm font-medium mb-4'>
-            Come back with 3 months free — use code COSMICSEASON at checkout
+            Come back and save {EMAIL_PROMO.percent}% on {EMAIL_PROMO.label},
+            use code {EMAIL_PROMO.code} at checkout
           </p>
           <div className='flex flex-col sm:flex-row gap-3'>
             <Button variant='lunary-soft' size='default' asChild>
-              <Link href='/pricing?nav=app&promo=COSMICSEASON'>
-                Get 3 months free
+              <Link
+                href={`/pricing?nav=app&promo=${EMAIL_PROMO.code}&plan=annual`}
+              >
+                Save {EMAIL_PROMO.percent}% on {EMAIL_PROMO.label}
               </Link>
             </Button>
             <SmartTrialButton size='default' />

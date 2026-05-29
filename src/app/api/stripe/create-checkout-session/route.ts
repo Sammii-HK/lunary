@@ -670,8 +670,17 @@ export async function POST(request: NextRequest) {
       metadata.discountCode = normalizedDiscountCode;
     }
 
+    // Track whether a requested promo/discount code actually resolved to an
+    // active Stripe promotion code. When a code is supplied (e.g. from a
+    // lifecycle email CTA) but does not match, checkout still proceeds at full
+    // price — historically with no signal to the caller. We surface this in the
+    // response so the funnel can detect a stale/dead code instead of silently
+    // charging full price. `undefined` = no code was requested.
+    let promoCodeApplied: boolean | undefined;
+
     // Handle promo codes (Stripe promotion codes) - use same account as price
     if (promoCode) {
+      promoCodeApplied = false;
       try {
         const promoLookupCode = normalizedPromoCode || promoCode;
         const promoCodes = await checkoutStripe.promotionCodes.list({
@@ -682,9 +691,12 @@ export async function POST(request: NextRequest) {
         if (promoCodes.data.length > 0) {
           const promoCodeObj = promoCodes.data[0];
           sessionConfig.discounts = [{ promotion_code: promoCodeObj.id }];
+          promoCodeApplied = true;
           console.log(`✅ Applied promo code: ${promoLookupCode}`);
         } else {
-          console.warn(`⚠️ Promo code not found: ${promoLookupCode}`);
+          console.warn(
+            `⚠️ Promo code not found (checkout proceeds at full price): ${promoLookupCode}`,
+          );
         }
       } catch (error) {
         console.error('Failed to apply promo code:', error);
@@ -694,16 +706,23 @@ export async function POST(request: NextRequest) {
 
     // Handle discount codes (for trial expired users) - use same account as price
     if (discountCode && !promoCode) {
+      promoCodeApplied = false;
       try {
         const discountLookupCode = normalizedDiscountCode || discountCode;
         const promotionCodes = await checkoutStripe.promotionCodes.list({
           code: discountLookupCode,
+          active: true,
           limit: 1,
         });
         if (promotionCodes.data.length > 0) {
           sessionConfig.discounts = [
             { promotion_code: promotionCodes.data[0].id },
           ];
+          promoCodeApplied = true;
+        } else {
+          console.warn(
+            `⚠️ Discount code not found (checkout proceeds at full price): ${discountLookupCode}`,
+          );
         }
       } catch (error) {
         console.error('Failed to apply discount code:', error);
@@ -982,7 +1001,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ sessionId: session.id, url: session.url });
+    return NextResponse.json({
+      sessionId: session.id,
+      url: session.url,
+      // Lets the caller detect a stale/dead promo code: false means a code was
+      // supplied but did not resolve to an active Stripe promotion code, so the
+      // session is at full price. Omitted when no code was requested.
+      ...(promoCodeApplied !== undefined ? { promoCodeApplied } : {}),
+    });
   } catch (error) {
     console.error('Error creating checkout session:', error);
     console.error('Error details:', {

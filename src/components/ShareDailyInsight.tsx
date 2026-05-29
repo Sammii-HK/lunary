@@ -28,6 +28,8 @@ import { SharePreview } from './share/SharePreview';
 import { ShareActions } from './share/ShareActions';
 import { ShareFormatSelector } from './share/ShareFormatSelector';
 import { shareTracking } from '@/lib/analytics/share-tracking';
+import { useReferralCode } from '@/hooks/useReferralCode';
+import { buildReferralLink } from '@/lib/referrals/referral-link';
 
 dayjs.extend(utc);
 dayjs.extend(dayOfYear);
@@ -40,6 +42,7 @@ export function ShareDailyInsight() {
   const { user } = useUser();
   const subscription = useSubscription();
   const isDemoMode = isInDemoMode();
+  const referralCode = useReferralCode();
 
   const userName = user?.name;
   const userBirthday = user?.birthday;
@@ -336,7 +339,7 @@ export function ShareDailyInsight() {
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText('https://lunary.app');
+      await navigator.clipboard.writeText(buildReferralLink(referralCode));
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2000);
       shareTracking.shareCompleted(user?.id, 'daily-insight', 'clipboard');
@@ -350,9 +353,10 @@ export function ShareDailyInsight() {
     typeof navigator.share === 'function' &&
     typeof navigator.canShare === 'function';
 
+  const shareLink = buildReferralLink(referralCode);
   const socialUrls = {
-    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent('My daily cosmic insight from Lunary ✨')}&url=${encodeURIComponent('https://lunary.app')}`,
-    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent('My daily cosmic insight from Lunary ✨ lunary.app')}`,
+    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent('My daily cosmic insight from Lunary ✨')}&url=${encodeURIComponent(shareLink)}`,
+    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My daily cosmic insight from Lunary ✨ ${shareLink}`)}`,
   };
 
   return (

@@ -10,6 +10,8 @@ import { Button } from './ui/button';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { getABTestMetadataFromVariant } from '@/lib/ab-test-tracking';
 import { trackEvent } from '@/lib/analytics';
+import { useCurrency, formatPrice } from '../hooks/useCurrency';
+import { getPriceForCurrency } from '../../utils/stripe-prices';
 
 const TRIAL_COUNTDOWN_TEST = 'trial_countdown_v1';
 
@@ -17,6 +19,14 @@ export function TrialCountdownBanner() {
   const subscription = useSubscription();
   const authState = useAuthStatus();
   const variantRaw = useFeatureFlagVariant(TRIAL_COUNTDOWN_TEST);
+  const currency = useCurrency();
+  const monthlyPriceEntry = getPriceForCurrency('lunary_plus', currency);
+  const formattedMonthlyPrice = monthlyPriceEntry
+    ? formatPrice(
+        monthlyPriceEntry.amount,
+        monthlyPriceEntry.currency.toUpperCase(),
+      )
+    : '£4.99';
 
   const { isTrialActive, trialDaysRemaining } = subscription;
 
@@ -87,7 +97,7 @@ export function TrialCountdownBanner() {
         onClick={handleCtaClick}
         className='underline hover:text-lunary-accent transition-colors inline-flex items-center gap-1'
       >
-        lock in £4.99/mo before your trial ends
+        lock in {formattedMonthlyPrice}/mo before your trial ends
         <Sparkles className='w-4 h-4' />
       </Link>
     </>

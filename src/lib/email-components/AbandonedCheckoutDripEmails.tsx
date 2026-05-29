@@ -10,6 +10,7 @@ import {
   Text,
 } from '@react-email/components';
 import { render } from '@react-email/render';
+import { EMAIL_PROMO, buildPromoPricingUrl } from '@/lib/promo/email-promo';
 
 const getBaseUrl = () =>
   process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
@@ -207,8 +208,8 @@ interface AbandonedCheckoutEmail3Props {
 
 function AbandonedCheckoutEmail3Component({
   userName,
-  couponCode = 'WELCOME15',
-  discountPercent = 15,
+  couponCode = EMAIL_PROMO.code,
+  discountPercent = EMAIL_PROMO.percent,
   userEmail,
 }: AbandonedCheckoutEmail3Props) {
   const baseUrl = getBaseUrl();
@@ -231,8 +232,7 @@ function AbandonedCheckoutEmail3Component({
           <Text style={textStyle}>Hi {userName},</Text>
           <Text style={textStyle}>
             We know subscribing is a commitment, so we wanted to make it a
-            little easier. Here is {discountPercent}% off your first month of
-            Lunary+:
+            little easier. Here is {discountPercent}% off {EMAIL_PROMO.label}:
           </Text>
 
           <Section
@@ -300,7 +300,11 @@ function AbandonedCheckoutEmail3Component({
           </Section>
 
           <CtaButton
-            href={`${baseUrl}/pricing?nav=app&promo=${encodeURIComponent(couponCode)}&utm_source=email&utm_medium=lifecycle&utm_campaign=abandoned_checkout_drip3`}
+            href={buildPromoPricingUrl(baseUrl, {
+              utm_source: 'email',
+              utm_medium: 'lifecycle',
+              utm_campaign: 'abandoned_checkout_drip3',
+            })}
             label={`Claim Your ${discountPercent}% Off`}
           />
           <Text

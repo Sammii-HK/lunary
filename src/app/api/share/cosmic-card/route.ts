@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/ai/auth';
 import { getCachedSnapshot } from '@/lib/cosmic-snapshot/cache';
+import { getReferralCode } from '@/lib/referrals';
+import { appendRef } from '@/lib/share/referral-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +46,10 @@ export async function GET(request: NextRequest) {
 
     const ogImageUrl = `${baseUrl}/api/og/user-cosmic?sun=${encodeURIComponent(sun)}&moon=${encodeURIComponent(moon)}&rising=${encodeURIComponent(rising)}&moonPhase=${encodeURIComponent(moonPhase)}&moonEmoji=${encodeURIComponent(moonEmoji)}&transit=${encodeURIComponent(keyTransit)}&name=${encodeURIComponent(user.displayName || 'Your')}`;
 
-    const shareUrl = `${baseUrl}/cosmic-state`;
+    // Carry the sharer's referral code so recipients' signups attribute back
+    // and unlock the referral reward. Falls back to a bare link if no code.
+    const referralCode = await getReferralCode(user.id);
+    const shareUrl = appendRef(`${baseUrl}/cosmic-state`, referralCode);
 
     return NextResponse.json({
       success: true,

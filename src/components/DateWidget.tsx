@@ -13,16 +13,25 @@ export const DateWidget = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const { writtenDate, setCurrentDateTime, currentDate } = useCosmicDate();
-  const { user } = useUser();
+  const { user, loading } = useUser();
 
   const isViewingDifferentDate = useMemo(() => {
     const today = dayjs().format('YYYY-MM-DD');
     return currentDate && currentDate !== today;
   }, [currentDate]);
 
+  // Entitlement is unresolved while the profile is still loading or hasn't
+  // resolved yet (user === null). Don't show the locked/upsell affordance —
+  // and never pop the upgrade modal — until we actually know the user is on
+  // the free tier. Otherwise an in-flight load can flash an "upgrade" prompt
+  // at a paying user.
+  const entitlementResolved = !loading && user != null;
   const isPremium = user?.isPaid ?? false;
+  const showLocked = entitlementResolved && !isPremium;
 
   const handleDateButtonClick = () => {
+    // While entitlement is unresolved, do nothing rather than upsell.
+    if (!entitlementResolved) return;
     if (!isPremium) {
       setShowPremiumModal(true);
       return;
@@ -59,7 +68,7 @@ export const DateWidget = () => {
         >
           <CalendarIcon className='w-4 h-4' />
           <span>{writtenDate}</span>
-          {!isPremium && <Lock className='w-3.5 h-3.5' />}
+          {showLocked && <Lock className='w-3.5 h-3.5' />}
         </Button>
 
         {/* Back to today button */}
