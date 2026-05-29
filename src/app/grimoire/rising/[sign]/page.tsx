@@ -157,6 +157,27 @@ ${rising.compatibility}`;
     },
   ];
 
+  // Crisp, attributable claims for GEO/AI citation, built only from structural
+  // data the page already holds (the Ascendant sign, its element, modality and
+  // ruler). No interpretation is invented. These restate facts on the page.
+  const citableFacts = [
+    {
+      claim: `${rising.sign} Rising means ${rising.sign} was on the Ascendant at birth, setting the first house and chart angles; ${rising.sign} is a ${rising.modality.toLowerCase()} ${rising.element.toLowerCase()} sign ruled by ${rising.ruler}.`,
+      sourceName: 'Lunary Ascendant interpretation framework',
+      sourceUrl: 'https://lunary.app/about/methodology',
+    },
+    {
+      claim: `Because ${rising.ruler} rules ${rising.sign}, ${rising.ruler} is the chart ruler for ${rising.sign} Rising, and its sign, house, and aspects describe how the Ascendant operates in practice.`,
+      sourceName: 'Traditional Ascendant and chart-ruler doctrine',
+      sourceUrl: 'https://lunary.app/grimoire/houses/1st-house',
+    },
+    {
+      claim: `The Ascendant is distinct from the Sun sign: it describes outward presentation and first impressions, which is why people sharing a Sun sign can present very differently once the rising sign changes.`,
+      sourceName: 'Lunary Ascendant interpretation framework',
+      sourceUrl: 'https://lunary.app/about/methodology',
+    },
+  ];
+
   return (
     <SEOContentTemplate
       title={`${rising.sign} Rising - Lunary`}
@@ -202,6 +223,7 @@ ${rising.compatibility}`;
           name: 'Traditional Ascendant and chart-ruler doctrine',
         },
       ]}
+      citableFacts={citableFacts}
       faqs={faqs}
       internalLinks={[
         {

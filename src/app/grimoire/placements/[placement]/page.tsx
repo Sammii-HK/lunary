@@ -299,6 +299,33 @@ For ${pageTitle}, that means we are not treating ${content.planet} in ${content.
 
   const faqs = generateFaqs();
 
+  // Crisp, attributable claims for GEO/AI citation, built only from structural
+  // data the page already holds (sign element/modality/ruler, planet themes,
+  // and the curated essential dignity where present). No interpretation is
+  // invented. These restate facts already shown on the page.
+  const citableFacts = [
+    {
+      claim: `${content.planet} in ${content.sign} places ${content.planet.toLowerCase()} (governing ${planetInfo.themes}) in ${content.sign}, a ${signInfo.modality.toLowerCase()} ${signInfo.element.toLowerCase()} sign ruled by ${signInfo.ruler}.`,
+      sourceName: 'Lunary placement interpretation framework',
+      sourceUrl: 'https://lunary.app/about/methodology',
+    },
+    ...(curated?.dignity
+      ? [
+          {
+            claim: `In ${content.sign}, ${content.planet.toLowerCase()} is in ${curated.dignity.toLowerCase()}, which describes how comfortably it expresses its core functions there.`,
+            sourceName: 'Traditional Western essential dignity doctrine',
+            sourceUrl:
+              'https://lunary.app/grimoire/astrology/rulerships-and-dignities',
+          },
+        ]
+      : []),
+    {
+      claim: `Lunary reads ${content.planet} in ${content.sign} by combining the planet's topics with the sign's ${signInfo.element.toLowerCase()} temperament and ${signInfo.modality.toLowerCase()} mode of action, rather than as a fixed personality label.`,
+      sourceName: 'Lunary placement interpretation framework',
+      sourceUrl: 'https://lunary.app/about/methodology',
+    },
+  ];
+
   return (
     <SEOContentTemplate
       title={`${pageTitle} - Lunary`}
@@ -380,6 +407,7 @@ For ${pageTitle}, that means we are not treating ${content.planet} in ${content.
           name: 'Traditional Western astrology and essential dignity doctrine',
         },
       ]}
+      citableFacts={citableFacts}
       cosmicConnections={
         <CosmicConnections
           entityType='placement'
