@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       ...parsed.data,
       referralCode,
     });
-    const shareUrl = `${APP_URL}/share/birth-chart/${record.shareId}`;
+    const shareUrl = `${APP_URL}/share/birth-chart/${record.shareId}?utm_source=chart_share&utm_medium=referral&utm_campaign=birth_chart`;
 
     return NextResponse.json({
       success: true,
