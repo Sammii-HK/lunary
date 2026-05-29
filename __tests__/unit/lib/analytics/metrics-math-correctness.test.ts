@@ -321,9 +321,7 @@ describe('extractActivity: engagement and stickiness ratios', () => {
   it('does not throw or emit NaN when product denominators are 0 but raw counts are present', () => {
     // Defensive: a snapshot can carry DAU/WAU/MAU while signed_in_product_* is
     // still 0 (e.g. anonymous-heavy day). Ratios keyed on product_* must be 0.
-    const out = extractActivity(
-      makeSnapshot({ dau: 10, wau: 20, mau: 30 }),
-    );
+    const out = extractActivity(makeSnapshot({ dau: 10, wau: 20, mau: 30 }));
     expect(out.engaged_rate_dau).toBe(0);
     expect(out.product_stickiness_dau_mau).toBe(0);
     expectAllFinite(out);
@@ -487,57 +485,77 @@ describe('getWeekBoundaries: weekly cohort window boundaries', () => {
 });
 
 /**
- * BUG: getWeekBoundaries shifts the week start to SUNDAY during British Summer
- * Time (BST, UTC+1), instead of Monday.
+ * FIXED: getWeekBoundaries is now computed entirely in UTC, so the week always
+ * starts on Monday 00:00:00.000 UTC and ends Sunday 23:59:59.999 UTC, in both
+ * GMT and BST.
  *
- * Corrupted metric: every weekly metric and weekly cohort that buckets events
- * by getWeekBoundaries (calculateWeeklyMetrics: W1/W4 retention, weekly
- * acquisition, churn, trial-to-paid; calculateFunnelMetrics weekly funnel).
+ * Previously, during British Summer Time (BST, UTC+1) the week start shifted to
+ * SUNDAY and the span widened to eight days, silently corrupting every weekly
+ * metric and cohort bucketed by getWeekBoundaries (calculateWeeklyMetrics:
+ * W1/W4 retention, weekly acquisition, churn, trial-to-paid;
+ * calculateFunnelMetrics weekly funnel) for roughly half the year (late March
+ * to late October).
  *
- * Direction of skew: for roughly half the year (late March to late October),
- * the window is shifted one day EARLIER. Sunday's events are pulled into the
- * "wrong" week and the intended Monday is excluded, so each weekly bucket is
- * mis-attributed by one day at both edges. Week-over-week deltas computed off
- * these buckets are therefore unreliable during BST.
+ * Root cause: toTimezone() rebuilt the instant as a Date whose UTC fields held
+ * London wall-clock time; date-fns startOfWeek/endOfWeek then used LOCAL
+ * getters while the code force-applied setUTCHours(0/23) on top. Under BST the
+ * two disagreed by the +1h offset, snapping Monday 00:00 London (= Sunday 23:00
+ * UTC) back to Sunday 00:00 UTC.
  *
- * Root cause: toTimezone() rebuilds the instant as a Date whose UTC fields hold
- * London wall-clock time. date-fns startOfWeek/endOfWeek then compute the week
- * using LOCAL getters, but the code immediately force-applies setUTCHours(0/23)
- * on top. Under BST the two operations disagree by the +1h offset, snapping
- * Monday 00:00 London (= Sunday 23:00 UTC) back to Sunday 00:00 UTC.
- *
- * Verified empirically: runner TZ Europe/London, input Wed 2025-07-16T12:00Z
- * yields weekStart 2025-07-13 (Sunday). Winter input yields the correct Monday.
- *
- * NOT fixed here per task scope (tests only). The skipped test below pins the
- * CORRECT invariant; the active companion test pins CURRENT buggy behaviour so
- * a fix is detected.
+ * The frame is UTC because the boundaries are compared (via toISOString) to UTC
+ * created_at columns and the analytics layer buckets events in UTC
+ * (date-range.ts timezone policy). These tests assert the corrected behaviour
+ * for both a BST/summer input and a GMT/winter input, and are runner-TZ
+ * independent (UTC math gives the same answer everywhere).
  */
-describe('getWeekBoundaries: BST week-start bug', () => {
-  const runnerTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const isLondonRunner = runnerTz === 'Europe/London';
-  // July is unambiguously BST when the runner is on London time.
+describe('getWeekBoundaries: BST week-start regression guard', () => {
+  // July is unambiguously BST (UTC+1) on the production cron / CI clock; this
+  // is the exact instant that previously produced a Sunday week start.
   const summer = new Date('2025-07-16T12:00:00Z');
+  // January is unambiguously GMT (UTC+0); the winter case was always correct.
+  const winter = new Date('2025-01-15T12:00:00Z');
 
-  it.skip('CORRECT INVARIANT (currently failing): week should start on Monday even in BST', () => {
+  it('starts the week on Monday for a BST/summer input (was Sunday before the fix)', () => {
     const { weekStart, weekEnd } = getWeekBoundaries(summer);
-    expect(weekStart.getUTCDay()).toBe(1); // Monday — currently returns 0 (Sunday)
+    expect(weekStart.getUTCDay()).toBe(1); // Monday
     expect(weekEnd.getUTCDay()).toBe(0); // Sunday
   });
 
-  it('PINS current buggy behaviour: BST week start lands on Sunday (London runner only)', () => {
-    if (!isLondonRunner) {
-      // The bug is TZ-of-runner dependent; only assert on the same TZ the
-      // production cron and CI use (Europe/London). Elsewhere, just record it.
-      // eslint-disable-next-line no-console
-      console.warn(
-        `[metrics-math] Skipping BST pin: runner TZ is ${runnerTz}, not Europe/London`,
-      );
-      expect(true).toBe(true);
-      return;
+  it('pins the exact corrected boundaries for the previously-failing 2025-07-16 case', () => {
+    // Before the fix this yielded weekStart 2025-07-13 (Sunday) and an 8-day
+    // span. The week containing Wed 2025-07-16 must run Mon 2025-07-14 ..
+    // Sun 2025-07-20, entirely in UTC.
+    const { weekStart, weekEnd } = getWeekBoundaries(summer);
+    expect(weekStart.toISOString()).toBe('2025-07-14T00:00:00.000Z');
+    expect(weekEnd.toISOString()).toBe('2025-07-20T23:59:59.999Z');
+  });
+
+  it('starts the week on Monday for a GMT/winter input', () => {
+    const { weekStart, weekEnd } = getWeekBoundaries(winter);
+    expect(weekStart.getUTCDay()).toBe(1); // Monday
+    expect(weekEnd.getUTCDay()).toBe(0); // Sunday
+    expect(weekStart.toISOString()).toBe('2025-01-13T00:00:00.000Z');
+    expect(weekEnd.toISOString()).toBe('2025-01-19T23:59:59.999Z');
+  });
+
+  it('spans just under 7 calendar days (never 8) in BST as well as GMT', () => {
+    for (const input of [summer, winter]) {
+      const { weekStart, weekEnd } = getWeekBoundaries(input);
+      const days = (weekEnd.getTime() - weekStart.getTime()) / 86_400_000;
+      expect(days).toBeGreaterThan(6.9);
+      expect(days).toBeLessThan(7);
     }
-    const { weekStart } = getWeekBoundaries(summer);
-    // Documents the defect: Monday expected, Sunday produced.
-    expect(weekStart.getUTCDay()).toBe(0);
+  });
+
+  it('is stable: re-running on any instant within the week gives identical boundaries', () => {
+    // Monday 00:00, mid-week, and Sunday 23:59 of the same BST week must all
+    // resolve to the same window (no drift at the edges).
+    const a = getWeekBoundaries(new Date('2025-07-14T00:00:00.000Z'));
+    const b = getWeekBoundaries(new Date('2025-07-16T12:00:00.000Z'));
+    const c = getWeekBoundaries(new Date('2025-07-20T23:59:59.000Z'));
+    expect(a.weekStart.toISOString()).toBe(b.weekStart.toISOString());
+    expect(b.weekStart.toISOString()).toBe(c.weekStart.toISOString());
+    expect(a.weekEnd.toISOString()).toBe(b.weekEnd.toISOString());
+    expect(b.weekEnd.toISOString()).toBe(c.weekEnd.toISOString());
   });
 });
