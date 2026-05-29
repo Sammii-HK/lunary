@@ -57,7 +57,21 @@ export async function POST(request: NextRequest) {
       } else if (lastCheckIn !== null) {
         const daysAway = calculateDaysAway(lastCheckIn, today);
         if (daysAway >= 7) {
-          // Reset streak after a full break
+          // Reset streak after a full break. Record the loss so streak churn
+          // becomes measurable (the event + helper already exist; only this
+          // call site was missing). previousDays is the streak that just broke.
+          const previousDays = currentStreak;
+          if (previousDays > 0) {
+            try {
+              const { conversionTracking } = await import('@/lib/analytics');
+              conversionTracking.streakBroken(userId, previousDays);
+            } catch (trackError) {
+              console.warn(
+                '[Streak] Failed to record streakBroken:',
+                trackError,
+              );
+            }
+          }
           currentStreak = 1;
         } else {
           // Pause streak during short breaks

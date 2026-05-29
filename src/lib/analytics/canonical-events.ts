@@ -124,6 +124,7 @@ export type CanonicalEventType =
   | 'user_reactivated'
   | 'login_streak_milestone'
   | 'streak_broken'
+  | 'streak_at_risk_nudge_clicked'
   | 'notification_opened'
   | 'notification_clicked'
   | 'email_opened'

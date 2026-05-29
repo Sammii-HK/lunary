@@ -96,6 +96,7 @@ export type ConversionEvent =
   | 'user_reactivated'
   | 'login_streak_milestone'
   | 'streak_broken'
+  | 'streak_at_risk_nudge_clicked'
   | 'notification_opened'
   | 'notification_clicked'
   | 'help_requested'
@@ -1210,6 +1211,10 @@ export const conversionTracking = {
     }),
   streakBroken: (userId?: string, previousDays?: number) =>
     trackConversion('streak_broken', { userId, metadata: { previousDays } }),
+  streakAtRiskNudgeClicked: (
+    userId?: string,
+    metadata?: { currentStreak?: number; context?: string },
+  ) => trackConversion('streak_at_risk_nudge_clicked', { userId, metadata }),
   notificationOpened: (userId?: string, notificationType?: string) =>
     trackConversion('notification_opened', {
       userId,

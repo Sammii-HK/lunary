@@ -14,6 +14,8 @@ export interface SubscriptionStatus {
   isSubscribed: boolean;
   isTrialActive: boolean;
   trialDaysRemaining: number;
+  /** ISO date the active trial ends, when known. Only meaningful while isTrialActive. */
+  trialEndsAt?: string;
   plan: 'free' | 'monthly' | 'yearly';
   planName?: string;
   status: 'free' | 'trial' | 'active' | 'cancelled' | 'past_due';
@@ -91,6 +93,9 @@ export function useSubscription(): SubscriptionStatus {
       isSubscribed,
       isTrialActive,
       trialDaysRemaining,
+      // Only surface the end date while the trial is active so consumers
+      // cannot accidentally show trial messaging to a lapsed/past_due user.
+      trialEndsAt: isTrialActive ? user.trialEndsAt : undefined,
       plan: planForState,
       planName: rawPlan,
       status,

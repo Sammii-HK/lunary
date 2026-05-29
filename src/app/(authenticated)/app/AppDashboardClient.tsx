@@ -5,6 +5,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useCosmicDate } from '@/context/AstronomyContext';
 import { recordCheckIn } from '@/lib/streak/check-in';
@@ -253,6 +254,7 @@ const WeeklyUsageCounter = dynamic(
 
 export default function AppDashboardClient() {
   const { user } = useUser();
+  const subscription = useSubscription();
   const authState = useAuthStatus();
   const { startTour, hasSeenOnboarding } = useTour();
   const { currentDate } = useCosmicDate();
@@ -515,6 +517,7 @@ export default function AppDashboardClient() {
             location='horoscope'
             className='mx-auto'
             showNextMilestone
+            trialEndsAt={subscription.trialEndsAt}
           />
         )}
 
