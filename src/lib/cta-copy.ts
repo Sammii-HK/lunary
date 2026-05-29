@@ -11,6 +11,11 @@ export const CTA_COPY = {
     continue: 'Continue',
   },
 
+  // Value-first preview (no account needed) — leads to /free-chart aha
+  freeChart: {
+    seeChart: 'See your free chart', // Value-first: aha before the registration wall
+  },
+
   // Pricing & Conversion
   pricing: {
     startTrial: 'Start free trial', // Direct action, communicates no-cost
