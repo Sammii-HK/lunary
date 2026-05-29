@@ -24,7 +24,7 @@ export function generateFAQSchema(faqs: FAQItem[]) {
  * Strips markdown formatting for schema.org text
  * Schema.org expects plain text, not markdown
  */
-function stripMarkdown(markdown: string): string {
+export function stripMarkdown(markdown: string): string {
   return (
     markdown
       // Remove bold **text**

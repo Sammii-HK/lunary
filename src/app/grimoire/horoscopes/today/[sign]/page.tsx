@@ -173,6 +173,20 @@ export default async function DailyHoroscopePage({
         />
       }
       components={<PlacementSelector signName={signData.name} />}
+      faqs={[
+        {
+          question: `What is today's horoscope for ${signData.name}?`,
+          answer: `${snapshot.summary} This reflects the current Moon and the most active transits for ${signData.name} today, ${today}.`,
+        },
+        {
+          question: `What dates are ${signData.name}?`,
+          answer: `${signData.name} covers birthdays from ${signData.dates}. It is a ${signData.element} sign.`,
+        },
+        {
+          question: `Does this daily horoscope use my birth chart?`,
+          answer: `This daily reading is written for the ${signData.name} Sun sign from the current sky. For timing tied to your exact birth chart, Lunary generates a personalised daily horoscope from your full natal placements.`,
+        },
+      ]}
       childrenPosition='after-description'
     >
       <section className='mb-12 grid gap-4 md:grid-cols-3'>

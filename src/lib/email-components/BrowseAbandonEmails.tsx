@@ -10,6 +10,7 @@ import {
   Text,
 } from '@react-email/components';
 import { render } from '@react-email/render';
+import { EMAIL_PROMO, buildPromoPricingUrl } from '@/lib/promo/email-promo';
 
 const getBaseUrl = () =>
   process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
@@ -522,7 +523,7 @@ function BrowseAbandonEmail3({ userName, userEmail }: BrowseAbandonProps) {
           <Text style={textStyle}>Hi {userName},</Text>
           <Text style={textStyle}>
             You showed interest in Lunary+ last week, and we appreciate that. As
-            a thank you, here is 10% off your first month or year:
+            a thank you, here is {EMAIL_PROMO.percent}% off {EMAIL_PROMO.label}:
           </Text>
 
           <Section
@@ -544,7 +545,7 @@ function BrowseAbandonEmail3({ userName, userEmail }: BrowseAbandonProps) {
                 letterSpacing: '2px',
               }}
             >
-              CURIOUS10
+              {EMAIL_PROMO.code}
             </Text>
             <Text
               style={{
@@ -553,7 +554,7 @@ function BrowseAbandonEmail3({ userName, userEmail }: BrowseAbandonProps) {
                 margin: 0,
               }}
             >
-              10% off — expires in 48 hours
+              {EMAIL_PROMO.percent}% off — expires in 48 hours
             </Text>
           </Section>
 
@@ -578,8 +579,13 @@ function BrowseAbandonEmail3({ userName, userEmail }: BrowseAbandonProps) {
           </Text>
 
           <CtaButton
-            href={`${baseUrl}/pricing?nav=app&promo=CURIOUS10&utm_source=email&utm_medium=lifecycle&utm_campaign=browse_abandon&utm_content=7day`}
-            label='Claim Your 10% Off'
+            href={buildPromoPricingUrl(baseUrl, {
+              utm_source: 'email',
+              utm_medium: 'lifecycle',
+              utm_campaign: 'browse_abandon',
+              utm_content: '7day',
+            })}
+            label={`Claim Your ${EMAIL_PROMO.percent}% Off`}
           />
 
           <Text

@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { Capacitor } from '@capacitor/core';
 import { Navbar } from '@/components/Navbar';
 import { MarketingNavbar } from '@/components/MarketingNavbar';
+import { BlueMoonBanner } from '@/components/BlueMoonBanner';
 import { PWAHandler } from '@/components/PWAHandler';
 import { NotificationManager } from '@/components/NotificationManager';
 import { ExitIntent } from '@/components/ExitIntent';
@@ -414,6 +415,7 @@ export function AppChrome() {
     <>
       {!isAdminSurface && (
         <>
+          {showMarketingNav && <BlueMoonBanner />}
           {showMarketingNav && <MarketingNavbar />}
           {showAppNav && (
             <>

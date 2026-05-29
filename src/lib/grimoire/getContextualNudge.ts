@@ -9,6 +9,12 @@ export type ContextualNudge = {
   href: string;
   action: 'authOrLink' | 'link';
   inlineCopy?: string;
+  /**
+   * Optional lower-commitment route shown alongside the primary signup CTA.
+   * Used to route cold readers into the no-account preview at /free-chart
+   * while keeping the primary signup invitation intact.
+   */
+  previewHref?: string;
   exampleType?: string;
   exampleText?: string;
   ctaVariant?: string;

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Share2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { ShareIconButton } from '@/components/share/ShareIconButton';
 import { useUser } from '@/context/UserContext';
 import { useShareModal } from '@/hooks/useShareModal';
@@ -98,6 +99,7 @@ export function ShareDailyCosmicState({
 }: ShareDailyCosmicStateProps) {
   const { user } = useUser();
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [cosmicData, setCosmicData] = useState<DailyCosmicStateData | null>(
     null,
@@ -187,6 +189,7 @@ export function ShareDailyCosmicState({
 
       const blob = await imageResponse.blob();
       setImageBlob(blob);
+      setShareUrl((data as { shareUrl?: string }).shareUrl ?? null);
       return { shareId: data.shareId, shareUrl: data.shareUrl };
     } catch (err) {
       console.error('Error generating card:', err);
@@ -258,7 +261,11 @@ export function ShareDailyCosmicState({
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText('https://lunary.app');
+      // Copy the ref-bearing share URL so the recipient's signup attributes
+      // back. Generate it first if the card has not been built yet.
+      const link =
+        shareUrl ?? (await generateCard())?.shareUrl ?? 'https://lunary.app';
+      await navigator.clipboard.writeText(link);
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2000);
       shareTracking.shareCompleted(user?.id, 'cosmic-state', 'clipboard');
@@ -272,9 +279,10 @@ export function ShareDailyCosmicState({
     typeof navigator.share === 'function' &&
     typeof navigator.canShare === 'function';
 
+  const resolvedShareUrl = shareUrl ?? 'https://lunary.app';
   const socialUrls = {
-    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent("Today's cosmic state")}&url=${encodeURIComponent('https://lunary.app')}`,
-    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent("Today's cosmic state lunary.app")}`,
+    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent("Today's cosmic state")}&url=${encodeURIComponent(resolvedShareUrl)}`,
+    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`Today's cosmic state ${resolvedShareUrl}`)}`,
   };
 
   return (
@@ -289,17 +297,17 @@ export function ShareDailyCosmicState({
           }}
         />
       ) : (
-        <button
+        <Button
+          variant='outline'
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
             handleOpen();
           }}
-          className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-layer-base/10 px-4 py-2 text-sm font-medium text-content-secondary hover:text-content-secondary hover:bg-layer-base/20 transition-colors'
         >
           <Share2 className='h-4 w-4' />
           Share Today&apos;s Cosmic State
-        </button>
+        </Button>
       )}
 
       <ShareModal
@@ -343,12 +351,9 @@ export function ShareDailyCosmicState({
         {error && (
           <div className='text-center py-8'>
             <p className='text-red-400 mb-4'>{error}</p>
-            <button
-              onClick={generateCard}
-              className='px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg transition-colors'
-            >
+            <Button variant='lunary' onClick={generateCard}>
               Try Again
-            </button>
+            </Button>
           </div>
         )}
       </ShareModal>

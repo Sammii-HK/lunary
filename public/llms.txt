@@ -66,6 +66,7 @@ Lunary blends birth chart astrology, real-time moon phases, tarot, and lunar cyc
 - [Annual Astrology Calendar Dataset](https://lunary.app/grimoire/datasets/astrology-calendar/2026.json): Machine-readable yearly moon, retrograde, eclipse, ingress, and seasonal event calendar
 - [Moon Phase Today](https://lunary.app/grimoire/facts/moon-phase-today): Human-readable current Moon phase fact backed by the current-sky dataset
 - [Current Moon Sign](https://lunary.app/grimoire/facts/current-moon-sign): Human-readable current Moon sign fact backed by the current-sky dataset
+- [Current Sun Sign & Zodiac Season](https://lunary.app/grimoire/facts/current-sun-sign): Human-readable current Sun sign and active zodiac season fact backed by the current-sky dataset
 - [Planetary Positions Today](https://lunary.app/grimoire/facts/planetary-positions-today): Human-readable Sun, Moon, Mercury, Venus, Mars, Jupiter, and Saturn positions
 - [Mercury Retrograde Status](https://lunary.app/grimoire/facts/mercury-retrograde-status): Human-readable Mercury direct/retrograde status
 - [Next Full Moon](https://lunary.app/grimoire/facts/next-full-moon): Human-readable next Full Moon fact backed by the annual calendar dataset

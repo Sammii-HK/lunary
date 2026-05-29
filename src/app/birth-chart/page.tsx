@@ -200,6 +200,15 @@ export default async function BirthChartLandingPage() {
               </Button>
             </Link>
           </div>
+          <p className='text-sm text-content-muted'>
+            or{' '}
+            <Link
+              href='/free-chart?source=birth_chart_hero'
+              className='text-lunary-primary-400 hover:text-content-brand underline underline-offset-2'
+            >
+              see a free preview, no account needed
+            </Link>
+          </p>
         </header>
 
         {/* Live Chart Showcase */}

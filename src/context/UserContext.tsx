@@ -193,15 +193,31 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
         // re-fetches during navigation, etc.) as blocking runtime errors.
         console.warn('Error fetching user data:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
-        // Still set basic user info even if profile fetch fails
-        setUser({
-          id: userId,
-          name: userName || undefined,
-          email: userEmail || undefined,
-          hasBirthChart: false,
-          hasPersonalCard: false,
-          isPaid: false,
-        });
+        // CRITICAL: never synthesise a free entitlement on a transient
+        // failure. A network blip, 5xx, or a background focus/sync/birth-chart
+        // re-fetch must NOT strip a paying/trialling user's Pro UI (Time
+        // Machine, full CosmicScore, any hasAccess() gate). Preserve the
+        // last-known subscription/entitlement state and only refresh the
+        // auth-derived identity fields. When there is genuinely no prior
+        // user (cold start, first load ever failed), fall back to a minimal
+        // logged-in shell — that user has no paid state to lose.
+        setUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                id: userId,
+                name: prev.name || userName || undefined,
+                email: prev.email || userEmail || undefined,
+              }
+            : {
+                id: userId,
+                name: userName || undefined,
+                email: userEmail || undefined,
+                hasBirthChart: false,
+                hasPersonalCard: false,
+                isPaid: false,
+              },
+        );
         if (!hasLoadedOnce) {
           setHasLoadedOnce(true);
         }

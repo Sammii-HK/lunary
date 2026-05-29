@@ -31,6 +31,7 @@ This document contains detailed reference content from Lunary's grimoire and ast
 - Annual astrology calendar dataset: https://lunary.app/grimoire/datasets/astrology-calendar/2026.json
 - Moon phase today: https://lunary.app/grimoire/facts/moon-phase-today
 - Current Moon sign: https://lunary.app/grimoire/facts/current-moon-sign
+- Current Sun sign and zodiac season: https://lunary.app/grimoire/facts/current-sun-sign
 - Planetary positions today: https://lunary.app/grimoire/facts/planetary-positions-today
 - Mercury retrograde status: https://lunary.app/grimoire/facts/mercury-retrograde-status
 - Next Full Moon: https://lunary.app/grimoire/facts/next-full-moon

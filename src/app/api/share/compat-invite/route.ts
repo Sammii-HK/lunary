@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { kvGet, kvPut } from '@/lib/cloudflare/kv';
+import { appendRef, getShareReferralCode } from '@/lib/share/referral-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,7 +50,16 @@ export async function POST(request: NextRequest) {
 
     const shareId = createShareId();
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-    const shareUrl = `${baseUrl}/compatibility/${body.inviteCode || shareId}`;
+    // Prefer the code the client passed, falling back to the signed-in sharer's
+    // code so recipients' signups attribute back and unlock the referral reward.
+    const referralCode =
+      body.referralCode ||
+      (await getShareReferralCode(request.headers)) ||
+      undefined;
+    const shareUrl = appendRef(
+      `${baseUrl}/compatibility/${body.inviteCode || shareId}`,
+      referralCode ?? null,
+    );
 
     const record: ShareCompatInviteRecord = {
       shareId,
@@ -58,7 +68,7 @@ export async function POST(request: NextRequest) {
       inviterSign,
       inviterBigThree: body.inviterBigThree,
       inviteCode: body.inviteCode,
-      referralCode: body.referralCode,
+      referralCode,
       format: body.format || 'square',
     };
 

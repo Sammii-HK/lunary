@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { kvGet, kvPut } from '@/lib/cloudflare/kv';
+import { appendRef, getShareReferralCode } from '@/lib/share/referral-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,7 +95,13 @@ export async function POST(request: NextRequest) {
 
     const shareId = createShareId();
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-    const shareUrl = `${baseUrl}/share/synastry/${shareId}`;
+    // Carry the sharer's referral code (if signed in) so recipients' signups
+    // attribute back and unlock the referral reward. Anonymous shares no-op.
+    const referralCode = await getShareReferralCode(request.headers);
+    const shareUrl = appendRef(
+      `${baseUrl}/share/synastry/${shareId}`,
+      referralCode,
+    );
 
     const record: ShareSynastryRecord = {
       shareId,

@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import { createFAQPageSchema, renderJsonLd } from '@/lib/schema';
+
+type FactFaq = { question: string; answer: string };
 
 type FactShellProps = {
   title: string;
@@ -7,6 +10,7 @@ type FactShellProps = {
   detail: string;
   children?: React.ReactNode;
   sources: Array<{ label: string; href: string }>;
+  faqs?: FactFaq[];
 };
 
 export function FactShell({
@@ -16,9 +20,13 @@ export function FactShell({
   detail,
   children,
   sources,
+  faqs,
 }: FactShellProps) {
+  const hasFaqs = Array.isArray(faqs) && faqs.length > 0;
+
   return (
     <main className='min-h-screen bg-surface-base text-content-primary'>
+      {hasFaqs && renderJsonLd(createFAQPageSchema(faqs))}
       <div className='mx-auto max-w-4xl px-4 py-12'>
         <nav className='mb-8 flex items-center gap-2 text-sm text-content-muted'>
           <Link href='/grimoire' className='hover:text-content-secondary'>
@@ -58,6 +66,32 @@ export function FactShell({
         </header>
 
         {children}
+
+        {hasFaqs && (
+          <section
+            aria-label='Frequently asked questions'
+            className='mt-10 border-t border-stroke-subtle pt-6'
+          >
+            <h2 className='text-sm font-medium uppercase tracking-[0.2em] text-content-muted'>
+              Common questions
+            </h2>
+            <dl className='mt-4 space-y-4'>
+              {faqs.map((faq) => (
+                <div
+                  key={faq.question}
+                  className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-4'
+                >
+                  <dt className='font-medium text-content-primary'>
+                    {faq.question}
+                  </dt>
+                  <dd className='mt-2 text-sm leading-relaxed text-content-secondary'>
+                    {faq.answer}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
 
         <section className='mt-10 border-t border-stroke-subtle pt-6'>
           <h2 className='text-sm font-medium uppercase tracking-[0.2em] text-content-muted'>

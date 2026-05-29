@@ -13,7 +13,15 @@ import {
   type PricingPlan,
 } from '../../../utils/pricing';
 import { createCheckoutSession } from '../../../utils/stripe';
-import { Check, Sparkles, Star, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Check,
+  Sparkles,
+  Star,
+  ChevronDown,
+  ChevronUp,
+  Moon,
+  X,
+} from 'lucide-react';
 import { useSubscription } from '../../hooks/useSubscription';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useCurrency, formatPrice } from '../../hooks/useCurrency';
@@ -39,6 +47,12 @@ import { FAQAccordion } from '@/components/FAQ';
 import { getPricingFAQs } from '@/lib/faq-helpers';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { getABTestMetadataFromVariant } from '@/lib/ab-test-tracking';
+
+// Once in a Blue Moon offer: live promo code, 32% off Pro Annual, applied at
+// checkout via the existing ?promo= -> Stripe plumbing. Annual is a pay /
+// commit moment, so seeding this code there does not undercut the free trial
+// that fresh monthly visitors rely on (applying any promo zeroes the trial).
+const BLUE_MOON_PROMO_CODE = 'BLUEMOON';
 
 const formatChatFeature = (plan: PricingPlan): string | undefined => {
   if (!plan.chatLabel) return undefined;
@@ -84,6 +98,7 @@ export default function PricingPage() {
   );
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [urlPromoCode, setUrlPromoCode] = useState<string | undefined>();
+  const [offerDismissed, setOfferDismissed] = useState(false);
   const [pendingCheckout, setPendingCheckout] = useState<{
     priceId: string;
     planId: string;
@@ -135,6 +150,22 @@ export default function PricingPage() {
     const promo = params.get('promo') || params.get('coupon');
     if (promo) {
       setUrlPromoCode(promo.trim().toUpperCase());
+    }
+    // Let an offer link land directly on the annual plan (e.g. the Blue Moon
+    // banner links to /pricing?promo=BLUEMOON&billing=annual).
+    if (params.get('billing') === 'annual') {
+      setBillingCycle('annual');
+    }
+
+    // Honour a ?plan= hint so promo links land on the plan the code can
+    // discount. The live email promo (BLUEMOON) is annual-only, so an annual
+    // hint avoids dropping the user on the default monthly view where an
+    // annual-scoped code would silently fail to apply.
+    const planHint = params.get('plan');
+    if (planHint === 'annual' || planHint === 'year') {
+      setBillingCycle('annual');
+    } else if (planHint === 'monthly' || planHint === 'month') {
+      setBillingCycle('monthly');
     }
 
     loadPricingPlans();
@@ -189,6 +220,14 @@ export default function PricingPage() {
     billingCycle === 'monthly'
       ? [freePlan, plusPlan, aiPlan].filter(Boolean)
       : [freePlan, plusPlan, annualPlan].filter(Boolean);
+
+  // A promo from the URL always wins. Otherwise, seed the Blue Moon code only
+  // for annual (a deliberate pay/commit intent) so monthly cards stay
+  // trial-first. Applying any promo zeroes the free trial, so we never attach
+  // it to the monthly experience that fresh visitors land on.
+  const effectivePromoCode =
+    urlPromoCode ??
+    (billingCycle === 'annual' ? BLUE_MOON_PROMO_CODE : undefined);
 
   const startCheckout = async (
     priceId: string,
@@ -260,7 +299,7 @@ export default function PricingPage() {
         undefined,
         currentUserId,
         currentUserEmail,
-        urlPromoCode,
+        effectivePromoCode,
         triggerFeature,
         checkoutSourceContext,
       );
@@ -438,6 +477,32 @@ export default function PricingPage() {
             </div>
           </div>
         </section>
+
+        {/* Once in a Blue Moon offer ribbon */}
+        {!offerDismissed && subscriptionStatus !== 'active' && (
+          <section className='relative pb-6'>
+            <div className='max-w-3xl mx-auto px-6'>
+              <div className='relative flex items-start gap-3 rounded-2xl border border-lunary-primary-700/40 bg-gradient-to-r from-layer-deep/40 to-surface-elevated/60 px-4 py-3 pr-10 md:items-center'>
+                <Moon className='mt-0.5 h-5 w-5 flex-shrink-0 text-lunary-accent md:mt-0' />
+                <p className='text-sm text-content-secondary'>
+                  <span className='font-medium text-content-brand-accent'>
+                    Once in a blue moon:
+                  </span>{' '}
+                  32% off Pro Annual, applied at checkout. Switch to annual
+                  below and the code lands automatically.
+                </p>
+                <button
+                  type='button'
+                  onClick={() => setOfferDismissed(true)}
+                  aria-label='Dismiss offer'
+                  className='absolute right-3 top-3 text-content-muted transition-colors hover:text-content-secondary md:top-1/2 md:-translate-y-1/2'
+                >
+                  <X className='h-4 w-4' />
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Billing Toggle */}
         <section className='relative pb-8'>

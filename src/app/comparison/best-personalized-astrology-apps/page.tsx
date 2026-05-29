@@ -391,12 +391,12 @@ export default function BestPersonalizedAstrologyAppsPage() {
                   </td>
                   <td className='border border-stroke-subtle p-4 text-center'>
                     <span className='text-content-muted text-sm'>
-                      Free + $2.99/mo
+                      Free + ~$9.99/mo
                     </span>
                   </td>
                   <td className='border border-stroke-subtle p-4 text-center'>
                     <span className='text-content-muted text-sm'>
-                      ~$12.99/mo
+                      ~$11.99/mo
                     </span>
                   </td>
                 </tr>
@@ -577,7 +577,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
               <div className='flex items-center gap-2'>
                 <span className='h-4 w-4 text-content-muted'>—</span>
                 <span className='text-sm text-content-muted'>
-                  Higher pricing (~$12.99/mo)
+                  Higher pricing (~$11.99/mo)
                 </span>
               </div>
               <div className='flex items-center gap-2'>

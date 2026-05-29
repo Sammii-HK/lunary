@@ -75,6 +75,7 @@ function TermCard({
   allTerms: GlossaryTerm[];
 }) {
   const grimoireLink = getTermLink(term.slug);
+  const definitionLink = `/grimoire/glossary/${term.slug}`;
 
   return (
     <article
@@ -82,15 +83,20 @@ function TermCard({
       className='p-4 rounded-lg bg-surface-elevated/30 border border-stroke-subtle/50 scroll-mt-24'
     >
       <div className='flex items-start justify-between gap-3 mb-2'>
-        <h4 className='font-medium text-content-primary text-sm'>
-          {term.term}
+        <h4 className='font-medium text-sm'>
+          <Link
+            href={definitionLink}
+            className='text-content-primary hover:text-content-brand transition-colors'
+          >
+            {term.term}
+          </Link>
         </h4>
         {grimoireLink && (
           <Link
             href={grimoireLink}
             className='text-xs px-2 py-1 rounded bg-layer-base/20 text-lunary-primary-400 hover:bg-layer-base/40 transition-colors whitespace-nowrap'
           >
-            Learn more →
+            In context →
           </Link>
         )}
       </div>
@@ -107,29 +113,18 @@ function TermCard({
           <span className='text-content-muted text-xs'>See also:</span>
           {term.relatedTerms.map((relatedSlug) => {
             const relatedTerm = allTerms.find((t) => t.slug === relatedSlug);
-            const relatedGrimoireLink = getTermLink(relatedSlug);
 
-            if (relatedGrimoireLink) {
+            // Link related terms to their glossary detail page so link equity
+            // flows hub -> spoke across the whole glossary cluster.
+            if (relatedTerm) {
               return (
                 <Link
                   key={relatedSlug}
-                  href={relatedGrimoireLink}
+                  href={`/grimoire/glossary/${relatedTerm.slug}`}
                   className='text-xs text-lunary-accent hover:text-lunary-accent/80 transition-colors'
                 >
-                  {relatedTerm?.term || relatedSlug}
-                </Link>
-              );
-            }
-
-            if (relatedTerm) {
-              return (
-                <a
-                  key={relatedSlug}
-                  href={`#${relatedTerm.slug}`}
-                  className='text-xs text-lunary-primary-400 hover:text-content-brand transition-colors'
-                >
                   {relatedTerm.term}
-                </a>
+                </Link>
               );
             }
 

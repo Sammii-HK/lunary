@@ -11,6 +11,8 @@ import { ShareActions } from './ShareActions';
 import { ShareFormatSelector } from './ShareFormatSelector';
 import { shareTracking } from '@/lib/analytics/share-tracking';
 import { isInDemoMode } from '@/lib/demo-mode';
+import { useReferralCode } from '@/hooks/useReferralCode';
+import { buildReferralLink } from '@/lib/referrals/referral-link';
 
 interface ShareMoonPhaseProps {
   moonPhase: string;
@@ -26,6 +28,7 @@ export function ShareMoonPhase({
   compact = false,
 }: ShareMoonPhaseProps) {
   const { user } = useUser();
+  const referralCode = useReferralCode();
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const lastGeneratedFormatRef = useRef<string | null>(null);
@@ -154,7 +157,9 @@ export function ShareMoonPhase({
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText('https://lunary.app/moon-calendar');
+      await navigator.clipboard.writeText(
+        buildReferralLink(referralCode, '/moon-calendar'),
+      );
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2000);
       shareTracking.shareCompleted(user?.id, 'moon-phase', 'clipboard');
@@ -170,9 +175,10 @@ export function ShareMoonPhase({
 
   const shareText = moonSign ? `${moonPhase} in ${moonSign}` : moonPhase;
 
+  const shareLink = buildReferralLink(referralCode, '/moon-calendar');
   const socialUrls = {
-    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Today's moon: ${shareText} 🌙`)}&url=${encodeURIComponent('https://lunary.app/moon-calendar')}`,
-    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`Today's moon: ${shareText} 🌙 lunary.app/moon-calendar`)}`,
+    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Today's moon: ${shareText} 🌙`)}&url=${encodeURIComponent(shareLink)}`,
+    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`Today's moon: ${shareText} 🌙 ${shareLink}`)}`,
   };
 
   return (
