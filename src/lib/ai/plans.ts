@@ -97,6 +97,11 @@ export const MEMORY_TURN_LIMITS: Record<AiPlanId, number> = {
 export const PLAN_LIMITS = {
   requestPerSecond: 1,
   requestsPerMinutePerIp: 10,
+  // Process-wide daily ceiling for paid surfaces that need a hard catastrophic
+  // -spend backstop on top of the per-IP / per-user limits (currently the iPrep
+  // /api/score route). Generous: far above realistic legit volume, intended
+  // only to cap runaway abuse. HELD for owner sign-off — tune to taste.
+  globalDailyCallCeiling: 2000,
 };
 
 export const CONTEXT_RULES: Record<

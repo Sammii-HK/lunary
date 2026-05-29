@@ -1,8 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import {
+  enforceIpRateLimit,
+  enforceGlobalDailyCeiling,
+} from '@/lib/ai/rate-limit';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
+
+/**
+ * Resolve the TRUSTED client IP for rate-limiting on this paid surface.
+ *
+ * On Vercel, `x-real-ip` is set by the platform edge to the actual connecting
+ * IP and cannot be overridden by the client, whereas `x-forwarded-for` may
+ * contain attacker-prepended values. We therefore prefer `x-real-ip`, fall
+ * back to the first `x-forwarded-for` hop, and finally to a shared 'unknown'
+ * bucket so callers that strip IP headers are still throttled together (never
+ * silently exempt). This is deliberately NOT keyed on the spoofable
+ * X-RC-User-Id header.
+ */
+const resolveTrustedIp = (request: NextRequest): string => {
+  const realIp = request.headers.get('x-real-ip')?.trim();
+  if (realIp) return realIp;
+  const forwarded = request.headers
+    .get('x-forwarded-for')
+    ?.split(',')[0]
+    ?.trim();
+  if (forwarded) return forwarded;
+  return 'unknown';
+};
 
 const scoreRequestSchema = z.object({
   transcript: z.string().max(8000),
@@ -51,10 +77,50 @@ Return ONLY the JSON object. No markdown, no explanation.`;
 }
 
 export async function POST(request: NextRequest) {
-  // Require RevenueCat user ID — only premium users should reach this endpoint
+  const now = Date.now();
+
+  // Require RevenueCat user ID — only premium users should reach this endpoint.
+  // NOTE: this header is client-supplied and trivially spoofable, so it is kept
+  // as a cheap first gate but is NOT relied upon alone for cost control — the
+  // rate limits below are keyed on the trusted IP and a global ceiling.
+  // TODO(owner): verify the RevenueCat entitlement server-side (validate the
+  // RC user/token against the RevenueCat API) instead of trusting this header.
+  // Deliberately NOT built here — it is an owner cost/UX + secrets decision.
   const rcUserId = request.headers.get('X-RC-User-Id');
   if (!rcUserId || rcUserId === 'anonymous') {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 });
+  }
+
+  // Cost/abuse guard 1: per-IP rate limit keyed on the TRUSTED IP (mirrors the
+  // chat route's enforceIpRateLimit, same 10/min window from PLAN_LIMITS). The
+  // spoofable X-RC-User-Id header is not trusted for this — see resolveTrustedIp.
+  const ipCheck = enforceIpRateLimit(resolveTrustedIp(request), now);
+  if (!ipCheck.ok) {
+    return NextResponse.json(
+      { error: ipCheck.reason ?? 'Too many requests' },
+      {
+        status: 429,
+        headers: ipCheck.retryAfter
+          ? { 'Retry-After': ipCheck.retryAfter.toString() }
+          : undefined,
+      },
+    );
+  }
+
+  // Cost/abuse guard 2: process-wide global daily ceiling — a hard catastrophic
+  // -spend backstop independent of caller identity (the per-IP limit alone does
+  // not bound total daily spend across many IPs).
+  const globalCheck = enforceGlobalDailyCeiling(undefined, now);
+  if (!globalCheck.ok) {
+    return NextResponse.json(
+      { error: globalCheck.reason ?? 'Daily capacity reached' },
+      {
+        status: 429,
+        headers: globalCheck.retryAfter
+          ? { 'Retry-After': globalCheck.retryAfter.toString() }
+          : undefined,
+      },
+    );
   }
 
   let body: unknown;

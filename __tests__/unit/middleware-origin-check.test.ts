@@ -6,8 +6,10 @@
  * The middleware blocks direct, browser-less API calls to a hand-picked set of
  * sensitive POST endpoints: real browsers always send an `Origin` header, bots
  * hammering the API directly usually don't. These tests pin which routes ARE
- * protected (so a regression that drops one fails CI) and — importantly for the
- * cost/abuse audit — DOCUMENT that the paid AI/LLM routes are NOT in that set.
+ * protected (so a regression that drops one fails CI), including the paid
+ * AI/LLM cost routes (grimoire-quick, score, ai-answer) added to the gate in
+ * fix/ai-route-cost-guards. (/api/ai/chat is intentionally left out of scope —
+ * see the note in the GUARD block — as it has strong per-route guards.)
  *
  * Pure unit: the middleware is a plain function; we hand it a NextRequest and a
  * minimal event stub. No network, no DB, no model. A non-production host
@@ -74,46 +76,53 @@ describe('middleware origin gate — guard invariants', () => {
     });
   });
 
-  describe('RISK: paid AI/LLM routes are NOT behind the origin gate', () => {
-    // BUG/RISK: src/middleware.ts only applies the Origin gate to auth, share
-    // (POST) and newsletter (POST). The paid DeepInfra routes — /api/ai/chat,
-    // /api/ai/grimoire-quick, /api/score, /api/community/.../ai-answer — are
-    // NOT in `requiresOriginCheck`, so the middleware does not reject a direct,
-    // browser-less call to them. Per-route guards (auth, daily ceiling) are the
-    // only backstop; the cheap "no Origin header => 403" bot filter that auth
-    // routes enjoy does not protect the spend-bearing endpoints.
-    //
-    // IMPACT: the lowest-cost line of defence against scripted/bot abuse of the
-    // paid LLM endpoints is absent at the edge. This compounds the per-route
-    // gaps flagged in the grimoire-quick / score / ai-answer guard tests.
-    // SUGGESTED GUARD (owner decision, app-code change — NOT applied here):
-    //   add the paid AI POST routes to `requiresOriginCheck` in middleware.ts
-    //   (and to the `matcher`), mirroring the auth-route treatment, as a cheap
-    //   first filter in front of the per-route auth/rate-limit guards.
-    const paidAiPosts = [
-      '/api/ai/chat',
+  describe('GUARD: paid AI/LLM cost routes are now behind the origin gate', () => {
+    // FIXED (fix/ai-route-cost-guards): the spend-bearing DeepInfra POST routes
+    // /api/ai/grimoire-quick, /api/score and /api/community/.../ai-answer were
+    // added to `requiresOriginCheck` (and the matcher) in src/middleware.ts,
+    // mirroring the auth-route treatment. A direct, browser-less call with no
+    // (or a non-allow-listed) Origin is now rejected with 403 at the edge — a
+    // cheap first filter in front of the per-route auth/rate-limit guards.
+    const gatedPaidAiPosts = [
       '/api/ai/grimoire-quick',
       '/api/score',
       '/api/community/questions/1/ai-answer',
     ];
 
-    it.skip.each(paidAiPosts)(
-      '[RISK] should 403 %s on a direct call with no Origin — NOT gated today',
+    it.each(gatedPaidAiPosts)(
+      '[GUARD] 403s %s on a direct POST with no Origin header',
       (path) => {
         const res = call(path, { method: 'POST' });
-        // Desired hardened behaviour (currently fails — route is not gated):
         expect(res?.status).toBe(403);
       },
     );
 
-    it.each(paidAiPosts)(
-      '[current behaviour] does NOT 403 %s with a missing Origin (documents the gap)',
+    it.each(gatedPaidAiPosts)(
+      '[GUARD] 403s %s on a POST whose Origin is not allow-listed',
       (path) => {
-        const res = call(path, { method: 'POST' });
-        // Middleware either returns undefined (pass-through) or a non-403
-        // result for these paths — it never blocks them on origin.
-        expect(res?.status === 403).toBe(false);
+        const res = call(path, { origin: 'https://evil.example.com' });
+        expect(res?.status).toBe(403);
       },
     );
+
+    it.each(gatedPaidAiPosts)(
+      'allows %s through the origin gate when the Origin is allow-listed',
+      (path) => {
+        const res = call(path, { origin: 'https://lunary.app' });
+        // Past the origin gate (not a 403); per-route auth/rate-limit guards
+        // then apply downstream.
+        expect(res?.status).not.toBe(403);
+      },
+    );
+
+    // NOTE: /api/ai/chat is intentionally NOT added to the origin gate here.
+    // It is the most heavily guarded route (auth + per-IP + per-user + per-day
+    // ceiling + input bound) and is left out of this change's scope; its strong
+    // per-route guards are pinned in ai-chat-guard.test.ts. This documents that
+    // the omission is deliberate, not a regression.
+    it('does not origin-gate /api/ai/chat (out of scope; covered by its per-route guards)', () => {
+      const res = call('/api/ai/chat', { method: 'POST' });
+      expect(res?.status === 403).toBe(false);
+    });
   });
 });

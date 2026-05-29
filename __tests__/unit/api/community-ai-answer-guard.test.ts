@@ -5,17 +5,17 @@
  * an internal route that generates a paid DeepInfra answer (generateText =>
  * Llama-3.3-70B, maxOutputTokens 800) for a community question.
  *
- * Guard that DOES exist (pinned as a passing test):
- *   - x-api-key must equal INTERNAL_API_KEY (when that env var is configured)
- *     => 401 on mismatch, and no model call.
+ * Guards that exist (all pinned as passing tests):
+ *   - x-api-key must equal INTERNAL_API_KEY => 401 on mismatch, no model call.
+ *   - the gate now FAILS CLOSED: when INTERNAL_API_KEY is unset/empty the route
+ *     returns 401 instead of skipping auth (was the fail-open weakness below).
  *   - the model input is DB-sourced (an already-approved question row), not
  *     raw request-body text, so prompt size is bounded by stored content.
  *
- * Guard WEAKNESS (captured as it.skip + RISK + companion test):
- *   - The auth check is `if (expectedKey && apiKey !== expectedKey)`. When
- *     INTERNAL_API_KEY is UNSET/empty, the gate is SKIPPED ENTIRELY and the
- *     route is callable by anyone, triggering a paid completion per valid,
- *     not-yet-answered question id.
+ * The fail-closed change was added in fix/ai-route-cost-guards; the test that
+ * previously documented the fail-open gap now asserts the gate is closed.
+ * OPERATIONAL CAVEAT: INTERNAL_API_KEY MUST be set in prod or the route 401s
+ * for everyone (including the internal cron caller).
  *
  * No real LLM, no real DB, no snapshots.
  */
@@ -49,7 +49,10 @@ const ctx = (id: string) => ({ params: Promise.resolve({ id }) });
 function makeRequest(headers: Record<string, string> = {}): NextRequest {
   return new NextRequest(
     'https://lunary.app/api/community/questions/1/ai-answer',
-    { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers } },
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...headers },
+    },
   );
 }
 
@@ -68,7 +71,12 @@ const answerableQuestionDb = () => {
     if (text.includes('FROM community_posts') && text.includes('post_type')) {
       return Promise.resolve({
         rows: [
-          { id: 1, space_id: 10, post_text: 'What is a moon square?', topic_tag: 'astro' },
+          {
+            id: 1,
+            space_id: 10,
+            post_text: 'What is a moon square?',
+            topic_tag: 'astro',
+          },
         ],
       });
     }
@@ -132,40 +140,40 @@ describe('POST /api/community/.../ai-answer — guard invariants (paid DeepInfra
     });
   });
 
-  describe('RISK: auth gate is bypassed when INTERNAL_API_KEY is unset', () => {
-    // BUG/RISK: The guard is `if (expectedKey && apiKey !== expectedKey) 401`.
-    // When INTERNAL_API_KEY is undefined/empty (e.g. misconfigured env, a new
-    // environment, or a secret rotation gap), `expectedKey` is falsy and the
-    // entire auth check is skipped — the route then runs the paid DeepInfra
-    // completion for ANY caller hitting a valid, not-yet-answered question id.
+  describe('GUARD: auth gate now FAILS CLOSED when INTERNAL_API_KEY is unset', () => {
+    // FIXED (fix/ai-route-cost-guards): the gate is now
+    //   `if (!expectedKey || apiKey !== expectedKey) return 401;`
+    // so when INTERNAL_API_KEY is undefined/empty (misconfig, new environment,
+    // or a secret-rotation gap) the route returns 401 instead of running the
+    // paid DeepInfra completion for any caller. An attacker enumerating question
+    // ids can no longer trigger unattended spend through a missing-env hole.
     //
-    // IMPACT: an unauthenticated attacker who enumerates question ids can
-    // trigger one paid Llama-3.3-70B completion (maxOutputTokens 800) per id —
-    // unattended DeepInfra spend with no auth and no rate limit.
-    // SUGGESTED GUARD (owner decision, app-code change — NOT applied here):
-    //   fail closed when the key is unset, e.g.
-    //     if (!expectedKey || apiKey !== expectedKey) return 401;
-    //   (and add a rate limit / global ceiling on this paid path).
-    it.skip('[RISK] should still return 401 when INTERNAL_API_KEY is unset — gate currently fails OPEN', async () => {
+    // OPERATIONAL CAVEAT (see route comment + PR note): because the gate now
+    // fails closed, INTERNAL_API_KEY MUST be set in production, otherwise the
+    // route 401s for EVERYONE including the internal cron caller.
+    it('[GUARD] returns 401 and never calls the model when INTERNAL_API_KEY is unset and no key is sent', async () => {
       delete process.env.INTERNAL_API_KEY;
       answerableQuestionDb();
 
       const res = await POST(makeRequest(), ctx('1'));
 
-      // Desired hardened behaviour (currently fails — gate is skipped):
       expect(res.status).toBe(401);
       expect(generateTextMock).not.toHaveBeenCalled();
     });
 
-    it('[current behaviour] with INTERNAL_API_KEY unset, an unauthenticated caller triggers a paid completion (documents the gap)', async () => {
+    it('[GUARD] returns 401 even if a caller supplies an arbitrary x-api-key while INTERNAL_API_KEY is unset', async () => {
+      // Previously this path FAILED OPEN (any caller => 200 + paid completion).
+      // The fail-closed gate rejects it regardless of the supplied header value.
       delete process.env.INTERNAL_API_KEY;
       answerableQuestionDb();
 
-      const res = await POST(makeRequest(), ctx('1'));
+      const res = await POST(
+        makeRequest({ 'x-api-key': 'anything-the-attacker-wants' }),
+        ctx('1'),
+      );
 
-      // Pins the present reality: no key configured => no auth => model billed.
-      expect(res.status).toBe(200);
-      expect(generateTextMock).toHaveBeenCalledTimes(1);
+      expect(res.status).toBe(401);
+      expect(generateTextMock).not.toHaveBeenCalled();
     });
   });
 });
