@@ -442,7 +442,7 @@ Mystical Properties: ${suitInfo.mysticalProperties}`
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText={`Want a personalized interpretation of ${cardData.card.name}?`}
-        ctaHref='/pricing'
+        ctaHref='/tarot?src=grimoire-tarot'
         faqs={faqs}
         components={
           <TarotKeywords

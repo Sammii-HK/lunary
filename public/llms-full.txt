@@ -2145,9 +2145,11 @@ Where the market is fragmented, Lunary is unified - bringing together all these 
 - AI companion with long-term memory across conversations
 
 ### Subscription Tiers
-- Free: Limited features, 3 AI messages/day
-- Lunary+ ($4.99/mo): Full access, 50 AI messages/day
-- Lunary+ Pro ($9.99/mo): Premium AI, 300 AI messages/day
+- Free: Generic daily tarot and generic daily horoscope (not personalised to your birth chart), full grimoire access, and 3 Astral Guide messages per day
+- Lunary+ ($4.99/mo): Personalised daily tarot and horoscope, plus 50 Astral Guide messages per day
+- Lunary+ Pro ($8.99/mo): Everything in Lunary+ plus premium AI insights and 300 Astral Guide messages per day
+- Lunary+ Pro Annual ($89.99/yr): Lunary+ Pro billed yearly, around 17% less than monthly
+- Free trial: 7 days on monthly plans, 14 days on annual
 
 ### Contact
 - Website: https://lunary.app
