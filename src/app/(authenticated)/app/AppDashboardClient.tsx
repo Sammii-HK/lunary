@@ -482,9 +482,15 @@ export default function AppDashboardClient() {
         {/* Surface the daily check-in streak so the visit becomes something to
             protect (loss-averse return-tomorrow mechanic). recordCheckIn()
             already fires on load above; this only READS the streak. Renders
-            null at streak 0, so new users see no extra UI. */}
+            null at streak 0, so new users see no extra UI. showNextMilestone
+            adds a "come back tomorrow" hook (progress to the next milestone)
+            from the same fetched streak — no extra request. */}
         {authState.isAuthenticated && (
-          <StreakBanner location='horoscope' className='mx-auto' />
+          <StreakBanner
+            location='horoscope'
+            className='mx-auto'
+            showNextMilestone
+          />
         )}
 
         <div className='flex flex-col gap-4'>

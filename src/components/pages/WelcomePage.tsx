@@ -198,12 +198,28 @@ export default function WelcomePage() {
               they mean, and stop relying on generic horoscopes.
             </p>
             <div className='flex flex-col gap-3 justify-center items-center pt-2 pb-0 md:pb-6'>
+              {/* Value-first primary CTA: show the real chart (no account) before
+                  the registration wall. Signup stays one tap away below. */}
               <Button variant='lunary-soft' size='lg' asChild>
+                <Link
+                  href='/free-chart?source=home_hero'
+                  onClick={() =>
+                    handleCtaClick(
+                      'hero',
+                      CTA_COPY.freeChart.seeChart,
+                      '/free-chart?source=home_hero',
+                    )
+                  }
+                >
+                  {CTA_COPY.freeChart.seeChart}
+                </Link>
+              </Button>
+              <Button variant='outline' size='lg' asChild>
                 <Link
                   href='/auth?signup=true'
                   onClick={() =>
                     handleCtaClick(
-                      'hero',
+                      'hero_signup',
                       CTA_COPY.auth.createChart,
                       '/auth?signup=true',
                     )
