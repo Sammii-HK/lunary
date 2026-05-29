@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { captureEvent } from '@/lib/posthog-client';
 import { setOnboardingPrefill } from '@/lib/onboarding/prefill';
+import { ChartTasteWidget } from './ChartTasteWidget';
 
 type Placement = {
   body: string;
@@ -637,6 +638,14 @@ export function FreeChartClient() {
               onEmailSubmit={handleEmailSubmit}
               onSignup={goToSignup}
             />
+          </div>
+        </section>
+      )}
+
+      {report && report.placements.length > 0 && (
+        <section className='bg-surface-elevated'>
+          <div className='mx-auto max-w-3xl px-4 py-12'>
+            <ChartTasteWidget placements={report.placements} source={source} />
           </div>
         </section>
       )}
