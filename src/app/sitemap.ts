@@ -454,11 +454,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     { path: 'grimoire/lunar-nodes', changeFrequency: 'monthly', priority: 0.8 },
     { path: 'grimoire/transits', changeFrequency: 'monthly', priority: 0.8 },
-    {
-      path: 'grimoire/transits/transit-of-the-day',
-      changeFrequency: 'daily',
-      priority: 0.8,
-    },
     { path: 'grimoire/moon', changeFrequency: 'monthly', priority: 0.8 },
     {
       path: 'grimoire/astrology/rulerships-and-dignities',

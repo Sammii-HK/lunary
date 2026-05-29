@@ -156,35 +156,37 @@ describe('Indexability: sitemap never advertises a noindex static page', () => {
   });
 
   /**
-   * BUG (#286-class, crawl-budget leak): `grimoire/transits/transit-of-the-day`
-   * is advertised in sitemap.ts `staticPageMeta`
-   *   { path: 'grimoire/transits/transit-of-the-day', changeFrequency: 'daily', priority: 0.8 }
-   * but its page (src/app/grimoire/transits/transit-of-the-day/page.tsx) sets
+   * General invariant (#286-class, crawl-budget leak): no STATIC route the
+   * sitemap advertises may declare `robots.index:false`. Advertising a noindex
+   * page tells Bing / AI crawlers to fetch a URL the page then tells them NOT to
+   * index: a wasted, self-contradictory crawl signal on the discovery surface
+   * that matters most now (Google deindexed Lunary).
+   *
+   * This was previously skipped because `grimoire/transits/transit-of-the-day`
+   * was advertised in sitemap.ts `staticPageMeta` while its page
+   * (src/app/grimoire/transits/transit-of-the-day/page.tsx) sets
    *   robots: { index: false, follow: true, googleBot: { index: false, ... } }
    *
-   * Reach impact: the sitemap tells Bing / AI crawlers to fetch a daily,
-   * priority-0.8 URL that the page then tells them NOT to index. It is a wasted,
-   * self-contradictory crawl signal on the discovery surface that matters most
-   * now (Google deindexed Lunary). Not a lost ranking page, but a steady drip of
-   * misdirected crawl budget away from the indexable transit pages.
-   *
-   * Fix (not applied here — additive tests only): either drop the entry from
-   * staticPageMeta/staticPageSources, or make the page indexable if a stable
-   * canonical "today's transit" page is actually wanted. When fixed, delete the
-   * skip and the assertion below passes as part of the general invariant.
+   * Fix (`fix/sitemap-noindex-delisting`): the contradiction was resolved in the
+   * safe direction. The sitemap entry was removed so a noindex page is no
+   * longer advertised. The page's `robots` metadata was left untouched (whether
+   * that page SHOULD be indexable is a separate content-strategy decision). The
+   * invariant now holds for every static route, so this is un-skipped and the
+   * inverse guard below asserts the contradiction set is empty.
    */
-  it.skip('BUG: no static sitemap path declares robots.index:false', () => {
+  it('no static sitemap path declares robots.index:false', () => {
     const contradictions = noindexRoutes.filter((r) => sitemapPaths.has(r));
     expect(contradictions).toEqual([]);
   });
 
-  it('pins the known contradiction so the fix flips this test (transit-of-the-day)', () => {
-    // Inverse guard for the skipped invariant above: today exactly one static
-    // sitemap path is noindexed. If someone fixes it, this fails loudly and the
-    // skipped test should be un-skipped; if someone adds a NEW contradiction,
-    // the count rises and this also fails.
+  it('keeps the (now-fixed) contradiction set empty (transit-of-the-day delisted)', () => {
+    // Inverse guard for the invariant above: the sitemap-vs-noindex
+    // contradiction set is now empty. transit-of-the-day was the sole offender
+    // and has been removed from staticPageMeta. If someone re-adds it, or adds
+    // a NEW noindex route to the sitemap, this fails loudly alongside the
+    // invariant above.
     const contradictions = noindexRoutes.filter((r) => sitemapPaths.has(r));
-    expect(contradictions).toEqual(['/grimoire/transits/transit-of-the-day']);
+    expect(contradictions).toEqual([]);
   });
 });
 
