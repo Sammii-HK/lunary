@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useRef, useState } from 'react';
-import { Check, Sparkles, Telescope } from 'lucide-react';
+import { Check, Moon, Sparkles, Telescope } from 'lucide-react';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { BirthChartPlacement, useUser } from '@/context/UserContext';
 import {
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/expandable-card';
 import { ShareSkyNow } from '@/components/share/ShareSkyNow';
 import { TransitDurationBadge } from '@/components/TransitDurationBadge';
+import { getVoidOfCourseMoon } from '@/lib/astro/voc-moon';
 import { useLocation } from '@/hooks/useLocation';
 import { composePlacementNarrative } from '@/lib/copy/transit-copy';
 import {
@@ -436,6 +437,9 @@ export const SkyNowCard = ({
     return planets.filter((p) => p.retrograde).length;
   }, [planets]);
 
+  // Void-of-course Moon, computed from the chart already in hand (no fetch).
+  const vocMoon = useMemo(() => getVoidOfCourseMoon(planets), [planets]);
+
   const natalHouseInfo = useMemo(
     () => buildNatalHouseInfo(user?.birthChart),
     [user?.birthChart],
@@ -525,6 +529,20 @@ export const SkyNowCard = ({
             );
           })}
         </div>
+        {vocMoon?.isVoid && (
+          <div className='mt-2 flex items-center gap-1.5 rounded-md border border-stroke-subtle/50 bg-surface-card/40 px-2 py-1.5 text-[11px] leading-snug text-content-muted'>
+            <Moon className='h-3 w-3 shrink-0 text-content-brand-secondary' />
+            <span>
+              Moon void of course
+              {vocMoon.moonSign ? ` in ${vocMoon.moonSign}` : ''}
+              {vocMoon.hoursRemaining > 0
+                ? ` for ~${vocMoon.hoursRemaining}h`
+                : ''}
+              . A pause before the next sign, so finish things off, rest, and
+              hold off on new starts.
+            </span>
+          </div>
+        )}
         {!showNatalHouses && (
           <div className='mt-2 flex items-center justify-between px-0.5'>
             <p className='text-[10px] text-content-muted'>

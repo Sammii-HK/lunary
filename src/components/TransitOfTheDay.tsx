@@ -16,6 +16,7 @@ import {
 } from '../../utils/astrology/personalTransits';
 import { useSubscription } from '../hooks/useSubscription';
 import { hasFeatureAccess } from '../../utils/pricing';
+import { TransitDurationBadge } from '@/components/TransitDurationBadge';
 import { bodiesSymbols } from '@/constants/symbols';
 import dayjs from 'dayjs';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
@@ -495,9 +496,19 @@ export const TransitOfTheDay = () => {
               </span>
             )}
           </p>
+          {transit.houseMeaning && (
+            <p className='text-[11px] text-content-muted/80 mb-1'>
+              {transit.houseMeaning}
+            </p>
+          )}
           <p className='text-xs text-content-muted line-clamp-2'>
             {transit.actionableGuidance}
           </p>
+          {transit.duration?.displayText && (
+            <div className='mt-1.5'>
+              <TransitDurationBadge duration={transit.duration} />
+            </div>
+          )}
           {nextHitLine}
         </div>
         <ArrowRight className='w-4 h-4 text-content-muted group-hover:text-content-brand-secondary transition-colors flex-shrink-0 mt-1' />
