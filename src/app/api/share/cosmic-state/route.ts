@@ -1,32 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { kvGet, kvPut } from '@/lib/cloudflare/kv';
+import { getShareReferralCode } from '@/lib/share/referral-url';
 
 export const dynamic = 'force-dynamic';
 
 const SHARE_TTL_SECONDS = 60 * 60 * 24; // 24 hours (daily refresh)
 
-export type ShareCosmicStatePayload = {
-  name?: string;
-  moonPhase: {
-    name: string;
-    icon: {
-      src: string;
-      alt: string;
-    };
-  };
-  zodiacSeason: string;
-  insight: string;
-  transit?: {
-    headline: string;
-    description: string;
-  };
-  date: string;
-  format?: string;
-};
+const cosmicStateShareSchema = z.object({
+  name: z.string().max(64).optional(),
+  moonPhase: z.object({
+    name: z.string().max(64),
+    icon: z.object({
+      src: z.string().max(256),
+      alt: z.string().max(64),
+    }),
+  }),
+  zodiacSeason: z.string().max(32),
+  insight: z.string().max(512),
+  transit: z
+    .object({
+      headline: z.string().max(128),
+      description: z.string().max(512),
+    })
+    .optional(),
+  date: z.string().max(32),
+  format: z.string().max(16).optional(),
+});
+
+export type ShareCosmicStatePayload = z.infer<typeof cosmicStateShareSchema>;
 
 export type ShareCosmicStateRecord = ShareCosmicStatePayload & {
   shareId: string;
   createdAt: string;
+  /** Sharer's referral code, captured at share-creation time. */
+  referralCode?: string;
 };
 
 function createShareId() {
@@ -52,6 +60,18 @@ function secureRandomHex(bytes: number) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const parsed = cosmicStateShareSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid share payload',
+          details: parsed.error.format(),
+        },
+        { status: 400 },
+      );
+    }
+
     const {
       name,
       moonPhase,
@@ -60,14 +80,13 @@ export async function POST(request: NextRequest) {
       transit,
       date,
       format = 'square',
-    } = body as ShareCosmicStatePayload;
+    } = parsed.data;
 
-    if (!moonPhase || !zodiacSeason || !insight || !date) {
-      return NextResponse.json(
-        { error: 'Missing required cosmic state data' },
-        { status: 400 },
-      );
-    }
+    // Capture the sharer's referral code (if signed in) so the public share
+    // page can carry attribution through to the recipient's signup. Falls back
+    // to undefined for anonymous shares.
+    const referralCode =
+      (await getShareReferralCode(request.headers)) ?? undefined;
 
     const shareId = createShareId();
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
@@ -83,6 +102,7 @@ export async function POST(request: NextRequest) {
       transit,
       date,
       format,
+      referralCode,
     };
 
     const stored = await kvPut(
@@ -99,6 +119,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
+      success: true,
       shareId,
       shareUrl,
     });
