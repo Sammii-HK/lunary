@@ -387,7 +387,11 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
     pathname.startsWith('/api/auth/resend-verification') ||
     (pathname.startsWith('/api/share/') && request.method === 'POST') ||
     (pathname.startsWith('/api/newsletter/subscribers') &&
-      request.method === 'POST');
+      request.method === 'POST') ||
+    // Unauthenticated, DeepInfra-billed taste endpoint: real browsers send an
+    // Origin header, direct-curl abuse bots don't. Blocks the trivial storm at
+    // the edge as a complement to the in-route IP + global ceilings.
+    (pathname.startsWith('/api/ai/chart-taste') && request.method === 'POST');
 
   if (requiresOriginCheck) {
     const origin = request.headers.get('origin');
@@ -651,6 +655,8 @@ export const config = {
     '/api/share/:path*',
     // Newsletter subscribe (origin check on POST)
     '/api/newsletter/subscribers',
+    // Public billed AI taste endpoint (origin check on POST)
+    '/api/ai/chart-taste',
     // Test/debug block
     '/api/test/:path*',
     '/api/debug/:path*',
