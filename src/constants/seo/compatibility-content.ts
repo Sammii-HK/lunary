@@ -34,10 +34,41 @@ interface CuratedPair {
   advice: string;
 }
 
-// Get curated pair data if available
+// Canonicalise two sign keys into the alphabetical "a-and-b" slug. Defined
+// up here because the curated map below is keyed on this canonical form.
+function canonicalPairSlug(sign1Key: string, sign2Key: string): string {
+  return sign1Key <= sign2Key
+    ? `${sign1Key}-and-${sign2Key}`
+    : `${sign2Key}-and-${sign1Key}`;
+}
+
+// Curated pairs, re-keyed to the canonical alphabetical slug. The source JSON
+// stores 12 of the 42 pairs under non-alphabetical keys (e.g.
+// "taurus-and-cancer"), but every consumer builds slugs alphabetically via
+// compatibilitySlug() (e.g. "cancer-and-taurus"). Without this normalisation
+// those 12 curated pages fail the curated lookup, get redirected to a slug that
+// is never statically generated, and render noindexed. Re-keying once here keeps
+// the data and every lookup in the same canonical space. There are no key
+// collisions, so no curated pair is lost.
+const curatedPairs: Record<string, CuratedPair> = (() => {
+  const raw = curatedPairsData.pairs as Record<string, CuratedPair>;
+  const normalised: Record<string, CuratedPair> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    const [a, b] = key.split('-and-');
+    const canonical = b ? canonicalPairSlug(a, b) : key;
+    normalised[canonical] = value;
+  }
+  return normalised;
+})();
+
+// Get curated pair data if available. The slug is expected to already be the
+// canonical alphabetical form (as produced by compatibilitySlug); we also accept
+// a raw non-alphabetical slug by re-canonicalising it so lookups never miss.
 function getCuratedPair(slug: string): CuratedPair | null {
-  const pairs = curatedPairsData.pairs as Record<string, CuratedPair>;
-  return pairs[slug] || null;
+  if (curatedPairs[slug]) return curatedPairs[slug];
+  const [a, b] = slug.split('-and-');
+  if (!b) return null;
+  return curatedPairs[canonicalPairSlug(a, b)] || null;
 }
 
 // Element compatibility matrix
@@ -66,11 +97,8 @@ export function generateCompatibilityContent(
     throw new Error(`Invalid signs: ${sign1Key}, ${sign2Key}`);
   }
 
-  // Normalize slug (alphabetical order)
-  const slug =
-    sign1Key <= sign2Key
-      ? `${sign1Key}-and-${sign2Key}`
-      : `${sign2Key}-and-${sign1Key}`;
+  // Normalise slug to canonical alphabetical order so it matches the curated map.
+  const slug = canonicalPairSlug(sign1Key, sign2Key);
 
   // Check for curated content first
   const curated = getCuratedPair(slug);
@@ -244,8 +272,9 @@ export function getAllCompatibilitySlugs(): string[] {
 }
 
 export function getCuratedCompatibilitySlugs(): string[] {
-  const pairs = curatedPairsData.pairs as Record<string, CuratedPair>;
-  return Object.keys(pairs).sort();
+  // Keys are already canonical alphabetical slugs (see curatedPairs above), so
+  // these match the slugs every consumer builds via compatibilitySlug().
+  return Object.keys(curatedPairs).sort();
 }
 
 // Pre-computed set of curated slugs for O(1) membership checks. Used to keep
@@ -255,9 +284,7 @@ const curatedSlugSet = new Set(getCuratedCompatibilitySlugs());
 
 // Normalise two sign keys into the canonical alphabetical slug used everywhere.
 export function compatibilitySlug(sign1Key: string, sign2Key: string): string {
-  return sign1Key <= sign2Key
-    ? `${sign1Key}-and-${sign2Key}`
-    : `${sign2Key}-and-${sign1Key}`;
+  return canonicalPairSlug(sign1Key, sign2Key);
 }
 
 // True only for the hand-written, substantive pairs. Non-curated pairs fall
