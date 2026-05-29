@@ -26,6 +26,7 @@ import { HoroscopeReflectionPrompts } from '@/components/horoscope/HoroscopeRefl
 import { HoroscopeSeasonReading } from '@/components/horoscope/HoroscopeSeasonReading';
 import { HoroscopeRitualForDay } from '@/components/horoscope/HoroscopeRitualForDay';
 import { Heading } from '@/components/ui/Heading';
+import { TrialValueReveal } from '@/components/TrialValueReveal';
 import { TransitScrubber } from '@/components/charts/TransitScrubber';
 // AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
 // import AudioNarrator from '@/components/audio/AudioNarrator';
@@ -625,6 +626,10 @@ export function HoroscopeView({
       {/* Season & Ritual, paid with horoscope data */}
       {hasPaidAccess && horoscope && (
         <div className='space-y-3' data-testid='ritual-section'>
+          {/* One-time trial value reveal — only renders on a real personalised
+              horoscope, gated internally on active trial + birth data + a shared
+              one-time flag (shows on horoscope OR tarot first-view, not both). */}
+          <TrialValueReveal surface='horoscope' />
           <HoroscopeSeasonReading
             sunSign={horoscope.sunSign}
             moonPhase={horoscope.moonPhase}
