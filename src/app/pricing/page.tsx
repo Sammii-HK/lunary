@@ -156,6 +156,17 @@ export default function PricingPage() {
       setBillingCycle('annual');
     }
 
+    // Honour a ?plan= hint so promo links land on the plan the code can
+    // discount. The live email promo (BLUEMOON) is annual-only, so an annual
+    // hint avoids dropping the user on the default monthly view where an
+    // annual-scoped code would silently fail to apply.
+    const planHint = params.get('plan');
+    if (planHint === 'annual' || planHint === 'year') {
+      setBillingCycle('annual');
+    } else if (planHint === 'monthly' || planHint === 'month') {
+      setBillingCycle('monthly');
+    }
+
     loadPricingPlans();
   }, [currency]);
 

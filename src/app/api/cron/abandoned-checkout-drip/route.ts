@@ -5,6 +5,7 @@ import {
   renderAbandonedCheckoutEmail2,
   renderAbandonedCheckoutEmail3,
 } from '@/lib/email-components/AbandonedCheckoutDripEmails';
+import { EMAIL_PROMO } from '@/lib/promo/email-promo';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,14 +94,14 @@ export async function GET(request: NextRequest) {
       try {
         const html = await renderAbandonedCheckoutEmail3({
           userName: user.name || 'there',
-          couponCode: 'WELCOME15',
-          discountPercent: 15,
+          couponCode: EMAIL_PROMO.code,
+          discountPercent: EMAIL_PROMO.percent,
           userEmail: user.email,
         });
 
         await sendEmail({
           to: user.email,
-          subject: 'Here is 15% off Lunary+, just for you',
+          subject: `Here is ${EMAIL_PROMO.percent}% off Lunary+, just for you`,
           html,
           tracking: {
             userId: user.user_id,
