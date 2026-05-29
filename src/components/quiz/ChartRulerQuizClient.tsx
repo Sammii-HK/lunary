@@ -285,7 +285,14 @@ function buildShareAssets(result: QuizResult) {
   const quizLandingPath = `/quiz/beyond-your-sun-sign/${result.quizSlug}`;
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const shareText = `I got "${label}" in the Beyond Your Sun Sign quiz. ${subtitle}.`;
-  const fullQuizUrl = `${origin}${quizLandingPath}`;
+  // Tag the shared link so referral traffic from quiz cards is attributable,
+  // mirroring how /api/share/birth-chart stamps UTMs on its share URL.
+  const shareParams = new URLSearchParams({
+    utm_source: 'quiz_share',
+    utm_medium: 'referral',
+    utm_campaign: 'chart_ruler',
+  });
+  const fullQuizUrl = `${origin}${quizLandingPath}?${shareParams.toString()}`;
 
   return {
     ogPath,
