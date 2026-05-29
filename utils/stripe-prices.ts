@@ -349,6 +349,35 @@ export const STRIPE_PRICE_MAPPING = {
   },
 } as const;
 
+/**
+ * One-time (mode: 'payment') products. These are buy-once artefacts, NOT
+ * subscriptions, so they live outside STRIPE_PRICE_MAPPING (which is recurring
+ * only and consumed by the subscription checkout + price-mapping generator).
+ *
+ * The price id is read from an env var rather than hard-coded so we never ship
+ * an invented live price. Sammii creates the one-time price in Stripe and sets
+ * the env var; until then the checkout endpoint returns a clear 503 instead of
+ * charging the wrong thing. See the cosmic-report checkout route.
+ */
+export type OneTimeProductId = 'cosmic_report';
+
+export const ONE_TIME_PRODUCTS: Record<
+  OneTimeProductId,
+  { envVar: string; label: string }
+> = {
+  cosmic_report: {
+    envVar: 'STRIPE_PRICE_COSMIC_REPORT',
+    label: 'Personalised Cosmic Report',
+  },
+};
+
+export function getOneTimePriceId(product: OneTimeProductId): string | null {
+  const config = ONE_TIME_PRODUCTS[product];
+  if (!config) return null;
+  const value = process.env[config.envVar];
+  return value && value.trim().length > 0 ? value.trim() : null;
+}
+
 export type PlanId = keyof typeof STRIPE_PRICE_MAPPING;
 export type Currency = string;
 

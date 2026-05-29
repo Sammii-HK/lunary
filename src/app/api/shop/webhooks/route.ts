@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { createHmac } from 'crypto';
 import { headers } from 'next/headers';
 import { sql } from '@vercel/postgres';
 import { sendEmail } from '@/lib/email';
@@ -7,6 +8,8 @@ import {
   generateTemplateDeliveryEmailHTML,
   generateTemplateDeliveryEmailText,
 } from '@/lib/email-components/TemplateDeliveryEmail';
+import { buildReportData } from '@/lib/cosmic-report/build';
+import { buildShareUrl } from '@/lib/cosmic-report/share';
 
 // ─── Notion template registry ─────────────────────────────────────────────────
 // Maps Stripe product metadata templateId → display name.
@@ -156,6 +159,15 @@ export async function POST(request: NextRequest) {
   // ── Notion template purchase ──────────────────────────────────────────────
   if (session.metadata?.purchaseType === 'notion_template') {
     await handleTemplatePurchase(session);
+    return NextResponse.json({ received: true });
+  }
+
+  // ── Personalised Cosmic Report (buy-once) ─────────────────────────────────
+  // Unlike the static digital packs, this fulfilment is DYNAMIC: we generate the
+  // buyer's own report from their stored birth chart at purchase time and email
+  // them the on-demand PDF link, rather than handing over a pre-uploaded blob.
+  if (session.metadata?.purchaseType === 'cosmic_report') {
+    await handleCosmicReportPurchase(session);
     return NextResponse.json({ received: true });
   }
 
@@ -333,4 +345,190 @@ async function handleTemplatePurchase(session: Stripe.Checkout.Session) {
   });
 
   console.log(`📧 Delivery email sent to ${customerEmail} for ${templateName}`);
+}
+
+// ─── Personalised Cosmic Report purchase handler ──────────────────────────────
+
+const COSMIC_REPORT_TYPES = new Set(['weekly', 'monthly', 'custom']);
+
+function normaliseReportType(value?: string): 'weekly' | 'monthly' | 'custom' {
+  return value && COSMIC_REPORT_TYPES.has(value)
+    ? (value as 'weekly' | 'monthly' | 'custom')
+    : 'monthly';
+}
+
+/**
+ * Derive the buyer's share token deterministically from the Stripe checkout
+ * session id. This is what makes fulfilment exactly-once: `cosmic_reports`
+ * has a UNIQUE constraint on `share_token`, so when Stripe retries the same
+ * `checkout.session.completed` event the second insert hits that constraint
+ * and is a no-op (no duplicate report row, no duplicate delivery email).
+ *
+ * The token is an HMAC keyed by the shop webhook secret rather than a plain
+ * hash, so it stays unguessable (you cannot derive it from a session id alone)
+ * and is sliced to 32 hex chars to match the legacy `randomBytes(16)` format.
+ */
+function deriveReportShareToken(sessionId: string): string {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET_SHOP || '';
+  return createHmac('sha256', secret)
+    .update(`cosmic_report:${sessionId}`)
+    .digest('hex')
+    .slice(0, 32);
+}
+
+/**
+ * Generate the buyer's personalised Cosmic Report at purchase time and email
+ * them the on-demand PDF link. The report row is stored in `cosmic_reports`,
+ * exactly like a generator-created report, so the existing /api/cosmic-report/
+ * [id]/pdf route regenerates the PDF on demand from the stored report_data JSON
+ * (no static blob, no per-buyer upload step).
+ */
+async function handleCosmicReportPurchase(session: Stripe.Checkout.Session) {
+  const userId = session.metadata?.userId;
+  const reportType = normaliseReportType(session.metadata?.reportType);
+  const rangeStart = session.metadata?.rangeStart || undefined;
+  const rangeEnd = session.metadata?.rangeEnd || undefined;
+  const deliveryEmail =
+    session.metadata?.deliveryEmail ||
+    session.customer_details?.email ||
+    session.customer_email ||
+    undefined;
+
+  if (!userId) {
+    console.error('❌ Cosmic report purchase missing userId', {
+      sessionId: session.id,
+    });
+    return;
+  }
+
+  // Stripe only fires this for paid/completed sessions, but guard explicitly so
+  // an unpaid (e.g. async-payment-pending) session can never trigger fulfilment.
+  if (session.payment_status !== 'paid') {
+    console.warn(
+      `⚠️ Cosmic report session ${session.id} not paid (status: ${session.payment_status}), skipping fulfilment`,
+    );
+    return;
+  }
+
+  // Deterministic, session-derived share token = idempotency key. Reusing the
+  // existing UNIQUE(share_token) constraint means a Stripe retry of the same
+  // event resolves to the same row instead of generating a second report.
+  const shareToken = deriveReportShareToken(session.id);
+
+  // Fast path for retries: if this session was already fulfilled, do not
+  // rebuild the report or re-send the email.
+  try {
+    const existing = await sql`
+      SELECT id FROM cosmic_reports WHERE share_token = ${shareToken} LIMIT 1
+    `;
+    if (existing.rows[0]?.id) {
+      console.log(
+        `[Shop webhook] Cosmic report for session ${session.id} already fulfilled (report ${existing.rows[0].id}), skipping`,
+      );
+      return;
+    }
+  } catch (error) {
+    console.error('❌ Failed to check existing cosmic report:', error);
+    // Fall through — the INSERT below is still guarded by ON CONFLICT.
+  }
+
+  console.log(`🔮 Generating purchased cosmic report for user ${userId}`);
+
+  let reportData;
+  try {
+    reportData = await buildReportData({
+      userId,
+      reportType,
+      dateRange:
+        rangeStart || rangeEnd
+          ? { start: rangeStart, end: rangeEnd }
+          : undefined,
+    });
+  } catch (error) {
+    console.error('❌ Failed to build purchased cosmic report:', error);
+    return;
+  }
+
+  let reportId: number | string | undefined;
+  try {
+    const insertResult = await sql`
+      INSERT INTO cosmic_reports (user_id, report_type, report_data, share_token, is_public)
+      VALUES (
+        ${userId},
+        ${reportType},
+        ${JSON.stringify(reportData)},
+        ${shareToken},
+        ${false}
+      )
+      ON CONFLICT (share_token) DO NOTHING
+      RETURNING id
+    `;
+    reportId = insertResult.rows[0]?.id;
+  } catch (error) {
+    console.error('❌ Failed to persist purchased cosmic report:', error);
+    return;
+  }
+
+  // No row returned means a concurrent retry inserted it between our pre-check
+  // and this INSERT (ON CONFLICT no-op). That retry owns the delivery email, so
+  // we stop here to avoid double-sending — this is the idempotent path, not an
+  // error.
+  if (!reportId) {
+    console.log(
+      `[Shop webhook] Cosmic report for session ${session.id} fulfilled concurrently, skipping duplicate delivery`,
+    );
+    return;
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lunary.app';
+  const pdfUrl = `${baseUrl}/api/cosmic-report/${reportId}/pdf`;
+  const shareUrl = buildShareUrl(shareToken);
+
+  if (!deliveryEmail) {
+    console.warn(
+      `⚠️ Purchased cosmic report ${reportId} generated but no email to deliver to`,
+    );
+    return;
+  }
+
+  const html = `
+    <div style="font-family:Roboto,Helvetica,sans-serif;background:#05020c;color:#f4f4ff;padding:32px;border-radius:20px">
+      <h1 style="margin:0 0 8px">${reportData.title}</h1>
+      <p style="color:#c4b5fd;margin:0 0 16px">${reportData.subtitle}</p>
+      <p style="margin:0 0 16px">Your personalised report is ready. It reads every transit against your own chart and houses.</p>
+      <p style="margin:0 0 8px"><a href="${pdfUrl}" style="color:#c4b5fd">Download your PDF</a></p>
+      <p style="margin:0"><a href="${shareUrl}" style="color:#9ca3af">View online</a></p>
+    </div>
+  `;
+  const text = `${reportData.title}
+
+${reportData.subtitle}
+
+Your personalised report is ready.
+Download PDF: ${pdfUrl}
+View online: ${shareUrl}`;
+
+  try {
+    await sendEmail({
+      to: deliveryEmail,
+      subject: `Your personalised Cosmic Report is ready ✨`,
+      html,
+      text,
+      tracking: {
+        userId,
+        notificationType: 'cosmic_report_delivery',
+        notificationId: `cosmic-report-${reportId}`,
+        utm: {
+          source: 'email',
+          medium: 'transactional',
+          campaign: 'cosmic_report_delivery',
+        },
+      },
+    });
+    console.log(
+      `📧 Cosmic report ${reportId} delivered to buyer for user ${userId}`,
+    );
+  } catch (error) {
+    console.error('❌ Failed to email purchased cosmic report:', error);
+  }
 }
