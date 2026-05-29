@@ -227,6 +227,7 @@ export function ConditionalMainWrapper({
   return (
     <main
       ref={mainRef}
+      id='main-content'
       style={{
         paddingTop: showAppNav
           ? 'calc(var(--global-nav-offset, 0px) + max(env(safe-area-inset-top, 0px), 1rem))'

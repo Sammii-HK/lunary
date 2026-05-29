@@ -49,6 +49,23 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Honour the OS-level reduced-motion preference across smooth-scroll and all
+   Tailwind animation/transition utilities (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ─── Semantic theme tokens (dark default) ─────────────────────────────── */
 /* layer-* = the lunary brand purple surfaces that flip between dark/light   */
 :root {
@@ -75,7 +92,7 @@ html {
   /* content — space-separated RGB so Tailwind opacity modifiers work */
   --content-primary: 255 255 255;
   --content-secondary: 206 189 240; /* #cebdf0 primary-200 */
-  --content-muted: 133 90 216; /* #855ad8 primary-400 */
+  --content-muted: 154 115 224; /* #9a73e0 — lifted from primary-400 for WCAG AA on dark surfaces */
 
   /* brand text — light purple in dark mode, dark purple in light mode */
   --content-brand: 176 148 230; /* #b094e6 primary-300 */

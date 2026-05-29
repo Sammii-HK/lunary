@@ -794,13 +794,19 @@ export function OnboardingFlow({
       const calculatingStartedAt = Date.now();
       setCalculatingChart(true);
 
-      // Save to Postgres
-      await fetch('/api/profile', {
+      // Save to Postgres. This persists the core activation event (birthday),
+      // so a failed response must surface an error and let the user retry —
+      // otherwise they land "complete" with no birthday and every personalised
+      // feature is silently broken.
+      const profileResponse = await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ birthday, location: locationPayload }),
       });
+      if (!profileResponse.ok) {
+        throw new Error(`profile save failed (${profileResponse.status})`);
+      }
 
       // Track birth data submission
       if (user?.id) {

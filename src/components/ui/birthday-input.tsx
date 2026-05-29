@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useId } from 'react';
 import { cn } from '@/lib/utils';
 
 interface BirthdayInputProps {
@@ -81,6 +81,13 @@ export function BirthdayInput({
 }: BirthdayInputProps) {
   const format = useMemo(() => detectLocaleFormat(), []);
   const placeholder = format === 'MDY' ? 'MM/DD/YYYY' : 'DD/MM/YYYY';
+
+  // Stable ids so the validation/hint text can be linked via aria-describedby
+  const reactId = useId();
+  const baseId = id ?? reactId;
+  const errorId = `${baseId}-error`;
+  const warningId = `${baseId}-warning`;
+  const hintId = `${baseId}-hint`;
 
   const [inputValue, setInputValue] = useState(() =>
     formatDisplayDate(value, format),
@@ -211,18 +218,35 @@ export function BirthdayInput({
         placeholder={placeholder}
         autoComplete='bday'
         maxLength={10}
+        aria-invalid={!!error}
+        aria-describedby={cn(
+          error ? errorId : warning ? warningId : undefined,
+          hintId,
+        )}
         className={cn(
           'w-full px-4 py-3 bg-surface-card border rounded-lg text-content-primary placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent transition-colors',
-          error ? 'border-red-500' : 'border-stroke-default',
+          error ? 'border-lunary-error' : 'border-stroke-default',
           disabled && 'opacity-50 cursor-not-allowed',
           className,
         )}
       />
-      {error && <p className='mt-1 text-xs text-red-400'>{error}</p>}
-      {!error && warning && (
-        <p className='mt-1 text-xs text-amber-300'>{warning}</p>
+      {error && (
+        <p
+          id={errorId}
+          role='alert'
+          className='mt-1 text-xs text-content-error'
+        >
+          {error}
+        </p>
       )}
-      <p className='mt-1 text-xs text-content-muted'>Format: {placeholder}</p>
+      {!error && warning && (
+        <p id={warningId} className='mt-1 text-xs text-amber-300'>
+          {warning}
+        </p>
+      )}
+      <p id={hintId} className='mt-1 text-xs text-content-muted'>
+        Format: {placeholder}
+      </p>
     </div>
   );
 }

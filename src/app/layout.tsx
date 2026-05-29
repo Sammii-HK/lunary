@@ -193,6 +193,12 @@ export default function RootLayout({
         className={`${roboto.className} ${astronomicon.variable} flex flex-col w-full h-dvh bg-surface-base text-content-primary overflow-hidden`}
         suppressHydrationWarning
       >
+        <a
+          href='#main-content'
+          className='sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-surface-card focus:px-4 focus:py-2 focus:text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+        >
+          Skip to content
+        </a>
         {clarityProjectId ? (
           <Script id='microsoft-clarity' strategy='afterInteractive'>
             {`
@@ -266,7 +272,10 @@ export default function RootLayout({
                       <PageViewTracker />
                       <Suspense
                         fallback={
-                          <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
+                          <main
+                            id='main-content'
+                            className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'
+                          >
                             {children}
                           </main>
                         }

@@ -177,12 +177,16 @@ export default function DeveloperDashboard() {
               </code>
               <button
                 onClick={() => copyToClipboard(newKey)}
+                aria-label={copied ? 'API key copied' : 'Copy API key'}
                 className='p-2 rounded bg-surface-card hover:bg-surface-overlay transition-colors'
               >
                 {copied ? (
-                  <Check className='h-4 w-4 text-lunary-success' />
+                  <Check
+                    className='h-4 w-4 text-lunary-success'
+                    aria-hidden='true'
+                  />
                 ) : (
-                  <Copy className='h-4 w-4' />
+                  <Copy className='h-4 w-4' aria-hidden='true' />
                 )}
               </button>
             </div>

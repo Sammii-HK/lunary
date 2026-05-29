@@ -14,7 +14,12 @@ interface ModalProps {
   closeOnEsc?: boolean;
   closeOnClickOutside?: boolean;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  /** Accessible name announced to screen readers when the dialog opens. */
+  ariaLabel?: string;
 }
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 const sizeClasses = {
   sm: 'max-w-sm',
@@ -33,14 +38,39 @@ export function Modal({
   closeOnEsc = true,
   closeOnClickOutside = true,
   size = 'md',
+  ariaLabel,
 }: ModalProps) {
   const contentRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
-  const handleEscKey = useCallback(
+  const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape' && closeOnEsc) {
         e.preventDefault();
         onClose();
+        return;
+      }
+
+      // Trap Tab focus within the dialog
+      if (e.key === 'Tab' && contentRef.current) {
+        const focusable = Array.from(
+          contentRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+        ).filter((el) => el.offsetParent !== null);
+        if (focusable.length === 0) {
+          e.preventDefault();
+          contentRef.current.focus();
+          return;
+        }
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        const active = document.activeElement as HTMLElement | null;
+        if (e.shiftKey && (active === first || active === contentRef.current)) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && active === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     },
     [onClose, closeOnEsc],
@@ -61,14 +91,27 @@ export function Modal({
     // Light haptic feedback when modal opens
     hapticService.light();
 
-    document.addEventListener('keydown', handleEscKey);
+    // Remember what had focus so we can restore it on close
+    previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
+
+    document.addEventListener('keydown', handleKeyDown);
     document.body.style.overflow = 'hidden';
 
+    // Move focus into the dialog so keyboard/SR users start inside it
+    const focusTarget = contentRef.current;
+    if (focusTarget) {
+      const firstFocusable =
+        focusTarget.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+      (firstFocusable ?? focusTarget).focus();
+    }
+
     return () => {
-      document.removeEventListener('keydown', handleEscKey);
+      document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
+      // Restore focus to the element that opened the modal
+      previouslyFocusedRef.current?.focus?.();
     };
-  }, [isOpen, handleEscKey]);
+  }, [isOpen, handleKeyDown]);
 
   if (!isOpen) return null;
 
@@ -76,13 +119,15 @@ export function Modal({
     <div
       className='fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-surface-base/60 backdrop-blur-sm sm:p-4'
       onClick={handleBackdropClick}
-      role='dialog'
-      aria-modal='true'
     >
       <div
         ref={contentRef}
+        role='dialog'
+        aria-modal='true'
+        aria-label={ariaLabel}
+        tabIndex={-1}
         className={cn(
-          'relative w-full border border-stroke-default/50 bg-surface-card/95 backdrop-blur-xl shadow-2xl',
+          'relative w-full border border-stroke-default/50 bg-surface-card/95 backdrop-blur-xl shadow-2xl focus:outline-none',
           'rounded-t-2xl sm:rounded-2xl',
           'animate-in fade-in-0 slide-in-from-bottom-4 sm:zoom-in-95 duration-200',
           'max-h-[90vh] sm:max-h-[85vh] flex flex-col',
