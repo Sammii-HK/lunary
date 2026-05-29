@@ -136,7 +136,13 @@ export function hasFeatureAccess(
     );
   }
 
-  return false;
+  // Any other (non-paying) status — cancelled, past_due, expired, incomplete,
+  // unpaid, paused, or unrecognised — falls back to EXACTLY the free tier, the
+  // same list an anonymous 'free' visitor sees. This keeps generic content
+  // (general_horoscope, moon_phases, grimoire) available to churned/lapsed
+  // subscribers for the win-back experience, while paid/personalised features
+  // stay denied because they are not in freeFeatures (no backing trial/active).
+  return freeFeatures.includes(feature);
 }
 
 // Helper function to check if user has access to birth chart features
