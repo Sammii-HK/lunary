@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { CosmicReportPreview } from '@/components/cosmic-report/CosmicReportPreview';
 import { CosmicReportData } from '@/lib/cosmic-report/types';
 import { Paywall } from '@/components/Paywall';
+import { BuyOnceReportCTA } from '@/components/cosmic-report/BuyOnceReportCTA';
 import { Heading } from '@/components/ui/Heading';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -153,7 +154,9 @@ export function GeneratorClient() {
   };
 
   return (
-    <Paywall feature='downloadable_reports'>
+    // No hard wall: subscribers/trial get the full generator; everyone else
+    // sees a teaser preview with a buy-once OR start-trial choice.
+    <Paywall feature='downloadable_reports' fallback={<BuyOnceReportCTA />}>
       <div className='w-full max-w-5xl mx-auto space-y-8 px-4 py-8 text-content-primary'>
         <div className='space-y-2'>
           <Heading as='h1' variant='h1'>

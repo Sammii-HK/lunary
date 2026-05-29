@@ -7,6 +7,8 @@ import {
   generateTemplateDeliveryEmailHTML,
   generateTemplateDeliveryEmailText,
 } from '@/lib/email-components/TemplateDeliveryEmail';
+import { buildReportData } from '@/lib/cosmic-report/build';
+import { createShareToken, buildShareUrl } from '@/lib/cosmic-report/share';
 
 // ─── Notion template registry ─────────────────────────────────────────────────
 // Maps Stripe product metadata templateId → display name.
@@ -156,6 +158,15 @@ export async function POST(request: NextRequest) {
   // ── Notion template purchase ──────────────────────────────────────────────
   if (session.metadata?.purchaseType === 'notion_template') {
     await handleTemplatePurchase(session);
+    return NextResponse.json({ received: true });
+  }
+
+  // ── Personalised Cosmic Report (buy-once) ─────────────────────────────────
+  // Unlike the static digital packs, this fulfilment is DYNAMIC: we generate the
+  // buyer's own report from their stored birth chart at purchase time and email
+  // them the on-demand PDF link, rather than handing over a pre-uploaded blob.
+  if (session.metadata?.purchaseType === 'cosmic_report') {
+    await handleCosmicReportPurchase(session);
     return NextResponse.json({ received: true });
   }
 
@@ -333,4 +344,139 @@ async function handleTemplatePurchase(session: Stripe.Checkout.Session) {
   });
 
   console.log(`📧 Delivery email sent to ${customerEmail} for ${templateName}`);
+}
+
+// ─── Personalised Cosmic Report purchase handler ──────────────────────────────
+
+const COSMIC_REPORT_TYPES = new Set(['weekly', 'monthly', 'custom']);
+
+function normaliseReportType(value?: string): 'weekly' | 'monthly' | 'custom' {
+  return value && COSMIC_REPORT_TYPES.has(value)
+    ? (value as 'weekly' | 'monthly' | 'custom')
+    : 'monthly';
+}
+
+/**
+ * Generate the buyer's personalised Cosmic Report at purchase time and email
+ * them the on-demand PDF link. The report row is stored in `cosmic_reports`,
+ * exactly like a generator-created report, so the existing /api/cosmic-report/
+ * [id]/pdf route regenerates the PDF on demand from the stored report_data JSON
+ * (no static blob, no per-buyer upload step).
+ */
+async function handleCosmicReportPurchase(session: Stripe.Checkout.Session) {
+  const userId = session.metadata?.userId;
+  const reportType = normaliseReportType(session.metadata?.reportType);
+  const rangeStart = session.metadata?.rangeStart || undefined;
+  const rangeEnd = session.metadata?.rangeEnd || undefined;
+  const deliveryEmail =
+    session.metadata?.deliveryEmail ||
+    session.customer_details?.email ||
+    session.customer_email ||
+    undefined;
+
+  if (!userId) {
+    console.error('❌ Cosmic report purchase missing userId', {
+      sessionId: session.id,
+    });
+    return;
+  }
+
+  console.log(`🔮 Generating purchased cosmic report for user ${userId}`);
+
+  let reportData;
+  try {
+    reportData = await buildReportData({
+      userId,
+      reportType,
+      dateRange:
+        rangeStart || rangeEnd
+          ? { start: rangeStart, end: rangeEnd }
+          : undefined,
+    });
+  } catch (error) {
+    console.error('❌ Failed to build purchased cosmic report:', error);
+    return;
+  }
+
+  // Buyers get a private share token so they have a stable shareable artefact.
+  const shareToken = createShareToken();
+
+  let reportId: number | string | undefined;
+  try {
+    const insertResult = await sql`
+      INSERT INTO cosmic_reports (user_id, report_type, report_data, share_token, is_public)
+      VALUES (
+        ${userId},
+        ${reportType},
+        ${JSON.stringify(reportData)},
+        ${shareToken},
+        ${false}
+      )
+      ON CONFLICT (share_token) DO NOTHING
+      RETURNING id
+    `;
+    reportId = insertResult.rows[0]?.id;
+  } catch (error) {
+    console.error('❌ Failed to persist purchased cosmic report:', error);
+    return;
+  }
+
+  if (!reportId) {
+    console.error('❌ No report id returned after insert', {
+      sessionId: session.id,
+    });
+    return;
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lunary.app';
+  const pdfUrl = `${baseUrl}/api/cosmic-report/${reportId}/pdf`;
+  const shareUrl = buildShareUrl(shareToken);
+
+  if (!deliveryEmail) {
+    console.warn(
+      `⚠️ Purchased cosmic report ${reportId} generated but no email to deliver to`,
+    );
+    return;
+  }
+
+  const html = `
+    <div style="font-family:Roboto,Helvetica,sans-serif;background:#05020c;color:#f4f4ff;padding:32px;border-radius:20px">
+      <h1 style="margin:0 0 8px">${reportData.title}</h1>
+      <p style="color:#c4b5fd;margin:0 0 16px">${reportData.subtitle}</p>
+      <p style="margin:0 0 16px">Your personalised report is ready. It reads every transit against your own chart and houses.</p>
+      <p style="margin:0 0 8px"><a href="${pdfUrl}" style="color:#c4b5fd">Download your PDF</a></p>
+      <p style="margin:0"><a href="${shareUrl}" style="color:#9ca3af">View online</a></p>
+    </div>
+  `;
+  const text = `${reportData.title}
+
+${reportData.subtitle}
+
+Your personalised report is ready.
+Download PDF: ${pdfUrl}
+View online: ${shareUrl}`;
+
+  try {
+    await sendEmail({
+      to: deliveryEmail,
+      subject: `Your personalised Cosmic Report is ready ✨`,
+      html,
+      text,
+      tracking: {
+        userId,
+        notificationType: 'cosmic_report_delivery',
+        notificationId: `cosmic-report-${reportId}`,
+        utm: {
+          source: 'email',
+          medium: 'transactional',
+          campaign: 'cosmic_report_delivery',
+        },
+      },
+    });
+    console.log(
+      `📧 Cosmic report ${reportId} delivered to buyer for user ${userId}`,
+    );
+  } catch (error) {
+    console.error('❌ Failed to email purchased cosmic report:', error);
+  }
 }
