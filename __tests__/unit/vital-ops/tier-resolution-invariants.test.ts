@@ -115,28 +115,25 @@ describe('VITAL tier - non-paying statuses fail closed to free-only', () => {
   );
 
   // -------------------------------------------------------------------------
-  // BUG (latent, under-grant — NOT a privacy/revenue leak, so left unfixed):
+  // FIXED (was an under-grant bug; resolved in fix/churned-user-free-access):
   //
-  // hasFeatureAccess() only falls back to the FREE feature list when the status
-  // is exactly 'free' or empty/undefined. For ANY other non-paying status
-  // (cancelled, past_due, expired, incomplete, unpaid, paused, garbage) it hits
-  // the final `return false` and DENIES EVERYTHING — including the generic free
-  // content (general_horoscope, moon_phases, grimoire) that an anonymous 'free'
-  // visitor can see. This flows all the way through the production
-  // useSubscription().hasAccess() hook, so a churned/lapsed subscriber is more
-  // locked out than a brand-new free user — i.e. exactly the win-back audience
-  // loses their free horoscope/moon-phase/grimoire access.
+  // hasFeatureAccess() previously only fell back to the FREE feature list when
+  // the status was exactly 'free' or empty/undefined. For ANY other non-paying
+  // status (cancelled, past_due, expired, incomplete, unpaid, paused, garbage)
+  // it hit a trailing `return false` and DENIED EVERYTHING — including the
+  // generic free content (general_horoscope, moon_phases, grimoire) that an
+  // anonymous 'free' visitor can see. This flowed through the production
+  // useSubscription().hasAccess() hook, so a churned/lapsed subscriber was more
+  // locked out than a brand-new free user — exactly the win-back audience lost
+  // their free horoscope/moon-phase/grimoire access.
   //
-  // It fails SAFE on money/privacy (it under-grants, never leaks paid content),
-  // which is why it is reported but NOT fixed here. The desired behaviour is
-  // that every non-paying status falls back to the free list. Re-enable the
-  // skipped test once hasFeatureAccess treats unknown/lapsed statuses as free.
-  //
-  // Suggested fix: in hasFeatureAccess, replace the trailing `return false`
-  // with `return freeFeatures.includes(feature);` so any non-trial/active
-  // status still resolves the free tier.
+  // The fix replaced that trailing `return false` with
+  // `return freeFeatures.includes(feature);`, so every non-trial/active status
+  // now resolves EXACTLY the free tier — no more, no less. Paid/personalised
+  // features stay denied because they are not in the free list and there is no
+  // backing trial/active status (pinned by the fail-closed test above).
   // -------------------------------------------------------------------------
-  it.skip('BUG: a cancelled/past_due/expired status should still get generic FREE features', () => {
+  it('a cancelled/past_due/expired status still gets generic FREE features', () => {
     const LAPSED = ['cancelled', 'past_due', 'expired', 'incomplete', 'unpaid'];
     for (const status of LAPSED) {
       expect(hasFeatureAccess(status as any, 'free', 'general_horoscope')).toBe(
@@ -147,19 +144,29 @@ describe('VITAL tier - non-paying statuses fail closed to free-only', () => {
     }
   });
 
-  it('PINS CURRENT BEHAVIOUR: a lapsed status currently denies even free content (deny-all)', () => {
-    // Companion to the skipped BUG above. This pins the ACTUAL current output
-    // so the suite stays green and any change to it is deliberate. When the bug
-    // is fixed, this pin flips to expect(true) and the skipped test re-enables.
+  it('a lapsed status grants ONLY the free tier, never paid/personalised content', () => {
+    // Companion to the win-back test above. The free-tier fallback must NOT
+    // leak paid content: a lapsed status with even a Pro plan id is still
+    // denied every personalised feature (no backing trial/active status).
     expect(hasFeatureAccess('cancelled', 'free', 'general_horoscope')).toBe(
-      false,
+      true,
     );
     expect(hasFeatureAccess('past_due', 'lunary_plus_ai', 'moon_phases')).toBe(
-      false,
+      true,
     );
-    expect(hasFeatureAccess('expired', 'free', 'grimoire')).toBe(false);
-    // The ONLY non-paying status that correctly falls back to free is 'free'
-    // itself (and empty/undefined, handled in the dedicated test below).
+    expect(hasFeatureAccess('expired', 'free', 'grimoire')).toBe(true);
+    // Free content is granted, but the paid boundary holds: a Pro plan id on a
+    // non-paying status unlocks nothing personalised.
+    expect(
+      hasFeatureAccess('cancelled', 'lunary_plus_ai', 'personalized_horoscope'),
+    ).toBe(false);
+    expect(
+      hasFeatureAccess('past_due', 'lunary_plus_ai', 'personal_tarot'),
+    ).toBe(false);
+    expect(
+      hasFeatureAccess('expired', 'lunary_plus_ai', 'transit_calendar'),
+    ).toBe(false);
+    // 'free' itself behaves identically — the win-back fallback is consistent.
     expect(hasFeatureAccess('free', 'free', 'general_horoscope')).toBe(true);
   });
 
