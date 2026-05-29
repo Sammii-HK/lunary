@@ -1,3 +1,5 @@
+import aspectInterpretationsData from '@/data/aspect-interpretations.json';
+
 export const PLANETS = [
   'sun',
   'moon',
@@ -149,6 +151,39 @@ export interface AspectInterpretation {
   inSynastry: string;
 }
 
+/**
+ * Curated, per-pair aspect description sourced from
+ * `src/data/aspect-interpretations.json`. The dataset covers all 45 planet
+ * pairs across the 5 major aspects (Conjunction, Opposition, Square, Trine,
+ * Sextile), keyed by display name with the canonical (lower-index-first)
+ * planet ordering. Minor aspects (quincunx, semi-sextile) are not in the
+ * dataset and resolve to `null`, so callers fall back to the generic template.
+ *
+ * `planet1`/`planet2` MUST already be canonicalised via
+ * {@link getCanonicalAspectPair} before being passed here.
+ */
+export function getCuratedAspectDescription(
+  planet1: Planet,
+  aspect: Aspect,
+  planet2: Planet,
+): { meaning: string; description: string } | null {
+  const data = aspectInterpretationsData as Record<
+    string,
+    Record<string, Record<string, { meaning: string; description: string }>>
+  >;
+
+  const aspectKey = ASPECT_DATA[aspect].displayName;
+
+  const entry =
+    data[PLANET_DISPLAY[planet1]]?.[PLANET_DISPLAY[planet2]]?.[aspectKey];
+
+  if (entry?.description?.trim() && entry?.meaning?.trim()) {
+    return entry;
+  }
+
+  return null;
+}
+
 export function getAspectInterpretation(
   planet1: Planet,
   aspect: Aspect,
@@ -158,7 +193,15 @@ export function getAspectInterpretation(
   const p2 = PLANET_DISPLAY[planet2];
   const aspectData = ASPECT_DATA[aspect];
 
-  const interpretations: Record<
+  const templateInterp = {
+    natal: `${p1} ${aspectData.displayName.toLowerCase()} ${p2} in the natal chart creates a ${aspectData.nature} dynamic between ${p1.toLowerCase()} energy (${getKeywordsForPlanet(planet1)}) and ${p2.toLowerCase()} energy (${getKeywordsForPlanet(planet2)}).`,
+    transit: `When transiting ${p1} forms a ${aspectData.displayName.toLowerCase()} to natal ${p2}, expect ${aspectData.nature === 'harmonious' ? 'opportunities' : 'challenges'} related to ${getThemesForPlanet(planet2)}.`,
+    synastry: `In synastry, ${p1} ${aspectData.displayName.toLowerCase()} ${p2} indicates ${aspectData.nature === 'harmonious' ? 'natural harmony' : 'dynamic tension'} between partners regarding ${getThemesForPlanet(planet1)} and ${getThemesForPlanet(planet2)}.`,
+  };
+
+  // Two legacy hand-written entries carry full, unique natal/transit/synastry
+  // prose. Keep them as the richest source where they exist.
+  const handWritten: Record<
     string,
     { natal: string; transit: string; synastry: string }
   > = {
@@ -178,26 +221,37 @@ export function getAspectInterpretation(
       synastry:
         'In synastry, Venus square Mars indicates strong physical attraction with potential for passionate conflicts.',
     },
-    default: {
-      natal: `${p1} ${aspectData.displayName.toLowerCase()} ${p2} in the natal chart creates a ${aspectData.nature} dynamic between ${p1.toLowerCase()} energy (${getKeywordsForPlanet(planet1)}) and ${p2.toLowerCase()} energy (${getKeywordsForPlanet(planet2)}).`,
-      transit: `When transiting ${p1} forms a ${aspectData.displayName.toLowerCase()} to natal ${p2}, expect ${aspectData.nature === 'harmonious' ? 'opportunities' : 'challenges'} related to ${getThemesForPlanet(planet2)}.`,
-      synastry: `In synastry, ${p1} ${aspectData.displayName.toLowerCase()} ${p2} indicates ${aspectData.nature === 'harmonious' ? 'natural harmony' : 'dynamic tension'} between partners regarding ${getThemesForPlanet(planet1)} and ${getThemesForPlanet(planet2)}.`,
-    },
   };
 
+  // Curated, per-pair description from aspect-interpretations.json. Covers all
+  // 45 pairs across the 5 major aspects. The dataset describes the natal-chart
+  // dynamic, so it backs `inNatal` and sharpens `summary`; transit/synastry
+  // stay on the generic template (the dataset has no transit/synastry prose,
+  // and we never fabricate astrology).
+  const curated = getCuratedAspectDescription(planet1, aspect, planet2);
+
   const key = `${planet1}-${aspect}-${planet2}`;
-  const interp = interpretations[key] || interpretations.default;
+  const handWrittenInterp = handWritten[key];
+
+  const inNatal =
+    handWrittenInterp?.natal ?? curated?.description ?? templateInterp.natal;
+  const inTransit = handWrittenInterp?.transit ?? templateInterp.transit;
+  const inSynastry = handWrittenInterp?.synastry ?? templateInterp.synastry;
+
+  const summary = curated
+    ? `${p1} ${aspectData.displayName.toLowerCase()} ${p2} is a ${aspectData.nature} aspect of ${curated.meaning.toLowerCase()}. ${curated.description}`
+    : `${p1} ${aspectData.displayName.toLowerCase()} ${p2} is a ${aspectData.nature} aspect that ${aspectData.nature === 'harmonious' ? 'facilitates' : 'challenges'} the integration of ${p1.toLowerCase()} and ${p2.toLowerCase()} energies.`;
 
   return {
     planet1,
     aspect,
     planet2,
     title: `${p1} ${aspectData.displayName} ${p2}`,
-    summary: `${p1} ${aspectData.displayName.toLowerCase()} ${p2} is a ${aspectData.nature} aspect that ${aspectData.nature === 'harmonious' ? 'facilitates' : 'challenges'} the integration of ${p1.toLowerCase()} and ${p2.toLowerCase()} energies.`,
+    summary,
     keywords: [...aspectData.keywords, p1.toLowerCase(), p2.toLowerCase()],
-    inNatal: interp.natal,
-    inTransit: interp.transit,
-    inSynastry: interp.synastry,
+    inNatal,
+    inTransit,
+    inSynastry,
   };
 }
 
