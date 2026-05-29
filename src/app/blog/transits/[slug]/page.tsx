@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { TransitSignAccordion } from '@/components/blog/TransitSignAccordion';
+import { format } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 86400; // 1 day — transit posts are static once published
@@ -136,6 +137,47 @@ export default async function TransitBlogPostPage({
       ? JSON.parse(post.sign_breakdowns)
       : post.sign_breakdowns;
 
+  // Answer-extractable AEO props, computed from the post's REAL fields only.
+  const firstSentence = (text: string | null, cap = 280) => {
+    const trimmed = (text || '').trim();
+    if (!trimmed) return '';
+    const match = trimmed.match(/^[^.!?]+[.!?]/);
+    const sentence = match ? match[0] : trimmed;
+    return sentence.length > cap
+      ? `${sentence.slice(0, cap).trim()}...`
+      : sentence;
+  };
+  const tldr = firstSentence(post.introduction);
+  const whatIs = {
+    question: `What does ${post.title} mean?`,
+    answer: post.meta_description || firstSentence(post.introduction, 320),
+  };
+  const faqList: { question: string; answer: string }[] = [
+    {
+      question: `What is ${post.title}?`,
+      answer: firstSentence(post.introduction, 320),
+    },
+  ];
+  if (post.planet && post.sign && post.start_date && post.end_date) {
+    faqList.push({
+      question: `When is ${post.planet} in ${post.sign}?`,
+      answer: `${post.planet} in ${post.sign} runs from ${format(new Date(post.start_date), 'd MMMM yyyy')} to ${format(new Date(post.end_date), 'd MMMM yyyy')}.`,
+    });
+  }
+  if (post.practical_guidance) {
+    faqList.push({
+      question: `How do I work with ${post.title}?`,
+      answer: firstSentence(post.practical_guidance, 320),
+    });
+  }
+  if (post.astronomical_context) {
+    faqList.push({
+      question: `What is the astronomy behind ${post.title}?`,
+      answer: firstSentence(post.astronomical_context, 320),
+    });
+  }
+  const faqs = faqList.filter((f) => f.answer).slice(0, 5);
+
   return (
     <SEOContentTemplate
       title={`${post.title} | Lunary`}
@@ -143,6 +185,9 @@ export default async function TransitBlogPostPage({
       subtitle={post.subtitle || undefined}
       description={post.meta_description}
       keywords={post.keywords}
+      whatIs={whatIs}
+      tldr={tldr}
+      faqs={faqs}
       canonicalUrl={`https://lunary.app/blog/transits/${post.slug}`}
       articleSection='Transit guides'
       datePublished={post.published_at || post.created_at}

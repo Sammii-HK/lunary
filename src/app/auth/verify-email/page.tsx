@@ -92,9 +92,10 @@ export default function VerifyEmailPage() {
           }
 
           if (!redirectedToQuiz) {
-            // Redirect to profile after successful verification
+            // Redirect into the app after successful verification so onboarding
+            // fires immediately, instead of dropping users on /profile.
             setTimeout(() => {
-              window.location.href = '/profile';
+              window.location.href = '/app';
             }, 3000);
           }
         }

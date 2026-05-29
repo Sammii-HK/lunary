@@ -86,6 +86,12 @@ export default async function SharedReportPage({ params }: PageProps) {
           >
             Get your own report
           </Link>
+          <Link
+            href='/birth-chart?utm_source=cosmic_report_share'
+            className='rounded-full border border-white/10 px-4 py-2 text-sm text-content-primary transition hover:border-lunary-primary-400'
+          >
+            Calculate your own free birth chart
+          </Link>
         </div>
       </section>
 

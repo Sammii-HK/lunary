@@ -345,7 +345,7 @@ export default function SuccessPage() {
           </Button>
 
           <Button variant='lunary-soft' size='lg' asChild>
-            <Link href='/'>Explore Your Cosmic Dashboard</Link>
+            <Link href='/app'>Explore Your Cosmic Dashboard</Link>
           </Button>
         </div>
 

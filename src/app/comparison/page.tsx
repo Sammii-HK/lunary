@@ -236,10 +236,10 @@ export default function ComparisonHubPage() {
         {/* CTA */}
         <section className='text-center'>
           <Link
-            href='/pricing'
+            href='/birth-chart?src=comparison'
             className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium text-lg transition-colors'
           >
-            Start Your Free Trial
+            See your real birth chart free
             <ArrowRight className='h-5 w-5' />
           </Link>
         </section>

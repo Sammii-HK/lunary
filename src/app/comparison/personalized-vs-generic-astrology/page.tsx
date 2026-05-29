@@ -401,7 +401,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
         {/* CTA */}
         <section className='text-center mb-12'>
           <Link
-            href='/pricing'
+            href='/birth-chart?src=comparison'
             className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium text-lg transition-colors'
           >
             Try Personalized Astrology Free

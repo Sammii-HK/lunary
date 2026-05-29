@@ -2,6 +2,7 @@ const STORAGE_KEY = 'lunary_attribution';
 
 export type AttributionSource =
   | 'seo'
+  | 'ai'
   | 'social'
   | 'email'
   | 'direct'
@@ -22,6 +23,19 @@ export interface Attribution {
   utmTerm?: string;
   utmContent?: string;
 }
+
+// AI assistants / answer engines. Checked BEFORE search engines because some
+// (e.g. gemini.google.com) contain a search-engine domain and would otherwise be
+// mislabelled as seo. This is how the AI-citation channel becomes measurable.
+const AI_ENGINES = [
+  { domain: 'chatgpt.com', name: 'chatgpt' },
+  { domain: 'chat.openai.com', name: 'chatgpt' },
+  { domain: 'openai.com', name: 'openai' },
+  { domain: 'perplexity.ai', name: 'perplexity' },
+  { domain: 'gemini.google.com', name: 'gemini' },
+  { domain: 'copilot.microsoft.com', name: 'copilot' },
+  { domain: 'claude.ai', name: 'claude' },
+];
 
 const SEARCH_ENGINES = [
   { domain: 'google', name: 'google' },
@@ -83,6 +97,12 @@ export function detectSourceFromReferrer(referrer: string): {
   try {
     const url = new URL(referrer);
     const hostname = url.hostname.toLowerCase();
+
+    for (const engine of AI_ENGINES) {
+      if (hostname.includes(engine.domain)) {
+        return { source: 'ai', medium: engine.name };
+      }
+    }
 
     for (const engine of SEARCH_ENGINES) {
       if (hostname.includes(engine.domain)) {
@@ -251,6 +271,11 @@ export function getAttributionForTracking(): Record<
 export function isOrganicTraffic(): boolean {
   const attribution = getStoredAttribution();
   return attribution?.source === 'seo';
+}
+
+export function isAiSourced(): boolean {
+  const attribution = getStoredAttribution();
+  return attribution?.source === 'ai';
 }
 
 export function isSocialTraffic(): boolean {

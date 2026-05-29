@@ -635,7 +635,9 @@ export async function POST(request: NextRequest) {
 
     const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
-      payment_method_types: ['card'],
+      // Omit payment_method_types so Stripe Checkout auto-enables every eligible
+      // method for the device (card, Apple Pay, Google Pay, Link). Verify in
+      // Stripe test mode before deploy.
       payment_method_collection: 'if_required',
       line_items: [
         {

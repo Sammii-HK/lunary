@@ -45,6 +45,7 @@ interface Props {
 
 const SOURCE_LABELS: Record<string, string> = {
   seo: 'Organic Search',
+  ai: 'AI assistants',
   social: 'Social Media',
   email: 'Email',
   direct: 'Direct',
@@ -54,6 +55,7 @@ const SOURCE_LABELS: Record<string, string> = {
 
 const SOURCE_COLORS: Record<string, string> = {
   seo: 'bg-green-500',
+  ai: 'bg-cyan-500',
   social: 'bg-blue-500',
   email: 'bg-purple-500',
   direct: 'bg-surface-overlay',
