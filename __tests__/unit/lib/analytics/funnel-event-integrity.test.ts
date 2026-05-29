@@ -229,58 +229,52 @@ describe('unknown / malformed event types are rejected, never silently bucketed'
  * green-locked until the canonicaliser / consumer is corrected.
  * ───────────────────────────────────────────────────────────────────────────
  */
-describe('BUG: fired-and-consumed events dropped by canonicalisation', () => {
-  // BUG: `upgrade_clicked` is fired from 7 call-sites (pricing page, ConversionCTAs,
-  // TrialReminder, UpgradePrompt, ...) and consumed at
-  // src/app/api/admin/analytics/route.ts:217 (`upgradeClickRate`) and
-  // cta-conversions/route.ts:34. It is dropped by canonicalisation, so
-  // upgradeClickRate is permanently 0 in the admin analytics funnel.
-  it.skip('BUG: upgrade_clicked SHOULD survive canonicalisation (consumed by upgradeClickRate)', () => {
-    expect(storedTypeFor('upgrade_clicked')).not.toBeNull();
-  });
-  it('current behaviour: upgrade_clicked is dropped (upgradeClickRate reads 0)', () => {
-    expect(storedTypeFor('upgrade_clicked')).toBeNull();
+describe('fired-and-consumed events survive canonicalisation', () => {
+  // FIXED (fix/funnel-event-canonicalisation): `upgrade_clicked` is fired from 7
+  // call-sites (pricing page, ConversionCTAs, TrialReminder, UpgradePrompt, ...)
+  // and consumed at src/app/api/admin/analytics/route.ts:217 (`upgradeClickRate`)
+  // and cta-conversions/route.ts:34. It is now on the canonicalisation accept-list
+  // so upgradeClickRate is no longer hard-wired to 0.
+  it('upgrade_clicked survives canonicalisation (consumed by upgradeClickRate)', () => {
+    expect(storedTypeFor('upgrade_clicked')).toBe('upgrade_clicked');
   });
 
-  // BUG: `feature_gated` is fired from FeatureGate.tsx + guide page and consumed
-  // at src/app/api/admin/analytics/route.ts:223 (`featureGated` count). Dropped
-  // by canonicalisation -> that gate-impression metric is permanently 0.
-  it.skip('BUG: feature_gated SHOULD survive canonicalisation (consumed by admin analytics)', () => {
-    expect(storedTypeFor('feature_gated')).not.toBeNull();
-  });
-  it('current behaviour: feature_gated is dropped (gate-impression metric reads 0)', () => {
-    expect(storedTypeFor('feature_gated')).toBeNull();
+  // FIXED: `feature_gated` is fired from FeatureGate.tsx + guide page and consumed
+  // at src/app/api/admin/analytics/route.ts:223 (`featureGated` count). Now on the
+  // accept-list, so the gate-impression metric is no longer permanently 0.
+  it('feature_gated survives canonicalisation (consumed by admin analytics)', () => {
+    expect(storedTypeFor('feature_gated')).toBe('feature_gated');
   });
 
-  // BUG: `crystal_recommendations_viewed` is fired from CrystalWidget.tsx and
-  // consumed in admin/analytics/route.ts:324 (`aiUsageCount`),
-  // analytics/summary PRODUCT_EVENTS, and admin/analytics/user-segments. It is
-  // neither an accepted canonical name nor a legacy alias, so it is dropped and
-  // every consumer of it counts 0.
-  it.skip('BUG: crystal_recommendations_viewed SHOULD survive canonicalisation (consumed widely)', () => {
-    expect(storedTypeFor('crystal_recommendations_viewed')).not.toBeNull();
-  });
-  it('current behaviour: crystal_recommendations_viewed is dropped (aiUsageCount reads 0)', () => {
-    expect(storedTypeFor('crystal_recommendations_viewed')).toBeNull();
+  // FIXED: `crystal_recommendations_viewed` is fired from CrystalWidget.tsx and
+  // consumed in admin/analytics/route.ts:324 (`aiUsageCount`), analytics/summary
+  // PRODUCT_EVENTS, and admin/analytics/user-segments. Now on the accept-list, so
+  // every consumer of it can count it.
+  it('crystal_recommendations_viewed survives canonicalisation (consumed widely)', () => {
+    expect(storedTypeFor('crystal_recommendations_viewed')).toBe(
+      'crystal_recommendations_viewed',
+    );
   });
 });
 
 /**
- * BUG: legacy-name CONSUMER mismatch in admin/analytics/route.ts.
+ * FIXED (fix/funnel-event-canonicalisation): legacy-name CONSUMER mismatch in
+ * admin/analytics/route.ts.
  *
  * `analytics/summary` was already corrected (see its inline comment dated
- * 2026-01-16) to filter PRODUCT_EVENTS on canonical names. But
- * src/app/api/admin/analytics/route.ts:324 still filters on the LEGACY names:
+ * 2026-01-16) to filter PRODUCT_EVENTS on canonical names. The admin
+ * `aiUsageCount` query previously still filtered on the LEGACY names:
  *   IN ('personalized_tarot_viewed','personalized_horoscope_viewed',
  *       'birth_chart_viewed','crystal_recommendations_viewed')
  * Those rows are stored under their canonical names (tarot_drawn /
- * horoscope_viewed / chart_viewed) or dropped (crystal). So that `aiUsageCount`
- * query matches nothing and the admin "AI usage %" is permanently 0.
+ * horoscope_viewed / chart_viewed), so that query matched nothing and the admin
+ * "AI usage %" was permanently 0. The consumer now filters on the canonical
+ * names (matching analytics/summary PRODUCT_EVENTS).
  *
- * These tests pin the canonicaliser reality the consumer is out of step with:
- * the legacy names DO map (or drop), proving the literal-name filter is stale.
+ * These tests pin the canonicaliser reality the consumer must stay aligned with:
+ * the legacy fire-names map onto the canonical names the fixed consumer queries.
  */
-describe('BUG: admin/analytics aiUsageCount filters on stale legacy names', () => {
+describe('admin/analytics aiUsageCount filters on canonical names', () => {
   it('personalized_tarot_viewed is stored as tarot_drawn, not under its own name', () => {
     expect(storedTypeFor('personalized_tarot_viewed')).toBe('tarot_drawn');
   });
@@ -292,12 +286,25 @@ describe('BUG: admin/analytics aiUsageCount filters on stale legacy names', () =
   it('birth_chart_viewed is stored as chart_viewed, not under its own name', () => {
     expect(storedTypeFor('birth_chart_viewed')).toBe('chart_viewed');
   });
-  // The intended contract: a consumer measuring "AI/personalised feature usage"
-  // should query canonical names. Skipped until admin/analytics/route.ts:324 is
-  // migrated to ['tarot_drawn','horoscope_viewed','chart_viewed', ...].
-  it.skip('BUG: admin aiUsageCount SHOULD query canonical names so it is not permanently 0', () => {
-    // Placeholder for the fixed consumer; canonicaliser side is already correct.
-    expect(true).toBe(true);
+  // The fixed consumer (admin/analytics/route.ts aiUsageCount) now queries the
+  // canonical names below. Every legacy/personalised fire-name for AI/personalised
+  // feature usage must land on one of them, or the metric undercounts again.
+  it('admin aiUsageCount queries canonical names every personalised fire-name lands on', () => {
+    const aiUsageCanonicalFilter = [
+      'tarot_drawn',
+      'horoscope_viewed',
+      'chart_viewed',
+    ];
+    const personalisedFireNames = [
+      'personalized_tarot_viewed',
+      'personalized_horoscope_viewed',
+      'birth_chart_viewed',
+    ];
+    for (const fireName of personalisedFireNames) {
+      const stored = storedTypeFor(fireName);
+      expect(stored).not.toBeNull();
+      expect(aiUsageCanonicalFilter).toContain(stored);
+    }
   });
 });
 

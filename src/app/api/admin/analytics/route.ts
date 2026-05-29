@@ -318,10 +318,14 @@ export async function GET(request: NextRequest) {
     let aiUsagePercent = 0;
 
     try {
+      // Ingest canonicalises legacy names since 2026-01-16
+      // (birth_chart_viewed -> chart_viewed; tarot_viewed/personalized_tarot_viewed -> tarot_drawn;
+      // personalized_horoscope_viewed -> horoscope_viewed), so filtering the legacy names returned 0.
+      // Filter on the canonical names the rows are actually stored under (matches analytics/summary PRODUCT_EVENTS).
       const aiUsers = await sql`
         SELECT COUNT(DISTINCT user_id) as count
         FROM conversion_events
-        WHERE event_type IN ('personalized_tarot_viewed', 'personalized_horoscope_viewed', 'birth_chart_viewed', 'crystal_recommendations_viewed')
+        WHERE event_type IN ('tarot_drawn', 'horoscope_viewed', 'chart_viewed', 'crystal_recommendations_viewed')
         AND created_at >= ${dateStartIso}
       `;
       aiUsageCount = parseInt(aiUsers.rows[0]?.count || '0');
@@ -329,7 +333,7 @@ export async function GET(request: NextRequest) {
       const activeUsers = await sql`
         SELECT COUNT(DISTINCT user_id) as count
         FROM conversion_events
-        WHERE event_type IN ('app_opened', 'horoscope_viewed', 'tarot_viewed', 'birth_chart_viewed')
+        WHERE event_type IN ('app_opened', 'horoscope_viewed', 'tarot_drawn', 'chart_viewed')
         AND created_at >= ${dateStartIso}
       `;
       const activeUsersCount = parseInt(activeUsers.rows[0]?.count || '0');
