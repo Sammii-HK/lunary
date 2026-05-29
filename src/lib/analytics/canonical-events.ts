@@ -58,6 +58,7 @@ export type CanonicalEventType =
   | 'chart_viewed'
   | 'daily_dashboard_viewed'
   | 'astral_chat_used'
+  | 'crystal_recommendations_viewed'
   | 'tarot_drawn'
   | 'ritual_started'
   | 'ritual_completed'
@@ -117,7 +118,9 @@ export type CanonicalEventType =
   | 'paywall_accepted'
   | 'paywall_dismissed'
   | 'feature_gated_accessed'
+  | 'feature_gated'
   | 'upgrade_prompted'
+  | 'upgrade_clicked'
   | 'upgrade_motivation_identified'
   | 'pricing_page_viewed'
   // Retention & Reactivation
@@ -238,6 +241,9 @@ function canonicaliseEventType(raw: unknown): {
     value === 'chart_viewed' ||
     value === 'daily_dashboard_viewed' ||
     value === 'astral_chat_used' ||
+    value === 'crystal_recommendations_viewed' ||
+    value === 'feature_gated' ||
+    value === 'upgrade_clicked' ||
     value === 'tarot_drawn' ||
     value === 'ritual_started' ||
     value === 'ritual_completed' ||
