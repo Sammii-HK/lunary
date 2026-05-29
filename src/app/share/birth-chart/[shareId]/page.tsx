@@ -105,6 +105,7 @@ export default async function ShareBirthChartSharePage({
     keywords: record.keywords ?? [],
     birthChart: record.placements,
     houseSystem: record.houseSystem,
+    referralCode: record.referralCode,
   };
 
   return <ShareBirthChartLayout data={viewData} />;

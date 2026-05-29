@@ -24,8 +24,8 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${hourData.time} Double Hour Meaning: Spiritual Significance - Lunary`;
-  const description = `Discover the complete meaning of ${hourData.time} double hour. Learn what it means when you see ${hourData.time} on the clock, its spiritual message, love meaning, and guidance.`;
+  const title = `${hourData.time} Double Hour Meaning: ${hourData.meaning}`;
+  const description = `Keep seeing ${hourData.time}? It amplifies ${hourData.meaning.toLowerCase()}. Learn the spiritual message, love and career meaning, plus what this double hour is confirming for you.`;
 
   return {
     title,

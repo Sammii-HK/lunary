@@ -25,6 +25,10 @@ import {
   getAnonymousId,
 } from '@/lib/analytics';
 import { getAttributionForTracking } from '@/lib/attribution';
+import {
+  storeReferralCodeFromUrl,
+  getStoredReferralCode,
+} from '@/lib/referrals/referral-link';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import { createProductSchema, renderJsonLd } from '@/lib/schema';
 import { AuthComponent } from '@/components/Auth';
@@ -123,10 +127,9 @@ export default function PricingPage() {
     }
 
     const params = new URLSearchParams(window.location.search);
-    const ref = params.get('ref');
-    if (ref) {
-      localStorage.setItem('lunary_referral_code', ref);
-    }
+    // Stash any ?ref code so it survives until signup/checkout. Free signups
+    // are attributed on /auth; paid signups via the Stripe webhook.
+    storeReferralCodeFromUrl(window.location.search);
 
     const promo = params.get('promo') || params.get('coupon');
     if (promo) {
@@ -219,7 +222,7 @@ export default function PricingPage() {
     setLoading(planId);
 
     try {
-      const storedReferralCode = localStorage.getItem('lunary_referral_code');
+      const storedReferralCode = getStoredReferralCode();
       const currentUserId = authState.user?.id || user?.id;
       const currentUserEmail = user?.email || authState.user?.email;
 

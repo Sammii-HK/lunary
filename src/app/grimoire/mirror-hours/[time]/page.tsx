@@ -23,8 +23,8 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${hourData.time} Mirror Hour Meaning: Spiritual Significance - Lunary`;
-  const description = `Discover the complete meaning of ${hourData.time} mirror hour. Learn what it means when you see ${hourData.time} on the clock, its spiritual message, love meaning, and guidance.`;
+  const title = `${hourData.time} Mirror Hour Meaning: ${hourData.meaning}`;
+  const description = `Keep seeing ${hourData.time}? It signals ${hourData.meaning.toLowerCase()}. Learn the spiritual message, love and career meaning, plus how to respond when this mirror hour appears.`;
 
   return {
     title,

@@ -16,6 +16,11 @@ export type ShareBirthChartPayload = {
   keywords?: string[];
   placements: BirthChartData[];
   houseSystem?: HouseSystem;
+  /**
+   * The sharer's referral code, captured at share-creation time so the public
+   * share page can carry attribution through to the recipient's signup.
+   */
+  referralCode?: string;
 };
 
 export type ShareBirthChartRecord = ShareBirthChartPayload & {

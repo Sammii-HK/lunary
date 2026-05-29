@@ -7,9 +7,10 @@ export type CampaignType =
   | 'missed_streak'
   | 'milestone'
   | 'insights_ready'
-  | 'free_3days_inactive'
+  | 'free_2days_inactive'
   | 'free_7days_inactive'
   | 'free_14days_inactive'
+  | 'free_major_transit'
   | 'winback_30d'
   | 'weekly_reading';
 
@@ -59,36 +60,89 @@ export async function recordCampaignSent(
   }
 }
 
-export async function getInactiveUsers(daysInactive: number): Promise<
-  Array<{
-    userId: string;
-    email: string;
-    lastActivity: Date | null;
-  }>
-> {
-  try {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - daysInactive);
+export interface DormantFreeUser {
+  userId: string;
+  email: string;
+  name: string | null;
+  birthChart: unknown;
+}
 
-    // Use subscriptions updated_at as proxy for last activity
+/**
+ * Dormant free-user selection for reactivation.
+ *
+ * This is the canonical query for the reactivation sequence. It does NOT lean
+ * on subscriptions.created_at or subscriptions.updated_at: a cold or dormant
+ * user is, by definition, someone whose row stopped changing, so a
+ * created_at-anchored drip (the welcome-drip cron) will never pick them up.
+ * Instead we select on real activity recency in user_sessions.
+ *
+ * A user qualifies when:
+ *   - they are on the free tier
+ *   - they have activated at least once (>=1 session, filters bot/ghost rows)
+ *   - they have had NO session in the last `daysInactive` days
+ *   - they DID have a session inside an outer window (`maxDaysInactive`), so we
+ *     only target the recently-dormant pool and never email truly ancient or
+ *     never-activated addresses. Pass `null` to disable the outer bound.
+ *
+ * @param daysInactive    minimum days of silence to qualify (inner cutoff)
+ * @param maxDaysInactive outer cutoff: ignore users dormant longer than this
+ * @param limit           batch size per run
+ */
+export async function getDormantFreeUsers(
+  daysInactive: number,
+  maxDaysInactive: number | null = null,
+  limit: number = 100,
+): Promise<DormantFreeUser[]> {
+  try {
+    const innerCutoff = new Date();
+    innerCutoff.setDate(innerCutoff.getDate() - daysInactive);
+
+    const outerCutoff = new Date();
+    if (maxDaysInactive !== null) {
+      outerCutoff.setDate(outerCutoff.getDate() - maxDaysInactive);
+    }
+
     const result = await sql`
-      SELECT DISTINCT 
-        sub.user_id, 
-        sub.user_email as email, 
-        sub.updated_at as last_activity
-      FROM subscriptions sub
-      WHERE sub.user_email IS NOT NULL
-        AND (sub.updated_at < ${cutoffDate.toISOString()} OR sub.updated_at IS NULL)
-      LIMIT 100
+      SELECT DISTINCT
+        s.user_id,
+        s.user_email AS email,
+        s.user_name AS name,
+        up.birth_chart
+      FROM subscriptions s
+      LEFT JOIN user_profiles up ON s.user_id = up.user_id
+      WHERE s.user_email IS NOT NULL
+        AND s.status = 'free'
+        AND EXISTS (
+          SELECT 1 FROM user_sessions us2
+          WHERE us2.user_id = s.user_id
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM user_sessions us
+          WHERE us.user_id = s.user_id
+            AND us.session_timestamp >= ${innerCutoff.toISOString()}
+        )
+        AND (
+          ${maxDaysInactive === null}
+          OR EXISTS (
+            SELECT 1 FROM user_sessions us3
+            WHERE us3.user_id = s.user_id
+              AND us3.session_timestamp >= ${outerCutoff.toISOString()}
+          )
+        )
+      LIMIT ${limit}
     `;
 
     return result.rows.map((row) => ({
       userId: row.user_id,
-      email: row.user_email,
-      lastActivity: row.last_activity ? new Date(row.last_activity) : null,
+      email: row.email,
+      name: row.name ?? null,
+      birthChart: row.birth_chart,
     }));
   } catch (error) {
-    console.error('[Campaign Manager] Error getting inactive users:', error);
+    console.error(
+      '[Campaign Manager] Error getting dormant free users:',
+      error,
+    );
     return [];
   }
 }

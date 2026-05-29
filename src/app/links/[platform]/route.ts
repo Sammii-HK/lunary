@@ -40,6 +40,21 @@ const PLATFORM_DESTINATIONS: Record<string, Destination> = {
   mastodon: { path: '/grimoire', campaign: 'mastodon_bio_grimoire' },
   podcast: { path: '/podcast', campaign: 'podcast_bio' },
   substack: { path: '/grimoire', campaign: 'substack_bio_grimoire' },
+  // Persona slugs (Studio Sammii) — each persona's bio/CTA routes to its best cold destination.
+  stardust: { path: '/grimoire/astrology/sky-now', campaign: 'stardust_sky' },
+  solopreneur: { path: '/building-lunary', campaign: 'solopreneur_build' },
+  seer: { path: '/grimoire/tarot', campaign: 'seer_tarot' },
+  sparkle: { path: '/birth-chart', campaign: 'sparkle_chart' },
+  // Content slugs — for posts/replies pointing at a specific page (cold-safe routes only).
+  'sky-now': {
+    path: '/grimoire/astrology/sky-now',
+    campaign: 'content_sky_now',
+  },
+  transits: { path: '/transits', campaign: 'content_transits' },
+  'birth-chart': { path: '/birth-chart', campaign: 'content_birth_chart' },
+  'build-log': { path: '/building-lunary', campaign: 'content_build_log' },
+  'daily-tarot': { path: '/grimoire/tarot', campaign: 'content_daily_tarot' },
+  pricing: { path: '/building-lunary', campaign: 'content_pricing_to_build' },
 };
 // Notes on destinations intentionally NOT in this map:
 //   - discord: dead channel, audience mismatch — falls back to /links menu

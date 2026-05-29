@@ -14,8 +14,8 @@ const formatKeywords = (...terms: string[]) =>
 
 export const signMeta = (signName: string, slug: string): Metadata => {
   const endYear = new Date().getFullYear() + 1;
-  const title = `${signName} Horoscope 2025–${endYear}: Monthly & Yearly Forecasts`;
-  const description = `${signName} horoscopes for every month from 2025 to ${endYear}. Personalised love, career, health and finance forecasts for ${signName} — updated monthly.`;
+  const title = `${signName} Horoscope: Monthly & Yearly Forecasts to ${endYear}`;
+  const description = `Read your ${signName} horoscope for every month through ${endYear}. Love, career, money and wellbeing forecasts personalised to ${signName} and updated monthly.`;
   const image = `${OG_BASE}?sign=${encode(signName)}`;
 
   return {
@@ -78,10 +78,10 @@ export const yearMeta = (
       signHooks[signName] || `${year} Yearly Forecast & Major Shifts`;
     title = `${signName} Horoscope 2027: ${hook}`;
   } else {
-    title = `${signName} Horoscope ${year}: Love, Career & Year Ahead`;
+    title = `${signName} Horoscope ${year}: Love, Career & The Year Ahead`;
   }
 
-  const description = `Your complete ${signName} horoscope for ${year}. All 12 monthly forecasts, yearly themes, love, career and wellness predictions — personalised to your sign.`;
+  const description = `Your full ${signName} ${year} horoscope: all 12 monthly forecasts plus the big yearly themes for love, career, money and wellbeing, mapped to ${signName}.`;
   const image = `${OG_BASE}?sign=${encode(signName)}&year=${encode(year)}`;
 
   return {
@@ -129,10 +129,10 @@ export const monthMeta = (
   const override = getMonthlyMetaOverride(slug, year, monthSlug);
   const title =
     override?.title ??
-    `${signName} Horoscope ${monthName} ${year}: Love, Career & What to Expect`;
+    `${signName} Horoscope ${monthName} ${year}: What to Expect`;
   const description =
     override?.description ??
-    `Your personalised ${signName} horoscope for ${monthName} ${year}. Lucky days, power colour, love & career forecasts, plus what the transits mean for your sign this month.`;
+    `Your ${signName} horoscope for ${monthName} ${year}: lucky days, power colour, love and career forecasts, and what this month's transits really mean for your sign.`;
   const image = `${OG_BASE}?sign=${encode(signName)}&month=${encode(monthSlug)}&year=${encode(year)}`;
 
   return {

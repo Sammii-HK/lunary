@@ -102,6 +102,8 @@ export type ShareBirthChartDisplayData = {
   keywords?: string[];
   birthChart?: BirthChartData[];
   houseSystem?: HouseSystem;
+  /** Sharer's referral code, used to attribute the recipient's signup. */
+  referralCode?: string;
 };
 
 const BODY_ORDER = [
@@ -140,7 +142,17 @@ export function ShareBirthChartLayout({
     keywords = [],
     birthChart = [],
     houseSystem = 'placidus',
+    referralCode,
   } = data;
+
+  // Carry the sharer's referral code through to signup so FREE signups from a
+  // shared chart are attributed (paid signups attribute via the Stripe
+  // webhook). The /auth page redeems the `ref` once the account exists.
+  const signupHref = referralCode
+    ? `/auth?signup=true&redirect=/app/birth-chart&ref=${encodeURIComponent(
+        referralCode,
+      )}`
+    : '/auth?signup=true&redirect=/app/birth-chart';
 
   const theme =
     (element && gradientsByElement[element]) || gradientsByElement.default;
@@ -400,7 +412,7 @@ export function ShareBirthChartLayout({
                 </p>
                 <div className='mt-4 flex flex-col items-center gap-4 sm:flex-row sm:justify-center'>
                   <Button asChild variant='lunary'>
-                    <Link href='/auth?signup=true&redirect=/app/birth-chart'>
+                    <Link href={signupHref}>
                       <Sparkles className='w-4 h-4' />
                       Get Your Free Birth Chart
                     </Link>

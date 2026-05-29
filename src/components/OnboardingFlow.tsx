@@ -56,6 +56,75 @@ type LocationSuggestion = {
   country?: string;
 };
 
+// Birthday skip re-prompt schedule. When a user skips the birthday step we
+// don't want to lose them forever (the personalised hook is gated on
+// user.birthday), but we also don't want to nag. Re-show onboarding after a
+// 3-day cooldown, at most 3 times total, then leave them alone. The schedule
+// is cleared permanently once the birthday is set.
+const SKIP_REPROMPT_KEY = 'lunary_onboarding_skip_reprompt';
+const SKIP_REPROMPT_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
+const SKIP_REPROMPT_MAX = 3;
+
+type SkipRepromptSchedule = {
+  count: number;
+  nextPromptAt: number;
+};
+
+const readSkipReprompt = (): SkipRepromptSchedule | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(SKIP_REPROMPT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<SkipRepromptSchedule>;
+    if (
+      typeof parsed.count !== 'number' ||
+      typeof parsed.nextPromptAt !== 'number'
+    ) {
+      return null;
+    }
+    return { count: parsed.count, nextPromptAt: parsed.nextPromptAt };
+  } catch {
+    return null;
+  }
+};
+
+// Record a fresh skip: bump the count and push the next prompt out by the
+// cooldown. Once we hit the max we stop scheduling further re-prompts.
+const recordSkipReprompt = () => {
+  if (typeof window === 'undefined') return;
+  const existing = readSkipReprompt();
+  const count = (existing?.count ?? 0) + 1;
+  try {
+    window.localStorage.setItem(
+      SKIP_REPROMPT_KEY,
+      JSON.stringify({
+        count,
+        nextPromptAt: Date.now() + SKIP_REPROMPT_COOLDOWN_MS,
+      }),
+    );
+  } catch {
+    /* storage unavailable, skip silently */
+  }
+};
+
+const clearSkipReprompt = () => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(SKIP_REPROMPT_KEY);
+  } catch {
+    /* storage unavailable, skip silently */
+  }
+};
+
+// A scheduled re-prompt is due when the cooldown has elapsed and we haven't
+// already hit the maximum number of re-prompts.
+const isSkipRepromptDue = (): boolean => {
+  const schedule = readSkipReprompt();
+  if (!schedule) return false;
+  if (schedule.count >= SKIP_REPROMPT_MAX) return false;
+  return Date.now() >= schedule.nextPromptAt;
+};
+
 export function OnboardingFlow({
   overridePlanId,
   forceOpen = false,
@@ -519,7 +588,11 @@ export function OnboardingFlow({
       !userLoading &&
       !onboardingStatus.loading &&
       needsBirthDetails &&
-      !onboardingStatus.completed
+      // Re-prompt earlier skippers once their 3-day cooldown has elapsed
+      // (capped at SKIP_REPROMPT_MAX), even though onboarding was marked
+      // complete/skipped server-side. Without a birthday the personalised
+      // hook stays null, so a bounded nudge wins them back.
+      (!onboardingStatus.completed || (!user?.birthday && isSkipRepromptDue()))
     ) {
       setShowOnboarding(true);
       return;
@@ -543,6 +616,15 @@ export function OnboardingFlow({
     setOnboardingStatus({ loading: false, completed: true });
     setShowOnboarding(false);
   };
+
+  // Once the birthday is set, the user is in personalisation. Clear any
+  // pending skip re-prompt schedule permanently so we never nag them again.
+  const hasBirthdaySet = Boolean(user?.birthday);
+  useEffect(() => {
+    if (hasBirthdaySet) {
+      clearSkipReprompt();
+    }
+  }, [hasBirthdaySet]);
 
   useEffect(() => {
     if (previewMode && previewStep) {
@@ -885,6 +967,11 @@ export function OnboardingFlow({
       return;
     }
     if (step === 'birthday') {
+      // Skipping the birthday step leaks a user out of personalisation.
+      // Schedule a gentle re-prompt unless they've already added a birthday.
+      if (!user?.birthday) {
+        recordSkipReprompt();
+      }
       setCurrentStep('complete');
       return;
     }
@@ -904,6 +991,11 @@ export function OnboardingFlow({
     }
 
     await trackStepCompletion('complete', true);
+    // Dismissing onboarding without a birthday leaks the user out of
+    // personalisation. Schedule a gentle re-prompt (cooldown + capped).
+    if (!user?.birthday) {
+      recordSkipReprompt();
+    }
     resolveOnboarding();
     setShowSkipWarning(false);
     setCurrentStep('complete');
