@@ -4,6 +4,21 @@ import webpush from 'web-push';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Send gate. This cron pushes streak-at-risk + general re-engagement
+ * notifications. It is OFF by default and runs in dry-run mode (computes the
+ * target subscribers and logs what it WOULD send, but sends nothing) unless
+ * ENGAGEMENT_NOTIFS_ENABLED is explicitly set to "true". Mirrors the dunning
+ * dry-run pattern so the cron cannot send unattended once scheduled.
+ *
+ * NOTE: even when enabled, the recipient gate is opt-OUT on a preference key
+ * (`engagementReminders`) that the subscribe flow does not yet write (see
+ * retention plan item 4). Resolve the preference-key reconciliation before
+ * flipping this on, or it will reach every active push subscriber.
+ */
+const ENGAGEMENT_SEND_ENABLED =
+  process.env.ENGAGEMENT_NOTIFS_ENABLED === 'true';
+
 function ensureVapidConfigured() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;
@@ -82,6 +97,24 @@ export async function GET(request: NextRequest) {
         success: true,
         notificationsSent: 0,
         message: 'No subscribers needing engagement reminders',
+      });
+    }
+
+    // ── Send gate ────────────────────────────────────────────────────
+    // Default OFF: report what we WOULD send and exit without sending.
+    if (!ENGAGEMENT_SEND_ENABLED) {
+      console.log(
+        `[engagement-notifications] DRY RUN (ENGAGEMENT_NOTIFS_ENABLED!="true"): would push ${streaksAtRisk.rows.length} streak-at-risk + ${subscriptions.rows.length} general reminders (${totalSubscribers} total). Sending nothing.`,
+      );
+      return NextResponse.json({
+        success: true,
+        dryRun: true,
+        notificationsSent: 0,
+        wouldSend: totalSubscribers,
+        streakAtRisk: streaksAtRisk.rows.length,
+        generalReminders: subscriptions.rows.length,
+        date: today,
+        note: 'ENGAGEMENT_NOTIFS_ENABLED is not "true" - no notifications sent.',
       });
     }
 

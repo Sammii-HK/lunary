@@ -12,6 +12,16 @@ const INTRO_DELAY_MS = 7 * 24 * 60 * 60 * 1000;
 const FOLLOWUP_DELAY_MS = 14 * 24 * 60 * 60 * 1000;
 const MAX_EMAILS_PER_RUN = 200;
 
+/**
+ * Send gate. This cron asks engaged users for a testimonial at day 7 (intro)
+ * and day 14 (follow-up). It is OFF by default and runs in dry-run mode
+ * (resolves the recipient lists and logs what it WOULD send, but sends nothing)
+ * unless TESTIMONIAL_FEEDBACK_ENABLED is explicitly set to "true". Mirrors the
+ * dunning dry-run pattern so the cron cannot send unattended once scheduled.
+ */
+const TESTIMONIAL_SEND_ENABLED =
+  process.env.TESTIMONIAL_FEEDBACK_ENABLED === 'true';
+
 type UserRow = {
   id: string;
   email: string;
@@ -86,6 +96,20 @@ async function runTestimonialFeedback() {
 
   const introUsers = await getIntroRecipients(introCutoffISO);
   const followupUsers = await getFollowupRecipients(followupCutoffISO);
+
+  // ── Send gate ──────────────────────────────────────────────────────
+  // Default OFF: report what we WOULD send and exit without sending.
+  if (!TESTIMONIAL_SEND_ENABLED) {
+    console.log(
+      `[testimonial-feedback] DRY RUN (TESTIMONIAL_FEEDBACK_ENABLED!="true"): would send ${introUsers.length} intro + ${followupUsers.length} follow-up emails. Sending nothing.`,
+    );
+    return {
+      dryRun: true,
+      intro: { attempted: introUsers.length, successes: 0, failures: 0 },
+      followup: { attempted: followupUsers.length, successes: 0, failures: 0 },
+      note: 'TESTIMONIAL_FEEDBACK_ENABLED is not "true" - no emails sent.',
+    };
+  }
 
   const introResults = await sendFeedbackEmails('intro', introUsers);
   const followupResults = await sendFeedbackEmails('followup', followupUsers);
