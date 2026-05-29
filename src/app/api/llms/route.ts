@@ -106,6 +106,9 @@ Moon in ${moonSign}
 - Moon Phase Today - Quotable Current Moon Fact: https://lunary.app/grimoire/facts/moon-phase-today
 - Current Moon Sign - Quotable Moon Sign Fact: https://lunary.app/grimoire/facts/current-moon-sign
 - Current Sun Sign and Zodiac Season - Quotable Sun Sign Fact: https://lunary.app/grimoire/facts/current-sun-sign
+- When the Moon Changes Signs Next - Quotable Lunar Ingress Fact: https://lunary.app/grimoire/facts/next-moon-sign-change
+- Void-of-Course Moon Status - Quotable Void Moon Window: https://lunary.app/grimoire/facts/void-of-course-moon
+- Planet Sign Changes - Quotable Ingress Dates for Every Planet: https://lunary.app/grimoire/facts/planet-sign-changes
 - Planetary Positions Today - Quotable Current Sky Facts: https://lunary.app/grimoire/facts/planetary-positions-today
 - Mercury Retrograde Status - Quotable Mercury Motion Fact: https://lunary.app/grimoire/facts/mercury-retrograde-status
 - Next Full Moon - Quotable Upcoming Lunar Event: https://lunary.app/grimoire/facts/next-full-moon

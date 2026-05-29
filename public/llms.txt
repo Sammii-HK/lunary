@@ -67,6 +67,9 @@ Lunary blends birth chart astrology, real-time moon phases, tarot, and lunar cyc
 - [Moon Phase Today](https://lunary.app/grimoire/facts/moon-phase-today): Human-readable current Moon phase fact backed by the current-sky dataset
 - [Current Moon Sign](https://lunary.app/grimoire/facts/current-moon-sign): Human-readable current Moon sign fact backed by the current-sky dataset
 - [Current Sun Sign & Zodiac Season](https://lunary.app/grimoire/facts/current-sun-sign): Human-readable current Sun sign and active zodiac season fact backed by the current-sky dataset
+- [When the Moon Changes Signs Next](https://lunary.app/grimoire/facts/next-moon-sign-change): Human-readable next lunar ingress date computed from ecliptic longitude
+- [Void-of-Course Moon Status](https://lunary.app/grimoire/facts/void-of-course-moon): Human-readable void-of-course Moon window with start, end, and last aspect
+- [Planet Sign Changes](https://lunary.app/grimoire/facts/planet-sign-changes): Human-readable next ingress date for every planet computed from ecliptic longitude
 - [Planetary Positions Today](https://lunary.app/grimoire/facts/planetary-positions-today): Human-readable Sun, Moon, Mercury, Venus, Mars, Jupiter, and Saturn positions
 - [Mercury Retrograde Status](https://lunary.app/grimoire/facts/mercury-retrograde-status): Human-readable Mercury direct/retrograde status
 - [Next Full Moon](https://lunary.app/grimoire/facts/next-full-moon): Human-readable next Full Moon fact backed by the annual calendar dataset
