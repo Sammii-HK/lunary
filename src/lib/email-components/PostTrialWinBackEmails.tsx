@@ -10,6 +10,7 @@ import {
   Text,
 } from '@react-email/components';
 import { render } from '@react-email/render';
+import { EMAIL_PROMO, buildPromoPricingUrl } from '@/lib/promo/email-promo';
 
 const getBaseUrl = () =>
   process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
@@ -262,7 +263,7 @@ function WinBackDay7Email({ userName, sunSign, userEmail }: WinBackDay7Props) {
                 margin: '0 0 4px 0',
               }}
             >
-              Come back and save 20%
+              Come back and save {EMAIL_PROMO.percent}% on {EMAIL_PROMO.label}
             </Text>
             <Text
               style={{
@@ -273,7 +274,7 @@ function WinBackDay7Email({ userName, sunSign, userEmail }: WinBackDay7Props) {
                 letterSpacing: '2px',
               }}
             >
-              RETURN20
+              {EMAIL_PROMO.code}
             </Text>
             <Text
               style={{
@@ -287,8 +288,13 @@ function WinBackDay7Email({ userName, sunSign, userEmail }: WinBackDay7Props) {
           </Section>
 
           <CtaButton
-            href={`${baseUrl}/pricing?nav=app&promo=RETURN20&utm_source=email&utm_medium=lifecycle&utm_campaign=winback&utm_content=day7`}
-            label='Reactivate with 20% Off'
+            href={buildPromoPricingUrl(baseUrl, {
+              utm_source: 'email',
+              utm_medium: 'lifecycle',
+              utm_campaign: 'winback',
+              utm_content: 'day7',
+            })}
+            label={`Reactivate with ${EMAIL_PROMO.percent}% Off`}
           />
           <Text
             style={{
