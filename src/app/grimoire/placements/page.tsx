@@ -6,11 +6,7 @@ import {
 } from '@/constants/seo/planet-sign-content';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
-import {
-  createItemListSchema,
-  createFAQPageSchema,
-  renderJsonLd,
-} from '@/lib/schema';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 export const revalidate = 2592000;
@@ -86,12 +82,9 @@ export default function PlacementsIndexPage() {
     items: allPlacements.slice(0, 50),
   });
 
-  const faqSchema = createFAQPageSchema(faqs);
-
   return (
     <>
       {renderJsonLd(itemListSchema)}
-      {renderJsonLd(faqSchema)}
       <SEOContentTemplate
         title='Astrological Placements: Sun, Moon & Rising in Every Sign'
         h1='Astrological Placements'

@@ -4,13 +4,8 @@ import { Heart } from 'lucide-react';
 import { signDescriptions } from '@/constants/seo/planet-sign-content';
 import { getCuratedCompatibilitySlugs } from '@/constants/seo/compatibility-content';
 import { CompatibilityMatrix } from '@/components/CompatibilityMatrix';
-import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
-import {
-  createItemListSchema,
-  renderJsonLd,
-  createBreadcrumbSchema,
-} from '@/lib/schema';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
@@ -104,35 +99,90 @@ export default function CompatibilityIndexPage() {
     })),
   });
 
-  return (
-    <div className='min-h-screen bg-surface-base text-content-primary'>
-      {renderJsonLd(compatibilityListSchema)}
-      {renderJsonLd(
-        createBreadcrumbSchema([
-          { name: 'Grimoire', url: '/grimoire' },
-          { name: 'Compatibility', url: '/grimoire/compatibility' },
-        ]),
-      )}
-      <div className='max-w-6xl mx-auto px-4 py-12'>
-        <Breadcrumbs
-          items={[
-            { label: 'Grimoire', href: '/grimoire' },
-            { label: 'Compatibility' },
-          ]}
-        />
-        <div className='mb-12'>
-          <h1 className='text-4xl font-light text-content-primary mb-4'>
-            Zodiac Compatibility: Best & Worst Matches for Every Sign
-          </h1>
-          <p className='text-lg text-content-muted max-w-2xl'>
-            Explore how zodiac signs interact in love, friendship, and work.
-            Select two signs to see their compatibility analysis.
-          </p>
-          <p className='mt-4 text-sm text-content-muted max-w-2xl'>
-            TL;DR: {tldr}
-          </p>
-        </div>
+  const faqs = [
+    {
+      question: 'What is zodiac compatibility?',
+      answer:
+        'Zodiac compatibility describes how two signs relate based on element, modality, polarity, and planetary rulership. It is a starting point for understanding relationship dynamics, not a verdict. Full synastry compares complete birth charts for a deeper read.',
+    },
+    {
+      question: 'Which zodiac signs are most compatible?',
+      answer:
+        'Signs of the same element (Fire and Fire, Earth and Earth, Air and Air, Water and Water) share a natural temperament and often feel easy together. Complementary elements, Fire with Air and Earth with Water, bring balance. Compatibility is always more accurate with a full synastry chart than with Sun signs alone.',
+    },
+    {
+      question:
+        'What is the difference between Sun sign compatibility and synastry?',
+      answer:
+        'Sun sign compatibility compares one planet in each chart. Synastry overlays every placement, Sun, Moon, Venus, Mars, and all others, to show the full relational picture. Sun sign reads are useful as a starting point; synastry is where meaningful compatibility analysis lives.',
+    },
+    {
+      question: 'Can incompatible signs have a good relationship?',
+      answer:
+        'Yes. Challenging Sun sign combinations are often softened by harmonious Moon, Venus, or Mars aspects in a synastry chart. Low Sun sign scores do not predict relationship failure; they flag areas that need more awareness and communication.',
+    },
+  ];
 
+  return (
+    <>
+      {renderJsonLd(compatibilityListSchema)}
+      <SEOContentTemplate
+        title='Zodiac Compatibility: Best & Worst Matches for Every Sign'
+        h1='Zodiac Compatibility'
+        description='Selective zodiac compatibility guide. Explore curated love, friendship, and work match reads, then go deeper with synastry and full-chart comparison.'
+        keywords={[
+          'zodiac compatibility',
+          'astrology compatibility',
+          'zodiac love matches',
+          'compatible zodiac signs',
+          'synastry',
+        ]}
+        canonicalUrl='https://lunary.app/grimoire/compatibility'
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Compatibility' },
+        ]}
+        whatIs={{
+          question: 'What is zodiac compatibility?',
+          answer:
+            'Zodiac compatibility describes how two signs relate based on element, modality, polarity, and planetary rulership. It is a useful starting point for understanding relationship dynamics, but full synastry, comparing complete birth charts, gives a far deeper and more accurate picture.',
+        }}
+        tldr={tldr}
+        intro='Explore how zodiac signs interact in love, friendship, and work. Select two signs to see their compatibility analysis. Sun signs are a useful starting point, while synastry and full chart comparison reveal the real picture.'
+        meaning={`Compatibility in astrology is not a binary pass or fail. Element affinity (Fire with Air, Earth with Water) creates natural ease. Complementary modalities (Cardinal with Mutable, Fixed with Fixed) shape how two people approach goals and change together. Polarity, each sign paired with its opposite, adds tension that can be creative or draining depending on the rest of the chart.\n\nSun sign reads capture one layer. The Moon describes emotional needs. Venus and Mars describe how each person loves and pursues. When these four points align across two charts, the connection typically feels effortless. When they clash, effort and awareness matter more than raw sign labels.`}
+        howToWorkWith={[
+          'Start with Sun sign as a style overview, not a verdict.',
+          'Check Moon signs next. Emotional compatibility shapes day-to-day life more than Sun.',
+          'Venus and Mars aspects in synastry reveal attraction, affection style, and drive.',
+          'Use a full synastry chart before drawing conclusions about long-term compatibility.',
+        ]}
+        faqs={faqs}
+        tableOfContents={[
+          { label: 'What compatibility means', href: '#what-is' },
+          { label: 'How to read it', href: '#meaning' },
+          { label: 'Compatibility matrix', href: '#matrix' },
+          { label: 'Curated pair reads', href: '#curated-pairs' },
+          { label: 'FAQ', href: '#faq' },
+        ]}
+        internalLinks={[
+          { text: 'Synastry Calculator', href: '/grimoire/synastry/generate' },
+          { text: 'Zodiac Signs', href: '/grimoire/zodiac' },
+          { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
+          { text: 'Placements', href: '/grimoire/placements' },
+        ]}
+        sources={[
+          {
+            name: 'Lunary compatibility interpretation framework',
+            url: 'https://lunary.app/about/methodology',
+          },
+          {
+            name: 'Traditional Western astrology elemental and modal doctrine',
+          },
+        ]}
+        ctaText='Generate your synastry chart'
+        ctaHref='/grimoire/synastry/generate'
+        childrenPosition='before-faqs'
+      >
         {/* Stats */}
         <div className='grid grid-cols-3 gap-4 mb-12 max-w-md'>
           <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
@@ -152,7 +202,7 @@ export default function CompatibilityIndexPage() {
         </div>
 
         {/* Compatibility Matrix */}
-        <div className='mb-12 overflow-x-auto'>
+        <div id='matrix' className='mb-12 overflow-x-auto'>
           <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Compatibility Matrix
           </h2>
@@ -168,7 +218,7 @@ export default function CompatibilityIndexPage() {
         </div>
 
         {/* Curated pairs */}
-        <div className='space-y-8'>
+        <div id='curated-pairs' className='space-y-8'>
           <h2 className='text-2xl font-medium text-content-primary'>
             Curated Compatibility Reads
           </h2>
@@ -242,22 +292,7 @@ export default function CompatibilityIndexPage() {
             </div>
           </Link>
         </section>
-
-        {/* Birth Chart CTA */}
-        <section className='mt-6 text-center'>
-          <Link
-            href='/birth-chart'
-            className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-surface-card/50 hover:bg-surface-card border border-stroke-default text-content-secondary hover:text-content-primary transition-colors'
-          >
-            View Your Birth Chart
-          </Link>
-          <p className='mt-3 text-sm text-content-muted'>
-            Understand your complete astrological profile
-          </p>
-        </section>
-
-        <ExploreGrimoire />
-      </div>
-    </div>
+      </SEOContentTemplate>
+    </>
   );
 }

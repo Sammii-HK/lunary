@@ -1,33 +1,95 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { X } from 'lucide-react';
-import { SmartTrialButton } from './SmartTrialButton';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
+import { Button } from '@/components/ui/button';
+import { Heading } from '@/components/ui/Heading';
+import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
 
 const EXIT_INTENT_STORAGE_KEY = 'exitIntentDismissed';
 const EXIT_INTENT_COOLDOWN_DAYS = 7; // Show again after 7 days
+
+// The live "Blue Moon" Pro offer (32% off) applied at checkout via the promo param.
+const PRO_DISCOUNT_PERCENT = 32;
+const PRO_DISCOUNT_HREF = '/pricing?nav=app&promo=BLUEMOON';
+
+// No-account birth chart preview. Low-commitment route for cold visitors that
+// captures an email without asking for a discount they have no intent for yet.
+const FREE_CHART_HREF = '/free-chart';
+
+type ExitMode = 'discount' | 'anon';
+
+const COPY: Record<
+  ExitMode,
+  {
+    heading: string;
+    body: string;
+    bullets: string[];
+    ctaLabel: string;
+    href: string;
+    dismissLabel: string;
+    ctaId: string;
+  }
+> = {
+  // (a) Logged-in users whose trial has expired: lead with the live offer.
+  discount: {
+    heading: 'Before you go',
+    body: `Your trial has ended. Take ${PRO_DISCOUNT_PERCENT}% off Lunary Pro and keep your personalised charts, transits, and readings.`,
+    bullets: [
+      'Personalised birth chart analysis',
+      'Daily horoscopes based on your chart',
+      'Personalised tarot readings',
+    ],
+    ctaLabel: `Get ${PRO_DISCOUNT_PERCENT}% off Pro`,
+    href: PRO_DISCOUNT_HREF,
+    dismissLabel: 'No thanks, maybe later',
+    ctaId: 'exit_intent_pro_discount',
+  },
+  // (b) Anonymous cold visitors (the bulk of Bing/GEO traffic): offer the
+  // no-account preview rather than a discount.
+  anon: {
+    heading: 'Before you go',
+    body: 'See your real placements in a free birth chart preview. No account needed, takes 30 seconds.',
+    bullets: [
+      'Your core Sun, Moon, and rising placements',
+      'The first standout pattern in your chart',
+      'Save the full map in Lunary when you are ready',
+    ],
+    ctaLabel: 'See my free chart',
+    href: FREE_CHART_HREF,
+    dismissLabel: 'No thanks',
+    ctaId: 'exit_intent_free_chart',
+  },
+};
 
 export function ExitIntent() {
   const [showModal, setShowModal] = useState(false);
   const authState = useAuthStatus();
   const subscription = useSubscription();
+  const pathname = usePathname() || '';
+
+  // Logged-in expired-trial users get the discount path; anonymous cold
+  // visitors get the no-account preview path. Active subscribers, free-plan
+  // users, and not-yet-resolved auth states get nothing.
+  const mode: ExitMode | null = subscription.loading
+    ? null
+    : authState.isAuthenticated
+      ? subscription.isSubscribed || subscription.status === 'free'
+        ? null
+        : 'discount'
+      : 'anon';
 
   useEffect(() => {
-    // Don't show for:
-    // 1. Free plan users (status === 'free')
-    // 2. Active subscribers
-    // 3. Users who dismissed it recently (within cooldown period)
-    if (
-      subscription.status === 'free' ||
-      subscription.isSubscribed ||
-      !authState.isAuthenticated
-    ) {
+    if (!mode) {
       return;
     }
 
-    // Check if user dismissed it recently
+    // Check if user dismissed it recently (shared cooldown across both modes
+    // so we never stack exit prompts on the same visitor).
     const dismissedData = localStorage.getItem(EXIT_INTENT_STORAGE_KEY);
     if (dismissedData) {
       try {
@@ -69,17 +131,25 @@ export function ExitIntent() {
         clearTimeout(mouseLeaveTimer);
       }
     };
-  }, [
-    subscription.status,
-    subscription.isSubscribed,
-    authState.isAuthenticated,
-  ]);
+  }, [mode]);
 
-  if (
-    !showModal ||
-    subscription.isSubscribed ||
-    subscription.status === 'free'
-  ) {
+  const copy = mode ? COPY[mode] : null;
+
+  // Fire a single impression event when the modal first becomes visible.
+  useEffect(() => {
+    if (!showModal || !copy) {
+      return;
+    }
+    trackCtaImpression({
+      hub: 'app',
+      ctaId: copy.ctaId,
+      location: 'exit_intent_modal',
+      label: copy.ctaLabel,
+      pagePath: pathname,
+    });
+  }, [showModal, copy, pathname]);
+
+  if (!showModal || !copy) {
     return null;
   }
 
@@ -90,6 +160,17 @@ export function ExitIntent() {
       EXIT_INTENT_STORAGE_KEY,
       JSON.stringify({ timestamp: Date.now() }),
     );
+  };
+
+  const handleCtaClick = () => {
+    trackCtaClick({
+      hub: 'app',
+      ctaId: copy.ctaId,
+      location: 'exit_intent_modal',
+      label: copy.ctaLabel,
+      href: copy.href,
+      pagePath: pathname,
+    });
   };
 
   return (
@@ -104,50 +185,37 @@ export function ExitIntent() {
         </button>
 
         <div className='text-center space-y-4'>
-          <h2 className='text-2xl font-bold text-content-primary'>
-            Wait! Don't Miss Out
-          </h2>
-          <p className='text-content-secondary'>
-            Unlock personalized horoscopes, birth charts, and cosmic insights
-            tailored to you.
-          </p>
+          <Heading as='h2' variant='h2'>
+            {copy.heading}
+          </Heading>
+          <p className='text-content-secondary'>{copy.body}</p>
 
           <div className='space-y-3 pt-4'>
-            <div className='flex items-center gap-3 text-left'>
-              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-layer-base flex items-center justify-center'>
-                <span className='text-content-brand-accent text-sm'>✓</span>
+            {copy.bullets.map((bullet) => (
+              <div key={bullet} className='flex items-center gap-3 text-left'>
+                <div className='flex-shrink-0 w-6 h-6 rounded-full bg-layer-base flex items-center justify-center'>
+                  <span className='text-content-brand-accent text-sm'>
+                    &#10003;
+                  </span>
+                </div>
+                <span className='text-content-secondary text-sm'>{bullet}</span>
               </div>
-              <span className='text-content-secondary text-sm'>
-                Personalized birth chart analysis
-              </span>
-            </div>
-            <div className='flex items-center gap-3 text-left'>
-              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-layer-base flex items-center justify-center'>
-                <span className='text-content-brand-accent text-sm'>✓</span>
-              </div>
-              <span className='text-content-secondary text-sm'>
-                Daily horoscopes based on your chart
-              </span>
-            </div>
-            <div className='flex items-center gap-3 text-left'>
-              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-layer-base flex items-center justify-center'>
-                <span className='text-content-brand-accent text-sm'>✓</span>
-              </div>
-              <span className='text-content-secondary text-sm'>
-                Personalized tarot readings
-              </span>
-            </div>
+            ))}
           </div>
 
           <div className='pt-6'>
-            <SmartTrialButton size='lg' fullWidth />
+            <Button variant='lunary-solid' size='lg' className='w-full' asChild>
+              <Link href={copy.href} onClick={handleCtaClick}>
+                {copy.ctaLabel}
+              </Link>
+            </Button>
           </div>
 
           <button
             onClick={handleClose}
             className='text-sm text-content-muted hover:text-content-secondary transition-colors'
           >
-            No thanks, I'll stay on the free plan
+            {copy.dismissLabel}
           </button>
         </div>
       </div>
