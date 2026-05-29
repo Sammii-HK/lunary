@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Capacitor } from '@capacitor/core';
 import Link from 'next/link';
 import { useInView } from 'react-intersection-observer';
@@ -14,7 +15,6 @@ import {
 } from 'lucide-react';
 import { MarketingFooter } from '@/components/MarketingFooter';
 import { Button } from '@/components/ui/button';
-import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 import { renderJsonLd } from '@/lib/schema';
 import { CTA_COPY } from '@/lib/cta-copy';
 import { FAQAccordion } from '@/components/FAQ';
@@ -30,7 +30,21 @@ import {
   useABTestConversion,
 } from '@/hooks/useABTestTracking';
 import { Heading } from '../ui/Heading';
-import { Testimonials } from '@/components/marketing/Testimonials';
+
+// Below-the-fold marketing widgets: render is already gated with useInView,
+// so code-split them out of the initial homepage bundle too (no SEO value).
+const Testimonials = dynamic(
+  () =>
+    import('@/components/marketing/Testimonials').then((m) => m.Testimonials),
+  { ssr: false },
+);
+const NewsletterSignupForm = dynamic(
+  () =>
+    import('@/components/NewsletterSignupForm').then(
+      (m) => m.NewsletterSignupForm,
+    ),
+  { ssr: false },
+);
 
 const structuredData = {
   '@context': 'https://schema.org',

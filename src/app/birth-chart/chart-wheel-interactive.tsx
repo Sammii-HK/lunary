@@ -1,10 +1,43 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import type { BirthChartData } from '../../../utils/astrology/birthChart';
-import { BirthChart } from '@/components/BirthChart';
-import { ChartControls } from '@/components/ChartControls';
-import { TransitScrubber } from '@/components/charts/TransitScrubber';
+
+// These chart widgets are heavy (motion-driven SVG, ~3k LOC combined) and sit
+// below the hero on the marketing page. Lazy-load them so they stay out of the
+// initial JS bundle and don't block first paint / interactivity.
+const BirthChart = dynamic(
+  () => import('@/components/BirthChart').then((m) => m.BirthChart),
+  {
+    ssr: false,
+    loading: () => (
+      <div className='h-80 w-full max-w-md rounded-lg bg-surface-elevated/50 animate-pulse' />
+    ),
+  },
+);
+const ChartControls = dynamic(
+  () => import('@/components/ChartControls').then((m) => m.ChartControls),
+  {
+    ssr: false,
+    loading: () => (
+      <div className='h-10 w-full max-w-md rounded-lg bg-surface-elevated/40 animate-pulse' />
+    ),
+  },
+);
+// Only mounts when the visitor switches to the "Today's transits" tab.
+const TransitScrubber = dynamic(
+  () =>
+    import('@/components/charts/TransitScrubber').then(
+      (m) => m.TransitScrubber,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className='h-96 w-full max-w-md rounded-lg bg-surface-elevated/50 animate-pulse' />
+    ),
+  },
+);
 
 type HouseSystem =
   | 'placidus'
