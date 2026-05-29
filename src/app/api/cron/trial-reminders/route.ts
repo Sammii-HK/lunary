@@ -46,9 +46,12 @@ export async function GET(request: NextRequest) {
       AND s.trial_ends_at < NOW()
       AND (s.trial_expired_email_sent = false OR s.trial_expired_email_sent IS NULL)
       AND s.user_email IS NOT NULL
-      AND s.has_discount = false
+      -- Only exclude 100%-off comp accounts, not real discounts like BLUEMOON
+      -- (32% off). The blanket has_discount / promo_code exclusion previously
+      -- dropped the highest paying-intent trials from the expired + win-back
+      -- ladder. The win-back queries below already key off is_paying = false,
+      -- so a part-paid promo user now flows through the whole post-trial path.
       AND COALESCE(s.discount_percent, 0) < 100
-      AND (s.promo_code IS NULL OR s.promo_code = '')
       LIMIT 100
     `;
 

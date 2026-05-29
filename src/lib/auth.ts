@@ -161,6 +161,26 @@ async function initializeAuth() {
     emailVerification: {
       sendOnSignUp: true,
       autoSignInAfterVerification: true,
+      // Fire the Day-0 "try these 3 things" welcome email the moment a user
+      // verifies their email (peak intent). The actual Resend send is gated
+      // behind WELCOME_EMAIL_ENABLED (default OFF / dry-run) inside
+      // sendWelcomeEmail, so this is dormant until Sammii flips the env flag.
+      // Never throws — a failed welcome email must not block verification.
+      async onEmailVerification(verifiedUser: any) {
+        try {
+          const { sendWelcomeEmail } = await import('./email/welcome');
+          await sendWelcomeEmail({
+            id: verifiedUser?.id,
+            email: verifiedUser?.email,
+            name: verifiedUser?.name,
+          });
+        } catch (error) {
+          console.error(
+            '[welcome-email] onEmailVerification hook error:',
+            error,
+          );
+        }
+      },
       async sendVerificationEmail({
         user,
         url,
@@ -358,7 +378,10 @@ async function initializeAuth() {
                 includeTrialStarted: autoTrialCreated,
               });
             }
-            // Welcome email is sent after email verification to avoid emailing unverified/bot addresses
+            // The Day-0 welcome email is sent from the emailVerification
+            // onEmailVerification hook (above), not here, so we only email
+            // verified (non-bot) addresses. That send is gated behind
+            // WELCOME_EMAIL_ENABLED (default OFF) via sendWelcomeEmail.
           },
         },
       },
