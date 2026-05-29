@@ -48,6 +48,21 @@ export default function PlanetaryPositionsTodayPage() {
         eyebrow={dateKey}
         answer={answer}
         detail='These are geocentric ecliptic longitude positions for the Sun, Moon, and visible planets. Use the JSON dataset for exact degrees and the methodology page for calculation notes.'
+        faqs={[
+          {
+            question: 'Where are the planets right now?',
+            answer: `As of ${dateKey}, the Sun is in ${facts.sun.sign}, the Moon is in ${facts.moon.sign}, Mercury in ${facts.planets[0].sign}, Venus in ${facts.planets[1].sign}, and Mars in ${facts.planets[2].sign}.`,
+          },
+          {
+            question: 'What zodiac sign is the Sun in right now?',
+            answer: `The Sun is currently in ${facts.sun.sign}, which means it is ${facts.sun.sign} season.`,
+          },
+          {
+            question: 'How are these planetary positions calculated?',
+            answer:
+              'Lunary computes geocentric ecliptic longitude for each body and maps it to the zodiac sign. The exact degrees are available in the linked current-sky JSON dataset, with calculation notes on the methodology page.',
+          },
+        ]}
         sources={[
           {
             label: 'Current sky JSON',

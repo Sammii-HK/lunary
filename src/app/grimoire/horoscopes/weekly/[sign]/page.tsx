@@ -185,6 +185,20 @@ export default async function WeeklyHoroscopePage({
         />
       }
       components={<PlacementSelector signName={signData.name} />}
+      faqs={[
+        {
+          question: `What does this week hold for ${signData.name}?`,
+          answer: `${snapshot.summary} The forecast for ${weekRange} reflects the current lunar rhythm and the transits shaping ${signData.name}.`,
+        },
+        {
+          question: `What dates fall under ${signData.name}?`,
+          answer: `${signData.name} covers birthdays from ${signData.dates}, and it is a ${signData.element} sign.`,
+        },
+        {
+          question: `Is this weekly horoscope based on my whole chart?`,
+          answer: `This weekly forecast is written for the ${signData.name} Sun sign. For timing precise to your own placements, Lunary builds a personalised weekly horoscope from your full birth chart.`,
+        },
+      ]}
       childrenPosition='after-description'
     >
       <section className='mb-12'>

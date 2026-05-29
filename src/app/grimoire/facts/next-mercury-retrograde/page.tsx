@@ -43,6 +43,25 @@ export default async function NextMercuryRetrogradePage() {
         eyebrow={event?.startDate ?? dateKey}
         answer={answer}
         detail='This page is generated from Lunary annual astrology calendar data and links back to the retrograde guide and calculation methodology.'
+        faqs={[
+          {
+            question: 'When is the next Mercury retrograde?',
+            answer: event
+              ? `The next Mercury retrograde runs from ${event.startDate} to ${event.endDate}.`
+              : 'The next Mercury retrograde is not available in the current Lunary calendar window.',
+          },
+          {
+            question: 'When does the next Mercury retrograde end?',
+            answer: event
+              ? `The next Mercury retrograde ends on ${event.endDate}.`
+              : 'The next Mercury retrograde end date is not available in the current Lunary calendar window.',
+          },
+          {
+            question: 'What happens during Mercury retrograde?',
+            answer:
+              'Mercury retrograde is when Mercury appears to move backwards from Earth. Astrologically it is associated with reviewing, revising, and slowing down around communication, travel, and technology rather than launching anything new.',
+          },
+        ]}
         sources={[
           {
             label: 'Astrology calendar JSON',

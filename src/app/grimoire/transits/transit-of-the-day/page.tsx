@@ -59,6 +59,27 @@ export default async function TransitOfTheDayPage() {
           ]}
           canonicalUrl='https://lunary.app/grimoire/transits/transit-of-the-day'
           intro={`${headline} — ${introEnergy}. Updated daily with the most relevant transit for timing and awareness.`}
+          whatIs={{
+            question: "What is today's transit of the day?",
+            answer: `Today's headline transit is ${headline}. ${introEnergy}. The transit of the day is the single most influential planetary movement in the current sky, chosen for timing and awareness.`,
+          }}
+          tldr={`Today's transit of the day is ${headline}. ${introEnergy}.`}
+          faqs={[
+            {
+              question: "What is today's transit of the day?",
+              answer: `Today's most influential transit is ${headline}. ${introEnergy}.`,
+            },
+            {
+              question: 'What is a transit in astrology?',
+              answer:
+                'A transit is the movement of a planet in the current sky as it forms an aspect to another planet or to a placement in your birth chart. Transits are how astrologers read timing: when an event is likely to feel active.',
+            },
+            {
+              question: 'How often does the transit of the day change?',
+              answer:
+                'The transit of the day updates daily as the sky shifts. The fast-moving Moon changes the picture most, while slower planets keep a theme active for days or weeks.',
+            },
+          ]}
           breadcrumbs={[
             { label: 'Grimoire', href: '/grimoire' },
             { label: 'Transits', href: '/grimoire/transits' },

@@ -47,6 +47,21 @@ export default function MercuryRetrogradeStatusPage() {
         eyebrow={dateKey}
         answer={answer}
         detail={mercury.retrogradeEffect}
+        faqs={[
+          {
+            question: 'Is Mercury retrograde right now?',
+            answer: `${mercury.isRetrograde ? 'Yes' : 'No'}. As of ${dateKey}, Mercury is ${mercury.isRetrograde ? 'retrograde' : 'direct'} in ${mercury.sign}.`,
+          },
+          {
+            question: 'What sign is Mercury in right now?',
+            answer: `Mercury is currently in ${mercury.sign} at ${mercury.degreeInSign.toFixed(1)} degrees of the sign.`,
+          },
+          {
+            question: 'What should I avoid during Mercury retrograde?',
+            answer:
+              'Traditional guidance is to avoid signing major contracts, buying expensive electronics, or launching brand-new projects during Mercury retrograde, and instead use the period to review, revise, and double-check communication.',
+          },
+        ]}
         sources={[
           {
             label: 'Retrogrades guide',

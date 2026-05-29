@@ -163,6 +163,24 @@ The ${ordinal} House is naturally associated with ${houseData.naturalSign} and r
         },
         { name: 'Houses Overview', href: '/grimoire/houses', type: 'Guide' },
       ]}
+      faqs={[
+        {
+          question: `What does ${planetName} in the ${ordinal} House mean?`,
+          answer: `${planetName} in the ${ordinal} House places ${planetName}'s energy into the area of ${houseData.lifeArea.toLowerCase()}, colouring how you experience ${houseData.keywords[0]} and ${houseData.keywords[1]}.`,
+        },
+        {
+          question: `What life area does the ${ordinal} House rule?`,
+          answer: `The ${ordinal} House governs ${houseData.lifeArea.toLowerCase()}. It is naturally associated with ${houseData.naturalSign} and ruled by ${houseData.naturalRuler}.`,
+        },
+        {
+          question: `Is ${planetName} in the ${ordinal} House good or bad?`,
+          answer: `No house placement is simply good or bad. ${planetName} in the ${ordinal} House is a particular flavour: it directs ${planetName}'s qualities toward ${houseData.keywords[0]}, which can be a strength or a growth edge depending on the rest of your chart.`,
+        },
+        {
+          question: `How do I find which house my ${planetName} is in?`,
+          answer: `Your house placements depend on your exact birth time and location. Lunary calculates them from your birth chart so you can see which house ${planetName} actually falls in for you.`,
+        },
+      ]}
       ctaText='Find your house placements'
       ctaHref='/birth-chart'
       sources={[

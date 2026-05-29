@@ -213,6 +213,45 @@ export default async function SkyNowPage() {
 
   const pageTitle = 'Sky Now Transit Chart';
 
+  const moonSign = positions['Moon']?.sign;
+  const sunSign = positions['Sun']?.sign;
+  const retrogradeAnswer =
+    retrogradeBodies.length > 0
+      ? `${retrogradeBodies.join(', ')} ${retrogradeBodies.length === 1 ? 'is' : 'are'} retrograde right now, so those planetary themes favour review and revision over fresh momentum.`
+      : 'No major planets are retrograde right now, so the current sky favours forward momentum rather than review.';
+  const skyNowFaqs = [
+    {
+      question: 'What planets are retrograde right now?',
+      answer: retrogradeAnswer,
+    },
+    ...(moonSign
+      ? [
+          {
+            question: 'What sign is the Moon in right now?',
+            answer: `The Moon is currently in ${moonSign}, which sets the emotional tone and daily mood of the present sky. Read the Moon first when interpreting the current chart.`,
+          },
+        ]
+      : []),
+    ...(sunSign
+      ? [
+          {
+            question: 'What zodiac season are we in right now?',
+            answer: `The Sun is currently in ${sunSign}, so it is ${sunSign} season. The Sun sign sets the broad seasonal theme that the rest of the current chart plays against.`,
+          },
+        ]
+      : []),
+    {
+      question: "How do I read today's transits?",
+      answer:
+        'Read the current chart in order: check the sign positions of the Sun and Moon, note any retrogrades, identify the loudest aspects, then compare that live weather to your own natal chart to see which houses and placements are activated.',
+    },
+    {
+      question: 'Is the current chart the same as my birth chart?',
+      answer:
+        'No. The current chart is a live snapshot of where the planets are right now, the same for everyone. Your birth chart is fixed to your moment of birth. Today’s transits become personal when they aspect your natal placements.',
+    },
+  ];
+
   const shareDateParam = now.toISOString();
   const heroContent = (
     <div className='mx-auto flex max-w-4xl flex-col items-center gap-4'>
@@ -302,6 +341,7 @@ The wheel on this page is intentionally a clean current chart rather than a hype
         },
       ]}
       internalLinksTitle='Related Grimoire guides'
+      faqs={skyNowFaqs}
       contextualCopyVariant='callout'
       contextualCopy='Live planetary data keeps refreshing while this page shares evergreen context on how to read the chart.'
       cosmicConnections={
