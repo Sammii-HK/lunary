@@ -247,3 +247,21 @@ export function getCuratedCompatibilitySlugs(): string[] {
   const pairs = curatedPairsData.pairs as Record<string, CuratedPair>;
   return Object.keys(pairs).sort();
 }
+
+// Pre-computed set of curated slugs for O(1) membership checks. Used to keep
+// internal links (matrix, related-pairs) pointed only at curated, indexable
+// pages so the thin element/modality fallback pairs are not crawled or linked.
+const curatedSlugSet = new Set(getCuratedCompatibilitySlugs());
+
+// Normalise two sign keys into the canonical alphabetical slug used everywhere.
+export function compatibilitySlug(sign1Key: string, sign2Key: string): string {
+  return sign1Key <= sign2Key
+    ? `${sign1Key}-and-${sign2Key}`
+    : `${sign2Key}-and-${sign1Key}`;
+}
+
+// True only for the hand-written, substantive pairs. Non-curated pairs fall
+// back to a templated element/modality summary and are kept out of the index.
+export function isCuratedCompatibilityPair(slug: string): boolean {
+  return curatedSlugSet.has(slug);
+}
