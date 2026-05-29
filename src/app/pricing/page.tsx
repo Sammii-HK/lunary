@@ -135,6 +135,11 @@ export default function PricingPage() {
     if (promo) {
       setUrlPromoCode(promo.trim().toUpperCase());
     }
+    // Let an offer link land directly on the annual plan (e.g. the Blue Moon
+    // banner links to /pricing?promo=BLUEMOON&billing=annual).
+    if (params.get('billing') === 'annual') {
+      setBillingCycle('annual');
+    }
 
     loadPricingPlans();
   }, [currency]);
