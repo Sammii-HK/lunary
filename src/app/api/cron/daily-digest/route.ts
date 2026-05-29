@@ -11,6 +11,15 @@ export const dynamic = 'force-dynamic';
 // Max emails per cron invocation to stay within Vercel function timeout
 const BATCH_SIZE = 100;
 
+/**
+ * Send gate. This cron emails the free/active base their personalised daily
+ * digest. It is OFF by default and runs in dry-run mode (computes the eligible
+ * recipients and logs what it WOULD send, but sends nothing) unless
+ * DAILY_DIGEST_ENABLED is explicitly set to the string "true". Mirrors the
+ * dunning dry-run pattern so the cron cannot send unattended once scheduled.
+ */
+const DIGEST_SEND_ENABLED = process.env.DAILY_DIGEST_ENABLED === 'true';
+
 interface UserRow {
   user_id: string;
   user_email: string;
@@ -99,6 +108,30 @@ export async function GET(request: NextRequest) {
     );
 
     const users = usersResult.rows;
+
+    // ── Send gate ────────────────────────────────────────────────────
+    // Default OFF: report what we WOULD send and exit without sending.
+    if (!DIGEST_SEND_ENABLED) {
+      const wouldSend = users.filter(
+        (u) => extractSunSign(u.birth_chart) !== null,
+      ).length;
+      console.log(
+        `[daily-digest] DRY RUN (DAILY_DIGEST_ENABLED!="true"): would email ${wouldSend} of ${users.length} eligible users for ${todayStr}. Sending nothing.`,
+      );
+      return NextResponse.json({
+        success: true,
+        dryRun: true,
+        date: todayStr,
+        stats: {
+          eligible: users.length,
+          wouldSend,
+          sent: 0,
+          skipped: users.length,
+          errors: 0,
+        },
+        note: 'DAILY_DIGEST_ENABLED is not "true" - no emails sent.',
+      });
+    }
 
     let sent = 0;
     let skipped = 0;
