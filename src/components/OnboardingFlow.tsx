@@ -1013,6 +1013,9 @@ export function OnboardingFlow({
 
   async function handleComplete(redirectPath: string = '/app') {
     await trackStepCompletion(currentStep, false);
+    if (!previewMode) {
+      conversionTracking.onboardingCompleted(user?.id);
+    }
     resolveOnboarding();
     if (!previewMode && redirectPath) {
       router.push(redirectPath);

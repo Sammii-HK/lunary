@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
         AVG(EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) / 86400) as avg_days
       FROM conversion_events t1
       JOIN conversion_events t2 ON t1.user_id = t2.user_id
-      WHERE t1.event_type = 'signup'
+      WHERE t1.event_type = 'signup_completed'
         AND t2.event_type = 'trial_started'
         AND t2.created_at > t1.created_at
         AND EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) > 0
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
         AVG(EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) / 86400) as avg_days
       FROM conversion_events t1
       JOIN conversion_events t2 ON t1.user_id = t2.user_id
-      WHERE t1.event_type = 'signup'
+      WHERE t1.event_type = 'signup_completed'
         AND t2.event_type IN ('trial_converted', 'subscription_started')
         AND t2.created_at > t1.created_at
         AND t1.created_at >= ${formatTimestamp(range.start)}
