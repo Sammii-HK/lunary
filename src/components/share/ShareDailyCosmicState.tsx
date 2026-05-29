@@ -260,9 +260,12 @@ export function ShareDailyCosmicState({
   }
 
   const handleCopyLink = async () => {
-    const url = shareUrl ?? 'https://lunary.app';
     try {
-      await navigator.clipboard.writeText(url);
+      // Copy the ref-bearing share URL so the recipient's signup attributes
+      // back. Generate it first if the card has not been built yet.
+      const link =
+        shareUrl ?? (await generateCard())?.shareUrl ?? 'https://lunary.app';
+      await navigator.clipboard.writeText(link);
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2000);
       shareTracking.shareCompleted(user?.id, 'cosmic-state', 'clipboard');

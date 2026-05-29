@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { kvGet, kvPut } from '@/lib/cloudflare/kv';
-import { getShareReferralCode } from '@/lib/share/referral-url';
+import { appendRef, getShareReferralCode } from '@/lib/share/referral-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,15 +82,18 @@ export async function POST(request: NextRequest) {
       format = 'square',
     } = parsed.data;
 
-    // Capture the sharer's referral code (if signed in) so the public share
-    // page can carry attribution through to the recipient's signup. Falls back
-    // to undefined for anonymous shares.
-    const referralCode =
-      (await getShareReferralCode(request.headers)) ?? undefined;
+    // Capture the sharer's referral code (if signed in) once, then use it two
+    // ways: append it to the returned shareUrl so recipients' signups attribute
+    // back and unlock the referral reward, and persist it on the record so the
+    // public share page can carry attribution too. Anonymous shares no-op.
+    const referralCode = await getShareReferralCode(request.headers);
 
     const shareId = createShareId();
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-    const shareUrl = `${baseUrl}/share/cosmic-state/${shareId}`;
+    const shareUrl = appendRef(
+      `${baseUrl}/share/cosmic-state/${shareId}`,
+      referralCode,
+    );
 
     const record: ShareCosmicStateRecord = {
       shareId,
@@ -102,7 +105,7 @@ export async function POST(request: NextRequest) {
       transit,
       date,
       format,
-      referralCode,
+      referralCode: referralCode ?? undefined,
     };
 
     const stored = await kvPut(

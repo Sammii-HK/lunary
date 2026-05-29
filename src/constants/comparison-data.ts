@@ -196,7 +196,7 @@ export const comparisonData: Record<string, ComparisonData> = {
           value: PRICING_DISPLAY.range,
           highlight: true,
         },
-        competitor: { type: 'text', value: 'Free + $2.99/mo' },
+        competitor: { type: 'text', value: 'Free, or ~$9.99/mo Plus' },
       },
     ],
     lunaryAdvantages: [
@@ -403,7 +403,7 @@ export const comparisonData: Record<string, ComparisonData> = {
           value: PRICING_DISPLAY.range,
           highlight: true,
         },
-        competitor: { type: 'text', value: '~$12.99/mo' },
+        competitor: { type: 'text', value: '~$11.99/mo' },
       },
     ],
     lunaryAdvantages: [
@@ -439,7 +439,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       },
       {
         question: "What's the difference between Lunary and CHANI?",
-        answer: `Lunary focuses on astronomical accuracy and includes magical tools like a 2000+ page grimoire, tarot readings personalized to your birth chart, and crystal guidance. CHANI focuses on curated, expert-written content. Lunary's free tier is more generous, and paid tiers start at ${PRICING_DISPLAY.paidTiersStart} vs CHANI's ~$12.99/mo.`,
+        answer: `Lunary focuses on astronomical accuracy and includes magical tools like a 2000+ page grimoire, tarot readings personalized to your birth chart, and crystal guidance. CHANI focuses on curated, expert-written content. Lunary's free tier is more generous, and paid tiers start at ${PRICING_DISPLAY.paidTiersStart} vs CHANI's ~$11.99/mo.`,
       },
       {
         question: "Is Lunary's grimoire really free?",
