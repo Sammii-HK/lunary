@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Check, Copy, Share2, Sparkles } from 'lucide-react';
+import { Check, Copy, Globe, Lock, Share2, Sparkles } from 'lucide-react';
 
 import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
@@ -11,22 +11,28 @@ import { buildReferralLink } from '@/lib/referrals/referral-link';
 import { conversionTracking } from '@/lib/analytics';
 
 /**
- * Claim + share affordance for the public cosmic-identity profile (`/me/[handle]`).
+ * Claim + consent + share affordance for the public cosmic-identity profile
+ * (`/me/[handle]`).
  *
- * The public page, its OG card (`/api/og/cosmic-identity`) and the claim
- * endpoint (`POST /api/me/handle`) already exist — this is the missing UI that
- * lets an authenticated user (1) claim a handle and (2) share the resulting
- * public page. The shared link carries the user's referral code as `?ref=` so
- * a visitor who signs up is attributed back to the sharer (a source-labelled
- * viral loop).
+ * Privacy model (security round-2 SHOULD-FIX 3): claiming a handle reserves it
+ * but publishes NOTHING. The `/me/{handle}` page only goes live once the user
+ * gives explicit, affirmative consent here — at which point their name, Big
+ * Three and top transits become a public, search-engine-indexable page. The
+ * user can revoke (make private) at any time. Sharing affordances only appear
+ * once the page is actually public.
+ *
+ * The shared link carries the user's referral code as `?ref=` so a visitor who
+ * signs up is attributed back to the sharer (a source-labelled viral loop).
  */
 export function CosmicIdentityShareCard() {
   const { user } = useUser();
   const [handle, setHandle] = useState<string | null>(null);
+  const [isPublic, setIsPublic] = useState(false);
   const [draft, setDraft] = useState('');
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [updatingVisibility, setUpdatingVisibility] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);
@@ -51,8 +57,12 @@ export function CosmicIdentityShareCard() {
         fetch('/api/referrals'),
       ]);
       if (handleRes.ok) {
-        const data = (await handleRes.json()) as { handle?: string | null };
+        const data = (await handleRes.json()) as {
+          handle?: string | null;
+          isPublic?: boolean;
+        };
         setHandle(data.handle ?? null);
+        setIsPublic(data.isPublic ?? false);
       }
       if (refRes.ok) {
         const data = (await refRes.json()) as { code?: string | null };
@@ -86,6 +96,7 @@ export function CosmicIdentityShareCard() {
       };
       if (res.ok && data.handle) {
         setHandle(data.handle);
+        setIsPublic(false); // claiming never auto-publishes
         setDraft('');
       } else {
         setError(data.error ?? 'Could not claim that handle');
@@ -94,6 +105,33 @@ export function CosmicIdentityShareCard() {
       setError('Something went wrong. Please try again.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Explicit consent step — flips profile_is_public. Going public makes the
+  // page live + indexable; making private 404s it again.
+  const setVisibility = async (next: boolean) => {
+    setUpdatingVisibility(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/me/handle', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPublic: next }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        isPublic?: boolean;
+        error?: string;
+      };
+      if (res.ok && typeof data.isPublic === 'boolean') {
+        setIsPublic(data.isPublic);
+      } else {
+        setError(data.error ?? 'Could not update visibility');
+      }
+    } catch {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setUpdatingVisibility(false);
     }
   };
 
@@ -145,56 +183,12 @@ export function CosmicIdentityShareCard() {
             Your public cosmic profile
           </Heading>
 
-          {handle ? (
+          {!handle && (
             <>
               <p className='mt-1 text-sm text-content-secondary'>
-                Share your Big Three and the transits shaping your year. Friends
-                who join from your link start with a head start, and you earn a
-                bonus week of Pro for each one who sticks.
-              </p>
-              <div className='mt-4 flex flex-col gap-3 sm:flex-row sm:items-center'>
-                <Link
-                  href={`/me/${handle}`}
-                  className='truncate text-sm text-content-brand underline-offset-2 hover:underline'
-                >
-                  lunary.app/me/{handle}
-                </Link>
-                <div className='flex items-center gap-2 sm:ml-auto'>
-                  <Button
-                    type='button'
-                    variant='outline'
-                    size='sm'
-                    onClick={copyLink}
-                  >
-                    {copied ? (
-                      <>
-                        <Check className='text-lunary-success' /> Copied
-                      </>
-                    ) : (
-                      <>
-                        <Copy /> Copy link
-                      </>
-                    )}
-                  </Button>
-                  {canShare && (
-                    <Button
-                      type='button'
-                      variant='lunary'
-                      size='sm'
-                      onClick={shareLink}
-                    >
-                      <Share2 /> Share
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className='mt-1 text-sm text-content-secondary'>
-                Claim a handle to get a shareable page with your Big Three and
-                your year&apos;s top transits. It is public and works without an
-                account, so anyone can see it.
+                Reserve a handle for a shareable cosmic-identity page. Claiming
+                a handle is private and does not publish anything — you choose
+                whether to make the page public in the next step.
               </p>
               <div className='mt-4 flex flex-col gap-2 sm:flex-row sm:items-center'>
                 <div className='flex flex-1 items-center rounded-lg border border-stroke-strong bg-surface-base px-3 py-2 text-sm'>
@@ -233,6 +227,123 @@ export function CosmicIdentityShareCard() {
               </p>
               {error && (
                 <p className='mt-1 text-xs text-lunary-rose' role='alert'>
+                  {error}
+                </p>
+              )}
+            </>
+          )}
+
+          {handle && !isPublic && (
+            <>
+              <div className='mt-1 flex items-center gap-1.5 text-sm text-content-secondary'>
+                <Lock className='h-4 w-4 flex-shrink-0' aria-hidden />
+                <span>
+                  <span className='text-content-primary'>
+                    lunary.app/me/{handle}
+                  </span>{' '}
+                  is reserved and currently private.
+                </span>
+              </div>
+              <div className='mt-4 rounded-lg border border-stroke-strong bg-surface-base/60 p-4'>
+                <p className='text-sm text-content-secondary'>
+                  Making your profile public creates a page that{' '}
+                  <strong className='text-content-primary'>
+                    anyone can view without an account
+                  </strong>{' '}
+                  and that{' '}
+                  <strong className='text-content-primary'>
+                    search engines can index
+                  </strong>
+                  . It will show your display name, your Sun, Moon and Rising
+                  signs, and your top transits for the year. You can make it
+                  private again at any time.
+                </p>
+                <div className='mt-4'>
+                  <Button
+                    type='button'
+                    variant='lunary'
+                    size='sm'
+                    onClick={() => setVisibility(true)}
+                    disabled={updatingVisibility}
+                  >
+                    <Globe />
+                    {updatingVisibility
+                      ? 'Publishing...'
+                      : 'Make my profile public'}
+                  </Button>
+                </div>
+              </div>
+              {error && (
+                <p className='mt-2 text-xs text-lunary-rose' role='alert'>
+                  {error}
+                </p>
+              )}
+            </>
+          )}
+
+          {handle && isPublic && (
+            <>
+              <div className='mt-1 flex items-center gap-1.5 text-sm text-content-secondary'>
+                <Globe
+                  className='h-4 w-4 flex-shrink-0 text-lunary-success'
+                  aria-hidden
+                />
+                <span>
+                  Your profile is public. Friends who join from your link start
+                  with a head start, and you earn a bonus week of Pro for each
+                  one who sticks.
+                </span>
+              </div>
+              <div className='mt-4 flex flex-col gap-3 sm:flex-row sm:items-center'>
+                <Link
+                  href={`/me/${handle}`}
+                  className='truncate text-sm text-content-brand underline-offset-2 hover:underline'
+                >
+                  lunary.app/me/{handle}
+                </Link>
+                <div className='flex items-center gap-2 sm:ml-auto'>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='sm'
+                    onClick={copyLink}
+                  >
+                    {copied ? (
+                      <>
+                        <Check className='text-lunary-success' /> Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy /> Copy link
+                      </>
+                    )}
+                  </Button>
+                  {canShare && (
+                    <Button
+                      type='button'
+                      variant='lunary'
+                      size='sm'
+                      onClick={shareLink}
+                    >
+                      <Share2 /> Share
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div className='mt-3'>
+                <Button
+                  type='button'
+                  variant='ghost'
+                  size='xs'
+                  onClick={() => setVisibility(false)}
+                  disabled={updatingVisibility}
+                >
+                  <Lock />
+                  {updatingVisibility ? 'Updating...' : 'Make private'}
+                </Button>
+              </div>
+              {error && (
+                <p className='mt-2 text-xs text-lunary-rose' role='alert'>
                   {error}
                 </p>
               )}

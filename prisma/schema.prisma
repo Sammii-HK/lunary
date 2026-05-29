@@ -1112,6 +1112,10 @@ model user {
   /// Public Linktree-style handle for /me/{handle} cosmic identity profile.
   /// Lowercase a-z, 0-9, hyphen — 3-30 chars. Optional + unique.
   publicHandle              String?   @unique @map("public_handle")
+  /// Explicit-consent visibility flag for the /me/{handle} public page.
+  /// The page (name + Big Three + transits) only renders when this is true.
+  /// Defaults to false so claiming a handle never auto-publishes chart data.
+  profileIsPublic           Boolean   @default(false) @map("profile_is_public")
   createdAt                 DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt                 DateTime  @default(now()) @db.Timestamptz(6)
   account                   account[]
