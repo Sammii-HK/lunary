@@ -5,15 +5,16 @@
  * DeepInfra surface (calls `generateContent` => Llama-3.3-70B). Cheaper per
  * call than the main chat route (maxTokens 150) but still real money.
  *
- * Guards that DO exist (pinned below as passing tests):
+ * Guards that exist (all pinned below as passing tests):
  *   - requireUser  => 401 when unauthenticated
  *   - per-day message ceiling (DAILY_MESSAGE_LIMITS) => 429 when exhausted
+ *   - input length bound on body.message: z.string().max(4000), mirroring the
+ *     chat route => 400 on an oversized prompt before the paid model is reached
+ *   - enforceIpRateLimit + enforceUserRateLimit (same helpers/windows as chat)
+ *     => 429 on a rapid burst from the same caller
  *
- * Guards that are MISSING vs the main chat route (captured as it.skip +
- * RISK + a companion test pinning the CURRENT, weaker behaviour so the gap is
- * documented and a future hardening flips the skip green):
- *   - NO input length bound on body.message (chat route caps at 4000 chars)
- *   - NO enforceIpRateLimit / enforceUserRateLimit (chat route has both)
+ * The rate-limit + input-bound guards were added in fix/ai-route-cost-guards;
+ * the tests that previously documented the gap now assert the guard exists.
  *
  * No real LLM, no real DB, no snapshots.
  */
@@ -46,6 +47,7 @@ jest.mock('@/lib/ai/usage', () => ({
 }));
 
 import { POST } from '@/app/api/ai/grimoire-quick/route';
+import { __resetRateLimitStateForTests } from '@/lib/ai/rate-limit';
 
 const ORIGINAL_NODE_ENV = process.env.NODE_ENV;
 
@@ -73,6 +75,9 @@ afterAll(() => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // Clear in-memory rate-limit counters so prior tests don't bleed state into
+  // the per-IP / per-user burst assertions below.
+  __resetRateLimitStateForTests();
   generateContentMock.mockResolvedValue('• one\n• two\n• three');
   loadUsageMock.mockResolvedValue({ usedMessages: 0 });
   updateUsageMock.mockResolvedValue({
@@ -112,66 +117,49 @@ describe('POST /api/ai/grimoire-quick — guard invariants (paid DeepInfra surfa
       // Free plan daily limit is 3; simulate an already-exhausted ledger.
       loadUsageMock.mockResolvedValue({ usedMessages: 3 });
 
-      const res = await POST(makeRequest({ message: 'tell me about crystals' }));
+      const res = await POST(
+        makeRequest({ message: 'tell me about crystals' }),
+      );
 
       expect(res.status).toBe(429);
       expect(generateContentMock).not.toHaveBeenCalled();
     });
   });
 
-  describe('RISK: missing input-length bound (silent-cost / abuse surface)', () => {
-    // BUG/RISK: Unlike POST /api/ai/chat (which caps message at z.string().max(4000)),
-    // this route applies NO length bound to body.message before forwarding it to
-    // the paid model. A single authenticated request can ship an arbitrarily large
-    // prompt, inflating DeepInfra input-token cost per call. The per-day message
-    // COUNT ceiling does not bound per-message SIZE, so cost-per-call is uncapped.
-    //
-    // IMPACT: an entitled (or trial) user — or a leaked session — can drive up
-    // spend with very large prompts; cost scales with attacker-controlled input.
-    // SUGGESTED GUARD (owner decision, app-code change — NOT applied here):
-    //   add `if (body.message.length > MAX) return 400;` (mirror chat's 4000-char
-    //   z.string().max bound), ideally via a shared zod schema.
-    it.skip('[RISK] should reject an oversized message (> 4000 chars) with 400 — NO bound exists today', async () => {
+  describe('GUARD: input-length bound now mirrors the chat route (caps per-call cost)', () => {
+    // FIXED (fix/ai-route-cost-guards): the route now validates the body with
+    // a zod schema `z.object({ message: z.string().max(4000) })`, mirroring the
+    // main chat route's 4000-char bound. An oversized prompt is rejected with
+    // 400 BEFORE the paid model is reached, so cost-per-call is capped.
+    it('[GUARD] rejects an oversized message (> 4000 chars) with 400 and never calls the model', async () => {
       authedSession();
       const huge = 'a'.repeat(20_000);
 
       const res = await POST(makeRequest({ message: huge }));
 
-      // Desired hardened behaviour (currently fails — there is no bound):
       expect(res.status).toBe(400);
       expect(generateContentMock).not.toHaveBeenCalled();
     });
 
-    it('[current behaviour] forwards an oversized 20k-char message straight to the paid model (documents the gap)', async () => {
+    it('accepts a message at exactly the 4000-char boundary (bound is inclusive, not stricter than chat)', async () => {
       authedSession();
-      const huge = 'a'.repeat(20_000);
+      const atLimit = 'a'.repeat(4000);
 
-      const res = await POST(makeRequest({ message: huge }));
+      const res = await POST(makeRequest({ message: atLimit }));
 
-      // Pins the present reality: oversized input is accepted and billed.
-      expect(res.status).toBe(200);
+      // Must NOT be the 400 input-rejection path; the model (mocked) is reached.
+      expect(res.status).not.toBe(400);
       expect(generateContentMock).toHaveBeenCalledTimes(1);
-      const [args] = generateContentMock.mock.calls[0] as [
-        { prompt: string },
-      ];
-      expect(args.prompt.length).toBe(20_000);
     });
   });
 
-  describe('RISK: no per-IP / per-second rate limit (no brake on burst spend)', () => {
-    // BUG/RISK: This route does NOT call enforceIpRateLimit or
-    // enforceUserRateLimit (the main chat route calls both). The only throttle
-    // is the per-DAY message count. Within a single day a caller can fire as
-    // fast as the event loop allows, each a paid DeepInfra call, with no
-    // per-second or per-IP brake — there is no fast kill switch against a burst.
-    //
-    // IMPACT: a tight loop from one session/IP produces a burst of paid calls
-    // until the daily ceiling trips; no rapid abuse cut-off in between.
-    // SUGGESTED GUARD (owner decision, app-code change — NOT applied here):
-    //   call enforceIpRateLimit(req.headers.get('x-forwarded-for'), now) and
-    //   enforceUserRateLimit(user.id, now) immediately after requireUser, as the
-    //   chat route does, returning 429 on !ok.
-    it.skip('[RISK] should return 429 on a rapid second request from the same IP — NO per-IP/second limit exists today', async () => {
+  describe('GUARD: per-IP + per-user rate limiting now exists (brake on burst spend)', () => {
+    // FIXED (fix/ai-route-cost-guards): the route now calls enforceIpRateLimit
+    // and enforceUserRateLimit (the same helpers, same windows/limits as the
+    // chat route) immediately after requireUser, returning 429 on !ok. A rapid
+    // second request from the same caller is throttled before it bills a second
+    // paid DeepInfra call.
+    it('[GUARD] returns 429 on a rapid second request from the same caller', async () => {
       authedSession();
       const ip = '203.0.113.7';
 
@@ -182,26 +170,11 @@ describe('POST /api/ai/grimoire-quick — guard invariants (paid DeepInfra surfa
         makeRequest({ message: 'two' }, { 'x-forwarded-for': ip }),
       );
 
-      // Desired hardened behaviour (currently fails — no such limit):
+      // Hardened behaviour: per-user/second limit trips the back-to-back call.
       expect(first.status).toBe(200);
       expect(second.status).toBe(429);
-    });
-
-    it('[current behaviour] allows two back-to-back paid calls from the same IP within a second (documents the gap)', async () => {
-      authedSession();
-      const ip = '203.0.113.7';
-
-      const first = await POST(
-        makeRequest({ message: 'one' }, { 'x-forwarded-for': ip }),
-      );
-      const second = await POST(
-        makeRequest({ message: 'two' }, { 'x-forwarded-for': ip }),
-      );
-
-      // Pins the present reality: no per-IP/second brake — both calls bill.
-      expect(first.status).toBe(200);
-      expect(second.status).toBe(200);
-      expect(generateContentMock).toHaveBeenCalledTimes(2);
+      // The throttled call never reaches the paid model.
+      expect(generateContentMock).toHaveBeenCalledTimes(1);
     });
   });
 });

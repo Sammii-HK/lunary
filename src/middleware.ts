@@ -387,6 +387,13 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
     pathname.startsWith('/api/auth/resend-verification') ||
     (pathname.startsWith('/api/share/') && request.method === 'POST') ||
     (pathname.startsWith('/api/newsletter/subscribers') &&
+      request.method === 'POST') ||
+    // Paid AI surfaces: extra brake against direct (botted) POSTs that don't
+    // originate from our UI, mirroring how chart-taste was gated in #283.
+    (pathname === '/api/ai/grimoire-quick' && request.method === 'POST') ||
+    (pathname === '/api/score' && request.method === 'POST') ||
+    (pathname.startsWith('/api/community/questions/') &&
+      pathname.endsWith('/ai-answer') &&
       request.method === 'POST');
 
   if (requiresOriginCheck) {
@@ -651,6 +658,10 @@ export const config = {
     '/api/share/:path*',
     // Newsletter subscribe (origin check on POST)
     '/api/newsletter/subscribers',
+    // Paid AI surfaces (origin check on POST), mirroring #283's chart-taste add
+    '/api/ai/grimoire-quick',
+    '/api/score',
+    '/api/community/questions/:id/ai-answer',
     // Test/debug block
     '/api/test/:path*',
     '/api/debug/:path*',

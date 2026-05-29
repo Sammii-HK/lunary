@@ -25,10 +25,24 @@ export async function POST(request: NextRequest, context: any) {
       );
     }
 
-    // Verify the API key for internal calls
+    // Verify the API key for internal calls — FAIL CLOSED.
+    //
+    // COST/ABUSE GUARD: this route triggers a paid DeepInfra completion
+    // (generateText => Llama-3.3-70B, maxOutputTokens 800) per valid,
+    // not-yet-answered question id. The previous gate `if (expectedKey &&
+    // apiKey !== expectedKey)` failed OPEN: when INTERNAL_API_KEY was unset
+    // (new environment, misconfig, or a secret-rotation gap) the auth check was
+    // skipped entirely and ANY caller could drive unattended spend by
+    // enumerating question ids.
+    //
+    // REQUIRES: INTERNAL_API_KEY MUST be set in the production environment.
+    // With this fail-closed gate, if the env var is missing the route returns
+    // 401 for EVERYONE (including the internal cron/caller that posts AI
+    // answers). The owner must confirm INTERNAL_API_KEY is present in prod
+    // before this merges, otherwise community AI answers stop being generated.
     const apiKey = request.headers.get('x-api-key');
     const expectedKey = process.env.INTERNAL_API_KEY;
-    if (expectedKey && apiKey !== expectedKey) {
+    if (!expectedKey || apiKey !== expectedKey) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

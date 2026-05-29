@@ -6,15 +6,16 @@
  * call. It is NOT an astrology route, but it shares the same unattended-spend
  * surface and the same DEEPINFRA_API_KEY, so the cost-abuse invariants matter.
  *
- * Guards that DO exist (pinned as passing tests):
+ * Guards that exist (all pinned as passing tests):
  *   - X-RC-User-Id header gate => 401 when absent or 'anonymous'
  *   - input bounds: transcript z.string().max(8000), question max(1000)
+ *   - per-IP rate limit keyed on the TRUSTED IP (mirrors the chat route's
+ *     enforceIpRateLimit, 10/min) + a process-wide global daily ceiling
+ *     => 429s brake a burst; the spoofable header is no longer the only gate
  *
- * Guard that is MISSING (captured as it.skip + RISK + companion test):
- *   - NO rate limit of any kind (per-user, per-IP, or global) and no cost
- *     ceiling / kill switch. The X-RC-User-Id gate is a client-supplied header
- *     (spoofable), so the only thing standing between a caller and unbounded
- *     paid completions is "send any non-'anonymous' header value".
+ * The rate-limit + global-ceiling guards were added in fix/ai-route-cost-guards;
+ * the test that previously documented the gap now asserts the guard exists.
+ * (Server-side RC-entitlement verification remains a TODO(owner) in the route.)
  *
  * No real LLM (fetch is mocked), no real DB, no snapshots.
  */
@@ -24,6 +25,7 @@ import { NextRequest } from 'next/server';
 const fetchMock = jest.fn();
 
 import { POST } from '@/app/api/score/route';
+import { __resetRateLimitStateForTests } from '@/lib/ai/rate-limit';
 
 function makeRequest(
   body: unknown,
@@ -53,6 +55,9 @@ const okDeepInfraResponse = () =>
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // Clear in-memory rate-limit counters (per-IP + global daily) so prior tests
+  // don't bleed state into the burst assertion or the input-bound checks.
+  __resetRateLimitStateForTests();
   global.fetch = fetchMock as unknown as typeof fetch;
   fetchMock.mockResolvedValue(okDeepInfraResponse());
   process.env.DEEPINFRA_API_KEY = 'test-key';
@@ -107,44 +112,49 @@ describe('POST /api/score — guard invariants (paid DeepInfra surface)', () => 
     });
   });
 
-  describe('RISK: no rate limit and no cost ceiling (silent burst-spend surface)', () => {
-    // BUG/RISK: /api/score has NO rate limiting (no per-user, per-IP, or global
-    // ceiling) and NO cost ceiling / kill switch. Its only gate is the
-    // client-supplied X-RC-User-Id header, which is trivially spoofable to any
-    // non-'anonymous' string. Combined, this means an attacker who sends a
-    // single header value can call paid DeepInfra completions in an unbounded
-    // loop. This is the PR #283 class of finding on a non-Lunary route that
-    // shares the same DEEPINFRA_API_KEY.
-    //
-    // IMPACT: uncapped paid completions from one spoofed header => direct,
-    // unattended DeepInfra spend with no brake and no automatic cut-off.
-    // SUGGESTED GUARD (owner decision, app-code change — NOT applied here):
-    //   add a per-IP and/or per-RC-user rate limit (the app already has
-    //   src/lib/ai/rate-limit.ts) plus a global daily call ceiling / kill
-    //   switch, and ideally verify the RC entitlement server-side rather than
-    //   trusting the header.
-    it.skip('[RISK] should throttle a rapid burst from one caller — NO rate limit exists today', async () => {
+  describe('GUARD: rate limit + global daily ceiling now brake burst spend', () => {
+    // FIXED (fix/ai-route-cost-guards): /api/score now enforces a per-IP rate
+    // limit keyed on the TRUSTED IP (mirrors the chat route's enforceIpRateLimit,
+    // 10/min from PLAN_LIMITS) plus a process-wide global daily ceiling. The
+    // spoofable X-RC-User-Id header is kept as a cheap first gate but is no
+    // longer the only thing standing between a caller and unbounded paid
+    // DeepInfra completions. (Server-side RC-entitlement verification is left as
+    // a documented TODO(owner) in the route — an owner secrets/cost decision.)
+    it('[GUARD] throttles a rapid 25-call burst from one caller (some 429s, model not billed for them)', async () => {
       const headers = { 'X-RC-User-Id': 'rc-user-123' };
 
       const results = await Promise.all(
         Array.from({ length: 25 }, () => POST(makeRequest(validBody, headers))),
       );
 
-      // Desired hardened behaviour (currently fails — no limiter exists):
+      const ok = results.filter((r) => r.status === 200);
       const throttled = results.filter((r) => r.status === 429);
+
+      // Hardened behaviour: the burst is braked, not billed end-to-end.
       expect(throttled.length).toBeGreaterThan(0);
+      // The paid model is only hit for the calls that passed the limiter.
+      expect(fetchMock).toHaveBeenCalledTimes(ok.length);
+      expect(fetchMock.mock.calls.length).toBeLessThan(25);
     });
 
-    it('[current behaviour] bills every request in a 25-call burst from one spoofable header (documents the gap)', async () => {
-      const headers = { 'X-RC-User-Id': 'rc-user-123' };
-
+    it('[GUARD] the limit is keyed on the TRUSTED IP, not the spoofable X-RC-User-Id header', async () => {
+      // Every request carries a DIFFERENT (spoofed) RC user id but the SAME
+      // trusted x-real-ip. If the limiter were keyed on the header, rotating it
+      // would defeat throttling; keyed on the IP, the burst is still braked.
+      const ip = '198.51.100.42';
       const results = await Promise.all(
-        Array.from({ length: 25 }, () => POST(makeRequest(validBody, headers))),
+        Array.from({ length: 25 }, (_unused, i) =>
+          POST(
+            makeRequest(validBody, {
+              'X-RC-User-Id': `spoofed-${i}`,
+              'x-real-ip': ip,
+            }),
+          ),
+        ),
       );
 
-      // Pins the present reality: zero throttling, every call hits the model.
-      expect(results.every((r) => r.status === 200)).toBe(true);
-      expect(fetchMock).toHaveBeenCalledTimes(25);
+      const throttled = results.filter((r) => r.status === 429);
+      expect(throttled.length).toBeGreaterThan(0);
     });
   });
 });

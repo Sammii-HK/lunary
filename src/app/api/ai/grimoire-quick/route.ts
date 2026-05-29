@@ -1,23 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { requireUser, UnauthorizedError } from '@/lib/ai/auth';
 import { estimateTokenCount } from '@/lib/ai/tokenizer';
 import { loadUsage, updateUsage } from '@/lib/ai/usage';
 import { resolvePlanId } from '@/lib/ai/plan-resolver';
+import { enforceIpRateLimit, enforceUserRateLimit } from '@/lib/ai/rate-limit';
 import { DAILY_MESSAGE_LIMITS } from '@/lib/ai/plans';
 
 export const dynamic = 'force-dynamic';
 
-type GrimoireQuickRequest = {
-  message: string;
-};
+// Cost/abuse guard: mirror the main chat route's input bound. Cap the user
+// prompt at 4000 chars (chat uses the same z.string().max(4000)) so a single
+// authed or leaked-session request cannot ship an arbitrarily large prompt to
+// the paid DeepInfra model. The per-day message COUNT ceiling does not bound
+// per-message SIZE, so this is what caps cost-per-call.
+const grimoireQuickRequestSchema = z.object({
+  message: z.string().max(4000),
+});
 
 type GrimoireQuickResponse = {
   bullets: string[];
   tokens?: number;
 };
 
-const jsonResponse = (payload: unknown, status = 200) =>
-  NextResponse.json(payload, { status });
+const jsonResponse = (payload: unknown, status = 200, init?: ResponseInit) =>
+  NextResponse.json(payload, { status, ...init });
 
 const GRIMOIRE_QUICK_PROMPT = `You are a knowledgeable mystical guide. Answer questions about witchcraft, tarot, astrology, crystals, moon phases, spells, and spiritual practices.
 
@@ -38,14 +45,47 @@ export async function POST(request: NextRequest) {
   const now = new Date();
 
   try {
-    const body = (await request.json()) as GrimoireQuickRequest;
-
-    if (!body?.message || typeof body.message !== 'string') {
-      return jsonResponse({ error: 'Message is required.' }, 400);
+    const parsed = grimoireQuickRequestSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      // Covers both a missing/invalid message and an over-length (> 4000 char)
+      // prompt — the latter is the per-call cost bound mirrored from chat.
+      return jsonResponse({ error: 'Invalid request body' }, 400);
     }
+    const body = parsed.data;
 
     // Require authentication
     const user = await requireUser(request);
+
+    // Cost/abuse guard: per-IP + per-user rate limiting, mirroring the chat
+    // route exactly (same enforceIpRateLimit/enforceUserRateLimit helpers, same
+    // windows/limits from PLAN_LIMITS). Applied AFTER requireUser so only
+    // authenticated callers reach the paid model, and a tight loop from one
+    // session/IP is throttled before it can burst paid DeepInfra calls.
+    const ipCheck = enforceIpRateLimit(
+      request.headers.get('x-forwarded-for'),
+      now.getTime(),
+    );
+    if (!ipCheck.ok) {
+      return jsonResponse(
+        { error: ipCheck.reason ?? 'Too many requests' },
+        429,
+        ipCheck.retryAfter
+          ? { headers: { 'Retry-After': ipCheck.retryAfter.toString() } }
+          : undefined,
+      );
+    }
+
+    const userCheck = enforceUserRateLimit(user.id, now.getTime());
+    if (!userCheck.ok) {
+      return jsonResponse(
+        { error: userCheck.reason ?? 'Rate limit exceeded' },
+        429,
+        userCheck.retryAfter
+          ? { headers: { 'Retry-After': userCheck.retryAfter.toString() } }
+          : undefined,
+      );
+    }
+
     const planId = resolvePlanId(user);
     const dailyLimit = DAILY_MESSAGE_LIMITS[planId];
 
