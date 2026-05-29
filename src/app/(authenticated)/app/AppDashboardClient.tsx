@@ -227,6 +227,30 @@ const WebPushContextualPrompt = dynamic(
   },
 );
 
+// Hands-free "listen to your daily sky" affordance. Uses the on-device
+// Web Speech API (zero per-user TTS cost). Self-opens on `?recap=1`/`?narrate=1`
+// so it stays deep-linkable from notifications.
+const DailyRecapLauncher = dynamic(
+  () => import('@/components/daily-recap/DailyRecapLauncher'),
+  {
+    ssr: false,
+    loading: () => null,
+  },
+);
+
+// Cap-not-gate nudge: surfaces how many cosmic insights the user has opened
+// this week (reads the `insight-accessed` events the dashboard already fires).
+const WeeklyUsageCounter = dynamic(
+  () =>
+    import('@/components/WeeklyUsageCounter').then((m) => ({
+      default: m.WeeklyUsageCounter,
+    })),
+  {
+    ssr: false,
+    loading: () => null,
+  },
+);
+
 export default function AppDashboardClient() {
   const { user } = useUser();
   const authState = useAuthStatus();
@@ -556,6 +580,9 @@ export default function AppDashboardClient() {
               </div>
               <DailyInsightCard />
             </div>
+            {authState.isAuthenticated && (
+              <DailyRecapLauncher className='mt-1' />
+            )}
           </section>
 
           <section aria-labelledby='daily-pulls-heading' className='space-y-2'>
@@ -618,6 +645,12 @@ export default function AppDashboardClient() {
             })()}
 
           {authState.isAuthenticated && <ReferralShareCTA compact />}
+
+          {authState.isAuthenticated && (
+            <div className='flex justify-center'>
+              <WeeklyUsageCounter />
+            </div>
+          )}
 
           {authState.isAuthenticated && (
             <p className='text-xs text-content-muted text-center mt-4'>

@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Sparkles } from 'lucide-react';
-// AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
-// import AudioNarrator from '@/components/audio/AudioNarrator';
+import AudioNarrator from '@/components/audio/AudioNarrator';
 import { Heading } from '@/components/ui/Heading';
 import { cn } from '@/lib/utils';
 
@@ -42,13 +41,12 @@ export default function DailyRecapPlayer({
 }: DailyRecapPlayerProps) {
   const [state, setState] = useState<FetchState>({ status: 'loading' });
 
-  // AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting.
   // Detect the daily-push deep-link (`/app?from=daily-push&narrate=1`) once on
   // mount so we can ask <AudioNarrator> to auto-play when the user tapped in
   // from a push notification. Single-line URL parse, no router required.
-  // const autoPlayFromPush =
-  //   typeof window !== 'undefined' &&
-  //   new URLSearchParams(window.location.search).get('narrate') === '1';
+  const autoPlayFromPush =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('narrate') === '1';
 
   useEffect(() => {
     let cancelled = false;
@@ -129,15 +127,14 @@ export default function DailyRecapPlayer({
           <p className='whitespace-pre-line text-sm leading-relaxed text-content-secondary'>
             {state.script}
           </p>
-          {/* AudioNarrator paused: voice quality + TTS cost decision pending. Restore by uncommenting. */}
-          {/* <div className='pt-1'>
+          <div className='pt-1'>
             <AudioNarrator
               text={state.script}
               title={title}
               compactVariant='pill'
               autoPlay={autoPlayFromPush}
             />
-          </div> */}
+          </div>
           {state.audience === 'plus' ? (
             <p className='text-[11px] uppercase tracking-[0.18em] text-lunary-accent'>
               Personalised for you
