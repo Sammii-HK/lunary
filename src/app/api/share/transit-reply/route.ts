@@ -11,6 +11,7 @@ import {
   transitReplyImageUrl,
   transitReplyPublicUrl,
 } from '@/lib/share/transit-reply';
+import { appendRef, getShareReferralCode } from '@/lib/share/referral-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,7 +65,13 @@ export async function POST(request: NextRequest) {
 
     const input = parsed.data;
     const shareId = createTransitReplyShareId();
-    const shareUrl = transitReplyPublicUrl(shareId, APP_URL);
+    // Carry the sharer's referral code (if signed in) so recipients' signups
+    // attribute back and unlock the referral reward. Anonymous shares no-op.
+    const referralCode = await getShareReferralCode(request.headers);
+    const shareUrl = appendRef(
+      transitReplyPublicUrl(shareId, APP_URL),
+      referralCode,
+    );
     const imageUrl = transitReplyImageUrl(shareId, APP_URL);
     const imagePngUrl = transitReplyImagePngUrl(shareId, APP_URL);
     const analysis = analyseTransitReply(

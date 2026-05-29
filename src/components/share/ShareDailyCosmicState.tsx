@@ -98,6 +98,7 @@ export function ShareDailyCosmicState({
 }: ShareDailyCosmicStateProps) {
   const { user } = useUser();
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [cosmicData, setCosmicData] = useState<DailyCosmicStateData | null>(
     null,
@@ -187,6 +188,7 @@ export function ShareDailyCosmicState({
 
       const blob = await imageResponse.blob();
       setImageBlob(blob);
+      setShareUrl(data.shareUrl ?? null);
       return { shareId: data.shareId, shareUrl: data.shareUrl };
     } catch (err) {
       console.error('Error generating card:', err);
@@ -258,7 +260,11 @@ export function ShareDailyCosmicState({
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText('https://lunary.app');
+      // Copy the ref-bearing share URL so the recipient's signup attributes
+      // back. Generate it first if the card has not been built yet.
+      const link =
+        shareUrl ?? (await generateCard())?.shareUrl ?? 'https://lunary.app';
+      await navigator.clipboard.writeText(link);
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2000);
       shareTracking.shareCompleted(user?.id, 'cosmic-state', 'clipboard');
