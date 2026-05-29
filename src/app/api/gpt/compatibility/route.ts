@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireGptAuth } from '@/lib/gptAuth';
+import { isCuratedCompatibilityPair } from '@/constants/seo/compatibility-content';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -228,6 +229,11 @@ export async function GET(request: NextRequest) {
     const score = calculateCompatibilityScore(sign1, sign2);
     const compatibilitySlug =
       sign1 <= sign2 ? `${sign1}-and-${sign2}` : `${sign2}-and-${sign1}`;
+    // Only point at a pair page when it has curated content; otherwise send to
+    // the compatibility hub rather than a thin, noindexed fallback page.
+    const ctaUrl = isCuratedCompatibilityPair(compatibilitySlug)
+      ? `https://lunary.app/grimoire/compatibility/${compatibilitySlug}`
+      : 'https://lunary.app/grimoire/compatibility';
 
     const response = {
       sign1: sign1.charAt(0).toUpperCase() + sign1.slice(1),
@@ -249,7 +255,7 @@ export async function GET(request: NextRequest) {
         score >= 70
           ? 'Focus on maintaining your natural connection through quality time together.'
           : 'Communication and patience are key. Embrace your differences as opportunities for growth.',
-      ctaUrl: `https://lunary.app/grimoire/compatibility/${compatibilitySlug}`,
+      ctaUrl,
       ctaText: 'Get a detailed compatibility reading with synastry analysis',
       source: 'Lunary.app - Astrological compatibility analysis',
     };

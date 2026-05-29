@@ -12,6 +12,10 @@ import {
   formatRulershipValue,
   getPrimaryRuler,
 } from '@/lib/astrology/rulerships';
+import {
+  compatibilitySlug,
+  isCuratedCompatibilityPair,
+} from '@/constants/seo/compatibility-content';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
@@ -260,14 +264,22 @@ Numerology does not replace astrology here; it adds a second symbolic pattern. A
           href: `/grimoire/transits/year/${currentYear}`,
           type: 'Guide',
         },
-        ...zodiac.compatibleSigns.slice(0, 2).map((sign) => ({
-          name: `${sign} Compatibility`,
-          href:
-            zodiac.sign.toLowerCase() <= sign.toLowerCase()
-              ? `/grimoire/compatibility/${zodiac.sign.toLowerCase()}-and-${sign.toLowerCase()}`
-              : `/grimoire/compatibility/${sign.toLowerCase()}-and-${zodiac.sign.toLowerCase()}`,
-          type: 'Compatibility' as const,
-        })),
+        // Only link curated compatibility pages; skip thin fallback pairs.
+        ...zodiac.compatibleSigns
+          .map((sign) => ({
+            sign,
+            slug: compatibilitySlug(
+              zodiac.sign.toLowerCase(),
+              sign.toLowerCase(),
+            ),
+          }))
+          .filter(({ slug }) => isCuratedCompatibilityPair(slug))
+          .slice(0, 2)
+          .map(({ sign, slug }) => ({
+            name: `${sign} Compatibility`,
+            href: `/grimoire/compatibility/${slug}`,
+            type: 'Compatibility' as const,
+          })),
       ]}
       ctaText='Get your personalized birthday reading'
       ctaHref='/birth-chart'

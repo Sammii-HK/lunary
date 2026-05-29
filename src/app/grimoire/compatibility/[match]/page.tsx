@@ -8,6 +8,8 @@ import { signDescriptions } from '@/constants/seo/planet-sign-content';
 import {
   generateCompatibilityContent,
   getCuratedCompatibilitySlugs,
+  isCuratedCompatibilityPair,
+  compatibilitySlug,
 } from '@/constants/seo/compatibility-content';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
@@ -124,9 +126,15 @@ export default async function CompatibilityPage({ params }: PageProps) {
   const sign1Info = signDescriptions[parsed.sign1];
   const sign2Info = signDescriptions[parsed.sign2];
 
-  // Get other compatibility matches for sign1
+  // Get other compatibility matches for sign1 — only link to curated pairs so
+  // we never pass internal links into the thin, noindexed fallback pages.
   const sign1Matches = Object.keys(signDescriptions)
-    .filter((s) => s !== parsed.sign1 && s !== parsed.sign2)
+    .filter(
+      (s) =>
+        s !== parsed.sign1 &&
+        s !== parsed.sign2 &&
+        isCuratedCompatibilityPair(compatibilitySlug(parsed.sign1, s)),
+    )
     .slice(0, 4);
 
   const faqs = [
@@ -187,8 +195,8 @@ export default async function CompatibilityPage({ params }: PageProps) {
         },
         { text: 'Synastry Calculator', href: '/grimoire/synastry/generate' },
       ]}
-      ctaText='Generate Your Synastry Chart'
-      ctaHref='/grimoire/synastry/generate'
+      ctaText={`See how ${content.sign1} and ${content.sign2} really align in your charts`}
+      ctaHref='/birth-chart'
     >
       {/* Zodiac Symbol Header */}
       <section className='mb-8'>
@@ -332,30 +340,29 @@ export default async function CompatibilityPage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* Related Matches */}
-      <section className='mb-8'>
-        <Heading as='h2' variant='h3'>
-          Explore More {content.sign1} Compatibility
-        </Heading>
-        <div className='flex flex-wrap gap-3 mt-4'>
-          {sign1Matches.map((signKey) => {
-            const sign = signDescriptions[signKey];
-            const slug =
-              parsed.sign1 <= signKey
-                ? `${parsed.sign1}-and-${signKey}`
-                : `${signKey}-and-${parsed.sign1}`;
-            return (
-              <NavParamLink
-                key={signKey}
-                href={`/grimoire/compatibility/${slug}`}
-                className='px-4 py-2 rounded-lg bg-surface-card hover:bg-surface-overlay text-content-secondary hover:text-content-brand text-sm transition-colors'
-              >
-                {content.sign1} & {sign.name}
-              </NavParamLink>
-            );
-          })}
-        </div>
-      </section>
+      {/* Related Matches — curated pairs only */}
+      {sign1Matches.length > 0 && (
+        <section className='mb-8'>
+          <Heading as='h2' variant='h3'>
+            Explore More {content.sign1} Compatibility
+          </Heading>
+          <div className='flex flex-wrap gap-3 mt-4'>
+            {sign1Matches.map((signKey) => {
+              const sign = signDescriptions[signKey];
+              const slug = compatibilitySlug(parsed.sign1, signKey);
+              return (
+                <NavParamLink
+                  key={signKey}
+                  href={`/grimoire/compatibility/${slug}`}
+                  className='px-4 py-2 rounded-lg bg-surface-card hover:bg-surface-overlay text-content-secondary hover:text-content-brand text-sm transition-colors'
+                >
+                  {content.sign1} & {sign.name}
+                </NavParamLink>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Cosmic Connections */}
       <CosmicConnections

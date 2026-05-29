@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
+import {
+  compatibilitySlug,
+  isCuratedCompatibilityPair,
+} from '@/constants/seo/compatibility-content';
 
 interface SignInfo {
   name: string;
@@ -54,10 +58,8 @@ export function CompatibilityMatrix({ signs }: CompatibilityMatrixProps) {
                   {sign1.name.slice(0, 3)}
                 </td>
                 {signs.map(([key2], colIndex) => {
-                  const slug =
-                    key1 <= key2
-                      ? `${key1}-and-${key2}`
-                      : `${key2}-and-${key1}`;
+                  const slug = compatibilitySlug(key1, key2);
+                  const isCurated = isCuratedCompatibilityPair(slug);
                   const isHighlighted =
                     hoveredCell?.row === rowIndex ||
                     hoveredCell?.col === colIndex;
@@ -65,32 +67,52 @@ export function CompatibilityMatrix({ signs }: CompatibilityMatrixProps) {
                     hoveredCell?.row === rowIndex &&
                     hoveredCell?.col === colIndex;
 
+                  const cellClassName = `block w-8 h-8 rounded border transition-colors flex items-center justify-center ${
+                    isHoveredCell
+                      ? 'bg-lunary-rose-700 border-lunary-rose-500'
+                      : isHighlighted
+                        ? 'bg-layer-base/50 border-lunary-rose-700/50'
+                        : 'bg-surface-card border-transparent hover:bg-lunary-rose-800 hover:border-lunary-rose-600'
+                  }`;
+                  const heart = (
+                    <Heart
+                      className={`h-3 w-3 transition-colors ${
+                        isHoveredCell
+                          ? 'text-content-primary'
+                          : isHighlighted
+                            ? 'text-lunary-rose-400'
+                            : 'text-content-muted hover:text-lunary-rose'
+                      }`}
+                    />
+                  );
+                  const onMouseEnter = () =>
+                    setHoveredCell({ row: rowIndex, col: colIndex });
+                  const onMouseLeave = () => setHoveredCell(null);
+
                   return (
                     <td key={key2} className='p-1'>
-                      <Link
-                        href={`/grimoire/compatibility/${slug}`}
-                        className={`block w-8 h-8 rounded border transition-colors flex items-center justify-center ${
-                          isHoveredCell
-                            ? 'bg-lunary-rose-700 border-lunary-rose-500'
-                            : isHighlighted
-                              ? 'bg-layer-base/50 border-lunary-rose-700/50'
-                              : 'bg-surface-card border-transparent hover:bg-lunary-rose-800 hover:border-lunary-rose-600'
-                        }`}
-                        onMouseEnter={() =>
-                          setHoveredCell({ row: rowIndex, col: colIndex })
-                        }
-                        onMouseLeave={() => setHoveredCell(null)}
-                      >
-                        <Heart
-                          className={`h-3 w-3 transition-colors ${
-                            isHoveredCell
-                              ? 'text-content-primary'
-                              : isHighlighted
-                                ? 'text-lunary-rose-400'
-                                : 'text-content-muted hover:text-lunary-rose'
-                          }`}
-                        />
-                      </Link>
+                      {/* Only curated pairs are crawlable links; thin fallback
+                          pairs render as a non-link cell to keep them out of
+                          the crawl surface. */}
+                      {isCurated ? (
+                        <Link
+                          href={`/grimoire/compatibility/${slug}`}
+                          className={cellClassName}
+                          onMouseEnter={onMouseEnter}
+                          onMouseLeave={onMouseLeave}
+                        >
+                          {heart}
+                        </Link>
+                      ) : (
+                        <span
+                          className={`${cellClassName} opacity-50`}
+                          aria-hidden='true'
+                          onMouseEnter={onMouseEnter}
+                          onMouseLeave={onMouseLeave}
+                        >
+                          {heart}
+                        </span>
+                      )}
                     </td>
                   );
                 })}
