@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useUser } from '@/context/UserContext';
 import { SmartTrialButton } from './SmartTrialButton';
@@ -34,9 +34,39 @@ export function PostTrialMessaging() {
     return Math.max(1, daysSince);
   }, [trialExpired, user?.trialEndsAt]);
 
+  // If the lapsed user actually built a habit, lead with the streak they lost
+  // (loss aversion) instead of generic missed guidance. Reuses the same streak
+  // GET the StreakBanner uses — no new endpoint. Only fetched once the trial
+  // is known to have expired.
+  const [lostStreak, setLostStreak] = useState<number>(0);
+
+  useEffect(() => {
+    if (!trialExpired) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch('/api/streak/check-in', {
+          credentials: 'include',
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        const longest = data?.streak?.longest ?? 0;
+        if (!cancelled)
+          setLostStreak(typeof longest === 'number' ? longest : 0);
+      } catch (error) {
+        console.error('[PostTrialMessaging] Failed to fetch streak:', error);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [trialExpired]);
+
   if (!trialExpired || missedInsights === 0) {
     return null;
   }
+
+  const hasSavableStreak = lostStreak >= 3;
 
   return (
     <div className='bg-gradient-to-r from-layer-base/40 to-pink-900/40 rounded-lg p-6 border border-lunary-primary/30 mb-6'>
@@ -46,8 +76,14 @@ export function PostTrialMessaging() {
         </div>
         <div className='flex-1'>
           <h3 className='text-lg font-semibold text-content-primary mb-2'>
-            You&apos;ve missed {missedInsights} day
-            {missedInsights !== 1 ? 's' : ''} of personalised guidance
+            {hasSavableStreak ? (
+              <>You built a {lostStreak}-day streak. Pick it back up.</>
+            ) : (
+              <>
+                You&apos;ve missed {missedInsights} day
+                {missedInsights !== 1 ? 's' : ''} of personalised guidance
+              </>
+            )}
           </h3>
           <p className='text-content-secondary text-sm mb-4'>
             Your daily tarot pulls, personalised horoscopes, and transit

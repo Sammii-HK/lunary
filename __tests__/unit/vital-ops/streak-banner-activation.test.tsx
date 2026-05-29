@@ -121,11 +121,16 @@ describe('VITAL #11 StreakBanner renders nothing at streak 0', () => {
 describe('VITAL #11 StreakBanner surfaces the milestone line for an active streak', () => {
   beforeEach(() => jest.clearAllMocks());
 
+  // Checked in TODAY -> not at risk, so the milestone (gain) line shows rather
+  // than the at-risk (loss) line. Computed dynamically so the test is stable on
+  // any run date.
+  const todayISO = new Date().toISOString().split('T')[0];
+
   it('shows the streak count and the next-milestone hook when enabled', async () => {
     (global as any).fetch = jest.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        streak: { current: 6, longest: 6, lastCheckIn: '2026-05-29' },
+        streak: { current: 6, longest: 6, lastCheckIn: todayISO },
       }),
     });
 
@@ -144,7 +149,7 @@ describe('VITAL #11 StreakBanner surfaces the milestone line for an active strea
     (global as any).fetch = jest.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        streak: { current: 6, longest: 6, lastCheckIn: '2026-05-29' },
+        streak: { current: 6, longest: 6, lastCheckIn: todayISO },
       }),
     });
 
