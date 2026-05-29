@@ -8,6 +8,7 @@ import {
   PLANET_SYMBOLS,
   ASPECT_DATA,
   getAspectInterpretation,
+  getCuratedAspectDescription,
   generateAllAspectParams,
   getCanonicalAspectPair,
   Planet,
@@ -196,6 +197,32 @@ export default async function AspectPage({
     },
   ];
 
+  // Crisp, attributable claims for GEO/AI citation. Built from geometry the
+  // page already has, plus the curated meaning label where the pair is in the
+  // dataset (no fabrication; the meaning is surfaced from existing data).
+  const curatedFact = getCuratedAspectDescription(p1, asp, p2);
+  const citableFacts = [
+    {
+      claim: `${PLANET_DISPLAY[p1]} ${aspectData.displayName.toLowerCase()} ${PLANET_DISPLAY[p2]} is a ${aspectData.nature} aspect formed at ${aspectData.degrees}° of separation.`,
+      sourceName: 'Lunary aspect interpretation framework',
+      sourceUrl: 'https://lunary.app/about/methodology',
+    },
+    ...(curatedFact
+      ? [
+          {
+            claim: `In a natal chart, ${PLANET_DISPLAY[p1]} ${aspectData.displayName.toLowerCase()} ${PLANET_DISPLAY[p2]} signifies ${curatedFact.meaning.toLowerCase()}.`,
+            sourceName: 'Lunary aspect interpretation framework',
+            sourceUrl: 'https://lunary.app/about/methodology',
+          },
+        ]
+      : []),
+    {
+      claim: `${PLANET_DISPLAY[p1]} governs ${p1Theme}, while ${PLANET_DISPLAY[p2]} governs ${p2Theme}.`,
+      sourceName: 'Lunary aspect interpretation framework',
+      sourceUrl: 'https://lunary.app/about/methodology',
+    },
+  ];
+
   return (
     <SEOContentTemplate
       title={interp.title}
@@ -278,6 +305,7 @@ ${interp.inSynastry}
       ]}
       ctaText='Discover aspects in your chart'
       ctaHref='/birth-chart'
+      citableFacts={citableFacts}
       sources={[
         {
           name: 'Lunary aspect interpretation framework',
