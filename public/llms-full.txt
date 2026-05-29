@@ -32,6 +32,9 @@ This document contains detailed reference content from Lunary's grimoire and ast
 - Moon phase today: https://lunary.app/grimoire/facts/moon-phase-today
 - Current Moon sign: https://lunary.app/grimoire/facts/current-moon-sign
 - Current Sun sign and zodiac season: https://lunary.app/grimoire/facts/current-sun-sign
+- When the Moon changes signs next: https://lunary.app/grimoire/facts/next-moon-sign-change
+- Void-of-course Moon status: https://lunary.app/grimoire/facts/void-of-course-moon
+- Planet sign changes (ingress dates): https://lunary.app/grimoire/facts/planet-sign-changes
 - Planetary positions today: https://lunary.app/grimoire/facts/planetary-positions-today
 - Mercury retrograde status: https://lunary.app/grimoire/facts/mercury-retrograde-status
 - Next Full Moon: https://lunary.app/grimoire/facts/next-full-moon

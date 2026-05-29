@@ -107,6 +107,24 @@ export async function GET() {
       priority: '0.7',
     },
     {
+      loc: `${BASE_URL}/grimoire/facts/next-moon-sign-change`,
+      lastmod: today,
+      changefreq: 'daily',
+      priority: '0.7',
+    },
+    {
+      loc: `${BASE_URL}/grimoire/facts/void-of-course-moon`,
+      lastmod: today,
+      changefreq: 'daily',
+      priority: '0.7',
+    },
+    {
+      loc: `${BASE_URL}/grimoire/facts/planet-sign-changes`,
+      lastmod: today,
+      changefreq: 'daily',
+      priority: '0.7',
+    },
+    {
       loc: `${BASE_URL}/grimoire/facts/planetary-positions-today`,
       lastmod: today,
       changefreq: 'daily',

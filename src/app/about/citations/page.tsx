@@ -87,6 +87,21 @@ const citationUrls = [
     use: 'Human-readable current Sun sign and active zodiac season claim backed by dataset and methodology links.',
   },
   {
+    label: 'Next Moon Sign Change',
+    href: '/grimoire/facts/next-moon-sign-change',
+    use: 'Human-readable next lunar ingress date backed by computed ecliptic longitude.',
+  },
+  {
+    label: 'Void-of-Course Moon',
+    href: '/grimoire/facts/void-of-course-moon',
+    use: 'Human-readable void-of-course Moon window with start, end, and last aspect.',
+  },
+  {
+    label: 'Planet Sign Changes',
+    href: '/grimoire/facts/planet-sign-changes',
+    use: 'Human-readable next ingress date for every planet backed by computed ecliptic longitude.',
+  },
+  {
     label: 'Planetary Positions Today',
     href: '/grimoire/facts/planetary-positions-today',
     use: 'Human-readable current planetary position claim backed by dataset links.',
