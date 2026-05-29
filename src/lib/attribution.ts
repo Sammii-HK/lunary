@@ -1,13 +1,23 @@
 const STORAGE_KEY = 'lunary_attribution';
 
 export type AttributionSource =
+  // Existing buckets (do not reorder/remove — persisted verbatim in user_attribution.first_touch_source)
   | 'seo'
   | 'ai'
   | 'social'
   | 'email'
   | 'direct'
   | 'referral'
-  | 'paid';
+  | 'paid'
+  // New first-party channel buckets. Without these, the channels below were
+  // captured as raw UTM strings but collapsed to direct/referral in first-party
+  // attribution, so source labels never segmented in the revenue/activation SQL.
+  | 'crosspromo' // owned-app portfolio cross-promo (utm_medium=crosspromo, utm_source=<app>_app)
+  | 'directory' // app/dev directories + roundups (?ref=dir:* / roundup:*)
+  | 'partner' // partner / affiliate / Substack swaps (?ref=partner:* / affiliate:*, utm_medium=partner)
+  | 'aso' // App Store / Play Store listing (?ref=aso:* / utm_source=aso:*)
+  | 'chart-ai-taste' // chart AI "taste" lead surface
+  | 'quiz'; // quiz funnel (e.g. chart-ruler) warm second click
 
 export interface Attribution {
   source: AttributionSource;
@@ -17,6 +27,8 @@ export interface Attribution {
   landingPage: string;
   referrer?: string;
   timestamp: number;
+  /** Value of the `?ref=` param (referral code OR a prefixed channel label like `dir:apisguru`). */
+  ref?: string;
   utmSource?: string;
   utmMedium?: string;
   utmCampaign?: string;
@@ -58,7 +70,98 @@ const SOCIAL_PLATFORMS = [
   { domain: 'youtube', name: 'youtube' },
   { domain: 'discord', name: 'discord' },
   { domain: 'threads', name: 'threads' },
+  { domain: 'bsky.app', name: 'bluesky' },
+  { domain: 'bsky.social', name: 'bluesky' },
+  { domain: 'mastodon', name: 'mastodon' },
 ];
+
+/**
+ * Map a UTM source/medium pair and a `?ref=` value to a first-party
+ * {@link AttributionSource} bucket.
+ *
+ * This is the keystone that makes the new channels (owned-app cross-promo,
+ * directories, partners, ASO, chart-ai-taste, quiz) segment as their own
+ * channel instead of collapsing to `direct`/`referral`. It is intentionally
+ * additive: it returns `undefined` for anything it does not recognise so the
+ * existing referrer-based and medium-based detection still wins, and bare
+ * referral codes (`?ref=CODE`) keep flowing through untouched.
+ *
+ * Conventions (from the external-surfaces + app-portfolio plans):
+ *  - `?ref=dir:<name>` / `?ref=roundup:<pub>`        -> directory
+ *  - `?ref=partner:<name>` / `?ref=affiliate:<name>` -> partner
+ *  - `?ref=aso:<store>`                              -> aso
+ *  - `utm_medium=crosspromo` / `utm_source=<app>_app`-> crosspromo
+ *  - `utm_medium=partner`                            -> partner
+ *  - `utm_source` / medium of `aso`, `quiz`, chart-ai-taste -> matching bucket
+ */
+export function mapUtmToSource(
+  utmSource?: string | null,
+  utmMedium?: string | null,
+  ref?: string | null,
+): AttributionSource | undefined {
+  const source = (utmSource || '').toLowerCase().trim();
+  const medium = (utmMedium || '').toLowerCase().trim();
+  const refValue = (ref || '').toLowerCase().trim();
+
+  // 1) Prefixed `?ref=` channel labels take priority (the canonical convention
+  //    for directory/partner/aso reach). Bare codes have no prefix and so are
+  //    intentionally ignored here, preserving existing referral behaviour.
+  if (refValue) {
+    if (refValue.startsWith('dir:') || refValue.startsWith('roundup:')) {
+      return 'directory';
+    }
+    if (refValue.startsWith('partner:') || refValue.startsWith('affiliate:')) {
+      return 'partner';
+    }
+    if (refValue.startsWith('aso:')) {
+      return 'aso';
+    }
+    if (refValue.startsWith('crosspromo')) {
+      return 'crosspromo';
+    }
+    if (
+      refValue.startsWith('chart-ai-taste') ||
+      refValue.startsWith('chart_ai_taste')
+    ) {
+      return 'chart-ai-taste';
+    }
+    if (refValue.startsWith('quiz') || refValue.startsWith('lead:chart-')) {
+      return 'quiz';
+    }
+  }
+
+  // 2) UTM medium / source mapping for the new channels.
+  if (medium === 'crosspromo' || source.endsWith('_app')) {
+    return 'crosspromo';
+  }
+  if (medium === 'partner' || medium === 'affiliate') {
+    return 'partner';
+  }
+  if (
+    medium === 'directory' ||
+    medium === 'dir' ||
+    medium === 'roundup' ||
+    source === 'directory' ||
+    source === 'roundup'
+  ) {
+    return 'directory';
+  }
+  if (source === 'aso' || medium === 'aso' || source.startsWith('aso:')) {
+    return 'aso';
+  }
+  if (
+    source === 'chart-ai-taste' ||
+    source === 'chart_ai_taste' ||
+    medium === 'chart-ai-taste'
+  ) {
+    return 'chart-ai-taste';
+  }
+  if (source === 'quiz' || medium === 'quiz') {
+    return 'quiz';
+  }
+
+  return undefined;
+}
 
 export function extractSearchQuery(referrer: string): string | undefined {
   if (!referrer) return undefined;
@@ -141,12 +244,17 @@ export function extractUTMFromURL(): Partial<Attribution> {
   const utmCampaign = params.get('utm_campaign');
   const utmTerm = params.get('utm_term');
   const utmContent = params.get('utm_content');
+  // `?ref=` is overloaded: it carries either a bare referral code (e.g. ?ref=bwt)
+  // or a prefixed channel label (e.g. ?ref=dir:apisguru). We keep the raw value
+  // and let mapUtmToSource decide whether it identifies a channel bucket.
+  const ref = params.get('ref');
 
   if (utmSource) utm.utmSource = utmSource;
   if (utmMedium) utm.utmMedium = utmMedium;
   if (utmCampaign) utm.utmCampaign = utmCampaign;
   if (utmTerm) utm.utmTerm = utmTerm;
   if (utmContent) utm.utmContent = utmContent;
+  if (ref) utm.ref = ref;
 
   if (utmSource) {
     if (utmMedium === 'cpc' || utmMedium === 'paid') {
@@ -160,6 +268,23 @@ export function extractUTMFromURL(): Partial<Attribution> {
     }
     utm.medium = utmMedium || utmSource;
     utm.campaign = utmCampaign || undefined;
+  }
+
+  // New first-party channel buckets. Only fills `source` when the existing
+  // medium-based mapping above did not already resolve one, so existing
+  // paid/email/social/referral attribution is never overridden. Also runs when
+  // there is a `?ref=` channel label but no utm_source at all.
+  if (!utm.source) {
+    const bucket = mapUtmToSource(utmSource, utmMedium, ref);
+    if (bucket) {
+      utm.source = bucket;
+      if (!utm.medium) {
+        utm.medium = utmMedium || utmSource || ref || undefined;
+      }
+      if (!utm.campaign) {
+        utm.campaign = utmCampaign || undefined;
+      }
+    }
   }
 
   return utm;
@@ -183,6 +308,7 @@ export function captureAttribution(): Attribution | null {
     landingPage,
     referrer: referrer || undefined,
     timestamp: Date.now(),
+    ref: utmData.ref,
     utmSource: utmData.utmSource,
     utmMedium: utmData.utmMedium,
     utmCampaign: utmData.utmCampaign,
@@ -259,6 +385,7 @@ export function getAttributionForTracking(): Record<
     first_touch_keyword: attribution.keyword,
     first_touch_page: attribution.landingPage,
     first_touch_referrer: attribution.referrer,
+    first_touch_ref: attribution.ref,
     first_touch_at: new Date(attribution.timestamp).toISOString(),
     utm_source: attribution.utmSource,
     utm_medium: attribution.utmMedium,
