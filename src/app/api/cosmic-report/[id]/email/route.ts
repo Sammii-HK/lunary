@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { z } from 'zod';
 import { sendEmail } from '@/lib/email';
 import { buildShareUrl, createShareToken } from '@/lib/cosmic-report/share';
+import { requireUser, UnauthorizedError } from '@/lib/ai/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,8 @@ const emailSchema = z.object({
 
 export async function POST(request: NextRequest, context: any) {
   try {
+    const user = await requireUser(request);
+
     const { params } = context as { params: { id: string } };
     const body = await request.json();
     const parsed = emailSchema.parse(body);
@@ -25,10 +28,13 @@ export async function POST(request: NextRequest, context: any) {
       );
     }
 
+    // Scope to the requesting user's own report to prevent IDOR. Without this,
+    // any caller could email another user's report (and force it public) by
+    // enumerating sequential ids.
     const result = await sql`
       SELECT id, report_data, share_token, is_public
       FROM cosmic_reports
-      WHERE id = ${id}
+      WHERE id = ${id} AND user_id = ${user.id}
       LIMIT 1
     `;
 
@@ -49,7 +55,7 @@ export async function POST(request: NextRequest, context: any) {
       await sql`
         UPDATE cosmic_reports
         SET share_token = ${shareToken}, is_public = true
-        WHERE id = ${id}
+        WHERE id = ${id} AND user_id = ${user.id}
       `;
     }
 
@@ -76,6 +82,12 @@ ${shareUrl ? `Share: ${shareUrl}\n` : ''}Download PDF: ${pdfUrl}`,
 
     return NextResponse.json({ success: true, message: 'Report emailed' });
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401 },
+      );
+    }
     console.error('Failed to email cosmic report:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(

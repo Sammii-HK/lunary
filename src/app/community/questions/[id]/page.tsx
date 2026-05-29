@@ -5,6 +5,7 @@ import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
 import { Heading } from '@/components/ui/Heading';
 import { SignupCTA } from '@/components/community/SignupCTA';
+import { renderJsonLd } from '@/lib/schema';
 import { QuestionDetailClient } from './QuestionDetailClient';
 
 interface Props {
@@ -134,10 +135,9 @@ export default async function QuestionPage({ params }: Props) {
     <div className='min-h-screen flex flex-col'>
       <div className='flex-1 p-4'>
         <div className='max-w-2xl mx-auto space-y-6'>
-          <script
-            type='application/ld+json'
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-          />
+          {/* Safe JSON-LD: renderJsonLd escapes '<' so user-supplied
+              question/answer text cannot break out of the script tag (XSS). */}
+          {renderJsonLd(jsonLd)}
 
           <header className='pt-4 pb-2'>
             <Heading variant='h1' as='h1'>
