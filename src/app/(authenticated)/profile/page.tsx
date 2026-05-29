@@ -29,6 +29,7 @@ import { ProfileTabs, type ProfileTab } from '@/components/profile/ProfileTabs';
 import { CosmicProfileGrid } from '@/components/profile/CosmicProfileGrid';
 import { PersonalCardModal } from '@/components/profile/PersonalCardModal';
 import { JourneySection } from '@/components/profile/JourneySection';
+import { CosmicIdentityShareCard } from '@/components/cosmic-identity/CosmicIdentityShareCard';
 import { SettingsTab } from '@/components/profile/SettingsTab';
 import { CircleTab } from '@/components/profile/CircleTab';
 import { CosmicSkeleton } from '@/components/states/CosmicSkeleton';
@@ -884,6 +885,11 @@ export default function ProfilePage() {
 
           {/* Journey Section (Streak + Insights) */}
           {authState.isAuthenticated && !isEditing && <JourneySection />}
+
+          {/* Public cosmic profile — claim a handle + share the public page */}
+          {authState.isAuthenticated && !isEditing && (
+            <CosmicIdentityShareCard />
+          )}
 
           {/* Footer Links */}
           <div className='w-full max-w-3xl'>

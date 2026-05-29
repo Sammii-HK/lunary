@@ -8,6 +8,7 @@ import {
   getStoredAttribution,
   initializeAttribution,
 } from '@/lib/attribution';
+import { storeReferralCodeFromUrl } from '@/lib/referrals/referral-link';
 
 const ATTRIBUTION_SYNC_PREFIX = 'lunary_attribution_synced';
 
@@ -31,6 +32,12 @@ export function AttributionCapture() {
     // Capture attribution immediately on first page load
     // This ensures attribution is available for signup tracking
     initializeAttribution();
+
+    // Capture any `?ref=` referral code on first load so shared links (e.g. a
+    // friend's public `/me/[handle]` page or a referral CTA) attribute the
+    // signup back to the sharer, regardless of which landing page they hit.
+    // Previously only `/auth` and `/pricing` captured this.
+    storeReferralCodeFromUrl();
   }, []);
 
   return null;
