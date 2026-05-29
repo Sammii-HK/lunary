@@ -73,6 +73,14 @@ export type AiReferralSummary = {
   conversions?: number;
 };
 
+export type AiReferralConversion = {
+  engine: string;
+  landingPage: string;
+  aiVisitors: number;
+  signups: number;
+  converters: number;
+};
+
 export type CitationRadarOpportunity = {
   promptId: string;
   prompt: string;
@@ -102,6 +110,8 @@ export type CitationRadarReport = {
     bingAiTotalCitations: number;
     bingAiAverageCitedPages: number;
     aiReferralVisits: number;
+    aiReferralSignups: number;
+    aiReferralConverters: number;
     opportunityCount: number;
   };
   sources: {
@@ -115,6 +125,7 @@ export type CitationRadarReport = {
       topPages: SearchMetricRow[];
     }>;
     posthogAiReferrals: ApiSourceState<AiReferralSummary[]>;
+    posthogAiReferralConversion: ApiSourceState<AiReferralConversion[]>;
     browserFindings: CitationFinding[];
   };
   promptPack: CitationRadarPrompt[];
@@ -492,11 +503,18 @@ export function createCitationRadarReport(params: {
     topPages: SearchMetricRow[];
   }>;
   posthogAiReferrals: ApiSourceState<AiReferralSummary[]>;
+  posthogAiReferralConversion?: ApiSourceState<AiReferralConversion[]>;
   startDate: string;
   endDate: string;
   generatedAt?: string;
 }): CitationRadarReport {
   const promptPack = buildCitationPromptPack(params.map);
+  const posthogAiReferralConversion: ApiSourceState<AiReferralConversion[]> =
+    params.posthogAiReferralConversion ?? {
+      available: false,
+      source: 'PostHog AI referral conversion API',
+      reason: 'AI referral conversion query was not run',
+    };
   const browserFindings = params.findings.map(normalizeFinding);
   const competitorDomains = createCompetitorDomains(browserFindings);
   const browserCitationRate =
@@ -506,6 +524,18 @@ export function createCitationRadarReport(params: {
       : null;
   const aiReferralVisits = params.posthogAiReferrals.available
     ? params.posthogAiReferrals.data.reduce((sum, row) => sum + row.visits, 0)
+    : 0;
+  const aiReferralSignups = posthogAiReferralConversion.available
+    ? posthogAiReferralConversion.data.reduce(
+        (sum, row) => sum + row.signups,
+        0,
+      )
+    : 0;
+  const aiReferralConverters = posthogAiReferralConversion.available
+    ? posthogAiReferralConversion.data.reduce(
+        (sum, row) => sum + row.converters,
+        0,
+      )
     : 0;
   const opportunities = createOpportunities({
     prompts: promptPack,
@@ -530,6 +560,8 @@ export function createCitationRadarReport(params: {
       bingAiAverageCitedPages:
         params.bingAiPerformance.summary.averageCitedPages,
       aiReferralVisits,
+      aiReferralSignups,
+      aiReferralConverters,
       opportunityCount: opportunities.length,
     },
     sources: {
@@ -537,6 +569,7 @@ export function createCitationRadarReport(params: {
       googleSearchConsole: params.googleSearchConsole,
       bingWebmaster: params.bingWebmaster,
       posthogAiReferrals: params.posthogAiReferrals,
+      posthogAiReferralConversion,
       browserFindings,
     },
     promptPack,
@@ -570,9 +603,24 @@ function renderOpportunityRows(opportunities: CitationRadarOpportunity[]) {
   ]);
 }
 
+function renderConversionRows(rows: AiReferralConversion[]) {
+  return rows.map((row) => [
+    row.engine,
+    row.landingPage || '(unknown)',
+    String(row.aiVisitors),
+    String(row.signups),
+    String(row.converters),
+  ]);
+}
+
 export function renderCitationRadarMarkdown(report: CitationRadarReport) {
   const topCompetitors = report.competitorDomains.slice(0, 12);
   const topOpportunities = report.opportunities.slice(0, 20);
+  const conversionRows = report.sources.posthogAiReferralConversion.available
+    ? renderConversionRows(
+        report.sources.posthogAiReferralConversion.data.slice(0, 20),
+      )
+    : [];
   const promptRows = report.promptPack
     .slice(0, 30)
     .map((prompt) => [
@@ -598,6 +646,8 @@ Window: ${report.window.startDate} to ${report.window.endDate}
 | Bing AI citations | ${report.summary.bingAiTotalCitations} |
 | Bing average cited pages | ${report.summary.bingAiAverageCitedPages} |
 | AI referral visits via API | ${report.summary.aiReferralVisits} |
+| AI referral signups via API | ${report.summary.aiReferralSignups} |
+| AI referral trial/sub converters via API | ${report.summary.aiReferralConverters} |
 
 ## Source Health
 
@@ -607,8 +657,16 @@ Window: ${report.window.startDate} to ${report.window.endDate}
 | Google Search Console API | ${sourceStatus(report.sources.googleSearchConsole)} |
 | Bing Webmaster API | ${sourceStatus(report.sources.bingWebmaster)} |
 | PostHog AI referrals API | ${sourceStatus(report.sources.posthogAiReferrals)} |
+| PostHog AI referral conversion API | ${sourceStatus(report.sources.posthogAiReferralConversion)} |
 | Browser citation findings | ${report.sources.browserFindings.length} findings |
 
+## AI Referral to Signup by Landing Page
+
+Closes the loop: an AI engine cited a page, a real human clicked through, and this is whether they signed up or converted. Visitors/signups/converters are floors (referrers are often stripped), per AI engine and the page they landed on.
+
+| Engine | Landing page | AI visitors | Signups | Trial/sub converters |
+| --- | --- | ---: | ---: | ---: |
+${renderRows(conversionRows)}
 ## Competitor Citation Domains
 
 | Domain | Citations | Engines | Example URLs |
