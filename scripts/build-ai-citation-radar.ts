@@ -12,6 +12,7 @@ import {
   createCitationRadarReport,
   loadCitationFindings,
   renderCitationRadarMarkdown,
+  type AiReferralConversion,
   type AiReferralSummary,
   type ApiSourceState,
   type SearchMetricRow,
@@ -261,6 +262,108 @@ async function loadPostHogAiReferrals(
   }
 }
 
+async function loadPostHogAiReferralConversion(
+  startDate: string,
+  endDate: string,
+  skipLive: boolean,
+): Promise<ApiSourceState<AiReferralConversion[]>> {
+  const source = 'PostHog AI referral conversion API';
+  if (skipLive) {
+    return { available: false, source, reason: '--skip-live was provided' };
+  }
+
+  const apiKey = process.env.POSTHOG_PERSONAL_API_KEY;
+  const projectId =
+    process.env.POSTHOG_PROJECT_ID ||
+    process.env.NEXT_PUBLIC_POSTHOG_PROJECT_ID;
+
+  if (!apiKey || !projectId) {
+    return {
+      available: false,
+      source,
+      reason:
+        'POSTHOG_PERSONAL_API_KEY and POSTHOG_PROJECT_ID/NEXT_PUBLIC_POSTHOG_PROJECT_ID are required',
+    };
+  }
+
+  // Closes the loop from volume to conversion: bucket each distinct_id by AI
+  // engine + landing page, then join later signup / trial_started /
+  // subscription_started events fired by the same distinct_id. Referrers are
+  // often stripped, so these counts are a floor, not the true total.
+  const aiSource = aiReferralCaseExpression();
+  const query = `
+    WITH ai AS (
+      SELECT
+        distinct_id,
+        ${aiSource} AS ai_engine,
+        argMin(coalesce(toString(properties.$pathname), ''), timestamp) AS landing_page,
+        min(timestamp) AS first_ai_seen
+      FROM events
+      WHERE timestamp >= toDateTime('${startDate} 00:00:00')
+        AND timestamp < toDateTime('${endDate} 23:59:59')
+        AND ${aiSource} != ''
+      GROUP BY distinct_id, ai_engine
+    )
+    SELECT
+      ai.ai_engine AS ai_engine,
+      ai.landing_page AS landing_page,
+      count(DISTINCT ai.distinct_id) AS ai_visitors,
+      count(DISTINCT if(e.event = 'signup', ai.distinct_id, NULL)) AS signups,
+      count(DISTINCT if(e.event IN ('trial_started', 'subscription_started'), ai.distinct_id, NULL)) AS converters
+    FROM ai
+    LEFT JOIN events AS e
+      ON e.distinct_id = ai.distinct_id AND e.timestamp >= ai.first_ai_seen
+    GROUP BY ai.ai_engine, ai.landing_page
+    ORDER BY ai_visitors DESC
+    LIMIT 200
+  `;
+
+  try {
+    const response = await fetch(
+      `${postHogApiHost()}/api/projects/${projectId}/query`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: {
+            kind: 'HogQLQuery',
+            query,
+          },
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `PostHog API returned ${response.status}: ${(await response.text()).slice(0, 240)}`,
+      );
+    }
+
+    const payload = (await response.json()) as {
+      results?: Array<[string, string, number, number, number]>;
+    };
+
+    return {
+      available: true,
+      source,
+      data: (payload.results || []).map(
+        ([engine, landingPage, aiVisitors, signups, converters]) => ({
+          engine,
+          landingPage: landingPage || '',
+          aiVisitors: Number(aiVisitors || 0),
+          signups: Number(signups || 0),
+          converters: Number(converters || 0),
+        }),
+      ),
+    };
+  } catch (error) {
+    return unavailable(source, error);
+  }
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const projectRoot = process.cwd();
@@ -274,12 +377,17 @@ async function main() {
   );
   const skipLive = boolArg(args, 'skip-live');
 
-  const [googleSearchConsole, bingWebmaster, posthogAiReferrals] =
-    await Promise.all([
-      loadGoogleSearchConsole(startDate, endDate, skipLive),
-      loadBingWebmaster(startDate, endDate, skipLive),
-      loadPostHogAiReferrals(startDate, endDate, skipLive),
-    ]);
+  const [
+    googleSearchConsole,
+    bingWebmaster,
+    posthogAiReferrals,
+    posthogAiReferralConversion,
+  ] = await Promise.all([
+    loadGoogleSearchConsole(startDate, endDate, skipLive),
+    loadBingWebmaster(startDate, endDate, skipLive),
+    loadPostHogAiReferrals(startDate, endDate, skipLive),
+    loadPostHogAiReferralConversion(startDate, endDate, skipLive),
+  ]);
 
   const report = createCitationRadarReport({
     map: loadAiCitationMap(projectRoot, 'public/ai-citation-map.json'),
@@ -288,6 +396,7 @@ async function main() {
     googleSearchConsole,
     bingWebmaster,
     posthogAiReferrals,
+    posthogAiReferralConversion,
     startDate,
     endDate,
   });
@@ -311,6 +420,8 @@ async function main() {
           googleSearchConsole: report.sources.googleSearchConsole.available,
           bingWebmaster: report.sources.bingWebmaster.available,
           posthogAiReferrals: report.sources.posthogAiReferrals.available,
+          posthogAiReferralConversion:
+            report.sources.posthogAiReferralConversion.available,
           browserFindings: report.sources.browserFindings.length,
         },
         outputs: {
