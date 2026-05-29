@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { createHmac } from 'crypto';
 import { headers } from 'next/headers';
 import { sql } from '@vercel/postgres';
 import { sendEmail } from '@/lib/email';
@@ -8,7 +9,7 @@ import {
   generateTemplateDeliveryEmailText,
 } from '@/lib/email-components/TemplateDeliveryEmail';
 import { buildReportData } from '@/lib/cosmic-report/build';
-import { createShareToken, buildShareUrl } from '@/lib/cosmic-report/share';
+import { buildShareUrl } from '@/lib/cosmic-report/share';
 
 // ─── Notion template registry ─────────────────────────────────────────────────
 // Maps Stripe product metadata templateId → display name.
@@ -357,6 +358,25 @@ function normaliseReportType(value?: string): 'weekly' | 'monthly' | 'custom' {
 }
 
 /**
+ * Derive the buyer's share token deterministically from the Stripe checkout
+ * session id. This is what makes fulfilment exactly-once: `cosmic_reports`
+ * has a UNIQUE constraint on `share_token`, so when Stripe retries the same
+ * `checkout.session.completed` event the second insert hits that constraint
+ * and is a no-op (no duplicate report row, no duplicate delivery email).
+ *
+ * The token is an HMAC keyed by the shop webhook secret rather than a plain
+ * hash, so it stays unguessable (you cannot derive it from a session id alone)
+ * and is sliced to 32 hex chars to match the legacy `randomBytes(16)` format.
+ */
+function deriveReportShareToken(sessionId: string): string {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET_SHOP || '';
+  return createHmac('sha256', secret)
+    .update(`cosmic_report:${sessionId}`)
+    .digest('hex')
+    .slice(0, 32);
+}
+
+/**
  * Generate the buyer's personalised Cosmic Report at purchase time and email
  * them the on-demand PDF link. The report row is stored in `cosmic_reports`,
  * exactly like a generator-created report, so the existing /api/cosmic-report/
@@ -381,6 +401,37 @@ async function handleCosmicReportPurchase(session: Stripe.Checkout.Session) {
     return;
   }
 
+  // Stripe only fires this for paid/completed sessions, but guard explicitly so
+  // an unpaid (e.g. async-payment-pending) session can never trigger fulfilment.
+  if (session.payment_status !== 'paid') {
+    console.warn(
+      `⚠️ Cosmic report session ${session.id} not paid (status: ${session.payment_status}), skipping fulfilment`,
+    );
+    return;
+  }
+
+  // Deterministic, session-derived share token = idempotency key. Reusing the
+  // existing UNIQUE(share_token) constraint means a Stripe retry of the same
+  // event resolves to the same row instead of generating a second report.
+  const shareToken = deriveReportShareToken(session.id);
+
+  // Fast path for retries: if this session was already fulfilled, do not
+  // rebuild the report or re-send the email.
+  try {
+    const existing = await sql`
+      SELECT id FROM cosmic_reports WHERE share_token = ${shareToken} LIMIT 1
+    `;
+    if (existing.rows[0]?.id) {
+      console.log(
+        `[Shop webhook] Cosmic report for session ${session.id} already fulfilled (report ${existing.rows[0].id}), skipping`,
+      );
+      return;
+    }
+  } catch (error) {
+    console.error('❌ Failed to check existing cosmic report:', error);
+    // Fall through — the INSERT below is still guarded by ON CONFLICT.
+  }
+
   console.log(`🔮 Generating purchased cosmic report for user ${userId}`);
 
   let reportData;
@@ -397,9 +448,6 @@ async function handleCosmicReportPurchase(session: Stripe.Checkout.Session) {
     console.error('❌ Failed to build purchased cosmic report:', error);
     return;
   }
-
-  // Buyers get a private share token so they have a stable shareable artefact.
-  const shareToken = createShareToken();
 
   let reportId: number | string | undefined;
   try {
@@ -421,10 +469,14 @@ async function handleCosmicReportPurchase(session: Stripe.Checkout.Session) {
     return;
   }
 
+  // No row returned means a concurrent retry inserted it between our pre-check
+  // and this INSERT (ON CONFLICT no-op). That retry owns the delivery email, so
+  // we stop here to avoid double-sending — this is the idempotent path, not an
+  // error.
   if (!reportId) {
-    console.error('❌ No report id returned after insert', {
-      sessionId: session.id,
-    });
+    console.log(
+      `[Shop webhook] Cosmic report for session ${session.id} fulfilled concurrently, skipping duplicate delivery`,
+    );
     return;
   }
 
