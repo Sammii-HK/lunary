@@ -1,12 +1,6 @@
 import { sql } from '@vercel/postgres';
 import { formatTimestamp } from '@/lib/analytics/date-range';
-import {
-  startOfWeek,
-  endOfWeek,
-  format,
-  getISOWeek,
-  getISOWeekYear,
-} from 'date-fns';
+import { format, getISOWeek, getISOWeekYear } from 'date-fns';
 import {
   ACTIVATION_EVENTS,
   ACTIVATION_WINDOW_DAYS,
@@ -44,25 +38,39 @@ function toTimezone(date: Date, timezone: string): Date {
 }
 
 /**
- * Get week boundaries for a given date in Europe/London timezone
- * Week starts Monday 00:00:00 and ends Sunday 23:59:59
+ * Get week boundaries for a given date, in UTC.
+ *
+ * Week starts Monday 00:00:00.000 UTC and ends Sunday 23:59:59.999 UTC.
+ *
+ * The returned boundaries are compared (via `formatTimestamp` ->
+ * `toISOString()`) against UTC `created_at`/`createdAt` columns, and the whole
+ * analytics layer buckets events in UTC (see `date-range.ts` timezone policy).
+ * The computation is therefore done entirely with UTC getters/setters so the
+ * boundary frame matches the events it buckets.
+ *
+ * This intentionally avoids the previous `toTimezone()` -> `startOfWeek()`
+ * (which uses LOCAL getters) -> `setUTCHours()` pattern. That mix made the
+ * week-start disagree with the forced UTC hour by the timezone offset, so
+ * under BST (UTC+1) the start snapped back to Sunday and the span widened to
+ * eight days, silently corrupting weekly metrics for ~half the year.
  */
 export function getWeekBoundaries(date: Date): {
   weekStart: Date;
   weekEnd: Date;
 } {
-  // Convert to London timezone
-  const londonDate = toTimezone(date, TIMEZONE);
+  // Monday 00:00:00.000 UTC of the week containing `date`.
+  const weekStart = new Date(date.getTime());
+  weekStart.setUTCHours(0, 0, 0, 0);
+  // getUTCDay(): 0=Sunday..6=Saturday. Days back to Monday = (day + 6) % 7.
+  const daysSinceMonday = (weekStart.getUTCDay() + 6) % 7;
+  weekStart.setUTCDate(weekStart.getUTCDate() - daysSinceMonday);
 
-  // Get Monday 00:00:00 of the week
-  const weekStartLondon = startOfWeek(londonDate, { weekStartsOn: 1 });
-  weekStartLondon.setUTCHours(0, 0, 0, 0);
+  // Sunday 23:59:59.999 UTC, exactly six days after the Monday start.
+  const weekEnd = new Date(weekStart.getTime());
+  weekEnd.setUTCDate(weekEnd.getUTCDate() + 6);
+  weekEnd.setUTCHours(23, 59, 59, 999);
 
-  // Get Sunday 23:59:59.999 of the week
-  const weekEndLondon = endOfWeek(londonDate, { weekStartsOn: 1 });
-  weekEndLondon.setUTCHours(23, 59, 59, 999);
-
-  return { weekStart: weekStartLondon, weekEnd: weekEndLondon };
+  return { weekStart, weekEnd };
 }
 
 /**
