@@ -117,28 +117,22 @@ describe('VITAL attribution - detectSourceFromReferrer ordering & buckets', () =
   });
 
   // -------------------------------------------------------------------------
-  // BUG (origin/main): Gmail and Yahoo Mail webmail click-throughs are
-  // mis-attributed to organic SEO, not email.
+  // FIXED: Gmail and Yahoo Mail webmail click-throughs now resolve to "email".
   //
-  // detectSourceFromReferrer loops SEARCH_ENGINES (which match the bare
-  // substrings 'google' and 'yahoo') BEFORE the email branch
-  // (hostname.includes('mail') || hostname.includes('outlook')). Because
-  // mail.google.com contains 'google' and mail.yahoo.com contains 'yahoo', they
-  // are classified as { source: 'seo' } and the email branch is never reached.
+  // mail.google.com contains 'google' and mail.yahoo.com contains 'yahoo', so
+  // when the SEARCH_ENGINES loop ran BEFORE the webmail branch they were
+  // mislabelled as organic SEO and the email branch was never reached. That
+  // inflated SEO conversion and hid email's true revenue contribution - the
+  // exact source-labelling corruption the funnel depends on avoiding.
   //
-  // Impact: every signup that arrives from a link clicked inside Gmail or Yahoo
-  // Mail (a real email channel - lifecycle, trial-nurture, re-engagement
-  // emails all land there) is credited to SEO in user_attribution. That both
-  // inflates SEO conversion and hides email's true revenue contribution - the
-  // exact source-labelling corruption the funnel depends on avoiding. Proton
-  // and Outlook webmail are unaffected (their hostnames contain no search-engine
-  // substring), so the bug is silent and partial.
-  //
-  // Fix (NOT applied here - tests are additive): check the webmail branch before
-  // the search-engine loop, or exclude mail.* subdomains from the search match.
-  // Un-skip this once the ordering is corrected.
+  // detectSourceFromReferrer now checks the webmail branch
+  // (hostname.includes('mail') || hostname.includes('outlook')) BEFORE the
+  // search-engine loop, so a link clicked inside any webmail client is credited
+  // to email regardless of which provider also runs a search engine. AI engines
+  // still win above webmail, so gemini.google.com stays "ai" (it has no 'mail'
+  // segment) and real search keeps resolving to "seo".
   // -------------------------------------------------------------------------
-  it.skip('BUG: should classify Gmail/Yahoo Mail webmail as "email", not "seo"', () => {
+  it('classifies Gmail/Yahoo Mail webmail as "email", not "seo"', () => {
     expect(
       detectSourceFromReferrer('https://mail.google.com/mail/u/0'),
     ).toEqual({ source: 'email', medium: 'webmail' });
@@ -147,16 +141,16 @@ describe('VITAL attribution - detectSourceFromReferrer ordering & buckets', () =
     ).toEqual({ source: 'email', medium: 'webmail' });
   });
 
-  it('pins the CURRENT (mislabelled) Gmail/Yahoo Mail behaviour so the bug is visible', () => {
-    // Documents reality on main: these resolve to seo today. Kept green so the
-    // mislabel is asserted, not silently tolerated; flip to the .skip above when
-    // the ordering is fixed.
+  it('still classifies real search hosts (no webmail segment) as "seo"', () => {
+    // Guards against the fix over-reaching: search.yahoo.com and www.google.com
+    // contain a search-engine substring but no 'mail' segment, so they must keep
+    // resolving to organic SEO now that webmail is checked first.
     expect(
-      detectSourceFromReferrer('https://mail.google.com/mail/u/0'),
-    ).toEqual({ source: 'seo', medium: 'google' });
-    expect(
-      detectSourceFromReferrer('https://mail.yahoo.com/d/folders/1'),
+      detectSourceFromReferrer('https://search.yahoo.com/search?p=tarot'),
     ).toEqual({ source: 'seo', medium: 'yahoo' });
+    expect(
+      detectSourceFromReferrer('https://www.google.com/search?q=lunary'),
+    ).toEqual({ source: 'seo', medium: 'google' });
   });
 
   it('classifies an unknown external site as "referral" carrying its hostname', () => {

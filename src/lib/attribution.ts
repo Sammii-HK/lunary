@@ -207,6 +207,17 @@ export function detectSourceFromReferrer(referrer: string): {
       }
     }
 
+    // Webmail must be checked BEFORE search engines: hosts like mail.google.com
+    // and mail.yahoo.com contain a search-engine substring ('google' / 'yahoo'),
+    // so if the search loop ran first they would be mislabelled as organic SEO
+    // and the email channel would never be credited. A link clicked inside a
+    // webmail client is an email click-through regardless of which provider also
+    // runs a search engine. AI engines still win above (gemini.google.com is a
+    // bare host with no 'mail' segment), so the AI-before-search invariant holds.
+    if (hostname.includes('mail') || hostname.includes('outlook')) {
+      return { source: 'email', medium: 'webmail' };
+    }
+
     for (const engine of SEARCH_ENGINES) {
       if (hostname.includes(engine.domain)) {
         return { source: 'seo', medium: engine.name };
@@ -217,10 +228,6 @@ export function detectSourceFromReferrer(referrer: string): {
       if (hostname.includes(platform.domain)) {
         return { source: 'social', medium: platform.name };
       }
-    }
-
-    if (hostname.includes('mail') || hostname.includes('outlook')) {
-      return { source: 'email', medium: 'webmail' };
     }
 
     if (!hostname.includes('lunary')) {
