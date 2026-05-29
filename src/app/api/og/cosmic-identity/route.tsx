@@ -74,6 +74,7 @@ function glyphFor(sign: string | null): string {
 interface UserRow {
   id: string;
   name: string | null;
+  profile_is_public: boolean | null;
 }
 
 interface ProfileRow {
@@ -96,12 +97,15 @@ export async function GET(request: NextRequest) {
   if (handle) {
     try {
       const userRes = await sql<UserRow>`
-        SELECT id, name FROM "user"
+        SELECT id, name, profile_is_public FROM "user"
         WHERE public_handle = ${handle}
         LIMIT 1
       `;
       const user = userRes.rows[0];
-      if (user) {
+      // Only expose name + chart in the OG card once the owner has opted in
+      // to a public profile (matches the /me/[handle] consent gate). A private
+      // or unknown handle falls through to the generic Lunary card below.
+      if (user && user.profile_is_public === true) {
         displayName = user.name;
         const profileRes = await sql<ProfileRow>`
           SELECT birth_chart FROM user_profiles

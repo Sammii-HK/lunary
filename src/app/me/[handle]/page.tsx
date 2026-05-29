@@ -7,8 +7,10 @@
  * year via the existing year-in-stars compute pipeline (which uses
  * `byPersonalImpact` under the hood).
  *
- * If the handle is unknown or doesn't match a `user.public_handle`, we
- * 404.
+ * Privacy: the page only renders when the profile owner has given explicit
+ * consent (`user.profile_is_public = true`). If the handle is unknown, does
+ * not match a `user.public_handle`, or the owner has NOT opted in, we 404 and
+ * the page is marked `noindex` so nothing is crawled without consent.
  */
 
 import type { Metadata } from 'next';
@@ -38,6 +40,7 @@ interface PageParams {
 interface UserRow {
   id: string;
   name: string | null;
+  profile_is_public: boolean | null;
 }
 
 interface ProfileRow {
@@ -57,12 +60,15 @@ async function loadByHandle(handle: string): Promise<{
   referralCode: string | null;
 } | null> {
   const userRes = await sql<UserRow>`
-    SELECT id, name FROM "user"
+    SELECT id, name, profile_is_public FROM "user"
     WHERE public_handle = ${handle}
     LIMIT 1
   `;
   const user = userRes.rows[0];
   if (!user) return null;
+  // Explicit-consent gate: never expose a profile the owner has not opted in
+  // to publish. Treated exactly like an unknown handle (404 + noindex).
+  if (user.profile_is_public !== true) return null;
 
   const profileRes = await sql<ProfileRow>`
     SELECT birth_chart, personal_card FROM user_profiles
@@ -148,11 +154,14 @@ export async function generateMetadata({
 }: PageParams): Promise<Metadata> {
   const { handle: rawHandle } = await params;
   const handle = String(rawHandle || '').toLowerCase();
+  // Default to noindex. Only a consented, public profile (below) flips this on,
+  // so an unknown / private handle is never surfaced to crawlers.
+  const noindex = { index: false, follow: false } as const;
   if (!HANDLE_REGEX.test(handle)) {
-    return { title: 'Cosmic identity | Lunary' };
+    return { title: 'Cosmic identity | Lunary', robots: noindex };
   }
   const data = await loadByHandle(handle);
-  if (!data) return { title: 'Cosmic identity | Lunary' };
+  if (!data) return { title: 'Cosmic identity | Lunary', robots: noindex };
 
   const { user, profile } = data;
   const chart = Array.isArray(profile?.birth_chart)
@@ -180,6 +189,9 @@ export async function generateMetadata({
   return {
     title,
     description,
+    // Reached only for a consented public profile (loadByHandle gates on
+    // profile_is_public), so indexing here is intentional opt-in.
+    robots: { index: true, follow: true },
     alternates: { canonical: `/me/${handle}` },
     openGraph: {
       title,
