@@ -42,6 +42,7 @@ export type ConversionEvent =
   | 'birth_chart_viewed'
   | 'personalized_tarot_viewed'
   | 'personalized_horoscope_viewed'
+  | 'personalized_value_revealed'
   | 'crystal_recommendations_viewed'
   | 'cosmic_pulse_opened'
   | 'cosmic_pulse_sent'
@@ -948,6 +949,22 @@ export const conversionTracking = {
     userId?: string,
     planType?: 'monthly' | 'yearly' | 'free',
   ) => trackConversion('personalized_horoscope_viewed', { userId, planType }),
+
+  // Fired once per trial user the first time the generic-vs-personalised value
+  // contrast is narrated (TrialValueReveal). This is the queryable personalised
+  // activation signal: unlike the viewed events (which free users also fire and
+  // which canonicalise into the generic event), this lands in conversion_events
+  // as its own type, so the signup -> value-revealed -> cta -> checkout funnel
+  // can finally be measured.
+  personalizedValueRevealed: (
+    userId?: string,
+    surface?: 'horoscope' | 'tarot',
+    daysRemaining?: number,
+  ) =>
+    trackConversion('personalized_value_revealed', {
+      userId,
+      metadata: { surface, daysRemaining },
+    }),
 
   crystalRecommendationsViewed: (
     userId?: string,

@@ -29,6 +29,7 @@ import {
 import type { TarotPlan } from '@/constants/tarotSpreads';
 import { FeaturePreview } from '../../horoscope/components/FeaturePreview';
 import { HoroscopeSection } from '../../horoscope/components/HoroscopeSection';
+import { TrialValueReveal } from '@/components/TrialValueReveal';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
@@ -901,6 +902,12 @@ export function TarotView({
         {/* Daily & Weekly Cards section */}
         {hasPaidAccess ? (
           <HoroscopeSection title='Daily & Weekly Cards' color='purple'>
+            {/* One-time trial value reveal — only on real personalised tarot,
+                gated internally on active trial + birth data + a shared one-time
+                flag (shows on tarot OR horoscope first-view, not both). */}
+            {subscription.hasAccess('personal_tarot') && (
+              <TrialValueReveal surface='tarot' />
+            )}
             <div className='grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-5'>
               {renderPremiumTarotCard({
                 label: 'Daily card',

@@ -102,6 +102,7 @@ export type CanonicalEventType =
   | 'trial_started'
   | 'trial_converted'
   | 'trial_expired'
+  | 'personalized_value_revealed'
   // Payment & Revenue
   | 'payment_failed'
   | 'payment_declined'
@@ -248,6 +249,7 @@ function canonicaliseEventType(raw: unknown): {
     value === 'subscription_started' ||
     value === 'subscription_cancelled' ||
     value === 'trial_started' ||
+    value === 'personalized_value_revealed' ||
     value === 'checkout_started' ||
     value === 'checkout_completed' ||
     value === 'pricing_page_viewed' ||
