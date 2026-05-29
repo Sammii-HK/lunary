@@ -31,7 +31,9 @@ export async function generateMetadata({
 }: ShareTransitReplyPageProps): Promise<Metadata> {
   const resolvedParams = await params;
   const record = await getTransitReplyShare(resolvedParams.shareId);
-  if (!record) notFound();
+  // The share record is a raw JSON.parse with no schema validation, so a
+  // malformed/partial KV value must 404 rather than throw on analysis.summary.
+  if (!record || typeof record.analysis?.summary !== 'string') notFound();
 
   const isBirthChart = record.mode === 'birth-chart';
   const title = isBirthChart
@@ -86,7 +88,9 @@ export default async function ShareTransitReplyPage({
 }: ShareTransitReplyPageProps) {
   const resolvedParams = await params;
   const record = await getTransitReplyShare(resolvedParams.shareId);
-  if (!record) notFound();
+  // Guard against malformed share records (raw JSON.parse, unvalidated) so one
+  // bad KV value 404s cleanly instead of crashing the page for every visitor.
+  if (!record || typeof record.analysis?.summary !== 'string') notFound();
 
   const shareUrl = buildCanonical(resolvedParams.shareId);
   const imageUrl = transitReplyImageUrl(resolvedParams.shareId, APP_URL);

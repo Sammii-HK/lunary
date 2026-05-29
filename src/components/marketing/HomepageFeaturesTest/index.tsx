@@ -1,11 +1,25 @@
 'use client';
 
 import { useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { captureEvent } from '@/lib/posthog-client';
 import { ControlVariant } from './ControlVariant';
-import { FourCardsUpdatedVariant } from './FourCardsUpdatedVariant';
-import { ThreeSectionsVariant } from './ThreeSectionsVariant';
+
+// The two A/B variants are only shown to a slice of visitors, so load them
+// lazily to keep them out of the default home-page bundle.
+const FourCardsUpdatedVariant = dynamic(
+  () =>
+    import('./FourCardsUpdatedVariant').then(
+      (mod) => mod.FourCardsUpdatedVariant,
+    ),
+  { ssr: false },
+);
+const ThreeSectionsVariant = dynamic(
+  () =>
+    import('./ThreeSectionsVariant').then((mod) => mod.ThreeSectionsVariant),
+  { ssr: false },
+);
 
 type FeaturesVariant = 'control' | 'four-cards-updated' | 'three-sections';
 

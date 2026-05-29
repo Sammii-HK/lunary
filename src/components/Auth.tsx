@@ -578,13 +578,20 @@ export function AuthComponent({
         )}
 
         {error && (
-          <div className='bg-red-900/30 border border-red-700 text-red-300 px-4 py-3 rounded-lg text-sm mb-4'>
+          <div
+            role='alert'
+            className='bg-lunary-error-900/30 border border-lunary-error-700 text-lunary-error-300 px-4 py-3 rounded-lg text-sm mb-4'
+          >
             {error}
           </div>
         )}
 
         {success && (
-          <div className='bg-layer-base/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm mb-4'>
+          <div
+            role='status'
+            aria-live='polite'
+            className='bg-layer-base/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm mb-4'
+          >
             {success}
           </div>
         )}
@@ -791,13 +798,20 @@ export function AuthComponent({
         )}
 
         {error && (
-          <div className='bg-red-900/30 border border-red-700 text-red-300 px-4 py-3 rounded-lg text-sm'>
+          <div
+            role='alert'
+            className='bg-lunary-error-900/30 border border-lunary-error-700 text-lunary-error-300 px-4 py-3 rounded-lg text-sm'
+          >
             {error}
           </div>
         )}
 
         {success && (
-          <div className='bg-layer-base/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm space-y-2'>
+          <div
+            role='status'
+            aria-live='polite'
+            className='bg-layer-base/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm space-y-2'
+          >
             <p>{success}</p>
             {pendingVerificationEmail && (
               <div className='pt-1 space-y-1'>

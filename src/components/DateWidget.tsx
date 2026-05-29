@@ -132,9 +132,13 @@ export const DateWidget = () => {
               </h3>
               <button
                 onClick={() => setIsOpen(false)}
+                aria-label='Close'
                 className='p-1 hover:bg-surface-card rounded-lg transition-colors'
               >
-                <CalendarIcon className='w-5 h-5 text-content-muted' />
+                <CalendarIcon
+                  className='w-5 h-5 text-content-muted'
+                  aria-hidden='true'
+                />
               </button>
             </div>
 

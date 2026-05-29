@@ -5,7 +5,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lunary-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
@@ -17,7 +17,7 @@ const buttonVariants = cva(
           'bg-surface-overlay text-content-secondary hover:bg-surface-overlay/80',
         ghost:
           'text-content-secondary hover:bg-surface-overlay hover:text-content-primary transition-colors',
-        link: 'text-primary underline-offset-4 hover:underline',
+        link: 'text-content-brand underline-offset-4 hover:underline',
         lunary:
           'bg-layer-base text-lunary-accent border border-lunary-primary-700 hover:bg-layer-raised hover:border-lunary-primary-600 hover:shadow-[0_0_20px_#8458D866] transition-all',
         'lunary-solid':

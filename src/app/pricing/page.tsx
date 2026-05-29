@@ -74,6 +74,7 @@ export default function PricingPage() {
   const authState = useAuthStatus();
   const currency = useCurrency();
   const [loading, setLoading] = useState<string | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [pricingPlans, setPricingPlans] =
     useState<PricingPlan[]>(PRICING_PLANS);
   const [loadingPlans, setLoadingPlans] = useState(true);
@@ -220,6 +221,7 @@ export default function PricingPage() {
     }
 
     setLoading(planId);
+    setCheckoutError(null);
 
     try {
       const storedReferralCode = getStoredReferralCode();
@@ -276,7 +278,9 @@ export default function PricingPage() {
       throw new Error('Missing checkout URL from response');
     } catch (error) {
       console.error('Error creating checkout session:', error);
-      alert('Something went wrong. Please try again.');
+      setCheckoutError(
+        'We could not start checkout just now. Please try again.',
+      );
     } finally {
       setLoading(null);
     }
@@ -514,6 +518,14 @@ export default function PricingPage() {
         <section id='pricing-plans' className='relative pb-24 scroll-mt-48'>
           <div className='max-w-5xl mx-auto px-6'>
             <h2 className='sr-only'>Choose Your Plan</h2>
+            {checkoutError && (
+              <div
+                role='alert'
+                className='mb-6 mx-auto max-w-md rounded-lg border border-lunary-error-700 bg-lunary-error-900/30 px-4 py-3 text-center text-sm text-lunary-error-300'
+              >
+                {checkoutError}
+              </div>
+            )}
             {loadingPlans ? (
               <div className='flex justify-center py-20'>
                 <div className='w-5 h-5 border-2 border-stroke-default border-t-lunary-primary rounded-full animate-spin' />

@@ -92,9 +92,10 @@ export function QuickReflection({
           </div>
           <button
             onClick={onClose}
+            aria-label='Close'
             className='p-2 hover:bg-surface-card rounded-lg transition-colors'
           >
-            <X className='w-5 h-5 text-content-muted' />
+            <X className='w-5 h-5 text-content-muted' aria-hidden='true' />
           </button>
         </div>
 

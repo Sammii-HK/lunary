@@ -1420,9 +1420,10 @@ function BookOfShadowsContent() {
               <button
                 type='button'
                 onClick={stop}
+                aria-label='Stop generating'
                 className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-layer-base text-lunary-error-300 border border-lunary-error-700 transition hover:bg-lunary-error-800'
               >
-                <Square className='w-4 h-4' />
+                <Square className='w-4 h-4' aria-hidden='true' />
               </button>
             ) : (
               <div className='absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1'>

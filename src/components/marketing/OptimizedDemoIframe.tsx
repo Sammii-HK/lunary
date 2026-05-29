@@ -29,6 +29,9 @@ export function OptimizedDemoIframe({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loadStartTime] = useState(Date.now());
   const [loadTime, setLoadTime] = useState<number | null>(null);
+  // Lazy iframes wait for the main thread to go idle so the iframe (which boots
+  // a second full app instance) never competes with the hero's interactivity.
+  const [idleReady, setIdleReady] = useState(loading === 'eager');
 
   // For lazy loading, use intersection observer
   const { ref: observerRef, inView } = useInView({
@@ -36,6 +39,25 @@ export function OptimizedDemoIframe({
     triggerOnce: true,
     rootMargin: '0px 0px -65% 0px',
   });
+
+  useEffect(() => {
+    if (loading === 'eager' || typeof window === 'undefined') return;
+    const w = window as typeof window & {
+      requestIdleCallback?: (
+        cb: () => void,
+        opts?: { timeout: number },
+      ) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+    if (typeof w.requestIdleCallback === 'function') {
+      const handle = w.requestIdleCallback(() => setIdleReady(true), {
+        timeout: 2500,
+      });
+      return () => w.cancelIdleCallback?.(handle);
+    }
+    const timer = window.setTimeout(() => setIdleReady(true), 1200);
+    return () => window.clearTimeout(timer);
+  }, [loading]);
 
   // Scroll isolation for iframe
   const { containerRef: scrollIsolationRef, isInteracting } =
@@ -122,8 +144,9 @@ export function OptimizedDemoIframe({
     return () => window.removeEventListener('message', handleMessage);
   }, [loadStartTime]);
 
-  // Determine if we should render iframe
-  const shouldLoad = loading === 'eager' || inView;
+  // Determine if we should render iframe: eager loads immediately; lazy waits
+  // until the element is near the viewport AND the main thread has gone idle.
+  const shouldLoad = loading === 'eager' || (inView && idleReady);
 
   return (
     <div
