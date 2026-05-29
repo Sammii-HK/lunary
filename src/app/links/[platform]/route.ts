@@ -46,7 +46,10 @@ const PLATFORM_DESTINATIONS: Record<string, Destination> = {
   seer: { path: '/grimoire/tarot', campaign: 'seer_tarot' },
   sparkle: { path: '/birth-chart', campaign: 'sparkle_chart' },
   // Content slugs — for posts/replies pointing at a specific page (cold-safe routes only).
-  'sky-now': { path: '/grimoire/astrology/sky-now', campaign: 'content_sky_now' },
+  'sky-now': {
+    path: '/grimoire/astrology/sky-now',
+    campaign: 'content_sky_now',
+  },
   transits: { path: '/transits', campaign: 'content_transits' },
   'birth-chart': { path: '/birth-chart', campaign: 'content_birth_chart' },
   'build-log': { path: '/building-lunary', campaign: 'content_build_log' },
