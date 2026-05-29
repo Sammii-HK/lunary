@@ -66,15 +66,20 @@ function extractPlacements(birthChart: unknown): BirthChartPlacements | null {
   return result.sun ? result : null;
 }
 
+// Only exclude 100%-off comp accounts (e.g. lifetime/staff grants), NOT users
+// who redeemed a real discount such as BLUEMOON (32% off). A part-paid promo
+// trial is the highest paying-intent segment and must stay in the nurture
+// ladder. The previous filter also excluded `has_discount = true` and any
+// non-empty `promo_code`, which silently dropped EVERY discounted trial.
+// `discount_percent` reflects the actual coupon percent (32 for BLUEMOON, 100
+// for a comp), so the 100% threshold is the precise comp-account guard.
 const TRIAL_BASE_QUERY = `
   FROM subscriptions s
   LEFT JOIN user_profiles up ON s.user_id = up.user_id
   WHERE s.status = 'trial'
   AND s.trial_ends_at IS NOT NULL
   AND s.user_email IS NOT NULL
-  AND s.has_discount = false
   AND COALESCE(s.discount_percent, 0) < 100
-  AND (s.promo_code IS NULL OR s.promo_code = '')
 `;
 
 export async function GET(request: NextRequest) {
@@ -101,7 +106,9 @@ export async function GET(request: NextRequest) {
     };
 
     // ─── NEW SEQUENCE (action-first) ───────────────────────────────
-    // Day 0 (signup): Welcome "Try these 3 things" — sent by auth hook
+    // Day 0 (verification): Welcome "Try these 3 things" — sent inline by the
+    //   better-auth onEmailVerification hook via sendWelcomeEmail (gated behind
+    //   WELCOME_EMAIL_ENABLED, default OFF). NOT handled by this cron.
     // Day 1: Sun in [Sign] (personalised)
     // Day 2: "Did you pull your card today?" (tarot action + transit nudge)
     // Day 3: Venus in [Sign] (personalised)
