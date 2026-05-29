@@ -43,6 +43,25 @@ export default async function NextNewMoonPage() {
         eyebrow={event?.date ?? dateKey}
         answer={answer}
         detail='This page is generated from Lunary annual astrology calendar data and links back to the machine-readable dataset for citation.'
+        faqs={[
+          {
+            question: 'When is the next new moon?',
+            answer: event
+              ? `The next New Moon is on ${event.date}.`
+              : 'The next New Moon date is not available in the current Lunary calendar window.',
+          },
+          {
+            question: 'What sign will the next new moon be in?',
+            answer: event
+              ? `The next New Moon falls in ${event.sign}.`
+              : 'The next New Moon sign is not available in the current Lunary calendar window.',
+          },
+          {
+            question: 'What does a new moon mean in astrology?',
+            answer:
+              'A New Moon begins the lunar cycle, when the Moon sits between the Earth and Sun and is not visibly illuminated. Astrologically it is read as a time for fresh starts, setting intentions, and planting seeds.',
+          },
+        ]}
         sources={[
           {
             label: 'Astrology calendar JSON',

@@ -44,6 +44,25 @@ export default async function NextEclipsePage() {
         eyebrow={event?.date ?? dateKey}
         answer={answer}
         detail='This page is generated from Lunary annual astrology calendar data and links back to eclipse guides and methodology.'
+        faqs={[
+          {
+            question: 'When is the next eclipse?',
+            answer: event
+              ? `The next eclipse is a ${type} on ${event.date} in ${event.sign}.`
+              : 'The next eclipse is not available in the current Lunary calendar window.',
+          },
+          {
+            question: 'Is the next eclipse a solar or lunar eclipse?',
+            answer: event
+              ? `The next eclipse is a ${type}.`
+              : 'The next eclipse type is not available in the current Lunary calendar window.',
+          },
+          {
+            question: 'What do eclipses mean in astrology?',
+            answer:
+              'Eclipses are supercharged New Moons (solar) or Full Moons (lunar) that fall near the lunar nodes. Astrologically they are read as accelerated turning points that bring beginnings, endings, and pivotal events.',
+          },
+        ]}
         sources={[
           {
             label: 'Astrology calendar JSON',

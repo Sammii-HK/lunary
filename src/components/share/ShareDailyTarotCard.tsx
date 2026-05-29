@@ -10,6 +10,8 @@ import { ShareActions } from './ShareActions';
 import { ShareFormatSelector } from './ShareFormatSelector';
 import { shareTracking } from '@/lib/analytics/share-tracking';
 import { isInDemoMode } from '@/lib/demo-mode';
+import { useReferralCode } from '@/hooks/useReferralCode';
+import { buildReferralLink } from '@/lib/referrals/referral-link';
 
 interface ShareDailyTarotCardProps {
   cardName: string;
@@ -25,6 +27,7 @@ export function ShareDailyTarotCard({
   compact = false,
 }: ShareDailyTarotCardProps) {
   const { user } = useUser();
+  const referralCode = useReferralCode();
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
 
@@ -146,7 +149,9 @@ export function ShareDailyTarotCard({
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText('https://lunary.app/tarot');
+      await navigator.clipboard.writeText(
+        buildReferralLink(referralCode, '/tarot'),
+      );
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2000);
       shareTracking.shareCompleted(user?.id, 'daily-tarot', 'clipboard');
@@ -160,9 +165,10 @@ export function ShareDailyTarotCard({
     typeof navigator.share === 'function' &&
     typeof navigator.canShare === 'function';
 
+  const shareLink = buildReferralLink(referralCode, '/tarot');
   const socialUrls = {
-    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`My daily tarot card is ${cardName}`)}&url=${encodeURIComponent('https://lunary.app/tarot')}`,
-    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My daily tarot card is ${cardName} lunary.app/tarot`)}`,
+    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`My daily tarot card is ${cardName}`)}&url=${encodeURIComponent(shareLink)}`,
+    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My daily tarot card is ${cardName} ${shareLink}`)}`,
   };
 
   return (

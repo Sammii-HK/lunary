@@ -46,6 +46,21 @@ export default function MoonPhaseTodayPage() {
         eyebrow={dateKey}
         answer={answer}
         detail='This page is a human-readable citation surface for Lunary current-sky facts. The underlying JSON dataset provides the calculated Moon phase, Moon sign, ecliptic longitude, illumination, and phase angle.'
+        faqs={[
+          {
+            question: 'What is the moon phase today?',
+            answer: `As of ${dateKey}, the Moon phase is ${facts.moon.phase}, with the Moon ${facts.moon.illuminationPercent.toFixed(0)}% illuminated in ${facts.moon.sign}.`,
+          },
+          {
+            question: 'How illuminated is the Moon right now?',
+            answer: `The Moon is currently ${facts.moon.illuminationPercent.toFixed(0)}% illuminated.`,
+          },
+          {
+            question: 'How many moon phases are there?',
+            answer:
+              'There are eight Moon phases: new moon, waxing crescent, first quarter, waxing gibbous, full moon, waning gibbous, last quarter, and waning crescent. The cycle repeats roughly every 29.5 days.',
+          },
+        ]}
         sources={[
           {
             label: 'Current sky JSON',

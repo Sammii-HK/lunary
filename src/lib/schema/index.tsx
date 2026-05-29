@@ -1,3 +1,5 @@
+import { stripMarkdown } from '@/lib/faq-schema';
+
 const BASE_URL = 'https://lunary.app';
 
 export const LUNARY_SOCIAL_LINKS = [
@@ -436,10 +438,12 @@ export function createFAQPageSchema(faqs: FAQItem[]) {
     '@type': 'FAQPage',
     mainEntity: faqs.map((faq) => ({
       '@type': 'Question',
-      name: faq.question,
+      name: stripMarkdown(faq.question),
       acceptedAnswer: {
         '@type': 'Answer',
-        text: faq.answer,
+        // schema.org expects plain text; strip any markdown (**bold**, links)
+        // that leaks into FAQ answers so JSON-LD is clean for Bing/AI extraction
+        text: stripMarkdown(faq.answer),
       },
     })),
   };

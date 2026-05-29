@@ -101,6 +101,12 @@ export async function GET() {
       priority: '0.7',
     },
     {
+      loc: `${BASE_URL}/grimoire/facts/current-sun-sign`,
+      lastmod: today,
+      changefreq: 'daily',
+      priority: '0.7',
+    },
+    {
       loc: `${BASE_URL}/grimoire/facts/planetary-positions-today`,
       lastmod: today,
       changefreq: 'daily',

@@ -362,6 +362,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       'src/app/grimoire/facts/current-moon-sign/page.tsx',
       'src/lib/seo/current-sky-fact-pages.ts',
     ],
+    'grimoire/facts/current-sun-sign': [
+      'src/app/grimoire/facts/current-sun-sign/page.tsx',
+      'src/lib/seo/current-sky-fact-pages.ts',
+    ],
     'grimoire/facts/planetary-positions-today': [
       'src/app/grimoire/facts/planetary-positions-today/page.tsx',
       'src/lib/seo/current-sky-fact-pages.ts',
@@ -597,6 +601,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       path: 'grimoire/facts/current-moon-sign',
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      path: 'grimoire/facts/current-sun-sign',
       changeFrequency: 'daily',
       priority: 0.7,
     },

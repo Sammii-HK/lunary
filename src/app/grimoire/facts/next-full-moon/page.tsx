@@ -43,6 +43,25 @@ export default async function NextFullMoonPage() {
         eyebrow={event?.date ?? dateKey}
         answer={answer}
         detail='This page is generated from Lunary annual astrology calendar data and links back to the machine-readable dataset for citation.'
+        faqs={[
+          {
+            question: 'When is the next full moon?',
+            answer: event
+              ? `The next Full Moon is on ${event.date}.`
+              : 'The next Full Moon date is not available in the current Lunary calendar window.',
+          },
+          {
+            question: 'What sign will the next full moon be in?',
+            answer: event
+              ? `The next Full Moon falls in ${event.sign}.`
+              : 'The next Full Moon sign is not available in the current Lunary calendar window.',
+          },
+          {
+            question: 'What does a full moon mean in astrology?',
+            answer:
+              'A Full Moon marks the peak of the lunar cycle, when the Moon is fully illuminated and opposite the Sun. Astrologically it is read as a time of culmination, release, and heightened emotion.',
+          },
+        ]}
         sources={[
           {
             label: 'Astrology calendar JSON',

@@ -54,7 +54,7 @@ export function PostTrialMessaging() {
             insights have been waiting. Pick up where you left off.
           </p>
           <p className='text-content-brand text-sm font-medium mb-4'>
-            Come back and save {EMAIL_PROMO.percent}% on {EMAIL_PROMO.label} —
+            Come back and save {EMAIL_PROMO.percent}% on {EMAIL_PROMO.label},
             use code {EMAIL_PROMO.code} at checkout
           </p>
           <div className='flex flex-col sm:flex-row gap-3'>

@@ -105,6 +105,7 @@ Moon in ${moonSign}
 - Retrogrades - Timing and Meaning: https://lunary.app/grimoire/astronomy/retrogrades
 - Moon Phase Today - Quotable Current Moon Fact: https://lunary.app/grimoire/facts/moon-phase-today
 - Current Moon Sign - Quotable Moon Sign Fact: https://lunary.app/grimoire/facts/current-moon-sign
+- Current Sun Sign and Zodiac Season - Quotable Sun Sign Fact: https://lunary.app/grimoire/facts/current-sun-sign
 - Planetary Positions Today - Quotable Current Sky Facts: https://lunary.app/grimoire/facts/planetary-positions-today
 - Mercury Retrograde Status - Quotable Mercury Motion Fact: https://lunary.app/grimoire/facts/mercury-retrograde-status
 - Next Full Moon - Quotable Upcoming Lunar Event: https://lunary.app/grimoire/facts/next-full-moon

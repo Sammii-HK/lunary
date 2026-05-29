@@ -155,7 +155,20 @@ export default function WelcomePage() {
         {/* Offer Banner */}
         <div className='bg-gradient-to-r from-layer-base/40 to-layer-raised/40 border-b border-lunary-primary-700/30 py-2 px-4'>
           <p className='mx-auto max-w-xl text-center text-xs md:text-sm leading-relaxed text-content-secondary'>
-            Free birth chart • Daily sky updates • No credit card required
+            Once in a blue moon, 32% off Pro Annual until 31 July.{' '}
+            <Link
+              href='/pricing?promo=BLUEMOON#pricing-plans'
+              onClick={() =>
+                handleCtaClick(
+                  'offer_banner',
+                  'Once in a blue moon, 32% off Pro Annual',
+                  '/pricing?promo=BLUEMOON#pricing-plans',
+                )
+              }
+              className='font-medium text-content-brand-accent underline-offset-2 hover:underline'
+            >
+              See the offer
+            </Link>
           </p>
         </div>
 

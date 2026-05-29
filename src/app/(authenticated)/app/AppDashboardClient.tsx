@@ -21,6 +21,7 @@ import { ShareZodiacSeason } from '@/components/share/ShareZodiacSeason';
 import { TourTrigger } from '@/components/feature-tour/tour-trigger';
 import { useMilestones } from '@/hooks/useMilestones';
 import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
+import { StreakBanner } from '@/components/StreakBanner';
 import { ReferralOnboardingModal } from '@/components/referrals/ReferralOnboardingModal';
 import { MoonPhaseIcon } from '@/components/MoonPhaseIcon';
 
@@ -477,6 +478,14 @@ export default function AppDashboardClient() {
             </div>
           </div>
         </header>
+
+        {/* Surface the daily check-in streak so the visit becomes something to
+            protect (loss-averse return-tomorrow mechanic). recordCheckIn()
+            already fires on load above; this only READS the streak. Renders
+            null at streak 0, so new users see no extra UI. */}
+        {authState.isAuthenticated && (
+          <StreakBanner location='horoscope' className='mx-auto' />
+        )}
 
         <div className='flex flex-col gap-4'>
           <CosmicScore />
