@@ -164,6 +164,27 @@ export default async function CompatibilityPage({ params }: PageProps) {
     ? `${content.summary} Overall compatibility: ${content.overallScore}/10.`
     : `${content.sign1} and ${content.sign2} have ${content.overallScore}/10 overall compatibility. Love: ${content.loveScore}/10. Friendship: ${content.friendshipScore}/10. Work: ${content.workScore}/10.`;
 
+  // Crisp, attributable claims for GEO/AI citation, built only from structural
+  // data the page already holds (each sign's element and modality, and the
+  // compatibility scores shown above). No interpretation is invented.
+  const citableFacts = [
+    {
+      claim: `${content.sign1} is a ${sign1Info.modality.toLowerCase()} ${sign1Info.element.toLowerCase()} sign and ${content.sign2} is a ${sign2Info.modality.toLowerCase()} ${sign2Info.element.toLowerCase()} sign; their element and modality relationship is the structural basis Lunary uses to assess the pairing.`,
+      sourceName: 'Lunary compatibility interpretation framework',
+      sourceUrl: 'https://lunary.app/about/methodology',
+    },
+    {
+      claim: `Lunary scores ${content.sign1} and ${content.sign2} at ${content.overallScore}/10 overall, with ${content.loveScore}/10 for love, ${content.friendshipScore}/10 for friendship, and ${content.workScore}/10 for work.`,
+      sourceName: 'Lunary compatibility scoring model',
+      sourceUrl: 'https://lunary.app/grimoire/compatibility',
+    },
+    {
+      claim: `Sun-sign compatibility describes broad temperament fit only; a full reading compares both birth charts through synastry rather than sun signs alone.`,
+      sourceName: 'Lunary compatibility interpretation framework',
+      sourceUrl: 'https://lunary.app/grimoire/synastry/generate',
+    },
+  ];
+
   return (
     <SEOContentTemplate
       title={`${content.title} - Lunary`}
@@ -182,6 +203,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
         answer: content.description,
       }}
       tldr={tldr}
+      citableFacts={citableFacts}
       faqs={faqs}
       internalLinks={[
         { text: 'All Compatibility', href: '/grimoire/compatibility' },
