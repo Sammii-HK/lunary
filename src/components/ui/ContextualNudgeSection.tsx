@@ -38,6 +38,18 @@ export function ContextualNudgeSection({
           >
             try the interactive demo
           </Link>
+          {nudge.previewHref && (
+            <>
+              {' '}
+              or{' '}
+              <Link
+                href={nudge.previewHref}
+                className='text-lunary-primary-400 hover:text-content-brand underline underline-offset-2'
+              >
+                see a free preview
+              </Link>
+            </>
+          )}
         </p>
       </div>
     </section>

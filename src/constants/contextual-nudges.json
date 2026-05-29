@@ -233,6 +233,7 @@
         "subline": "The sign it's in matters. The house it lands in tells you where it plays out.",
         "buttonLabel": "Find this planet in my chart",
         "href": "/auth?signup=true",
+        "previewHref": "/free-chart",
         "action": "authOrLink",
         "inlineCopy": "Which house does this planet rule in YOUR chart?"
       },
@@ -241,6 +242,7 @@
         "subline": "Where this lands in your chart changes everything. See your placements.",
         "buttonLabel": "See my placements",
         "href": "/auth?signup=true",
+        "previewHref": "/free-chart",
         "action": "authOrLink",
         "inlineCopy": "Same planet, different house = different story."
       },
@@ -249,6 +251,7 @@
         "subline": "Which sign? Which house? What aspects does it make? See yours.",
         "buttonLabel": "Find it in my chart",
         "href": "/auth?signup=true",
+        "previewHref": "/free-chart",
         "action": "authOrLink",
         "inlineCopy": "This planet sits somewhere in your chart."
       },
@@ -257,6 +260,7 @@
         "subline": "Conjunctions, squares, trines to your other planets. These connections shape you.",
         "buttonLabel": "See my aspects",
         "href": "/auth?signup=true",
+        "previewHref": "/free-chart",
         "action": "authOrLink",
         "inlineCopy": "What aspects does this planet make in your chart?"
       }
@@ -267,6 +271,7 @@
         "subline": "See which planets sit here and which sign rules this house for you.",
         "buttonLabel": "Check my houses",
         "href": "/auth?signup=true",
+        "previewHref": "/free-chart",
         "action": "authOrLink",
         "inlineCopy": "Empty house? Doesn't mean inactive. Check yours."
       },
@@ -275,6 +280,7 @@
         "subline": "The ruling sign and any planets here shape how this area plays out in your life.",
         "buttonLabel": "See my houses",
         "href": "/auth?signup=true",
+        "previewHref": "/free-chart",
         "action": "authOrLink",
         "inlineCopy": "What's actually in this house for you?"
       },
@@ -283,6 +289,7 @@
         "subline": "Which sign rules it? Are there planets here? Your chart has the specifics.",
         "buttonLabel": "Check my chart",
         "href": "/auth?signup=true",
+        "previewHref": "/free-chart",
         "action": "authOrLink",
         "inlineCopy": "This house has a ruler in your chart."
       },
@@ -291,6 +298,7 @@
         "subline": "See if you have any stelliums and which life areas they concentrate your energy in.",
         "buttonLabel": "Check for stelliums",
         "href": "/auth?signup=true",
+        "previewHref": "/free-chart",
         "action": "authOrLink",
         "inlineCopy": "3+ planets in one house? That's a stellium. Check yours."
       }
@@ -301,6 +309,7 @@
         "subline": "It takes 30 seconds to find out. Your chart is calculated from real astronomical data.",
         "buttonLabel": "Check my chart",
         "href": "/auth?signup=true",
+        "previewHref": "/free-chart",
         "action": "authOrLink",
         "inlineCopy": "Find out if you have this aspect \u2014 30 seconds to check"
       },
@@ -309,6 +318,7 @@
         "subline": "Your birth chart reveals which aspects shape your relationships, career, and inner life.",
         "buttonLabel": "See my aspects",
         "href": "/auth?signup=true",
+        "previewHref": "/free-chart",
         "action": "authOrLink",
         "inlineCopy": "Your birth chart shows which aspects shape your life most \u2014 see yours"
       },
@@ -317,6 +327,7 @@
         "subline": "Transiting aspects feel strongest when they connect to your natal placements.",
         "buttonLabel": "Check now",
         "href": "/auth?signup=true",
+        "previewHref": "/free-chart",
         "action": "authOrLink",
         "inlineCopy": "This aspect is active right now \u2014 check if it is connecting to your chart"
       }
@@ -327,6 +338,7 @@
         "subline": "The same transit affects your career, relationships, or health depending on where it lands.",
         "buttonLabel": "Find my houses",
         "href": "/auth?signup=true",
+        "previewHref": "/free-chart",
         "action": "authOrLink",
         "inlineCopy": "This transit hits a different life area depending on your chart \u2014 find which one"
       },
@@ -335,6 +347,7 @@
         "subline": "Lunary calculates your personal transits in real-time. Free daily updates.",
         "buttonLabel": "Set up alerts",
         "href": "/auth?signup=true",
+        "previewHref": "/free-chart",
         "action": "authOrLink",
         "inlineCopy": "Get free alerts when major transits hit your personal chart"
       },
@@ -343,6 +356,7 @@
         "subline": "Exact aspects are when you feel it most. Check if this one is touching your placements.",
         "buttonLabel": "Check my aspects",
         "href": "/auth?signup=true",
+        "previewHref": "/free-chart",
         "action": "authOrLink",
         "inlineCopy": "Check if this transit is making an exact aspect to your chart right now"
       }
