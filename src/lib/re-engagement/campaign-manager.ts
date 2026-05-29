@@ -172,7 +172,7 @@ export async function getUsersWithMissedStreaks(): Promise<
 
     return result.rows.map((row) => ({
       userId: row.user_id,
-      email: row.user_email,
+      email: row.email,
       streak: row.current_streak,
     }));
   } catch (error) {
@@ -204,7 +204,7 @@ export async function getMilestoneUsers(): Promise<
 
     return result.rows.map((row) => ({
       userId: row.user_id,
-      email: row.user_email,
+      email: row.email,
       milestone: "You've been on your cosmic journey for 30 days!",
     }));
   } catch (error) {

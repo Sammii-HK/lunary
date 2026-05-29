@@ -111,9 +111,9 @@ describe('getUsersWithMissedStreaks — row->object mapping (AFK streak email)',
    * not touch campaign-manager.ts).
    *
    * FIX (one word): map `email: row.email` (matching the SQL alias).
-   * Un-skip this test once the field name is corrected.
+   * Now corrected, so this test is live.
    */
-  it.skip('BUG: should map the aliased `email` column onto user.email', async () => {
+  it('maps the aliased `email` column onto user.email', async () => {
     nextTagRows([realRow]);
 
     const users = await getUsersWithMissedStreaks();
@@ -121,15 +121,16 @@ describe('getUsersWithMissedStreaks — row->object mapping (AFK streak email)',
     expect(users[0].email).toBe('streaker@example.com');
   });
 
-  it('PINS CURRENT BROKEN BEHAVIOUR: email comes back undefined (would throw downstream)', async () => {
+  it('populates email so the downstream user.email.split(@) no longer throws', async () => {
     nextTagRows([realRow]);
 
     const users = await getUsersWithMissedStreaks();
 
-    // The mapper read row.user_email, which the alias renamed away.
-    expect(users[0].email).toBeUndefined();
-    // Proof of the unattended crash: the cron does user.email.split('@').
-    expect(() => (users[0].email as string).split('@')).toThrow(TypeError);
+    // The mapper now reads row.email (the SQL alias), so email is a real string.
+    expect(users[0].email).toBe('streaker@example.com');
+    // The cron does user.email.split('@'); with email populated this is safe.
+    expect(() => users[0].email.split('@')).not.toThrow();
+    expect(users[0].email.split('@')[0]).toBe('streaker');
   });
 
   it('returns an empty array (never throws) when the DB call rejects', async () => {
@@ -179,9 +180,9 @@ describe('getMilestoneUsers — row->object mapping (AFK 30-day milestone email)
    * undefined this throws on EVERY milestone row — the 30-day milestone email
    * never reaches anyone. Same silent-failure pattern, separate code path.
    *
-   * FIX: map `email: row.email`. Un-skip once corrected.
+   * FIX: map `email: row.email`. Now corrected, so this test is live.
    */
-  it.skip('BUG: should map the aliased `email` column onto user.email', async () => {
+  it('maps the aliased `email` column onto user.email', async () => {
     nextTagRows([realRow]);
 
     const users = await getMilestoneUsers();
@@ -189,13 +190,14 @@ describe('getMilestoneUsers — row->object mapping (AFK 30-day milestone email)
     expect(users[0].email).toBe('cosmic@example.com');
   });
 
-  it('PINS CURRENT BROKEN BEHAVIOUR: email comes back undefined (would throw downstream)', async () => {
+  it('populates email so the downstream user.email.split(@) no longer throws', async () => {
     nextTagRows([realRow]);
 
     const users = await getMilestoneUsers();
 
-    expect(users[0].email).toBeUndefined();
-    expect(() => (users[0].email as string).split('@')).toThrow(TypeError);
+    expect(users[0].email).toBe('cosmic@example.com');
+    expect(() => users[0].email.split('@')).not.toThrow();
+    expect(users[0].email.split('@')[0]).toBe('cosmic');
   });
 
   it('returns an empty array (never throws) when the DB call rejects', async () => {
