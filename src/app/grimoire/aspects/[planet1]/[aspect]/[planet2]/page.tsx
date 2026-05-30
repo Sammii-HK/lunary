@@ -305,6 +305,7 @@ ${interp.inSynastry}
       ]}
       ctaText='Discover aspects in your chart'
       ctaHref='/birth-chart'
+      ctaHub='aspects'
       citableFacts={citableFacts}
       sources={[
         {

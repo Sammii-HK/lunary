@@ -17,7 +17,8 @@ export type AttributionSource =
   | 'partner' // partner / affiliate / Substack swaps (?ref=partner:* / affiliate:*, utm_medium=partner)
   | 'aso' // App Store / Play Store listing (?ref=aso:* / utm_source=aso:*)
   | 'chart-ai-taste' // chart AI "taste" lead surface
-  | 'quiz'; // quiz funnel (e.g. chart-ruler) warm second click
+  | 'quiz' // quiz funnel (e.g. chart-ruler) warm second click
+  | 'grimoire'; // interpretive grimoire free-chart CTAs (?ref=grimoire_<hub>)
 
 export interface Attribution {
   source: AttributionSource;
@@ -92,6 +93,7 @@ const SOCIAL_PLATFORMS = [
  *  - `?ref=aso:<store>`                              -> aso
  *  - `utm_medium=crosspromo` / `utm_source=<app>_app`-> crosspromo
  *  - `utm_medium=partner`                            -> partner
+ *  - `?ref=grimoire_<hub>` / `utm_source=grimoire`   -> grimoire
  *  - `utm_source` / medium of `aso`, `quiz`, chart-ai-taste -> matching bucket
  */
 export function mapUtmToSource(
@@ -128,6 +130,13 @@ export function mapUtmToSource(
     if (refValue.startsWith('quiz') || refValue.startsWith('lead:chart-')) {
       return 'quiz';
     }
+    // Interpretive grimoire CTAs label the originating hub as grimoire_<hub>
+    // (e.g. grimoire_aspects, grimoire_placements). The hub stays readable in
+    // the raw ref so the funnel can slice per hub via first_touch_ref, while the
+    // bucket keeps the channel out of "direct" on first-touch grimoire landings.
+    if (refValue.startsWith('grimoire_') || refValue.startsWith('grimoire:')) {
+      return 'grimoire';
+    }
   }
 
   // 2) UTM medium / source mapping for the new channels.
@@ -158,6 +167,12 @@ export function mapUtmToSource(
   }
   if (source === 'quiz' || medium === 'quiz') {
     return 'quiz';
+  }
+  // Grimoire reach surfaces (interpretive CTAs + the facts pages) all tag
+  // utm_source=grimoire; bucket them as grimoire so the highest-volume Bing/GEO
+  // surface segments as its own channel instead of collapsing to direct.
+  if (source === 'grimoire' || medium === 'grimoire') {
+    return 'grimoire';
   }
 
   return undefined;

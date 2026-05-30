@@ -183,6 +183,7 @@ The ${ordinal} House is naturally associated with ${houseData.naturalSign} and r
       ]}
       ctaText='Find your house placements'
       ctaHref='/birth-chart'
+      ctaHub='houses'
       sources={[
         {
           name: 'Lunary house placement interpretation framework',

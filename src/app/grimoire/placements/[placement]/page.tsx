@@ -394,6 +394,7 @@ For ${pageTitle}, that means we are not treating ${content.planet} in ${content.
       ]}
       ctaText='Discover Your Placements'
       ctaHref='/birth-chart'
+      ctaHub='placements'
       sources={[
         {
           name: 'Lunary placement interpretation framework',
