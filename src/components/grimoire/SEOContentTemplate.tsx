@@ -11,6 +11,7 @@ import { ParsedMarkdown } from '@/utils/markdown';
 import { getSmartPageDates } from '@/lib/getPageDates';
 import { NavParamLink } from '@/components/NavParamLink';
 import { getContextualCopy } from '@/lib/grimoire/getContextualCopy';
+import { withGrimoireRef } from '@/lib/grimoire/ctaRef';
 import {
   getContextualHub,
   getContextualNudge,
@@ -182,6 +183,15 @@ export interface SEOContentTemplateProps {
   // CTA
   ctaText?: string;
   ctaHref?: string;
+  /**
+   * Source-label hub for the free-chart CTA, used to attribute which interpretive
+   * grimoire surface earned a signup. Appended to an internal `ctaHref` as
+   * `?ref=grimoire_<ctaHub>` so first-touch attribution can slice per hub.
+   * Falls back to the contextual hub derived from the URL when omitted, which
+   * already distinguishes aspects/houses/planets. Pass an explicit value where
+   * the URL hub is too coarse (e.g. placements vs zodiac both map to "astrology").
+   */
+  ctaHub?: string;
   disableContextualNudge?: boolean;
 
   // E-A-T Credibility
@@ -267,6 +277,7 @@ export function SEOContentTemplate({
   breadcrumbs,
   ctaText,
   ctaHref,
+  ctaHub,
   disableContextualNudge = false,
   showEAT = true,
   sources,
@@ -1241,9 +1252,9 @@ export function SEOContentTemplate({
               {ctaText}
             </Heading>
             <SEOCTAButton
-              href={ctaHref}
+              href={withGrimoireRef(ctaHref, ctaHub ?? contextualHub)}
               label='Get Started'
-              hub={contextualHub}
+              hub={ctaHub ?? contextualHub}
             />
           </section>
         ) : null}

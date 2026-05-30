@@ -125,6 +125,7 @@ export default async function SignInChartPage({
       ]}
       ctaText={`Build your ${signData.name} chart`}
       ctaHref='/birth-chart'
+      ctaHub='sign_in_chart'
       childrenPosition='before-faqs'
     >
       <div className='space-y-6'>

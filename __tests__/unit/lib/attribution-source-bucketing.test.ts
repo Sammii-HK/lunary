@@ -204,6 +204,18 @@ describe('VITAL attribution - mapUtmToSource prefixed ?ref= channel labels', () 
     expect(mapUtmToSource(null, null, 'DIR:BigList')).toBe('directory');
     expect(mapUtmToSource(null, null, '  Partner:X  ')).toBe('partner');
   });
+
+  it('maps grimoire_<hub> ref labels to "grimoire" (the interpretive CTA channel)', () => {
+    // The interpretive grimoire free-chart CTAs tag ?ref=grimoire_<hub>. The hub
+    // stays readable in first_touch_ref for per-hub slicing; the bucket keeps an
+    // internal grimoire -> birth-chart first-touch out of "direct".
+    expect(mapUtmToSource(null, null, 'grimoire_aspects')).toBe('grimoire');
+    expect(mapUtmToSource(null, null, 'grimoire_placements')).toBe('grimoire');
+    expect(mapUtmToSource(null, null, 'grimoire_sign_in_chart')).toBe(
+      'grimoire',
+    );
+    expect(mapUtmToSource(null, null, 'GRIMOIRE_Houses')).toBe('grimoire');
+  });
 });
 
 describe('VITAL attribution - mapUtmToSource UTM source/medium channels', () => {
@@ -220,6 +232,11 @@ describe('VITAL attribution - mapUtmToSource UTM source/medium channels', () => 
     expect(mapUtmToSource('aso', null, null)).toBe('aso');
     expect(mapUtmToSource(null, 'quiz', null)).toBe('quiz');
     expect(mapUtmToSource('chart-ai-taste', null, null)).toBe('chart-ai-taste');
+    // utm_source=grimoire is the existing convention for both the facts pages
+    // and buildSignupChartUrl; bucket it so the high-volume reach surface
+    // segments as its own channel instead of "direct".
+    expect(mapUtmToSource('grimoire', 'facts', null)).toBe('grimoire');
+    expect(mapUtmToSource('grimoire', 'cta', null)).toBe('grimoire');
   });
 });
 
